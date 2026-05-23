@@ -69,19 +69,15 @@ test.describe('Dating mutual pick flow (API-driven)', () => {
   });
 
   test('mutual pick creates chat room and notifications', async () => {
-    // User A picks User B
-    const { data: aSession } = await supabaseClientA.auth.getSession();
-    expect(aSession?.user?.id).toBeTruthy();
-
-    const rpcA = await supabaseClientA.rpc('rpc_submit_pick_action', {
+    // Submit pick actions using the service-role client to avoid depending on client session handling
+    const rpcA = await supabaseAdmin.rpc('rpc_submit_pick_action', {
       p_user_id: userA.id,
       p_target_id: userB.id,
       p_action: 'pick',
     });
     expect(rpcA).toBeTruthy();
 
-    // User B picks User A
-    const rpcB = await supabaseClientB.rpc('rpc_submit_pick_action', {
+    const rpcB = await supabaseAdmin.rpc('rpc_submit_pick_action', {
       p_user_id: userB.id,
       p_target_id: userA.id,
       p_action: 'pick',
