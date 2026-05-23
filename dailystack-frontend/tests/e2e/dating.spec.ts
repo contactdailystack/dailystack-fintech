@@ -69,22 +69,37 @@ test.describe('Dating mutual pick flow (API-driven)', () => {
   });
 
   test('mutual pick creates chat room and notifications', async () => {
-    // Submit pick actions using the service-role client to avoid depending on client session handling
-    const rpcA = await supabaseAdmin.rpc('rpc_submit_pick_action', {
+    // User A picks User B via authenticated client
+    const { data: rpcAData, error: rpcAError } = await supabaseClientA.rpc('rpc_submit_pick_action', {
       p_user_id: userA.id,
       p_target_id: userB.id,
       p_action: 'pick',
     });
-    expect(rpcA).toBeTruthy();
+    if (rpcAError) throw rpcAError;
+    expect(rpcAData?.status).toBe('created');
+    expect(rpcAData?.is_mutual).toBe(false);
 
-    const rpcB = await supabaseAdmin.rpc('rpc_submit_pick_action', {
+    // Duplicate should be blocked
+    const { data: duplicateA, error: duplicateAError } = await supabaseClientA.rpc('rpc_submit_pick_action', {
+      p_user_id: userA.id,
+      p_target_id: userB.id,
+      p_action: 'pick',
+    });
+    if (duplicateAError) throw duplicateAError;
+    expect(duplicateA?.status).toBe('duplicate');
+
+    // User B picks User A via authenticated client
+    const { data: rpcBData, error: rpcBError } = await supabaseClientB.rpc('rpc_submit_pick_action', {
       p_user_id: userB.id,
       p_target_id: userA.id,
       p_action: 'pick',
     });
-    expect(rpcB).toBeTruthy();
+    if (rpcBError) throw rpcBError;
+    expect(rpcBData?.status).toBe('created');
+    expect(rpcBData?.is_mutual).toBe(true);
+    expect(Boolean(rpcBData?.chat_room_id)).toBeTruthy();
 
-    // Verify that chat_room exists for pair
+    // Verify that chat_room exists for pair using admin client to bypass RLS
     const { data: rooms } = await supabaseAdmin.from('chat_rooms').select('*').or(`and(user1_id.eq.${userA.id},user2_id.eq.${userB.id}),and(user1_id.eq.${userB.id},user2_id.eq.${userA.id})`);
     expect(Array.isArray(rooms) && rooms.length > 0).toBeTruthy();
 
