@@ -61,8 +61,11 @@ test.describe('Dating mutual pick flow (API-driven)', () => {
     supabaseClientA = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
     supabaseClientB = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
 
-    await supabaseClientA.auth.signInWithPassword({ email: userA.email, password });
-    await supabaseClientB.auth.signInWithPassword({ email: userB.email, password });
+    const { data: signInA } = await supabaseClientA.auth.signInWithPassword({ email: userA.email, password });
+    const { data: signInB } = await supabaseClientB.auth.signInWithPassword({ email: userB.email, password });
+    // Ensure the anon clients have the session set so getSession() returns the user
+    if (signInA?.session) await supabaseClientA.auth.setSession(signInA.session);
+    if (signInB?.session) await supabaseClientB.auth.setSession(signInB.session);
   });
 
   test('mutual pick creates chat room and notifications', async () => {
