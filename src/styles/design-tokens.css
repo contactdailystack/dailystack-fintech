@@ -1,0 +1,642 @@
+/**
+/* ================================================================
+ * DailyStack — Design Tokens (aligned to Reference Design)
+ * ================================================================
+ * Goal: Mobile-first, modern premium UI consistent with the
+ * Reference Design in `dashboard-redesign`.
+ * This file contains the global brand palette, shadows, radii,
+ * and core typography tokens only. Component-level tokens remain
+ * in `theme.css` to minimize surface changes.
+ */
+
+/* ================================================================
+ * LAYER 1: GLOBAL BRAND (Immutable brand constants)
+ * ================================================================ */
+:root {
+  /* ── Brand Primary — GiGi Lime */
+  --brand-100: #F8FFE6;
+  --brand-200: #E6FFB8;
+  --brand-300: #D2FF7A;
+  --brand-400: #C2FF4A;
+  --brand-500: #AAFF00;  /* GiGi Lime — main accent used by Reference Design */
+  --brand-600: #8FCC00;
+  --brand-700: #6B9900;
+  --brand-800: #4A6600;
+  --brand-900: #293300;
+
+  /* ── Brand Neutrals (Ink & Structure) ──────────────────────────── */
+  --brand-ink: #0D1117;
+  --brand-ink-light: #1C2333;
+  --brand-ink-secondary: #8B949E;
+  
+  /* ── Surface Spectrum (Light Mode) ─────────────────────────── */
+  --surface-bg:      #FAFBFC;  /* Lowest elevation */
+  --surface-2:       #F0F2F5;  /* Subtle separation */
+  --surface-1:       #FFFFFF;  /* Card/Panel */
+  --surface-elevated:#FFFFFF;  /* Floating/Modal */
+  
+  /* ── Text Spectrum ──────────────────────────────────────────── */
+  --text-primary:   #0D1117;
+  --text-secondary: #57606A;
+  --text-muted:     #8B949E;
+  --text-disabled:  #C5CDD6;
+  --text-inverse:   #FFFFFF;
+  
+  /* ── Borders ────────────────────────────────────────────────── */
+  --border-default: rgba(48, 54, 61, 0.12);
+  --border-strong:  rgba(48, 54, 61, 0.24);
+  --border-thick:    #30363D;     /* Neo-Brutalist thick stroke */
+  
+  /* ── Focus & Accessibility ──────────────────────────────────── */
+  --focus-ring:     rgba(170, 255, 18, 0.25);
+  --focus-ring-strong: #AAFF12;
+  
+  /* ── Shadow System — Soft/Blurry (Updated from Sharp) ─────────── */
+  /* Soft, slightly colored glows used by Reference Design */
+  --shadow-sm:  0 2px 8px rgba(13, 17, 23, 0.06);
+  --shadow-md:  0 6px 20px rgba(13, 17, 23, 0.10);
+  --shadow-lg:  0 10px 36px rgba(13, 17, 23, 0.14);
+  --shadow-xl:  0 18px 56px rgba(13, 17, 23, 0.18);
+  --shadow-glow: 0 0 28px rgba(170, 255, 0, 0.20);
+  
+  /* ── Radius System — Larger for modern feel ──────────────────── */
+  /* Radius system tuned for modern, premium look */
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  18px;
+  --radius-xl:  24px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
+  
+  /* ── Typography ──────────────────────────────────────────────── */
+  /* Primary typography — mobile-first (Inter for UI, JetBrains for mono) */
+  --font-heading: 'Inter', 'Space Grotesk', 'Sarabun', 'Noto Sans Thai', sans-serif;
+  --font-body: 'Inter', 'Space Grotesk', 'Sarabun', 'Noto Sans Thai', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', 'Kanit', 'Sarabun', 'Noto Sans Thai', sans-serif;
+
+  /* Backwards-compatible aliases used elsewhere */
+  --brand-primary-mint: var(--brand-500);
+  --brand-primary-dark: var(--brand-600);
+}
+
+/* ================================================================
+ * LAYER 2: SHARED SEMANTIC (Cross-feature states & surfaces)
+ * ================================================================ */
+:root {
+  /* ── Semantic Surfaces ──────────────────────────────────────── */
+  --semantic-bg:          var(--surface-bg);
+  --semantic-surface-2:   var(--surface-2);
+  --semantic-surface-1:   var(--surface-1);
+  --semantic-elevated:    var(--surface-elevated);
+  
+  /* ── Semantic Text ──────────────────────────────────────────── */
+  --semantic-text:        var(--text-primary);
+  --semantic-text-secondary: var(--text-secondary);
+  --semantic-muted:       var(--text-muted);
+  
+  /* ── Global State Colors ────────────────────────────────────── */
+  --state-success:      #22C55E;
+  --state-success-soft: #DCFCE7;
+  --state-warning:      #F59E0B;
+  --state-warning-soft: #FEF3C7;
+  --state-error:        #EF4444;
+  --state-error-soft:   #FEE2E2;
+  --state-info:         #06B6D4;
+  --state-info-soft:    #CFFAFE;
+  
+  /* ── Overlay & Backdrop ─────────────────────────────────────── */
+  --overlay-backdrop: rgba(13, 17, 23, 0.48);
+  --overlay-scrim:   rgba(13, 17, 23, 0.72);
+}
+
+/* ================================================================
+ * LAYER 3: FEATURE THEME PALETTES
+ * ================================================================ */
+
+/* ── FEATURE 1: DATING (Romantic Retro / Japanese Pop) ───────────
+   Feel: Warm, Friendly
+   Origin: Warm coral tones with Japanese magazine sticker aesthetic
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  --feature-dating-primary:        #FF6B81;
+  --feature-dating-on-primary:     #FFFFFF;
+  --feature-dating-primary-hover:  #FF5A74;
+  --feature-dating-primary-pressed:#E84F73;
+  --feature-dating-accent:         #FF3B30;
+  --feature-dating-soft-bg:        #FFF1EE;
+  --feature-dating-muted:          #FBE7E9;
+  --feature-dating-border:         #FFD5D8;
+  --feature-dating-decorative:     #FFD1C4;
+  --feature-dating-dark-variant:   #9C2E3A;
+  
+  /* Contrast Tokens (WCAG AA — 4.5:1 minimum) */
+  --feature-dating-primary-contrast:  #FFFFFF;
+  --feature-dating-accent-contrast:   #FFFFFF;
+  
+  /* Dark Mode Surface Tint (6% alpha blend) */
+  --feature-dating-dark-tint: rgba(255, 107, 129, 0.06);
+}
+
+/* ── FEATURE 2: EVENTS (Festival / Party / Fun) ──────────────────
+   Feel: Energetic, Dynamic
+   Origin: Retro yellow like old Japanese festival lanterns
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  --feature-events-primary:        #FFD24D;
+  --feature-events-on-primary:     #0D1117;
+  --feature-events-primary-hover:  #FFCE3A;
+  --feature-events-primary-pressed:#E6B83A;
+  --feature-events-accent:         #FF7A00;
+  --feature-events-soft-bg:        #FFF9EE;
+  --feature-events-muted:          #FFF3D6;
+  --feature-events-border:          #FFE6A8;
+  --feature-events-decorative:     #FFB84D;
+  --feature-events-dark-variant:   #6B4B00;
+  
+  /* Contrast Tokens */
+  --feature-events-primary-contrast:  #0D1117;
+  --feature-events-accent-contrast:  #FFFFFF;
+  
+  /* Dark Mode Tint */
+  --feature-events-dark-tint: rgba(255, 210, 77, 0.06);
+}
+
+/* ── FEATURE 3: COMMUNITY (Japanese Internet Culture) ───────────
+   Feel: Open, Social, Connected
+   Origin: Bright sky blue evoking openness and community bonds
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  --feature-community-primary:        #5CC3FF;
+  --feature-community-on-primary:     #021026;
+  --feature-community-primary-hover:  #4CB9FF;
+  --feature-community-primary-pressed: #3BAFE6;
+  --feature-community-accent:         #00D1D1;
+  --feature-community-soft-bg:        #F3FBFF;
+  --feature-community-muted:          #DFF7FF;
+  --feature-community-border:         #C5EEFF;
+  --feature-community-decorative:     #8FF0E6;
+  --feature-community-dark-variant:   #0E5E7A;
+  
+  /* Contrast Tokens */
+  --feature-community-primary-contrast:  #021026;
+  --feature-community-accent-contrast:   #021026;
+  
+  /* Dark Mode Tint */
+  --feature-community-dark-tint: rgba(92, 195, 255, 0.06);
+}
+
+/* ── FEATURE 4: MARKETPLACE (Fresh / Lifestyle) ─────────────────
+   Feel: Clean, Productive, Trustworthy
+   Origin: Lime green — aligned with DailyStack brand identity
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  --feature-marketplace-primary:        #AAFF12;    /* Aligned with brand */
+  --feature-marketplace-on-primary:     #0D1117;
+  --feature-marketplace-primary-hover:  #B8FF3A;
+  --feature-marketplace-primary-pressed: #A6EE00;
+  --feature-marketplace-accent:         #6B9900;
+  --feature-marketplace-soft-bg:        #F0FFD9;
+  --feature-marketplace-muted:          #E5FFD0;
+  --feature-marketplace-border:         #D6F5B8;
+  --feature-marketplace-decorative:     #8FCC00;
+  --feature-marketplace-dark-variant:   #246042;
+  
+  /* Contrast Tokens */
+  --feature-marketplace-primary-contrast:  #0D1117;
+  --feature-marketplace-accent-contrast:  #FFFFFF;
+  
+  /* Dark Mode Tint */
+  --feature-marketplace-dark-tint: rgba(170, 255, 18, 0.06);
+}
+
+/* ── FEATURE 5: AI ASSISTANT (Cyber Retro) ────────────────────────
+   Feel: Futuristic, Intelligent, Cutting-edge
+   Origin: Electric purple — cyber-futuristic with retro warmth
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  --feature-ai-primary:        #8A4CFF;
+  --feature-ai-on-primary:     #FFFFFF;
+  --feature-ai-primary-hover:  #7A3FE6;
+  --feature-ai-primary-pressed: #6633CC;
+  --feature-ai-accent:         #00B3FF;
+  --feature-ai-soft-bg:        #F1ECFB;
+  --feature-ai-muted:          #E9E4FF;
+  --feature-ai-border:         #D6CCFF;
+  --feature-ai-decorative:     #3B2B8D;
+  --feature-ai-dark-variant:   #2B114F;
+  
+  /* Contrast Tokens */
+  --feature-ai-primary-contrast:  #FFFFFF;
+  --feature-ai-accent-contrast:  #FFFFFF;
+  
+  /* Dark Mode Tint */
+  --feature-ai-dark-tint: rgba(138, 76, 255, 0.06);
+}
+
+/* ── FEATURE 6: WALLET / FINANCE (Retro Utility) ────────────────
+   Feel: Reliable, Functional, Stable
+   Origin: Deep retro red — trustworthy financial authority
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  --feature-wallet-primary:        #D6453E;
+  --feature-wallet-on-primary:     #FFFFFF;
+  --feature-wallet-primary-hover: #C63F37;
+  --feature-wallet-primary-pressed: #A7382F;
+  --feature-wallet-accent:         #B25422;
+  --feature-wallet-soft-bg:        #FBF5F1;
+  --feature-wallet-muted:          #F9E8E7;
+  --feature-wallet-border:         #F7D7D5;
+  --feature-wallet-decorative:     #6E1B1B;
+  --feature-wallet-dark-variant:   #531214;
+  
+  /* Contrast Tokens */
+  --feature-wallet-primary-contrast:  #FFFFFF;
+  --feature-wallet-accent-contrast:   #FFFFFF;
+  
+  /* Dark Mode Tint */
+  --feature-wallet-dark-tint: rgba(214, 69, 62, 0.06);
+}
+
+/* ── FEATURE 7: PET / LIFESTYLE (Cute / Cozy) ────────────────────
+   Feel: Comfortable, Natural, Warm
+   Origin: Soft sage green — natural, pet-friendly warmth
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  --feature-pet-primary:        #9FD8A8;
+  --feature-pet-on-primary:     #07250E;
+  --feature-pet-primary-hover:  #8DD397;
+  --feature-pet-primary-pressed: #74B683;
+  --feature-pet-accent:         #8B5A3C;
+  --feature-pet-soft-bg:        #FBFDF8;
+  --feature-pet-muted:          #EEF7EE;
+  --feature-pet-border:         #E7F3E6;
+  --feature-pet-decorative:     #788C4B;
+  --feature-pet-dark-variant:   #294221;
+  
+  /* Contrast Tokens */
+  --feature-pet-primary-contrast:  #07250E;
+  --feature-pet-accent-contrast:   #FFFFFF;
+  
+  /* Dark Mode Tint */
+  --feature-pet-dark-tint: rgba(159, 216, 168, 0.06);
+}
+
+/* ================================================================
+ * LAYER 4: COMPONENT TOKENS (UI-Specific Proxies)
+ * ================================================================ */
+:root {
+  /* ── Buttons — Full Pill Style ──────────────────────────────── */
+  --component-btn-bg:         var(--theme-primary);
+  --component-btn-text:       var(--theme-on-primary);
+  --component-btn-border:     transparent;
+  --component-btn-border-width: 0px;
+  --component-btn-shadow:     var(--shadow-md);
+  --component-btn-radius:     var(--radius-full);  /* Full pill */
+  --component-btn-padding-x:  24px;
+  --component-btn-padding-y:  14px;
+  --component-btn-font-weight: 600;
+  
+  /* ── Button Variants ─────────────────────────────────────────── */
+  --component-btn-secondary-bg:      var(--theme-soft-bg);
+  --component-btn-secondary-text:    var(--theme-primary);
+  --component-btn-secondary-border:  var(--theme-border);
+  --component-btn-ghost-text:        var(--theme-primary);
+  --component-btn-ghost-bg:          transparent;
+  
+  /* ── Cards ───────────────────────────────────────────────────── */
+  --component-card-bg:         var(--semantic-surface-1);
+  --component-card-border:     var(--border-default);
+  --component-card-border-thick: var(--border-thick);
+  --component-card-radius:    var(--radius-xl);
+  --component-card-padding:   20px;
+  --component-card-shadow:    var(--shadow-md);
+  --component-card-shadow-hover: var(--shadow-lg);
+  
+  /* ── Navigation ─────────────────────────────────────────────── */
+  --component-nav-bg:          var(--semantic-surface-2);
+  --component-nav-text:        var(--text-secondary);
+  --component-nav-text-active: var(--theme-primary);
+  --component-nav-indicator:   var(--theme-primary);
+  --component-nav-indicator-weight: 4px;
+  
+  /* ── Badges / Labels ────────────────────────────────────────── */
+  --component-badge-bg:        var(--theme-soft-bg);
+  --component-badge-text:      var(--theme-primary);
+  --component-badge-border:     var(--theme-border);
+  --component-badge-radius:    var(--radius-full);
+  --component-badge-padding-x:  12px;
+  --component-badge-padding-y:  6px;
+  --component-badge-font-size: 12px;
+  --component-badge-font-weight: 600;
+  
+  /* ── Inputs ──────────────────────────────────────────────────── */
+  --component-input-bg:        var(--semantic-surface-1);
+  --component-input-border:     var(--border-default);
+  --component-input-border-focus: var(--theme-primary);
+  --component-input-text:      var(--text-primary);
+  --component-input-placeholder: var(--text-muted);
+  --component-input-radius:    var(--radius-lg);
+  --component-input-padding-x:  16px;
+  --component-input-padding-y:  14px;
+  
+  /* ── Alerts / Toasts ─────────────────────────────────────────── */
+  --component-alert-success-bg:   var(--state-success-soft);
+  --component-alert-success-border: var(--state-success);
+  --component-alert-warning-bg:   var(--state-warning-soft);
+  --component-alert-warning-border: var(--state-warning);
+  --component-alert-error-bg:   var(--state-error-soft);
+  --component-alert-error-border: var(--state-error);
+  --component-alert-info-bg:   var(--state-info-soft);
+  --component-alert-info-border: var(--state-info);
+  --component-alert-stripe-weight: 4px;
+  
+  /* ── Tabs ─────────────────────────────────────────────────────── */
+  --component-tab-bg:         transparent;
+  --component-tab-text:       var(--text-secondary);
+  --component-tab-text-active: var(--theme-primary);
+  --component-tab-border-active: var(--theme-primary);
+  
+  /* ── Modals / Dialogs ─────────────────────────────────────────── */
+  --component-modal-bg:        var(--semantic-surface-1);
+  --component-modal-overlay:    var(--overlay-scrim);
+  --component-modal-radius:    var(--radius-xl);
+  
+  /* ── Progress / Loading ───────────────────────────────────────── */
+  --component-progress-bg:     var(--theme-soft-bg);
+  --component-progress-fill:   var(--theme-primary);
+  
+  /* ── Tooltips ──────────────────────────────────────────────────── */
+  --component-tooltip-bg:      var(--brand-ink);
+  --component-tooltip-text:    var(--text-inverse);
+}
+
+/* ================================================================
+ * LAYER 5: STATE TOKENS (Interaction States)
+ * ================================================================ */
+:root {
+  /* ── Hover States ─────────────────────────────────────────────── */
+  --state-hover-bg:          rgba(13, 17, 23, 0.04);
+  --state-hover-border:      rgba(13, 17, 23, 0.18);
+  --state-hover-overlay:    rgba(13, 17, 23, 0.08);
+  
+  /* ── Pressed / Active States ─────────────────────────────────── */
+  --state-pressed-scale:     0.98;
+  --state-pressed-shadow:    var(--shadow-sm);
+  --state-pressed-translate: translateY(1px);
+  
+  /* ── Disabled States ─────────────────────────────────────────── */
+  --state-disabled-opacity:  0.48;
+  --state-disabled-bg:       rgba(13, 17, 23, 0.08);
+  --state-disabled-text:     var(--text-disabled);
+  
+  /* ── Focus States ────────────────────────────────────────────── */
+  --state-focus-ring-width:   3px;
+  --state-focus-ring-offset:  2px;
+  
+  /* ── Loading / Skeleton ─────────────────────────────────────── */
+  --state-skeleton-bg:       rgba(13, 17, 23, 0.06);
+  --state-skeleton-shimmer:  rgba(13, 17, 23, 0.12);
+}
+
+/* ================================================================
+ * THEME PROXY SYSTEM (Runtime Feature Switching)
+ * ================================================================ */
+:root {
+  /* Default fallback mapping (brand) */
+  --theme-primary:       var(--brand-500);
+  --theme-on-primary:    var(--brand-ink);
+  --theme-accent:        var(--brand-600);
+  --theme-soft-bg:       var(--semantic-surface-2);
+  --theme-border:        var(--border-default);
+  --theme-decoration:    var(--brand-500);
+  --theme-primary-hover:   var(--brand-400);
+  --theme-primary-pressed: var(--brand-600);
+}
+
+/* ================================================================
+ * FEATURE SCOPING CLASSES
+ * ================================================================ */
+.feature-dating {
+  --theme-primary:       var(--feature-dating-primary);
+  --theme-on-primary:    var(--feature-dating-on-primary);
+  --theme-accent:        var(--feature-dating-accent);
+  --theme-soft-bg:       var(--feature-dating-soft-bg);
+  --theme-border:        var(--feature-dating-border);
+  --theme-decoration:    var(--feature-dating-decorative);
+  --theme-primary-hover:   var(--feature-dating-primary-hover);
+  --theme-primary-pressed: var(--feature-dating-primary-pressed);
+}
+
+.feature-events {
+  --theme-primary:       var(--feature-events-primary);
+  --theme-on-primary:    var(--feature-events-on-primary);
+  --theme-accent:        var(--feature-events-accent);
+  --theme-soft-bg:       var(--feature-events-soft-bg);
+  --theme-border:        var(--feature-events-border);
+  --theme-decoration:    var(--feature-events-decorative);
+  --theme-primary-hover:   var(--feature-events-primary-hover);
+  --theme-primary-pressed: var(--feature-events-primary-pressed);
+}
+
+.feature-community {
+  --theme-primary:       var(--feature-community-primary);
+  --theme-on-primary:    var(--feature-community-on-primary);
+  --theme-accent:        var(--feature-community-accent);
+  --theme-soft-bg:       var(--feature-community-soft-bg);
+  --theme-border:        var(--feature-community-border);
+  --theme-decoration:    var(--feature-community-decorative);
+  --theme-primary-hover:   var(--feature-community-primary-hover);
+  --theme-primary-pressed: var(--feature-community-primary-pressed);
+}
+
+.feature-marketplace {
+  --theme-primary:       var(--feature-marketplace-primary);
+  --theme-on-primary:    var(--feature-marketplace-on-primary);
+  --theme-accent:        var(--feature-marketplace-accent);
+  --theme-soft-bg:       var(--feature-marketplace-soft-bg);
+  --theme-border:        var(--feature-marketplace-border);
+  --theme-decoration:    var(--feature-marketplace-decorative);
+  --theme-primary-hover:   var(--feature-marketplace-primary-hover);
+  --theme-primary-pressed: var(--feature-marketplace-primary-pressed);
+}
+
+.feature-ai {
+  --theme-primary:       var(--feature-ai-primary);
+  --theme-on-primary:    var(--feature-ai-on-primary);
+  --theme-accent:        var(--feature-ai-accent);
+  --theme-soft-bg:       var(--feature-ai-soft-bg);
+  --theme-border:        var(--feature-ai-border);
+  --theme-decoration:    var(--feature-ai-decorative);
+  --theme-primary-hover:   var(--feature-ai-primary-hover);
+  --theme-primary-pressed: var(--feature-ai-primary-pressed);
+}
+
+.feature-wallet {
+  --theme-primary:       var(--feature-wallet-primary);
+  --theme-on-primary:    var(--feature-wallet-on-primary);
+  --theme-accent:        var(--feature-wallet-accent);
+  --theme-soft-bg:       var(--feature-wallet-soft-bg);
+  --theme-border:        var(--feature-wallet-border);
+  --theme-decoration:    var(--feature-wallet-decorative);
+  --theme-primary-hover:   var(--feature-wallet-primary-hover);
+  --theme-primary-pressed: var(--feature-wallet-primary-pressed);
+}
+
+.feature-pet {
+  --theme-primary:       var(--feature-pet-primary);
+  --theme-on-primary:    var(--feature-pet-on-primary);
+  --theme-accent:        var(--feature-pet-accent);
+  --theme-soft-bg:       var(--feature-pet-soft-bg);
+  --theme-border:        var(--feature-pet-border);
+  --theme-decoration:    var(--feature-pet-decorative);
+  --theme-primary-hover:   var(--feature-pet-primary-hover);
+  --theme-primary-pressed: var(--feature-pet-primary-pressed);
+}
+
+/* ================================================================
+ * DARK MODE — MODERN FINITECH DARK
+ * ================================================================ */
+.dark {
+  /* ── Surface Spectrum (Dark Mode) ─────────────────────────────── */
+  --surface-bg:      #0D1117;  /* Deep dark base — Modern fintech */
+  --surface-2:       #161B22;  /* Slightly elevated */
+  --surface-1:       #21262D;  /* Card/Panel */
+  --surface-elevated:#30363D;  /* Floating/Modal */
+  
+  /* ── Text Spectrum (Dark Mode) ───────────────────────────────── */
+  --text-primary:   #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted:    #6E7681;
+  --text-disabled: #484F58;
+  --text-inverse:  #0D1117;
+  
+  /* ── Borders (Dark Mode) ─────────────────────────────────────── */
+  --border-default: rgba(240, 246, 252, 0.10);
+  --border-strong:  rgba(240, 246, 252, 0.20);
+  --border-thick:   rgba(240, 246, 252, 0.30);
+  
+  /* ── Overlay (Dark Mode) ─────────────────────────────────────── */
+  --overlay-backdrop: rgba(13, 17, 23, 0.80);
+  --overlay-scrim:   rgba(13, 17, 23, 0.90);
+  
+  /* ── Focus Ring (Dark Mode) ───────────────────────────────────── */
+  --focus-ring:     rgba(170, 255, 18, 0.30);
+  
+  /* ── Shadow adjustments for dark mode ─────────────────────────── */
+  --shadow-sm:  0 2px 8px rgba(0, 0, 0, 0.30);
+  --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.40);
+  --shadow-xl:  0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 24px rgba(170, 255, 18, 0.25);
+}
+
+/* ── Dark Mode: Feature-Scoped Surface Tints ───────────────────── */
+.dark .feature-dating,
+.dark.feature-dating {
+  --surface-bg:      color-mix(in srgb, #0D1117 94%, var(--feature-dating-primary));
+  --surface-1:       color-mix(in srgb, #21262D 92%, var(--feature-dating-primary));
+  --surface-2:       color-mix(in srgb, #161B22 93%, var(--feature-dating-primary));
+}
+
+.dark .feature-events,
+.dark.feature-events {
+  --surface-bg:      color-mix(in srgb, #0D1117 94%, var(--feature-events-primary));
+  --surface-1:       color-mix(in srgb, #21262D 92%, var(--feature-events-primary));
+  --surface-2:       color-mix(in srgb, #161B22 93%, var(--feature-events-primary));
+}
+
+.dark .feature-community,
+.dark.feature-community {
+  --surface-bg:      color-mix(in srgb, #0D1117 94%, var(--feature-community-primary));
+  --surface-1:       color-mix(in srgb, #21262D 92%, var(--feature-community-primary));
+  --surface-2:       color-mix(in srgb, #161B22 93%, var(--feature-community-primary));
+}
+
+.dark .feature-marketplace,
+.dark.feature-marketplace {
+  --surface-bg:      color-mix(in srgb, #0D1117 94%, var(--feature-marketplace-primary));
+  --surface-1:       color-mix(in srgb, #21262D 92%, var(--feature-marketplace-primary));
+  --surface-2:       color-mix(in srgb, #161B22 93%, var(--feature-marketplace-primary));
+}
+
+.dark .feature-ai,
+.dark.feature-ai {
+  --surface-bg:      color-mix(in srgb, #0D1117 94%, var(--feature-ai-primary));
+  --surface-1:       color-mix(in srgb, #21262D 92%, var(--feature-ai-primary));
+  --surface-2:       color-mix(in srgb, #161B22 93%, var(--feature-ai-primary));
+}
+
+.dark .feature-wallet,
+.dark.feature-wallet {
+  --surface-bg:      color-mix(in srgb, #0D1117 94%, var(--feature-wallet-primary));
+  --surface-1:       color-mix(in srgb, #21262D 92%, var(--feature-wallet-primary));
+  --surface-2:       color-mix(in srgb, #161B22 93%, var(--feature-wallet-primary));
+}
+
+.dark .feature-pet,
+.dark.feature-pet {
+  --surface-bg:      color-mix(in srgb, #0D1117 94%, var(--feature-pet-primary));
+  --surface-1:       color-mix(in srgb, #21262D 92%, var(--feature-pet-primary));
+  --surface-2:       color-mix(in srgb, #161B22 93%, var(--feature-pet-primary));
+}
+
+/* ================================================================
+ * BACKWARDS COMPATIBILITY ALIASES
+ * ================================================================ */
+:root {
+  /* Legacy aliases for existing code */
+  --color-bg:           var(--semantic-bg);
+  --color-panel:        var(--semantic-surface-1);
+  --color-card:         var(--semantic-surface-1);
+  --color-text:         var(--semantic-text);
+  --color-text-main:    var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-muted:        var(--semantic-muted);
+  --color-border:       var(--border-default);
+  --color-dark-border:  var(--border-default);
+  --color-dark-bg:     var(--surface-bg);
+  --color-dark-card:   var(--surface-1);
+  --color-dark-input:  var(--surface-1);
+  --color-primary:     var(--brand-500);
+  --color-primary-hover: var(--brand-400);
+  --color-primary-dark: var(--brand-600);
+  --color-primary-glow: var(--focus-ring);
+  --color-surface:      var(--semantic-surface-2);
+  --color-outline:      var(--brand-ink-secondary);
+}
+
+/* ================================================================
+ * DECORATIVE UTILITY CLASSES
+ * ================================================================ */
+.decorative-small { 
+  opacity: 0.92; 
+  filter: saturate(0.9);
+}
+
+.decorative-pattern {
+  background-image: 
+    radial-gradient(circle at 2px 2px, var(--theme-decoration) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* ── Gradient Backgrounds ────────────────────────────────────────── */
+.gradient-brand {
+  background: linear-gradient(135deg, var(--brand-400) 0%, var(--brand-600) 100%);
+}
+
+.gradient-glow {
+  background: radial-gradient(circle at center, var(--brand-500) 0%, transparent 70%);
+}
+
+/* ── Glass Effect ────────────────────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dark .glass {
+  background: rgba(13, 17, 23, 0.80);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
