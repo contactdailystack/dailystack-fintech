@@ -1,0 +1,287 @@
+/**
+ * ================================================================
+ * DailyStack — Motion System v4.0
+ * ================================================================
+ * Smooth, intentional, physics-based animations.
+ * Feel: Cinematic, calm, premium — not aggressive or bouncy.
+ *
+ * Usage:
+ *   Import this file alongside dailystack.css
+ *   Add animation classes to elements:
+ *     className="animate-fade-up"
+ *   Use stagger with parent/child pattern:
+ *     className="stagger-children"
+ *     > children get staggered delay automatically
+ */
+
+  /* ──────────────────────────────────────────────────────────────
+   * ENTRANCE ANIMATIONS — Fade + slide
+   * ────────────────────────────────────────────────────────────── */
+
+  @keyframes ds-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes ds-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes ds-fade-down {
+    from {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes ds-scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes ds-scale-up {
+    from {
+      opacity: 0;
+      transform: scale(0.88);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes ds-slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes ds-slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * SCROLL REVEAL — Triggered by IntersectionObserver
+   * ────────────────────────────────────────────────────────────── */
+
+  @keyframes ds-reveal-up {
+    from {
+      opacity: 0;
+      transform: translateY(32px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes ds-reveal-scale {
+    from {
+      opacity: 0;
+      transform: scale(0.90);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * FLOATING MOTION — Subtle ambient movement
+   * ────────────────────────────────────────────────────────────── */
+
+  @keyframes ds-float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-8px); }
+  }
+
+  @keyframes ds-float-slow {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-14px); }
+  }
+
+  @keyframes ds-pulse-soft {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * GLOW PULSE — Subtle breathing glow on key elements
+   * ────────────────────────────────────────────────────────────── */
+
+  @keyframes ds-glow-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 transparent; }
+    50%       { box-shadow: 0 0 24px var(--mint-glow); }
+  }
+
+  @keyframes ds-glow-pulse-lime {
+    0%, 100% { box-shadow: 0 0 0 0 transparent; }
+    50%       { box-shadow: 0 0 20px var(--lime-glow); }
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * SPINNER — Loading state
+   * ────────────────────────────────────────────────────────────── */
+
+  @keyframes ds-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * SHIMMER — Skeleton loading
+   * ────────────────────────────────────────────────────────────── */
+
+  @keyframes ds-shimmer {
+    from { background-position: -200% 0; }
+    to   { background-position: 200% 0; }
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * CONFIRM — Success micro-animation
+   * ────────────────────────────────────────────────────────────── */
+
+  @keyframes ds-pop {
+    0%   { transform: scale(0.8); opacity: 0; }
+    60%  { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * BLINK — Typing indicator dots
+   * ────────────────────────────────────────────────────────────── */
+
+  @keyframes ds-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * UTILITY CLASSES
+   * ────────────────────────────────────────────────────────────── */
+
+  .animate-fade-in     { animation: ds-fade-in    var(--duration-normal) var(--ease-smooth) both; }
+  .animate-fade-up     { animation: ds-fade-up    var(--duration-slow)  var(--ease-smooth) both; }
+  .animate-fade-down   { animation: ds-fade-down  var(--duration-slow)  var(--ease-smooth) both; }
+  .animate-scale-in    { animation: ds-scale-in   var(--duration-normal) var(--ease-smooth) both; }
+  .animate-scale-up    { animation: ds-scale-up   var(--duration-slow)  var(--ease-smooth) both; }
+  .animate-slide-right { animation: ds-slide-in-right var(--duration-slow) var(--ease-smooth) both; }
+  .animate-slide-left  { animation: ds-slide-in-left  var(--duration-slow) var(--ease-smooth) both; }
+  .animate-reveal-up   { animation: ds-reveal-up   var(--duration-slower) var(--ease-smooth) both; }
+  .animate-reveal-scale{ animation: ds-reveal-scale var(--duration-slower) var(--ease-smooth) both; }
+  .animate-float       { animation: ds-float       4s ease-in-out infinite; }
+  .animate-float-slow  { animation: ds-float-slow  6s ease-in-out infinite; }
+  .animate-pulse-soft  { animation: ds-pulse-soft  3s ease-in-out infinite; }
+  .animate-glow-pulse  { animation: ds-glow-pulse  3s ease-in-out infinite; }
+  .animate-glow-lime   { animation: ds-glow-pulse-lime 3s ease-in-out infinite; }
+  .animate-spin        { animation: ds-spin       0.8s linear infinite; }
+  .animate-pop         { animation: ds-pop        0.35s var(--ease-spring) both; }
+
+  /* ──────────────────────────────────────────────────────────────
+   * STAGGER CHILDREN — Automatic delay per child
+   * ────────────────────────────────────────────────────────────── */
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+  .stagger-children > *:nth-child(7) { animation-delay: 360ms; }
+  .stagger-children > *:nth-child(8) { animation-delay: 420ms; }
+
+  /* ──────────────────────────────────────────────────────────────
+   * SKELETON LOADING
+   * ────────────────────────────────────────────────────────────── */
+
+  @keyframes ds-shimmer {
+    from { background-position: -200% 0; }
+    to   { background-position: 200% 0; }
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--bg-elevated) 0%,
+      var(--bg-card-hover) 50%,
+      var(--bg-elevated) 100%
+    );
+    background-size: 200% 100%;
+    animation: ds-shimmer 1.8s ease-in-out infinite;
+    border-radius: var(--radius-md);
+  }
+
+  .animate-shimmer {
+    animation: ds-shimmer 1.8s ease-in-out infinite;
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * HOVER LIFT — Subtle depth on hover
+   * ────────────────────────────────────────────────────────────── */
+
+  .hover-lift {
+    transition: transform var(--duration-fast) var(--ease-smooth),
+                box-shadow var(--duration-fast) var(--ease-smooth);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * PAGE TRANSITIONS — For React Router
+   * ────────────────────────────────────────────────────────────── */
+
+  .page-enter {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-slow) var(--ease-smooth),
+                transform var(--duration-slow) var(--ease-smooth);
+  }
+
+  .page-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .page-exit-active {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity var(--duration-fast) var(--ease-out),
+                transform var(--duration-fast) var(--ease-out);
+  }

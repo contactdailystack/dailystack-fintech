@@ -1,0 +1,19 @@
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.material-symbols-outlined.fill { font-variation-settings: 'FILL' 1; }
+.shadow-lime-glow { box-shadow: 0 10px 30px -10px rgba(200, 255, 0, 0.4); }
+.glass-card {
+  background: rgba(22, 22, 22, 0.8);
+  backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(200, 255, 0, 0.2); transform: scale(1); }
+  50% { box-shadow: 0 0 40px rgba(200, 255, 0, 0.4); transform: scale(1.02); }
+}
+.animate-pulse-glow { animation: pulseGlow 3s infinite ease-in-out; }
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, -50px); }
+}
+.animate-orb { animation: orbFloat 15s ease-in-out infinite; }

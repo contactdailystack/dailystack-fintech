@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { useLanguage } from '../../context/LanguageContext';
+import { DatingService } from '../../services/datingService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MatchUser {
@@ -37,66 +38,6 @@ interface MatchFilters {
   sortBy: 'recent' | 'compatibility' | 'unread';
   filterBy: 'all' | 'ultra' | 'unread' | 'messages';
 }
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const mockMatches: MatchUser[] = [
-  {
-    id: 'match-1',
-    name: 'Mika',
-    age: 28,
-    photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-    compatibility: 94,
-    lastMessage: 'That sounds amazing! When should we meet?',
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 5),
-    unreadCount: 2,
-    online: true,
-    isUltraMatch: true,
-    sharedInterests: ['Coffee', 'Reading', 'Travel'],
-    matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    hasConversation: true,
-  },
-  {
-    id: 'match-2',
-    name: 'Pim',
-    age: 26,
-    photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400',
-    compatibility: 91,
-    lastMessage: 'I love your sense of adventure!',
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    unreadCount: 0,
-    online: false,
-    sharedInterests: ['Art', 'Photography', 'Travel'],
-    matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-    hasConversation: true,
-  },
-  {
-    id: 'match-3',
-    name: 'Natasha',
-    age: 29,
-    photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-    compatibility: 88,
-    unreadCount: 1,
-    online: true,
-    isUltraMatch: false,
-    sharedInterests: ['Fitness', 'Wellness', 'Music'],
-    matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1),
-    hasConversation: false,
-  },
-  {
-    id: 'match-4',
-    name: 'Alice',
-    age: 27,
-    photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400',
-    compatibility: 85,
-    lastMessage: 'Great matching with you!',
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
-    unreadCount: 0,
-    online: false,
-    sharedInterests: ['Design', 'Coffee'],
-    matchedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14),
-    hasConversation: true,
-  },
-];
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 const fontFor = (lang: 'en' | 'th') => lang === 'th' ? 'font-kanit' : 'font-sans';
@@ -130,12 +71,12 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onChat, onProfile, lang, v
     return (
       <div
         onClick={onChat}
-        className="flex items-center gap-4 p-4 rounded-2xl bg-[#21262D]/50 border border-transparent
+        className="flex items-center gap-4 p-4 rounded-2xl bg-[#232D38] border border-[rgba(255,255,255,0.06)]
           hover:border-[rgba(255,255,255,0.08)] active:scale-[0.98] transition-all cursor-pointer group"
       >
         {/* Avatar */}
         <div className="relative shrink-0">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-[#FF6B81]/30">
+          <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-[rgba(255,255,255,0.06)]">
             <img src={match.photo} alt={match.name} className="w-full h-full object-cover" />
           </div>
           
@@ -146,7 +87,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onChat, onProfile, lang, v
           
           {/* Ultra badge */}
           {match.isUltraMatch && (
-            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-r from-[#FFD700] to-[#FFA500] flex items-center justify-center shadow-sm">
+            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-r from-[#D9FD82] to-[#56be89] flex items-center justify-center shadow-sm">
               <Zap size={10} className="text-[#0D1117]" />
             </div>
           )}
@@ -156,7 +97,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onChat, onProfile, lang, v
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-[var(--text-primary)] group-hover:text-[#FF6B81] transition-colors">
+              <h3 className="font-bold text-[var(--text-primary)] group-hover:text-[#56be89] transition-colors">
                 {match.name}, {match.age}
               </h3>
             </div>
@@ -174,8 +115,8 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onChat, onProfile, lang, v
           
           <div className="flex items-center gap-2 mb-1">
             <div className="flex items-center gap-1">
-              <Star size={10} className="text-[#FFD700]" fill="#FFD700" />
-              <span className="text-[11px] font-bold text-[#FFD700]">{match.compatibility}%</span>
+              <Star size={10} className="text-[#D9FD82]" fill="#FFD700" />
+              <span className="text-[11px] font-bold text-[#D9FD82]">{match.compatibility}%</span>
             </div>
             <span className="text-[10px] text-[var(--text-muted)]">·</span>
             <div className="flex items-center gap-1">
@@ -193,10 +134,10 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onChat, onProfile, lang, v
         {/* Chat button */}
         <button
           onClick={(e) => { e.stopPropagation(); onChat(); }}
-          className="w-10 h-10 rounded-full bg-[#FF6B81]/10 flex items-center justify-center shrink-0
-            hover:bg-[#FF6B81]/20 transition-colors"
+          className="w-10 h-10 rounded-full bg-[rgba(86,190,137,0.1)] flex items-center justify-center shrink-0
+            hover:bg-[rgba(86,190,137,0.2)] transition-colors"
         >
-          <MessageCircle size={18} className="text-[#FF6B81]" />
+          <MessageCircle size={18} className="text-[#56be89]" />
         </button>
       </div>
     );
@@ -206,7 +147,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onChat, onProfile, lang, v
   return (
     <div
       onClick={onChat}
-      className="rounded-2xl overflow-hidden bg-[#21262D]/50 border border-transparent
+      className="rounded-2xl overflow-hidden bg-[#232D38] border border-[rgba(255,255,255,0.06)]
         hover:border-[rgba(255,255,255,0.08)] active:scale-[0.98] transition-all cursor-pointer group"
     >
       {/* Photo */}
@@ -219,7 +160,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onChat, onProfile, lang, v
         {/* Badges */}
         <div className="absolute top-2 left-2 flex gap-1">
           {match.isUltraMatch && (
-            <div className="px-2 py-1 rounded-full bg-gradient-to-r from-[#FFD700] to-[#FFA500] flex items-center gap-1">
+            <div className="px-2 py-1 rounded-full bg-gradient-to-r from-[#D9FD82] to-[#56be89] flex items-center gap-1">
               <Zap size={10} className="text-[#0D1117]" />
               <span className="text-[9px] font-black text-[#0D1117]">ULTRA</span>
             </div>
@@ -228,7 +169,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onChat, onProfile, lang, v
         
         {/* Online */}
         {match.online && (
-          <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-[#22C55E] border-2 border-white" />
+          <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-[#22C55E] border-2 border-[#232D38]" />
         )}
         
         {/* Unread */}
@@ -242,8 +183,8 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onChat, onProfile, lang, v
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-bold text-white">{match.name}, {match.age}</span>
-            <Star size={12} className="text-[#FFD700]" fill="#FFD700" />
-            <span className="text-[11px] font-bold text-[#FFD700]">{match.compatibility}%</span>
+            <Star size={12} className="text-[#D9FD82]" fill="#FFD700" />
+            <span className="text-[11px] font-bold text-[#D9FD82]">{match.compatibility}%</span>
           </div>
           <p className="text-[10px] text-white/60 truncate">
             {match.lastMessage || (lang === 'th' ? 'ยังไม่ได้ส่งข้อความ' : 'No messages yet')}
@@ -266,8 +207,8 @@ const FilterChip: React.FC<FilterChipProps> = ({ label, active, onClick, icon: I
     onClick={onClick}
     className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap
       ${active
-        ? 'bg-[#FF6B81]/15 text-[#FF6B81] border border-[#FF6B81]/20'
-        : 'bg-[#21262D] text-[var(--text-secondary)] border border-transparent'
+        ? 'bg-[rgba(86,190,137,0.15)] text-[#56be89] border border-[rgba(86,190,137,0.2)]'
+        : 'bg-[#232D38] text-[var(--text-secondary)] border border-[rgba(255,255,255,0.06)]'
       }`}
   >
     {Icon && <Icon size={12} />}
@@ -292,8 +233,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({ lang, type, onExplore }) => {
   
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      <div className="w-20 h-20 rounded-full bg-[#FF6B81]/10 flex items-center justify-center mb-6">
-        <Heart size={40} className="text-[#FF6B81]" />
+      <div className="w-20 h-20 rounded-full bg-[rgba(86,190,137,0.1)] flex items-center justify-center mb-6">
+        <Heart size={40} className="text-[#56be89]" />
       </div>
       <h3 className={`text-lg font-bold text-[var(--text-primary)] mb-2 ${fontFor(lang)}`}>
         {lang === 'th' ? msg.titleTh : msg.title}
@@ -303,8 +244,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({ lang, type, onExplore }) => {
       </p>
       <button
         onClick={onExplore}
-        className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B81] to-[#FF3B30]
-          font-bold text-sm text-white shadow-lg shadow-[#FF6B81]/30"
+        className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#56be89] to-[#3D9E6E]
+          font-bold text-sm text-white shadow-lg shadow-[#56be89]/30"
       >
         {lang === 'th' ? 'เริ่มปัดเลย' : 'Start Exploring'}
       </button>
@@ -317,7 +258,7 @@ const MatchesList: React.FC = () => {
   const navigate = useNavigate();
   const { lang } = useLanguage();
 
-  const [matches, setMatches] = useState<MatchUser[]>(mockMatches);
+  const [matches, setMatches] = useState<MatchUser[]>([]);
   const [filters, setFilters] = useState<MatchFilters>({
     sortBy: 'recent',
     filterBy: 'all',
@@ -331,23 +272,27 @@ const MatchesList: React.FC = () => {
     const loadMatches = async () => {
       setLoading(true);
       try {
-        // TODO: Real Supabase fetch
-        // const { data: { user } } = await supabase.auth.getSession();
-        // const { data } = await supabase
-        //   .from('matches')
-        //   .select(`
-        //     *,
-        //     profile:profiles(*),
-        //     messages:messages(content, sent_at, read)
-        //   `)
-        //   .eq('user_id', user.id)
-        //   .order('created_at', { ascending: false });
+        const realMatches = await DatingService.match.getMatches();
         
-        // Simulate loading
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setMatches(mockMatches);
+        // Map API response to UI format
+        const mappedMatches: MatchUser[] = realMatches.map(m => ({
+          id: m.partnerId,
+          name: m.partnerName,
+          age: 0, // Not available in match data
+          photo: m.partnerAvatar || '',
+          compatibility: Math.round(m.compatibilityScore),
+          unreadCount: 0,
+          online: false,
+          isUltraMatch: m.isUltraMatch,
+          sharedInterests: m.sharedInterests || [],
+          matchedAt: new Date(m.matchedAt || Date.now()),
+          hasConversation: false,
+        }));
+        
+        setMatches(mappedMatches);
       } catch (error) {
         console.error('Failed to load matches:', error);
+        setMatches([]);
       } finally {
         setLoading(false);
       }
@@ -358,19 +303,33 @@ const MatchesList: React.FC = () => {
 
   // ── Real-time subscription ────────────────────────────────────────────────
   useEffect(() => {
-    // TODO: Supabase real-time for new matches
-    // const channel = supabase
-    //   .channel('matches-changes')
-    //   .on('postgres_changes', {
-    //     event: '*',
-    //     schema: 'public',
-    //     table: 'matches',
-    //   }, (payload) => {
-    //     // Update matches list
-    //   })
-    //   .subscribe();
-    //
-    // return () => supabase.removeChannel(channel);
+    const unsubscribe = DatingService.match.subscribeToMatches((newMatch) => {
+      // Add new match to the list
+      setMatches(prev => {
+        // Check if already exists
+        if (prev.find(m => m.id === newMatch.id)) return prev;
+        
+        const newMatchUser: MatchUser = {
+          id: newMatch.partnerId,
+          name: newMatch.partnerName,
+          age: 0,
+          photo: newMatch.partnerAvatar || '',
+          compatibility: Math.round(newMatch.compatibilityScore),
+          unreadCount: 0,
+          online: false,
+          isUltraMatch: newMatch.isUltraMatch,
+          sharedInterests: [],
+          matchedAt: new Date(newMatch.matchedAt || Date.now()),
+          hasConversation: false,
+        };
+        
+        return [newMatchUser, ...prev];
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   // ── Filter & sort matches ─────────────────────────────────────────────────
@@ -413,17 +372,17 @@ const MatchesList: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen h-[100dvh] bg-[#0D1117] font-sans feature-dating">
+    <div className="flex flex-col h-screen h-[100dvh] bg-[#232D38] font-sans feature-dating">
 
       {/* ── Top Header ───────────────────────────────────────────────────── */}
       <header className="shrink-0 px-4 py-3 border-b border-[rgba(255,255,255,0.06)]
-        bg-[rgba(13,17,23,0.95)] backdrop-blur-xl z-10">
+        bg-[#1C232A] backdrop-blur-xl z-10">
         
         {/* Back + Title */}
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => navigate('/dating')}
-            className="w-9 h-9 rounded-full bg-[#21262D] flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-[#232D38] flex items-center justify-center"
           >
             <ChevronLeft size={18} />
           </button>
@@ -434,9 +393,9 @@ const MatchesList: React.FC = () => {
           </div>
           <button
             onClick={() => navigate('/dating/discover')}
-            className="w-9 h-9 rounded-full bg-[#FF6B81]/10 flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-[rgba(86,190,137,0.1)] flex items-center justify-center"
           >
-            <Heart size={18} className="text-[#FF6B81]" />
+            <Heart size={18} className="text-[#56be89]" />
           </button>
         </div>
 
@@ -448,7 +407,7 @@ const MatchesList: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={lang === 'th' ? 'ค้นหาการแมตช์...' : 'Search matches...'}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#21262D] border border-transparent
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#232D38] border border-[rgba(255,255,255,0.06)]
               text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
               focus:border-[#FF6B81]/40 focus:outline-none transition-all"
           />
@@ -456,21 +415,21 @@ const MatchesList: React.FC = () => {
 
         {/* Stats row */}
         <div className="flex items-center gap-3 mb-3 overflow-x-auto scrollbar-hide">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#21262D] shrink-0">
-            <Heart size={12} className="text-[#FF6B81]" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#232D38] shrink-0">
+            <Heart size={12} className="text-[#56be89]" />
             <span className="text-[11px] font-medium text-[var(--text-secondary)]">{stats.total}</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFD700]/10 shrink-0">
-            <Zap size={12} className="text-[#FFD700]" />
-            <span className="text-[11px] font-medium text-[#FFD700]">{stats.ultra} Ultra</span>
+            <Zap size={12} className="text-[#D9FD82]" />
+            <span className="text-[11px] font-medium text-[#D9FD82]">{stats.ultra} Ultra</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#22C55E]/10 shrink-0">
             <MessageCircle size={12} className="text-[#22C55E]" />
             <span className="text-[11px] font-medium text-[#22C55E]">{stats.withMessages} Chats</span>
           </div>
           {stats.unread > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FF6B81]/20 shrink-0">
-              <span className="text-[11px] font-bold text-[#FF6B81]">{stats.unread} {lang === 'th' ? 'ยังไม่อ่าน' : 'Unread'}</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(86,190,137,0.2)] shrink-0">
+              <span className="text-[11px] font-bold text-[#56be89]">{stats.unread} {lang === 'th' ? 'ยังไม่อ่าน' : 'Unread'}</span>
             </div>
           )}
         </div>
@@ -504,14 +463,14 @@ const MatchesList: React.FC = () => {
           <div className="ml-auto flex items-center gap-1 shrink-0">
             <button
               onClick={() => setFilters(f => ({ ...f, sortBy: f.sortBy === 'recent' ? 'compatibility' : 'recent' }))}
-              className="w-8 h-8 rounded-lg bg-[#21262D] flex items-center justify-center"
+              className="w-8 h-8 rounded-lg bg-[#232D38] flex items-center justify-center"
               title={lang === 'th' ? 'เรียงลำดับ' : 'Sort'}
             >
               <ArrowUpDown size={14} className="text-[var(--text-secondary)]" />
             </button>
             <button
               onClick={() => setViewMode(v => v === 'list' ? 'grid' : 'list')}
-              className="w-8 h-8 rounded-lg bg-[#21262D] flex items-center justify-center"
+              className="w-8 h-8 rounded-lg bg-[#232D38] flex items-center justify-center"
               title={lang === 'th' ? 'เปลี่ยนมุมมอง' : 'View'}
             >
               {viewMode === 'list' ? <Grid size={14} className="text-[var(--text-secondary)]" /> : <List size={14} className="text-[var(--text-secondary)]" />}
@@ -526,11 +485,11 @@ const MatchesList: React.FC = () => {
           // Loading skeleton
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
-              <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-[#21262D]/30 animate-pulse">
-                <div className="w-14 h-14 rounded-2xl bg-[#21262D]" />
+              <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-[#232D38]/30 animate-pulse">
+                <div className="w-14 h-14 rounded-2xl bg-[#232D38]" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-[#21262D] rounded w-1/3" />
-                  <div className="h-3 bg-[#21262D] rounded w-1/2" />
+                  <div className="h-4 bg-[#232D38] rounded w-1/3" />
+                  <div className="h-3 bg-[#232D38] rounded w-1/2" />
                 </div>
               </div>
             ))}
@@ -574,8 +533,8 @@ const MatchesList: React.FC = () => {
       <div className="shrink-0 px-4 py-4 border-t border-[rgba(255,255,255,0.06)]">
         <button
           onClick={() => navigate('/dating/discover')}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#FF6B81] to-[#FF3B30]
-            font-bold text-base text-white shadow-lg shadow-[#FF6B81]/30
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#56be89] to-[#3D9E6E]
+            font-bold text-base text-white shadow-lg shadow-[#56be89]/30
             flex items-center justify-center gap-3"
         >
           <Sparkles size={20} />

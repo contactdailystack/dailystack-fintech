@@ -27,21 +27,21 @@ import SwipeGesture from '../../../components/dating/SwipeGesture';
 import { useLanguage } from '../../context/LanguageContext';
 import { DatingService } from '../../../services/datingService';
 
-// ─── CMB Color Theme ──────────────────────────────────────────────────────────
+// ─── Dark Theme Colors ──────────────────────────────────────────────────────────
 const colors = {
-  primary: '#9B7ED9',
-  primaryLight: '#B8A5E8',
-  primaryDark: '#7B5EC9',
-  background: '#FFFFFF',
-  surface: '#F8F9FA',
-  card: '#FFFFFF',
-  text: '#1A1A1A',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
-  border: '#E5E7EB',
+  primary: 'var(--neon)',
+  primaryLight: 'var(--neon-glow-sm)',
+  primaryDark: 'var(--neon-dark)',
+  background: 'var(--bg-base)',
+  surface: 'var(--surface-3)',
+  card: 'var(--bg-card)',
+  text: 'var(--text-primary)',
+  textSecondary: 'var(--text-secondary)',
+  textMuted: 'var(--text-muted)',
+  border: 'var(--border-subtle)',
   success: '#22C55E',
-  gold: '#F59E0B',
-  coral: '#F472B6',
+  gold: '#D9FD82',
+  coral: '#FF6B81',
   danger: '#EF4444',
 };
 
@@ -134,79 +134,29 @@ type SwipeDirection = 'left' | 'right' | 'super' | null;
 
 const fontFor = (lang: 'en' | 'th') => lang === 'th' ? 'font-sans' : 'font-sans';
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const mockProfiles: Profile[] = [
-  {
-    id: '1',
-    name: 'Mika',
-    age: 28,
-    location: 'Bangkok',
-    photos: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'],
-    compatibility: 94,
-    lifestyleScore: 92,
-    personalityScore: 96,
-    emotionalScore: 88,
-    insights: [
-      'You both enjoy early morning routines and productivity lifestyle',
-      'Shared interest in deep conversations and personal growth',
-      'Similar coffee shop preferences and weekend activities',
-    ],
-    interests: ['Productivity', 'Coffee', 'Reading', 'Travel'],
-    bio: 'Creative professional who loves deep conversations and quiet mornings ☕',
-    relationshipGoal: 'Long-term relationship',
-    occupation: 'Product Designer',
-    education: 'Chulalongkorn University',
-    mbti: 'INTJ',
-    isUltraMatch: true,
-    online: true,
-  },
-  {
-    id: '2',
-    name: 'Natasha',
-    age: 26,
-    location: 'Thong Lo',
-    photos: ['https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400'],
-    compatibility: 87,
-    lifestyleScore: 85,
-    personalityScore: 89,
-    emotionalScore: 84,
-    insights: [
-      'Both enjoy late-night cafe working sessions',
-      'Similar fitness and wellness priorities',
-      'Complementary communication styles',
-    ],
-    interests: ['Fitness', 'Wellness', 'Music', 'Art'],
-    bio: 'Fitness enthusiast who believes in work-life balance 💪',
-    relationshipGoal: 'Serious relationship',
-    occupation: 'Software Engineer',
-    education: 'Kasetsart University',
-    mbti: 'ENFP',
-    online: true,
-  },
-  {
-    id: '3',
-    name: 'Pim',
-    age: 29,
-    location: 'Sukhumvit',
-    photos: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400'],
-    compatibility: 91,
-    lifestyleScore: 88,
-    personalityScore: 93,
-    emotionalScore: 90,
-    insights: [
-      'Both value intentional dating and meaningful connections',
-      'Similar approach to emotional communication',
-      'Shared vision for future lifestyle',
-    ],
-    interests: ['Art', 'Design', 'Photography', 'Cooking'],
-    bio: 'Designer who finds joy in small moments and creative expression 🎨',
-    relationshipGoal: 'Marriage-minded',
-    occupation: 'UX Designer',
-    education: 'Silpakorn University',
-    mbti: 'INFP',
-    online: false,
-  },
-];
+// ─── Profile Mapper ──────────────────────────────────────────────────────────
+// Maps API response to UI Profile type
+const mapApiProfileToUiProfile = (apiProfile: any): Profile => ({
+  id: apiProfile.id,
+  name: apiProfile.name,
+  age: apiProfile.age || 25,
+  location: apiProfile.location || 'Bangkok',
+  photos: apiProfile.photos?.length > 0 ? apiProfile.photos : [apiProfile.avatar_url || ''].filter(Boolean),
+  compatibility: Math.round(apiProfile.compatibility || 0),
+  lifestyleScore: Math.round(apiProfile.lifestyleScore || 0),
+  personalityScore: Math.round(apiProfile.personalityScore || 0),
+  emotionalScore: Math.round(apiProfile.emotionalScore || 0),
+  insights: apiProfile.insights || [],
+  interests: apiProfile.interests || [],
+  bio: apiProfile.bio || '',
+  relationshipGoal: apiProfile.relationshipGoal || '',
+  occupation: apiProfile.occupation,
+  education: apiProfile.education,
+  mbti: apiProfile.mbti,
+  isUltraMatch: apiProfile.isUltraMatch || false,
+  online: apiProfile.online || false,
+  distance: apiProfile.distance,
+});
 
 // ─── CMB-Style Match Limit Bar ────────────────────────────────────────────────
 interface MatchLimitBarProps {
@@ -241,24 +191,27 @@ const SwipeActionButton: React.FC<SwipeActionButtonProps> = ({
   const configs = {
     pass: {
       icon: X,
-      bg: colors.surface,
-      border: colors.border,
-      iconColor: colors.danger,
+      bg: 'rgba(239, 68, 68, 0.1)',
+      border: 'rgba(239, 68, 68, 0.2)',
+      iconColor: '#EF4444',
       size: size === 'lg' ? 60 : size === 'md' ? 50 : 40,
+      shadow: '0 4px 16px rgba(239, 68, 68, 0.15)',
     },
     super: {
       icon: Star,
-      bg: colors.gold,
-      border: colors.gold,
-      iconColor: '#FFF',
+      bg: 'rgba(217, 253, 130, 0.15)',
+      border: 'rgba(217, 253, 130, 0.3)',
+      iconColor: '#D9FD82',
       size: size === 'lg' ? 50 : size === 'md' ? 44 : 36,
+      shadow: '0 4px 16px rgba(217, 253, 130, 0.2)',
     },
     like: {
       icon: Heart,
-      bg: colors.primary,
-      border: colors.primary,
-      iconColor: '#FFF',
+      bg: 'rgba(192, 245, 0, 0.15)',
+      border: 'rgba(192, 245, 0, 0.3)',
+      iconColor: 'var(--neon)',
       size: size === 'lg' ? 64 : size === 'md' ? 56 : 48,
+      shadow: '0 8px 24px var(--neon-glow)',
     },
   };
   
@@ -269,13 +222,15 @@ const SwipeActionButton: React.FC<SwipeActionButtonProps> = ({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
+      className="rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
       style={{
         width: config.size,
         height: config.size,
         backgroundColor: config.bg,
-        border: icon !== 'pass' ? 'none' : `2px solid ${config.border}`,
-        boxShadow: icon === 'pass' ? 'none' : '0 4px 12px rgba(0,0,0,0.15)',
+        border: `1.5px solid ${config.border}`,
+        boxShadow: config.shadow,
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
       }}
     >
       <Icon size={config.size * 0.45} color={config.iconColor} fill={icon === 'like' || icon === 'super' ? 'currentColor' : 'none'} />
@@ -315,7 +270,7 @@ const ProfileCardFull: React.FC<ProfileCardFullProps> = ({
 
       {/* Online indicator */}
       {profile.online && (
-        <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.95)' }}>
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: 'rgba(22,22,22,0.90)' }}>
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <span className="text-[10px] font-medium" style={{ color: colors.text }}>Online</span>
         </div>
@@ -548,8 +503,8 @@ const DatingDashboard: React.FC = () => {
   const [showInsight, setShowInsight] = useState(false);
   const [swipeIndicator, setSwipeIndicator] = useState<'pass' | 'super' | 'like' | null>(null);
 
-  // Mock match state
-  const [matchLimits] = useState({
+  // Real match limits from API
+  const [matchLimits, setMatchLimits] = useState({
     curated: { remaining: 5, max: 5 },
     ultra: { remaining: 1, max: 1 },
     explore: { remaining: 10, max: 10 },
@@ -557,23 +512,48 @@ const DatingDashboard: React.FC = () => {
 
   const currentProfile = profiles[currentIndex];
 
-  // ── Load profiles ──────────────────────────────────────────────────────────
+  // ── Load match limits from real API ────────────────────────────────────────
+  useEffect(() => {
+    const loadMatchLimits = async () => {
+      try {
+        const limits = await DatingService.limits.getLimits();
+        if (limits) {
+          setMatchLimits({
+            curated: { remaining: limits.curated.remaining, max: limits.curated.max },
+            ultra: { remaining: 1, max: 1 }, // Ultra is always 1/day
+            explore: { remaining: limits.explore.remaining, max: limits.explore.max },
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load match limits:', error);
+      }
+    };
+    loadMatchLimits();
+  }, []);
+
+  // ── Load profiles from real API ────────────────────────────────────────────
   useEffect(() => {
     const loadProfiles = async () => {
       setLoading(true);
       
       try {
-        // TODO: Real backend fetch using DatingService
-        // const curated = await DatingService.discovery.getCuratedMatches();
-        // const explore = await DatingService.discovery.getExploreMatches();
-        // setProfiles([...curated, ...explore]);
+        // Fetch from real Supabase database via DatingService
+        const [curated, explore] = await Promise.all([
+          DatingService.discovery.getCuratedMatches(),
+          DatingService.discovery.getExploreMatches(),
+        ]);
         
-        // Simulate loading
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setProfiles(mockProfiles);
+        // Combine and map to UI Profile type
+        const allProfiles = [...curated, ...explore].map(mapApiProfileToUiProfile);
+        
+        // Filter out profiles without photos
+        const validProfiles = allProfiles.filter(p => p.photos.length > 0);
+        
+        setProfiles(validProfiles);
       } catch (error) {
         console.error('Failed to load profiles:', error);
-        setProfiles(mockProfiles);
+        // Don't fall back to mock data - show empty state instead
+        setProfiles([]);
       } finally {
         setLoading(false);
       }
@@ -582,22 +562,35 @@ const DatingDashboard: React.FC = () => {
     loadProfiles();
   }, []);
 
-  // ── Handle swipe ──────────────────────────────────────────────────────────
+  // ── Handle swipe with real API ────────────────────────────────────────────
   const handleSwipe = useCallback(async (direction: SwipeDirection) => {
     if (!currentProfile || !direction) return;
 
-    // TODO: Real swipe using DatingService
-    // const result = await DatingService.swipe.swipe(
-    //   currentProfile.id,
-    //   direction === 'super' ? 'super' : direction === 'right' ? 'like' : 'pass'
-    // );
-    //
-    // if (result.isMatch) {
-    //   navigate(`/dating/match/${result.matchId}`);
-    //   return;
-    // }
+    // Map direction to API action
+    const actionMap = {
+      'left': 'pass' as const,
+      'right': 'like' as const,
+      'super': 'superlike' as const,
+    };
+    const action = actionMap[direction];
 
-    console.log(`Swiped ${direction} on ${currentProfile.name}`);
+    try {
+      // Call real API to record swipe
+      const result = await DatingService.swipe.swipe(currentProfile.id, action);
+      
+      // If it's a match, navigate to match screen
+      if (result.isMatch && result.matchId) {
+        // Show match celebration briefly before navigating
+        setSwipeIndicator(direction === 'super' ? 'super' : direction === 'right' ? 'like' : null);
+        setTimeout(() => {
+          navigate(`/dating/match/${result.matchId}`);
+        }, 1000);
+        return;
+      }
+    } catch (error) {
+      console.error('Swipe API error:', error);
+      // Continue with local state update even if API fails
+    }
 
     // Move to next profile
     if (currentIndex < profiles.length - 1) {
@@ -606,7 +599,7 @@ const DatingDashboard: React.FC = () => {
       setCurrentIndex(profiles.length);
     }
 
-    setSwipeIndicator(null);
+    setSwipeIndicator(direction === 'super' ? 'super' : direction === 'right' ? 'like' : 'pass');
     setShowInsight(false);
   }, [currentProfile, currentIndex, profiles.length, navigate]);
 
@@ -615,6 +608,11 @@ const DatingDashboard: React.FC = () => {
   const handleLike = () => handleSwipe('right');
   const handleSuper = () => {
     if (matchLimits.ultra.remaining > 0) {
+      // Decrement ultra limit locally (API will also update)
+      setMatchLimits(prev => ({
+        ...prev,
+        ultra: { ...prev.ultra, remaining: prev.ultra.remaining - 1 },
+      }));
       handleSwipe('super');
     }
   };

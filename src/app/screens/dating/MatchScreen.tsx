@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Heart, MessageCircle, Sparkles, X, Crown, Zap } from 'lucide-react';
+import { DatingService } from '../../services/datingService';
 
 interface MatchData {
   id: string;
@@ -16,16 +17,6 @@ interface MatchData {
   sharedInterests: string[];
   matchTime: Date;
 }
-
-const mockMatchData: MatchData = {
-  id: '1',
-  name: 'Mika',
-  age: 28,
-  photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-  compatibility: 94,
-  sharedInterests: ['Coffee', 'Reading', 'Travel', 'Productivity'],
-  matchTime: new Date(),
-};
 
 // ─── Confetti Particle ─────────────────────────────────────────────────────────
 const ConfettiParticle: React.FC<{ delay: number; x: number; color: string }> = ({ delay, x, color }) => (
@@ -46,8 +37,41 @@ const MatchScreen: React.FC = () => {
   const { matchId } = useParams();
   const [showContent, setShowContent] = useState(false);
   const [showConfetti, setShowConfetti] = useState(true);
+  const [match, setMatch] = useState<MatchData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const match = mockMatchData; // TODO: Fetch from API using matchId
+  // ── Load match data ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const loadMatch = async () => {
+      if (!matchId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const matches = await DatingService.match.getMatches();
+        const found = matches.find(m => m.id === matchId);
+        
+        if (found) {
+          setMatch({
+            id: found.partnerId,
+            name: found.partnerName,
+            age: 0,
+            photo: found.partnerAvatar || '',
+            compatibility: Math.round(found.compatibilityScore),
+            sharedInterests: found.sharedInterests || [],
+            matchTime: new Date(found.matchedAt || Date.now()),
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load match:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMatch();
+  }, [matchId]);
 
   useEffect(() => {
     // Animate in
@@ -68,10 +92,10 @@ const MatchScreen: React.FC = () => {
   };
 
   // Confetti colors
-  const confettiColors = ['#FF6B81', '#FFD700', '#22C55E', '#5CC3FF', '#8A4CFF', '#FF3B30'];
+  const confettiColors = ['#56be89', '#D9FD82', '#22C55E', '#3D9E6E', '#9CA3AF', '#3D9E6E'];
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-[#0D1117] via-[#1a1f2e] to-[#0D1117] 
+    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-[#1C232A] via-[#232D38] to-[#1C232A] 
       text-white font-sans flex flex-col items-center justify-center p-6 relative overflow-hidden feature-dating">
       
       {/* Confetti */}
@@ -101,7 +125,7 @@ const MatchScreen: React.FC = () => {
         
         {/* Celebration header */}
         <div className="mb-8">
-          <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-[#FF6B81] to-[#FF3B30] 
+          <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-[#56be89] to-[#3D9E6E] 
             flex items-center justify-center mb-6 animate-pulse-glow">
             <Heart size={48} className="text-white" fill="white" />
           </div>
@@ -113,14 +137,14 @@ const MatchScreen: React.FC = () => {
           </h1>
           
           <p className="text-lg text-white/70">
-            You and {match.name} liked each other
+            You and {loading ? '...' : match?.name || 'someone'} liked each other
           </p>
         </div>
 
         {/* Photos */}
         <div className="flex items-center justify-center gap-4 mb-8">
           {/* Current user placeholder */}
-          <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-[#22C55E] shadow-lg shadow-[#22C55E]/30">
+          <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-[#56be89] shadow-lg shadow-[#56be89]/30">
             <div className="w-full h-full bg-gradient-to-br from-[#21262D] to-[#0D1117] flex items-center justify-center">
               <span className="text-4xl">👤</span>
             </div>
@@ -128,7 +152,7 @@ const MatchScreen: React.FC = () => {
 
           {/* Heart connector */}
           <div className="relative">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FF6B81] to-[#FF3B30] 
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#56be89] to-[#3D9E6E] 
               flex items-center justify-center animate-heartbeat">
               <Sparkles size={24} className="text-white" />
             </div>
@@ -136,18 +160,28 @@ const MatchScreen: React.FC = () => {
 
           {/* Match photo */}
           <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-[#FF6B81] shadow-lg shadow-[#FF6B81]/30">
-            <img
-              src={match.photo}
-              alt={match.name}
-              className="w-full h-full object-cover"
-            />
+            {loading ? (
+              <div className="w-full h-full bg-[#21262D] animate-pulse" />
+            ) : match?.photo ? (
+              <img
+                src={match.photo}
+                alt={match?.name || 'Match'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-[#21262D] flex items-center justify-center">
+                <span className="text-4xl">👤</span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Compatibility badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[rgba(255,215,0,0.15)] rounded-full mb-8">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[rgba(86,190,137,0.15)] rounded-full mb-8">
           <Zap size={16} className="text-[#FFD700]" />
-          <span className="text-sm font-bold text-[#FFD700]">{match.compatibility}% Compatible</span>
+          <span className="text-sm font-bold text-[#FFD700]">
+            {loading ? '...' : `${match?.compatibility || 0}% Compatible`}
+          </span>
           <Crown size={14} className="text-[#FFD700]" />
         </div>
 
@@ -155,14 +189,20 @@ const MatchScreen: React.FC = () => {
         <div className="mb-10">
           <p className="text-xs text-white/50 uppercase tracking-widest mb-3">Shared Interests</p>
           <div className="flex flex-wrap justify-center gap-2 max-w-xs mx-auto">
-            {match.sharedInterests.map((interest) => (
-              <span
-                key={interest}
-                className="px-3 py-1.5 bg-[rgba(255,107,129,0.15)] rounded-full text-xs font-medium text-[#FF6B81]"
-              >
-                {interest}
-              </span>
-            ))}
+            {loading ? (
+              <span className="text-sm text-white/50">Loading...</span>
+            ) : match?.sharedInterests.length ? (
+              match.sharedInterests.map((interest) => (
+                <span
+                  key={interest}
+                  className="px-3 py-1.5 border border-[rgba(86,190,137,0.2)] rounded-full text-xs font-medium text-[#FF6B81]"
+                >
+                  {interest}
+                </span>
+              ))
+            ) : (
+              <span className="text-sm text-white/50">No shared interests</span>
+            )}
           </div>
         </div>
 
@@ -170,9 +210,10 @@ const MatchScreen: React.FC = () => {
         <div className="space-y-4 max-w-sm mx-auto">
           <button
             onClick={handleSendMessage}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#FF6B81] to-[#FF3B30]
+            disabled={loading || !match}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#56be89] to-[#3D9E6E]
               font-bold text-lg flex items-center justify-center gap-3 shadow-lg shadow-[#FF6B81]/30
-              active:scale-95 transition-all"
+              active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <MessageCircle size={24} />
             Send a Message

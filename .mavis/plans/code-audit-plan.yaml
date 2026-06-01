@@ -1,0 +1,359 @@
+﻿version: 1
+plan:
+  name: 'DailyStack Code Audit - Full Stack Analysis'
+  max_concurrency: 4
+  max_consecutive_failures: 1
+  max_cycles: 10
+tasks:
+  - id: architecture-audit
+    title: 'Architecture & Code Quality Audit'
+    prompt: |
+      You are a Senior Staff Engineer conducting a comprehensive architecture and code quality audit on the DailyStack frontend project.
+      
+      Workspace: D:\Coding Folder\dailystack\dailystack-frontend
+      
+      AUDIT SCOPE:
+      
+      1. FRONTEND ARCHITECTURE ANALYSIS:
+         - Analyze the overall project structure (src/ directory)
+         - Evaluate folder organization: app/, components/, services/, context/, hooks/, landing/
+         - Identify architectural issues and propose fixes
+         - Check for tight coupling between components
+         - Evaluate separation of concerns
+      
+      2. COMPONENT STRUCTURE & REUSABILITY:
+         - Review components in src/components/ (ui/, dating/, chat/)
+         - Identify duplicate logic and propose component abstraction
+         - Check for proper component composition patterns
+         - Evaluate prop drilling issues vs context usage
+      
+      3. STATE MANAGEMENT:
+         - Analyze context providers: ThemeContext, LanguageContext
+         - Check services layer: authService.ts, datingService.ts, datingAI.ts, energyService.ts, learningService.ts, relationshipService.ts, goals12wkService.ts
+         - Identify state synchronization issues
+         - Check for prop drilling vs context/Rx patterns
+      
+      4. CODE QUALITY ISSUES:
+         - Identify dead code patterns
+         - Find duplicate business logic across services
+         - Check naming conventions consistency
+         - Evaluate error handling patterns
+         - Find tight coupling violations
+      
+      5. SCALABILITY ANALYSIS:
+         - Evaluate if the current architecture can scale with new features
+         - Identify technical debt
+         - Check for proper module boundaries
+      
+      KEY FILES TO ANALYZE:
+      - src/App.tsx
+      - src/app/routes/AppRoutes.tsx
+      - src/app/pages/*.tsx (AuthPage, Dating, Onboarding, Dashboard, LoginPage, etc.)
+      - src/components/ - all subdirectories
+      - src/services/*.ts - all service files
+      - src/app/context/*.tsx
+      
+      OUTPUT FORMAT:
+      For each issue found, provide:
+      1. Issue Description (what is the problem)
+      2. Impact (how it affects the codebase)
+      3. Severity (High/Medium/Low)
+      4. Recommended Fix with code examples
+      5. File location and line numbers
+      
+      Also identify:
+      - Top 5 Critical Issues
+      - Quick Win Improvements
+      - High-Impact Refactors
+      
+      Return as structured JSON with sections for each category.
+    assigned_to: general
+    verified_by: code-reviewer
+    verify_prompt: |
+      Review the audit findings for accuracy. Verify:
+      1. All reported issues are real (not false positives)
+      2. Severity ratings are appropriate
+      3. Recommended fixes are implementable and correct
+      4. No critical issues were missed
+      
+      Do not modify files. Report any discrepancies found.
+    timeout_ms: 2400000
+
+  - id: ux-ui-audit
+    title: 'UX/UI & Design System Audit'
+    prompt: |
+      You are a Senior Product Designer + Senior Engineer conducting a UX/UI and Design System audit on the DailyStack frontend.
+      
+      Workspace: D:\Coding Folder\dailystack\dailystack-frontend
+      
+      AUDIT SCOPE:
+      
+      1. DESIGN SYSTEM ANALYSIS:
+         - Check src/app/components/DesignSystem.tsx for consistency
+         - Evaluate src/components/ui/ (premium-components.tsx, ui-components.tsx)
+         - Check for typography consistency (font-sans, font-kanit)
+         - Evaluate color system usage (var(--lime), var(--surface-*), etc.)
+         - Check spacing consistency (padding, margin patterns)
+      
+      2. UX/UI PROBLEMS:
+         - Analyze Dating.tsx (921 lines) - large monolithic component
+         - Analyze AuthPage.tsx (722 lines) - step-based auth flows
+         - Analyze Onboarding.tsx (1043 lines) - complex multi-step form
+         - Check for information hierarchy issues
+         - Identify confusing navigation flows
+         - Check CTA placement and sizing
+      
+      3. INTERACTION PATTERNS:
+         - Analyze bottom tab navigation in Dating.tsx
+         - Check for consistent interaction patterns
+         - Identify accessibility issues (ARIA, focus management)
+         - Check for empty states design
+      
+      4. RESPONSIVE DESIGN:
+         - Check for mobile-first implementation
+         - Evaluate breakpoint usage
+         - Check for proper touch targets
+      
+      5. STATE UX:
+         - Check for proper loading states
+         - Analyze error state handling UX
+         - Check for empty state designs
+      
+      KEY FILES:
+      - src/app/components/DesignSystem.tsx
+      - src/app/pages/Dating.tsx (921 lines - monolithic)
+      - src/app/pages/AuthPage.tsx (722 lines)
+      - src/app/pages/Onboarding.tsx (1043 lines)
+      - src/app/pages/Dashboard.tsx
+      - src/components/ui/*.tsx
+      
+      OUTPUT FORMAT:
+      For each issue:
+      1. Issue Description
+      2. User Impact (how it affects user experience)
+      3. Severity (High/Medium/Low)
+      4. Recommended Solution with design rationale
+      
+      Identify:
+      - UX Friction Points causing user drop-off
+      - Confusing Flow Patterns
+      - Bad Information Hierarchy
+      - Poor CTA Placement
+      - Accessibility Problems
+      
+      Return as structured JSON.
+    assigned_to: general
+    verified_by: code-reviewer
+    verify_prompt: |
+      Review the UX/UI audit for accuracy. Verify:
+      1. All reported UX issues are real and significant
+      2. Severity ratings are appropriate
+      3. Design recommendations are practical
+      4. No critical UX problems were missed
+      
+      Do not modify files. Report any discrepancies.
+    timeout_ms: 2400000
+
+  - id: performance-audit
+    title: 'Performance Analysis'
+    prompt: |
+      You are a Senior Frontend Engineer specializing in React performance optimization.
+      
+      Workspace: D:\Coding Folder\dailystack\dailystack-frontend
+      
+      AUDIT SCOPE:
+      
+      1. REACT PERFORMANCE ISSUES:
+         - Check for unnecessary re-renders in large components (Dating.tsx, Onboarding.tsx)
+         - Identify components that should use React.memo()
+         - Check for inline function definitions in JSX
+         - Analyze state update patterns (multiple setState calls vs batching)
+      
+      2. BUNDLE SIZE ANALYSIS:
+         - Review package.json for dependency optimization opportunities
+         - Check for tree-shaking potential issues
+         - Identify large dependencies (framer-motion, lucide-react, react-router-dom)
+         - Check for duplicate dependencies
+      
+      3. RENDERING PERFORMANCE:
+         - Analyze useEffect dependencies (potential infinite loops)
+         - Check for expensive computations in render
+         - Identify components with too many responsibilities
+      
+      4. MEMORY ISSUES:
+         - Check for potential memory leaks (URL.createObjectURL without revoke)
+         - Analyze subscription cleanup (Supabase real-time subscriptions)
+         - Check for event listener cleanup
+      
+      5. MOBILE PERFORMANCE:
+         - Check for heavy animations (framer-motion usage)
+         - Analyze image loading patterns
+         - Check for proper lazy loading
+      
+      KEY FILES:
+      - package.json
+      - vite.config.ts
+      - src/app/pages/Dating.tsx
+      - src/app/pages/Onboarding.tsx
+      - src/app/pages/Dashboard.tsx
+      - src/services/datingService.ts (subscription patterns)
+      - src/services/authService.ts
+      
+      OUTPUT FORMAT:
+      For each issue:
+      1. Issue Description
+      2. Performance Impact (bundle size, render time, etc.)
+      3. Severity (High/Medium/Low)
+      4. Recommended Fix with code example
+      
+      Identify:
+      - Bundle Size Optimizations
+      - Unnecessary Re-render Fixes
+      - Memory Leak Fixes
+      - Animation Performance Improvements
+      
+      Return as structured JSON.
+    assigned_to: general
+    verified_by: code-reviewer
+    verify_prompt: |
+      Review the performance audit for accuracy. Verify:
+      1. All reported performance issues are real
+      2. Severity ratings are appropriate
+      3. Recommended fixes are correct and implementable
+      4. No critical performance problems were missed
+      
+      Do not modify files. Report any discrepancies.
+    timeout_ms: 2400000
+
+  - id: security-audit
+    title: 'Security Audit'
+    prompt: |
+      You are a Senior Security Engineer conducting a security audit on the DailyStack frontend.
+      
+      Workspace: D:\Coding Folder\dailystack\dailystack-frontend
+      
+      AUDIT SCOPE:
+      
+      1. AUTHENTICATION & AUTHORIZATION:
+         - Analyze src/services/authService.ts (1143 lines)
+         - Check ProtectedRoute implementation in src/app/components/ProtectedRoute.tsx
+         - Verify auth flow security (signup, login, password reset)
+         - Check for session management issues
+      
+      2. API SECURITY:
+         - Check Supabase client configuration (src/app/services/supabaseClient.ts)
+         - Analyze database queries for SQL injection potential
+         - Check for proper error handling that doesn't expose sensitive data
+         - Verify RLS (Row Level Security) is properly configured
+      
+      3. DATA EXPOSURE:
+         - Check for sensitive data in localStorage (token storage patterns)
+         - Verify environment variable handling (.env patterns)
+         - Check for API key exposure risks
+         - Analyze console.log statements that might leak data
+      
+      4. INPUT VALIDATION:
+         - Check form validation in AuthPage.tsx
+         - Analyze input sanitization patterns
+         - Check for XSS vulnerabilities in user-generated content
+      
+      5. BROWSER SECURITY:
+         - Check for proper CSP headers (if applicable)
+         - Verify HTTPS usage patterns
+         - Check for secure cookie settings
+      
+      KEY FILES:
+      - src/services/authService.ts
+      - src/app/services/supabaseClient.ts
+      - src/app/components/ProtectedRoute.tsx
+      - src/app/pages/AuthPage.tsx
+      - src/app/pages/LoginPage.tsx
+      - src/app/pages/SignUpPage.tsx
+      - .env files (if any)
+      
+      OUTPUT FORMAT:
+      For each issue:
+      1. Issue Description
+      2. Security Risk (what could happen)
+      3. Severity (High/Medium/Low with CVSS-like reasoning)
+      4. Recommended Fix with code example
+      
+      Identify:
+      - Critical Security Vulnerabilities
+      - Authentication Weaknesses
+      - Data Exposure Risks
+      - Input Validation Gaps
+      
+      Return as structured JSON.
+    assigned_to: general
+    verified_by: code-reviewer
+    verify_prompt: |
+      Review the security audit for accuracy. Verify:
+      1. All reported security issues are real vulnerabilities
+      2. Severity ratings are appropriate
+      3. Recommended fixes are correct and secure
+      4. No critical security vulnerabilities were missed
+      
+      Do not modify files. Report any discrepancies.
+    timeout_ms: 2400000
+
+  - id: synthesize-report
+    title: 'Synthesize Final Audit Report'
+    prompt: |
+      You are synthesizing all the audit findings into a comprehensive final report.
+      
+      Wait for all 4 audit tracks to complete:
+      - architecture-audit (Architecture & Code Quality)
+      - ux-ui-audit (UX/UI & Design System)
+      - performance-audit (Performance Analysis)
+      - security-audit (Security Audit)
+      
+      Then create a comprehensive report with:
+      
+      1. EXECUTIVE SUMMARY
+         - Overall Code Quality Score (1-10)
+         - Overall Product Quality Score (1-10)
+         - Top Critical Issues (top 5 most urgent)
+      
+      2. DETAILED FINDINGS BY CATEGORY:
+         For each category, provide:
+         - Critical Issues (High severity)
+         - Medium Priority Issues
+         - Low Priority Items
+      
+      3. QUICK WIN IMPROVEMENTS:
+         - List 5-10 quick fixes that have high impact with low effort
+      
+      4. HIGH IMPACT REFACTORS:
+         - Major refactoring recommendations
+      
+      5. PRIORITY ROADMAP:
+         - Security Priorities (immediate)
+         - Performance Priorities (short-term)
+         - UX Priorities (medium-term)
+         - Scalability Priorities (long-term)
+      
+      6. TECHNICAL DEBT REGISTER:
+         - List all identified technical debt items
+      
+      7. ARCHITECTURE RECOMMENDATIONS:
+         - Overall architecture improvements
+      
+      OUTPUT FORMAT:
+      Create a comprehensive markdown report saved to:
+      D:\Coding Folder\dailystack\dailystack-frontend\report\FULL-AUDIT-REPORT.md
+      
+      The report should be detailed enough for a development team to act on.
+      Use Thai language for headings and descriptions as the user requested in Thai.
+    assigned_to: general
+    depends_on: [architecture-audit, ux-ui-audit, performance-audit, security-audit]
+    verified_by: code-reviewer
+    verify_prompt: |
+      Review the synthesized report for:
+      1. Completeness (all audit findings are included)
+      2. Accuracy (no contradictory findings)
+      3. Proper prioritization
+      4. Actionable recommendations
+      
+      Do not modify files. Report any discrepancies.
+    timeout_ms: 2400000

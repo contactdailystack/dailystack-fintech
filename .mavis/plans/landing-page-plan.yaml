@@ -1,0 +1,135 @@
+﻿version: 1
+plan:
+  name: "DailyStack Premium Landing Page"
+  max_concurrency: 3
+  max_consecutive_failures: 1
+  max_cycles: 5
+  message_to_user: "Building your world-class DailyStack landing page with cinematic motion and premium SaaS aesthetics. 🚀"
+tasks:
+  - id: design-foundation
+    title: "Design Foundation & Global Styles"
+    prompt: |
+      Create the design system foundation for DailyStack's premium landing page.
+      
+      PROJECT: D:\Coding Folder\dailystack\dailystack-frontend
+      OUTPUT: Create files in src/landing/
+      
+      BRAND IDENTITY:
+      - Primary Accent: #56be89 (mint green)
+      - Dark Base: #1c232a
+      - Typography: Space Grotesk (English), Prompt (Thai), JetBrains Mono (mono)
+      
+      STYLES (from existing tailwind.config.js):
+      - Font: "Space Grotesk", sans-serif
+      - Dark surfaces: #1c232a, #222b34, #28333e, #2f3c49
+      - Border radius: sm:8px, md:12px, lg:16px, xl:24px, 2xl:32px
+      - Shadows: soft-sm, soft-md, soft-lg, soft-xl, glow-brand
+      
+      REQUIRED FILES TO CREATE:
+      
+      1. src/landing/index.tsx - Main landing page export
+      2. src/landing/LandingPage.tsx - Main landing page component with all sections
+      3. src/landing/components/HeroSection.tsx - Cinematic hero
+      4. src/landing/components/ProductShowcase.tsx - Bento grid showcase
+      5. src/landing/components/FeaturesSection.tsx - AI/workflow features
+      6. src/landing/components/MotionShowcase.tsx - Motion showcase
+      7. src/landing/components/SocialProof.tsx - Testimonials
+      8. src/landing/components/CTASection.tsx - Conversion CTA
+      9. src/landing/components/Footer.tsx - Minimal footer
+      10. src/landing/components/LenisWrapper.tsx - Smooth scroll wrapper
+      
+      DESIGN PHILOSOPHY (adapted from reference, NOT copied):
+      - Global, Premium, Emotionally engaging, Modern
+      - Gen-Z friendly but professional
+      - Motion-first, cinematic scroll experience
+      - Glassmorphism with soft blur surfaces
+      - High contrast, soft futuristic aesthetic
+      
+      MOTION SYSTEM:
+      - Use Framer Motion for all animations
+      - Lenis smooth scroll (import from "lenis")
+      - Spring physics: stiffness: 100, damping: 30
+      - Easing: cubic-bezier(0.25, 0.4, 0.25, 1)
+      - Parallax effects on scroll
+      - Stagger animations (0.1s delay between items)
+      - Floating elements with subtle animation
+      - Scroll-triggered reveals
+      
+      GLASSMORPHISM:
+      - backdrop-blur-xl (64px blur)
+      - bg-white/5 to bg-white/10
+      - border border-white/10
+      - Soft glow shadows using brand accent
+      
+      SECTIONS TO BUILD:
+      
+      1. HERO SECTION:
+      - Large typography hierarchy (8xl-9xl for main headline)
+      - Motion-rich visuals with parallax
+      - Strong CTA focus
+      - Floating UI elements (mockup cards, gradients)
+      - Smooth entrance animations
+      - Scroll indicator at bottom
+      
+      2. PRODUCT SHOWCASE (Bento Grid):
+      - Asymmetric grid layout (varying card sizes)
+      - Interactive hover effects (3D tilt, glow)
+      - Layered card depth
+      - Feature highlights with icons
+      - Glassmorphism cards
+      
+      3. FEATURES SECTION:
+      - Premium dashboard preview cards
+      - AI/workflow/productivity capabilities
+      - Smooth stagger animations
+      - Modern SaaS presentation
+      - Interactive hover states
+      
+      4. MOTION SHOWCASE:
+      - Cinematic transitions
+      - Interactive UI previews
+      - Dynamic scroll behavior
+      - Floating/glassmorphism layers
+      
+      5. SOCIAL PROOF:
+      - Modern testimonial cards
+      - Creator/startup/productivity vibe
+      - Premium visual trust system
+      - Star ratings, user avatars
+      
+      6. CTA SECTION:
+      - Strong conversion hierarchy
+      - Clear visual focus
+      - Premium button interactions
+      - Mobile-first optimization
+      
+      7. FOOTER:
+      - Minimal premium footer
+      - Clean spacing
+      - Elegant typography
+      
+      IMPORTANT NOTES:
+      - Do NOT copy the reference design directly
+      - Adapt the philosophy: cinematic motion, premium feel, glassmorphism
+      - Preserve DailyStack brand identity
+      - Keep motion intentional and premium
+      - Avoid excessive neon usage
+      - Use the existing CSS variables from tailwind.config.js
+      - Import components from dashboard-redesign folder for reference patterns
+      
+      After creating all files, create an index.ts that exports LandingPage component.
+      Report the file paths created.
+    assigned_to: coder
+    verified_by: verifier
+    verify_prompt: |
+      Review the created landing page files for:
+      1. All 7 sections are present and well-structured
+      2. Motion system is comprehensive (scroll animations, hover effects, parallax)
+      3. Glassmorphism effects are implemented correctly
+      4. Brand colors (#56be89, #1c232a) are used properly
+      5. Responsive design is implemented
+      6. No excessive neon or cheap effects
+      7. Premium feel is achieved
+      8. Code quality and proper React patterns
+      Do not modify files, just report findings.
+    timeout_ms: 2400000

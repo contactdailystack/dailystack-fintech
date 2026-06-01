@@ -337,7 +337,8 @@ CREATE INDEX IF NOT EXISTS idx_auth_logs_user_id ON public.auth_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_auth_logs_login_at ON public.auth_logs(login_at);
 
 ALTER TABLE public.auth_logs ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own auth logs" ON public.auth_logs 
+DROP POLICY IF EXISTS "Users can view own auth logs" ON public.auth_logs;
+CREATE POLICY "Users can view own auth logs" ON public.auth_logs
     FOR SELECT USING (auth.uid() = user_id);
 
 -- 3. อัปเดต Trigger ให้ดึง auth_provider ตอนสมัครสมาชิก
@@ -364,4 +365,132 @@ BEGIN
     
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;    
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =====================================================
+-- 5 LIFE DIMENSIONS — DailyStack Productivity Suite
+-- =====================================================
+
+-- 1. ENERGY LOGS — daily energy level tracking
+CREATE TABLE IF NOT EXISTS public.energy_logs (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    energy_level INTEGER CHECK (energy_level BETWEEN 1 AND 100) NOT NULL,
+    note TEXT,
+    logged_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_energy_logs_user ON public.energy_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_energy_logs_date ON public.energy_logs(user_id, logged_at DESC);
+ALTER TABLE public.energy_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own energy logs" ON public.energy_logs
+    FOR ALL USING (auth.uid() = user_id);
+
+-- 2. LEARNING STREAKS — daily learning micro-habit tracker
+CREATE TABLE IF NOT EXISTS public.learning_streaks (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    minutes_learned INTEGER DEFAULT 0,
+    activity TEXT,
+    completed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, date)
+);
+CREATE INDEX IF NOT EXISTS idx_learning_streaks_user ON public.learning_streaks(user_id);
+CREATE INDEX IF NOT EXISTS idx_learning_streaks_streak ON public.learning_streaks(user_id, date DESC);
+ALTER TABLE public.learning_streaks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own learning streaks" ON public.learning_streaks
+    FOR ALL USING (auth.uid() = user_id);
+
+-- 3. RELATIONSHIPS — people + interaction tracking
+CREATE TABLE IF NOT EXISTS public.relationships (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    name TEXT NOT NULL,
+    relationship_type VARCHAR(20) CHECK (relationship_type IN ('family', 'partner', 'friend', 'colleague', 'mentor', 'other')),
+    call_frequency VARCHAR(20) CHECK (call_frequency IN ('daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly')),
+    last_interaction DATE,
+    notes TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    avatar_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_relationships_user ON public.relationships(user_id);
+ALTER TABLE public.relationships ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own relationships" ON public.relationships
+    FOR ALL USING (auth.uid() = user_id);
+
+-- Relationship interaction log
+CREATE TABLE IF NOT EXISTS public.relationship_logs (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    relationship_id UUID REFERENCES public.relationships(id) ON DELETE CASCADE NOT NULL,
+    interaction_type VARCHAR(20) CHECK (interaction_type IN ('call', 'meet', 'text', 'gift', 'other')),
+    interaction_date DATE DEFAULT CURRENT_DATE,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_relationship_logs_rel ON public.relationship_logs(relationship_id);
+ALTER TABLE public.relationship_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own relationship logs" ON public.relationship_logs
+    FOR ALL USING (
+        auth.uid() IN (
+            SELECT user_id FROM public.relationships WHERE id = relationship_id
+        )
+    );
+
+-- 4. 12-WEEK GOALS — quarterly goal framework
+CREATE TABLE IF NOT EXISTS public.goals_12wk (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    dimension VARCHAR(20) CHECK (dimension IN ('work', 'learning', 'relationships', 'passions', 'wellbeing')),
+    current_week INTEGER DEFAULT 1 CHECK (current_week BETWEEN 1 AND 12),
+    phase VARCHAR(20) CHECK (phase IN ('planning', 'building', 'reviewing', 'completed')),
+    milestones JSONB DEFAULT '[]',
+    target_date DATE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_goals_user ON public.goals_12wk(user_id);
+CREATE INDEX IF NOT EXISTS idx_goals_active ON public.goals_12wk(user_id) WHERE is_active = TRUE;
+ALTER TABLE public.goals_12wk ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own 12wk goals" ON public.goals_12wk
+    FOR ALL USING (auth.uid() = user_id);
+
+-- 5. ENERGY CYCLES — morning / afternoon / evening tracking
+CREATE TABLE IF NOT EXISTS public.energy_cycles (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    morning_level INTEGER CHECK (morning_level BETWEEN 1 AND 100),
+    afternoon_level INTEGER CHECK (afternoon_level BETWEEN 1 AND 100),
+    evening_level INTEGER CHECK (evening_level BETWEEN 1 AND 100),
+    morning_note TEXT,
+    afternoon_note TEXT,
+    evening_note TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, date)
+);
+CREATE INDEX IF NOT EXISTS idx_energy_cycles_user ON public.energy_cycles(user_id);
+CREATE INDEX IF NOT EXISTS idx_energy_cycles_date ON public.energy_cycles(user_id, date DESC);
+ALTER TABLE public.energy_cycles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own energy cycles" ON public.energy_cycles
+    FOR ALL USING (auth.uid() = user_id);
+
+-- Auto-update updated_at on energy_cycles
+CREATE OR REPLACE FUNCTION public.update_energy_cycle_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS on_energy_cycle_updated ON public.energy_cycles;
+CREATE TRIGGER on_energy_cycle_updated
+    BEFORE UPDATE ON public.energy_cycles
+    FOR EACH ROW EXECUTE FUNCTION public.update_energy_cycle_timestamp();

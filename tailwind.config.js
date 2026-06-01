@@ -1,272 +1,266 @@
-﻿/** @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  // Class-based dark mode — required for feature-scoped dark tinting
-  darkMode: 'class',
-  
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  
   theme: {
     extend: {
-      /* ============================================================
-       * BRAND COLOR PALETTE — DailyStack Identity (v2.0)
-       * ============================================================ */
+      /* ── PILO ACCENT — Primary Brand Color ─────────────────────
+         #D1FF3B — Electric Lime
+         Used sparingly: 5-10% of screen (Rule of 10%)
+      ─────────────────────────────────────────────────────────── */
       colors: {
-        brand: {
-          mint: 'var(--brand-500)',
-          lime: 'var(--brand-500)',
-          dark: 'var(--brand-600)',
-          ink: 'var(--brand-ink)',
-          bg: 'var(--brand-bg)',
-          panel: 'var(--brand-panel)',
+        pilo: {
+          DEFAULT: '#D1FF3B',
+          light:   '#E8FF7A',
+          dark:    '#B8E600',
+          glow:    'rgba(209, 255, 59, 0.40)',
+          'glow-sm': 'rgba(209, 255, 59, 0.20)',
+          surface: 'rgba(209, 255, 59, 0.08)',
+          muted:   'rgba(209, 255, 59, 0.15)',
+          text:    '#111111',
         },
 
-        semantic: {
-          bg: 'var(--semantic-bg)',
-          'surface-2': 'var(--semantic-surface-2)',
-          'surface-1': 'var(--semantic-surface-1)',
-          panel: 'var(--semantic-panel)',
-          text: 'var(--semantic-text)',
-          muted: 'var(--semantic-muted)',
-          inverse: 'var(--semantic-inverse)',
-          border: 'var(--semantic-border)',
-          success: 'var(--semantic-success)',
-          'success-soft': 'var(--semantic-success-soft)',
-          warning: 'var(--semantic-warning)',
-          'warning-soft': 'var(--semantic-warning-soft)',
-          error: 'var(--semantic-error)',
-          'error-soft': 'var(--semantic-error-soft)',
-          info: 'var(--semantic-info)',
-          'info-soft': 'var(--semantic-info-soft)',
+        /* ── ACCENT ALIASES ─────────────────────────────────── */
+        neon: {
+          DEFAULT: 'var(--pilo)',
+          light:   'var(--pilo-light)',
+          dark:    'var(--pilo-dark)',
+          glow:    'var(--pilo-glow)',
+          surface: 'var(--pilo-surface)',
+          text:    'var(--pilo-text)',
         },
 
-        feature: {
-          dating: {
-            primary: 'var(--feature-dating-primary)',
-            'on-primary': 'var(--feature-dating-on-primary)',
-            hover: 'var(--feature-dating-primary-hover)',
-            pressed: 'var(--feature-dating-primary-pressed)',
-            accent: 'var(--feature-dating-accent)',
-            'soft-bg': 'var(--feature-dating-soft-bg)',
-            border: 'var(--feature-dating-border)',
-            decorative: 'var(--feature-dating-decorative)',
-            'dark-variant': 'var(--feature-dating-dark-variant)',
-          },
-          events: {
-            primary: 'var(--feature-events-primary)',
-            'on-primary': 'var(--feature-events-on-primary)',
-            hover: 'var(--feature-events-primary-hover)',
-            pressed: 'var(--feature-events-primary-pressed)',
-            accent: 'var(--feature-events-accent)',
-            'soft-bg': 'var(--feature-events-soft-bg)',
-            border: 'var(--feature-events-border)',
-            decorative: 'var(--feature-events-decorative)',
-            'dark-variant': 'var(--feature-events-dark-variant)',
-          },
-          community: {
-            primary: 'var(--feature-community-primary)',
-            'on-primary': 'var(--feature-community-on-primary)',
-            hover: 'var(--feature-community-primary-hover)',
-            pressed: 'var(--feature-community-primary-pressed)',
-            accent: 'var(--feature-community-accent)',
-            'soft-bg': 'var(--feature-community-soft-bg)',
-            border: 'var(--feature-community-border)',
-            decorative: 'var(--feature-community-decorative)',
-            'dark-variant': 'var(--feature-community-dark-variant)',
-          },
-          marketplace: {
-            primary: 'var(--feature-marketplace-primary)',
-            'on-primary': 'var(--feature-marketplace-on-primary)',
-            hover: 'var(--feature-marketplace-primary-hover)',
-            pressed: 'var(--feature-marketplace-primary-pressed)',
-            accent: 'var(--feature-marketplace-accent)',
-            'soft-bg': 'var(--feature-marketplace-soft-bg)',
-            border: 'var(--feature-marketplace-border)',
-            decorative: 'var(--feature-marketplace-decorative)',
-            'dark-variant': 'var(--feature-marketplace-dark-variant)',
-          },
-          ai: {
-            primary: 'var(--feature-ai-primary)',
-            'on-primary': 'var(--feature-ai-on-primary)',
-            hover: 'var(--feature-ai-primary-hover)',
-            pressed: 'var(--feature-ai-primary-pressed)',
-            accent: 'var(--feature-ai-accent)',
-            'soft-bg': 'var(--feature-ai-soft-bg)',
-            border: 'var(--feature-ai-border)',
-            decorative: 'var(--feature-ai-decorative)',
-            'dark-variant': 'var(--feature-ai-dark-variant)',
-          },
-          wallet: {
-            primary: 'var(--feature-wallet-primary)',
-            'on-primary': 'var(--feature-wallet-on-primary)',
-            hover: 'var(--feature-wallet-primary-hover)',
-            pressed: 'var(--feature-wallet-primary-pressed)',
-            accent: 'var(--feature-wallet-accent)',
-            'soft-bg': 'var(--feature-wallet-soft-bg)',
-            border: 'var(--feature-wallet-border)',
-            decorative: 'var(--feature-wallet-decorative)',
-            'dark-variant': 'var(--feature-wallet-dark-variant)',
-          },
-          pet: {
-            primary: 'var(--feature-pet-primary)',
-            'on-primary': 'var(--feature-pet-on-primary)',
-            hover: 'var(--feature-pet-primary-hover)',
-            pressed: 'var(--feature-pet-primary-pressed)',
-            accent: 'var(--feature-pet-accent)',
-            'soft-bg': 'var(--feature-pet-soft-bg)',
-            border: 'var(--feature-pet-border)',
-            decorative: 'var(--feature-pet-decorative)',
-            'dark-variant': 'var(--feature-pet-dark-variant)',
-          },
+        lime: {
+          DEFAULT: '#D1FF3B',
+          light:   '#E8FF7A',
+          dark:    '#B8E600',
+          glow:    'rgba(209, 255, 59, 0.40)',
+          'glow-sm': 'rgba(209, 255, 59, 0.20)',
+          surface: 'rgba(209, 255, 59, 0.08)',
+          soft:    'rgba(209, 255, 59, 0.06)',
+          text:    '#111111',
         },
 
-        theme: {
-          primary: 'var(--theme-primary)',
-          'on-primary': 'var(--theme-on-primary)',
-          accent: 'var(--theme-accent)',
-          'soft-bg': 'var(--theme-soft-bg)',
-          border: 'var(--theme-border)',
-          decoration: 'var(--theme-decoration)',
+        /* ── LIFE DIMENSIONS ACCENTS ────────────────────────── */
+        work:       '#D1FF3B',  /* Pilo Lime */
+        learning:   '#5BE89C',  /* Mint */
+        social:     '#FF7EAD',  /* Coral Pink */
+        passion:   '#A78BFA',  /* Purple */
+        wellbeing: '#FBBF24',  /* Gold */
+
+        /* ── SURFACE BLACK — Pilo Signature Cards ──────────── */
+        'surface-black': '#111111',
+        'surface-dark': '#0D0D0D',
+
+        /* ── SEMANTIC COLORS ───────────────────────────────── */
+        success: {
+          DEFAULT: '#22C55E',
+          surface: 'rgba(34, 197, 94, 0.12)',
+        },
+        warning: {
+          DEFAULT: '#F59E0B',
+          surface: 'rgba(245, 158, 11, 0.12)',
+        },
+        error: {
+          DEFAULT: '#EF4444',
+          surface: 'rgba(239, 68, 68, 0.12)',
+        },
+        info: {
+          DEFAULT: '#3B82F6',
+          surface: 'rgba(59, 130, 246, 0.12)',
         },
 
-        state: {
-          hover: 'var(--state-hover-bg)',
-          pressed: 'var(--state-pressed-shadow)',
-          disabled: 'var(--state-disabled-bg)',
-          error: 'var(--state-error)',
-          success: 'var(--state-success)',
-          warning: 'var(--state-warning)',
-          info: 'var(--state-info)',
-        },
-
+        /* ── SURFACE TOKENS ───────────────────────────────── */
         surface: {
-          bg: 'var(--semantic-bg)',
-          'surface-2': 'var(--semantic-surface-2)',
-          'surface-1': 'var(--semantic-surface-1)',
-          elevated: 'var(--semantic-panel)',
+          0: 'var(--surface-0)',
+          1: 'var(--surface-1)',
+          2: 'var(--surface-2)',
+          3: 'var(--surface-3)',
+          4: 'var(--surface-4)',
+        },
+
+        /* ── TEXT TOKENS ──────────────────────────────────── */
+        text: {
+          primary:     'var(--text-primary)',
+          secondary:   'var(--text-secondary)',
+          muted:       'var(--text-muted)',
+          disabled:    'var(--text-disabled)',
+          inverse:     'var(--text-inverse)',
+        },
+
+        /* ── BORDER TOKENS ───────────────────────────────── */
+        border: {
+          subtle: 'var(--border-subtle)',
+          mid:    'var(--border-mid)',
+          strong: 'var(--border-strong)',
+        },
+
+        /* ── CHART COLORS ─────────────────────────────────── */
+        chart: {
+          1: '#D1FF3B',
+          2: '#5BE89C',
+          3: '#FF7EAD',
+          4: '#A78BFA',
+          5: '#FBBF24',
         },
       },
-      
-      /* ── Dark Mode Surfaces ─────────────────────────────────── */
-      dark: {
-        bg: '#0D1117',  // Modern fintech dark
-        surface2: '#161B22',
-        surface1: '#21262D',
-        elevated: '#30363D',
-      },
-      light: {
-        bg:       '#FAFBFC',
-        surface2: '#F0F2F5',
-        surface1: '#FFFFFF',
-        elevated: '#FFFFFF',
-      },
-      
-      /* ============================================================
-       * BOX SHADOWS — Soft/Blurry (v2.0)
-       * ============================================================
-       * Updated from sharp brutalist to soft modern shadows
-       */
+
+      /* ── SHADOWS — Pilo Soft Depth ──────────────────────────── */
       boxShadow: {
-        /* Small — buttons, inputs */
-        'soft-sm':  '0 2px 8px rgba(13, 17, 23, 0.08)',
-        /* Medium — cards, small containers */
-        'soft-md':  '0 4px 16px rgba(13, 17, 23, 0.12)',
-        /* Large — major cards, modals */
-        'soft-lg':  '0 8px 32px rgba(13, 17, 23, 0.16)',
-        /* XL — elevated modals, dropdowns */
-        'soft-xl':  '0 16px 48px rgba(13, 17, 23, 0.20)',
+        /* Pilo Light Shadows */
+        'xs':      '0 1px 2px rgba(17, 17, 17, 0.04)',
+        'sm':      '0 2px 8px rgba(17, 17, 17, 0.06)',
+        'md':      '0 4px 16px rgba(17, 17, 17, 0.08)',
+        'lg':      '0 8px 32px rgba(17, 17, 17, 0.10)',
+        'xl':      '0 16px 48px rgba(17, 17, 17, 0.12)',
         
-        /* Feature glow variants */
-        'glow-brand':     '0 0 24px rgba(170, 255, 18, 0.30)',
-        'glow-dating':     '0 0 24px rgba(255, 107, 129, 0.30)',
-        'glow-events':     '0 0 24px rgba(255, 210, 77, 0.30)',
-        'glow-community':  '0 0 24px rgba(92, 195, 255, 0.30)',
-        'glow-marketplace':'0 0 24px rgba(170, 255, 18, 0.30)',
-        'glow-ai':        '0 0 24px rgba(138, 76, 255, 0.30)',
-        'glow-wallet':    '0 0 24px rgba(214, 69, 62, 0.30)',
-        'glow-pet':       '0 0 24px rgba(159, 216, 168, 0.30)',
+        /* Card Shadows */
+        'card':    '0 4px 20px rgba(17, 17, 17, 0.08)',
+        'lifted':  '0 12px 40px rgba(17, 17, 17, 0.12)',
+        'float':   '0 20px 60px rgba(17, 17, 17, 0.14)',
+        'nav':     '0 8px 32px rgba(17, 17, 17, 0.10)',
+
+        /* Pilo Glow */
+        'pilo':    '0 0 28px rgba(209, 255, 59, 0.40)',
+        'pilo-sm': '0 0 16px rgba(209, 255, 59, 0.20)',
+        'pilo-lg': '0 0 48px rgba(209, 255, 59, 0.50)',
+
+        /* Dark Shadows */
+        'dark-sm': '0 4px 12px rgba(0, 0, 0, 0.3)',
+        'dark-md': '0 8px 24px rgba(0, 0, 0, 0.35)',
+        'dark-lg': '0 16px 48px rgba(0, 0, 0, 0.40)',
       },
-      
-      /* ============================================================
-       * BORDER WIDTHS
-       * ============================================================ */
-      borderWidth: {
-        '0':  '0',
-        '1':  '1px',
-        '2':  '2px',
-        '3':  '3px',
-        '4':  '4px',
-      },
-      
-      /* ============================================================
-       * RADIUS — Modern fintech (larger rounded corners)
-       * ============================================================ */
+
+      /* ── BORDER RADIUS — Pilo Extreme Rounded ──────────────── */
       borderRadius: {
-        'sm':  '8px',
-        'md':  '12px',
-        'lg':  '16px',
-        'xl':  '24px',
-        '2xl': '32px',
-        '3xl': '40px',
-        'full': '9999px',  // Full pill
+        'xs':   '8px',
+        'sm':   '12px',
+        'md':   '16px',
+        'lg':   '24px',
+        'xl':   '32px',
+        '2xl':  '40px',
+        'pill': '9999px',
+        'card': '28px',
+        'nav':  '32px',
+        'full': '9999px',
       },
-      
-      /* ============================================================
-       * TYPOGRAPHY — Brand Fonts
-       * ============================================================ */
+
+      /* ── FONT FAMILIES ─────────────────────────────────────── */
       fontFamily: {
-        sans: ['"Space Grotesk"', 'sans-serif'],
-        kanit: ['Kanit', 'sans-serif'],
+        sans:     ['Space Grotesk', 'Prompt', 'system-ui', 'sans-serif'],
+        mono:     ['JetBrains Mono', 'monospace'],
+        kanit:    ['Prompt', 'sans-serif'],
+        display:  ['Space Grotesk', 'system-ui'],
       },
-      
-      /* ============================================================
-       * TRANSITIONS — Smooth Modern Easing
-       * ============================================================ */
-      transitionDuration: {
-        'fast':   '150ms',
-        'normal': '200ms',
-        'slow':   '250ms',
-        'slower': '350ms',
-      },
-      
+
+      /* ── ANIMATION TIMING ───────────────────────────────────── */
       transitionTimingFunction: {
-        'retro':    'cubic-bezier(0.22, 1, 0.36, 1)',
-        'smooth':   'cubic-bezier(0.4, 0, 0.2, 1)',
-        'bounce':   'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        'smooth':  'cubic-bezier(0.22, 1, 0.36, 1)',
+        'spring':  'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'out':     'cubic-bezier(0, 0, 0.2, 1)',
+        'in':      'cubic-bezier(0.4, 0, 1, 1)',
       },
-      
-      /* ============================================================
-       * ANIMATION — Keyframes for micro-interactions
-       * ============================================================ */
+
+      transitionDuration: {
+        'instant': '50ms',
+        'fast':    '100ms',
+        'normal':  '200ms',
+        'slow':    '300ms',
+        'slower':  '400ms',
+        'slowest': '600ms',
+      },
+
+      /* ── ANIMATIONS ────────────────────────────────────────── */
       animation: {
-        'press':      'press 150ms cubic-bezier(0.22, 1, 0.36, 1)',
-        'bounce-in':  'bounce-in 350ms cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-        'fade-in':    'fade-in 200ms ease-out',
-        'slide-up':   'slide-up 250ms cubic-bezier(0.22, 1, 0.36, 1)',
+        /* Entrance */
+        'fade-up':       'fadeUp 300ms cubic-bezier(0.22, 1, 0.36, 1) both',
+        'fade-in':       'fadeIn 200ms cubic-bezier(0, 0, 0.2, 1) both',
+        'scale-in':      'scaleIn 200ms cubic-bezier(0.34, 1.56, 0.64, 1) both',
+        'slide-up':      'slideUp 300ms cubic-bezier(0.22, 1, 0.36, 1) both',
+        'slide-down':    'slideDown 200ms cubic-bezier(0, 0, 0.2, 1) both',
+        'slide-right':   'slideRight 200ms cubic-bezier(0.22, 1, 0.36, 1) both',
+
+        /* Loop */
+        'pulse-soft':    'pulseSoft 2.5s ease-in-out infinite',
+        'pulse-glow':    'pulseGlow 2s ease-in-out infinite',
+        'float':         'float 4s ease-in-out infinite',
+        'float-slow':    'floatSlow 6s ease-in-out infinite',
+        'spin':          'spin 1s linear infinite',
+        'shimmer':       'shimmer 1.5s ease-in-out infinite',
       },
+
       keyframes: {
-        press: {
-          '0%':   { transform: 'translateY(0)' },
-          '100%': { transform: 'translateY(1px) scale(0.98)' },
+        fadeUp: {
+          from: { opacity: '0', transform: 'translateY(20px)' },
+          to:   { opacity: '1', transform: 'translateY(0)' },
         },
-        'bounce-in': {
-          '0%':   { transform: 'scale(0.9)', opacity: '0' },
-          '50%':  { transform: 'scale(1.02)' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
+        fadeIn: {
+          from: { opacity: '0' },
+          to:   { opacity: '1' },
         },
-        'fade-in': {
-          '0%':   { opacity: '0' },
-          '100%': { opacity: '1' },
+        scaleIn: {
+          from: { opacity: '0', transform: 'scale(0.92)' },
+          to:   { opacity: '1', transform: 'scale(1)' },
         },
-        'slide-up': {
-          '0%':   { transform: 'translateY(8px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+        slideUp: {
+          from: { opacity: '0', transform: 'translateY(100%)' },
+          to:   { opacity: '1', transform: 'translateY(0)' },
         },
+        slideDown: {
+          from: { opacity: '0', transform: 'translateY(-20px)' },
+          to:   { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideRight: {
+          from: { opacity: '0', transform: 'translateX(24px)' },
+          to:   { opacity: '1', transform: 'translateX(0)' },
+        },
+        pulseSoft: {
+          '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+          '50%':      { opacity: '0.7', transform: 'scale(0.95)' },
+        },
+        pulseGlow: {
+          '0%, 100%': { opacity: '1', boxShadow: '0 0 20px rgba(209, 255, 59, 0.20)' },
+          '50%':      { opacity: '0.85', boxShadow: '0 0 40px rgba(209, 255, 59, 0.40)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%':      { transform: 'translateY(-10px)' },
+        },
+        floatSlow: {
+          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+          '50%':      { transform: 'translateY(-15px) rotate(3deg)' },
+        },
+        shimmer: {
+          '0%':   { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
+        spin: {
+          from: { transform: 'rotate(0deg)' },
+          to:   { transform: 'rotate(360deg)' },
+        },
+      },
+
+      /* ── SPACING ────────────────────────────────────────────── */
+      spacing: {
+        '18': '4.5rem',
+        '22': '5.5rem',
+      },
+
+      /* ── Z-INDEX ────────────────────────────────────────────── */
+      zIndex: {
+        'base':     '0',
+        'dropdown': '10',
+        'sticky':   '20',
+        'overlay':  '30',
+        'modal':    '40',
+        'popover':  '50',
+        'tooltip':  '60',
+        'toast':    '70',
       },
     },
   },
-  
   plugins: [],
 }

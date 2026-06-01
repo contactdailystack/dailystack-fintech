@@ -1,11 +1,25 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/design-tokens.css'
-import './styles/theme.css' // มั่นใจว่าชี้มาที่นี่ที่เดียว ห้ามมี import './index.css' หรือ App.css หลงเหลืออยู่ครับ
+import './styles/animations.css'
 import App from './App.tsx'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+async function bootstrap() {
+  // MSW temporarily disabled for debugging
+  // if (import.meta.env.DEV) {
+  //   try {
+  //     const { worker } = await import('./mocks/browser');
+  //     await worker.start({ onUnhandledRequest: 'bypass' });
+  //   } catch (err) {
+  //     console.warn('MSW worker failed to start, continuing without mocks', err);
+  //   }
+  // }
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  )
+}
+
+bootstrap();

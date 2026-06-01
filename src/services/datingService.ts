@@ -589,6 +589,61 @@ export const MatchService = {
 
     return !error;
   },
+
+  /**
+   * Subscribe to new matches (real-time)
+   */
+  subscribeToMatches(callback: (match: Match) => void): () => void {
+    const channel = supabase
+      .channel('matches-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'matches',
+        },
+        async (payload) => {
+          const matchData = payload.new as any;
+          
+          // Get partner info
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+          
+          const partnerId = matchData.user1_id === user.id 
+            ? matchData.user2_id 
+            : matchData.user1_id;
+          
+          const { data: partner } = await supabase
+            .from('users')
+            .select('id, display_name, nickname, avatar_url, dating_photos, interests, bio, age, location')
+            .eq('id', partnerId)
+            .single();
+          
+          if (partner) {
+            callback({
+              id: matchData.id,
+              userId: user.id,
+              partnerId: partner.id,
+              partnerName: partner.display_name || partner.nickname || 'Anonymous',
+              partnerAvatar: partner.avatar_url || '',
+              compatibilityScore: matchData.compatibility_score || 0,
+              isUltraMatch: matchData.is_ultra_match || false,
+              lastMessage: undefined,
+              lastMessageTime: undefined,
+              unreadCount: 0,
+              hasConversation: matchData.has_conversation || false,
+              createdAt: new Date(matchData.created_at),
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  },
 };
 
 // =====================================================

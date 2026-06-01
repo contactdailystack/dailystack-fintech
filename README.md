@@ -71,3 +71,38 @@ export default defineConfig([
   },
 ])
 ```
+
+---
+
+## Cloudflare Pages Deployment
+
+### Setup
+
+1. Connect your GitHub repository to Cloudflare Pages:
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) → Pages → Create a project
+   - Select `Pick-Kotchakorn/dailystack-ecosystem` as the GitHub repo
+   - Set **Production branch** to `main`
+
+2. Configure build settings:
+   - **Build command:** `npm run build`
+   - **Build output directory:** `dist`
+
+3. Deploy by pushing to the `main` branch, or manually via the Cloudflare Pages dashboard.
+
+### Configuration Files
+
+- `wrangler.toml` — Cloudflare Pages configuration (already committed in this repo)
+- `vite.config.ts` — No changes needed for Cloudflare Pages; PWA plugin is compatible
+
+### Environment Variables
+
+Set the following in Cloudflare Pages dashboard → Settings → Environment variables:
+
+| Variable | Description |
+|---|---|
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
+
+### PWA Icons
+
+Ensure PWA icon files under `public/assets/logos/` have correct extensions (`.png`, not `.png.png`) before deploying.

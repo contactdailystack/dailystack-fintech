@@ -1,0 +1,1778 @@
+/**
+ * ================================================================
+ * DailyStack — Pilo Design System v9.0
+ * ================================================================
+ * Premium Mobile-first Design System
+ * Inspired by Pilo Autonomous Taxi App Aesthetic
+ * 
+ * Design Philosophy:
+ * - High Contrast Minimalism (60-30-10 Rule)
+ * - Tech-forward with Trust
+ * - Clean, Bold, Autonomous
+ * 
+ * ═══════════════════════════════════════════════════════════════
+ * PILO OFFICIAL COLOR SYSTEM
+ * ═══════════════════════════════════════════════════════════════
+ * 
+ * Color Usage Rules (from Pilo):
+ * - ON LIME background: All text = BLACK (#111111)
+ * - ON BLACK/CHARCOAL background: Title = WHITE, labels = muted gray
+ * - ON WHITE background: Title = BLACK, labels = light gray
+ * - LIME = accent only — use sparingly (5-10%)
+ * 
+ * Pilo Colors:
+ * - PILO BLACK: #0F0F0F (Primary dark)
+ * - LIME GREEN: #C7FF2E (Accent)
+ * - PURE WHITE: #FFFFFF (Light bg)
+ * - CHARCOAL: #2E2E2E (Dark card)
+ * - MID GRAY: #808080 (Secondary text)
+ */
+
+/* ================================================================
+ * CSS CUSTOM PROPERTIES — Pilo Design Tokens
+ * ================================================================ */
+
+/* ═══════════════════════════════════════════════════════════════
+ * PILO COLOR SYSTEM — Light Mode (Default)
+ * Clean, Premium, High Contrast
+ * ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* ── PILO ACCENT ─ Primary Brand Color ─────────────────────── */
+  /* Used sparingly: 5-10% of screen (Rule of 10%) */
+  /* Official Pilo Lime: #C7FF2E */
+  --pilo: #C7FF2E;
+  --pilo-light: #D4FF5C;
+  --pilo-dark: #B3E600;
+  --pilo-muted: rgba(199, 255, 46, 0.15);
+  --pilo-surface: rgba(199, 255, 46, 0.08);
+  --pilo-glow: rgba(199, 255, 46, 0.40);
+  --pilo-glow-sm: rgba(199, 255, 46, 0.20);
+  --pilo-text: #111111;
+
+  /* ── ACCENT ALIASES ─────────────────────────────────────────── */
+  --neon: var(--pilo);
+  --neon-light: var(--pilo-light);
+  --neon-dark: var(--pilo-dark);
+  --neon-glow: var(--pilo-glow);
+  --neon-glow-sm: var(--pilo-glow-sm);
+  --neon-surface: var(--pilo-surface);
+  --neon-text: var(--pilo-text);
+
+  --lime: var(--pilo);
+  --lime-light: var(--pilo-light);
+  --lime-dark: var(--pilo-dark);
+  --lime-glow: var(--pilo-glow);
+  --lime-glow-sm: var(--pilo-glow-sm);
+  --lime-surface: var(--pilo-surface);
+  --lime-soft: rgba(199, 255, 46, 0.06);
+  --lime-text: var(--pilo-text);
+
+  --accent: var(--pilo);
+  --accent-dark: var(--pilo-dark);
+  --accent-surface: var(--pilo-surface);
+  --accent-surface-strong: rgba(199, 255, 46, 0.15);
+  --accent-glow: var(--pilo-glow);
+  --accent-glow-sm: var(--pilo-glow-sm);
+  --accent-text: var(--pilo-text);
+  --accent-muted: rgba(17, 17, 17, 0.75);
+
+  /* ── FOUNDATION — Backgrounds (Pilo Light) ─────────────────── */
+  /* 60% of screen — clean, premium white space */
+  --bg-base: #FFFFFF;
+  --bg-elevated: #F5F5F5; /* Pilo Light Gray */
+  --bg-card: #FFFFFF;
+  --bg-overlay: rgba(255, 255, 255, 0.96);
+  --bg-deep: #F0F0F0;
+  --bg-glass: rgba(255, 255, 255, 0.88);
+
+  /* Surface elevation system */
+  --surface-0: #FFFFFF;
+  --surface-1: #FFFFFF;
+  --surface-2: #F8F8F8;
+  --surface-3: #F2F2F2;
+  --surface-4: #EBEBEB;
+
+  /* Legacy surface aliases */
+  --surface-bg: #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-input: #F5F5F5;
+  --surface-elevated: #FFFFFF;
+
+  /* ── PILO BLACK & CHARCOAL ─ Pilo Signature Colors ──────────── */
+  /* Official Pilo Colors */
+  --pilo-black: #0F0F0F;
+  --pilo-charcoal: #2E2E2E;
+  --pilo-mid-gray: #808080;
+  
+  /* Legacy aliases for backwards compatibility */
+  --surface-black: var(--pilo-black);
+  --surface-black-soft: #1A1A1A;
+  --surface-charcoal: var(--pilo-charcoal);
+  --surface-dark: #0D0D0D;
+
+  /* ── TYPOGRAPHY — High Contrast ────────────────────────────── */
+  /* 30% of screen — clear hierarchy */
+  --text-primary: #111111;
+  --text-secondary: #6B6B6B;
+  --text-muted: #9A9A9A;
+  --text-disabled: #C4C4C4;
+  --text-inverse: #FFFFFF;
+
+  /* ── BORDER SYSTEM — Subtle Definition ─────────────────────── */
+  --border-subtle: rgba(17, 17, 17, 0.06);
+  --border-mid: rgba(17, 17, 17, 0.10);
+  --border-strong: rgba(17, 17, 17, 0.16);
+  --border: rgba(17, 17, 17, 0.08);
+  --border-inverse: rgba(255, 255, 255, 0.10);
+
+  /* ── SHADOW SYSTEM — Soft Depth ───────────────────────────── */
+  /* Pilo-style floating shadows */
+  --shadow-xs: 0 1px 2px rgba(17, 17, 17, 0.04);
+  --shadow-sm: 0 2px 8px rgba(17, 17, 17, 0.06);
+  --shadow-md: 0 4px 16px rgba(17, 17, 17, 0.08);
+  --shadow-lg: 0 8px 32px rgba(17, 17, 17, 0.10);
+  --shadow-xl: 0 16px 48px rgba(17, 17, 17, 0.12);
+  --shadow-card: 0 4px 20px rgba(17, 17, 17, 0.08);
+  --shadow-lifted: 0 12px 40px rgba(17, 17, 17, 0.12);
+  --shadow-float: 0 20px 60px rgba(17, 17, 17, 0.14);
+  --shadow-nav: 0 8px 32px rgba(17, 17, 17, 0.10);
+  
+  /* Pilo-style dark card shadows */
+  --shadow-dark-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-dark-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-dark-lg: 0 16px 48px rgba(0, 0, 0, 0.40);
+
+  /* ── RADIUS SYSTEM — Pilo Rounded ─────────────────────────── */
+  /* Extreme rounded corners for friendly, futuristic feel */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-2xl: 40px;
+  --radius-pill: 9999px;
+  --radius-card: 28px;
+  --radius-nav: 32px;
+  --radius-full: 9999px;
+
+  /* ── TYPOGRAPHY SCALE ──────────────────────────────────────── */
+  --font-heading: 'Space Grotesk', 'Prompt', system-ui, sans-serif;
+  --font-body: 'Space Grotesk', 'Prompt', system-ui, sans-serif;
+  --font-thai: 'Prompt', 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font: 'Space Grotesk', 'Prompt', system-ui, sans-serif;
+
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.8125rem;    /* 13px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.25rem;     /* 36px */
+  --text-5xl: 3rem;        /* 48px */
+
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+
+  /* ── ANIMATION ─────────────────────────────────────────────── */
+  --duration-instant: 50ms;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
+  --duration-slowest: 600ms;
+
+  --ease-linear: linear;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── SPACING ───────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Z-INDEX SYSTEM ───────────────────────────────────────── */
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-popover: 50;
+  --z-tooltip: 60;
+  --z-toast: 70;
+
+  /* ── SAFE AREAS ────────────────────────────────────────────── */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* ── LIFE DIMENSIONS ACCENTS ──────────────────────────────── */
+  /* Each dimension gets subtle differentiation */
+  --accent-work: #D1FF3B;
+  --accent-learning: #5BE89C;
+  --accent-social: #FF7EAD;
+  --accent-passion: #A78BFA;
+  --accent-wellbeing: #FBBF24;
+
+  /* ── SEMANTIC COLORS ───────────────────────────────────────── */
+  --success: #22C55E;
+  --success-surface: rgba(34, 197, 94, 0.12);
+  --warning: #F59E0B;
+  --warning-surface: rgba(245, 158, 11, 0.12);
+  --error: #EF4444;
+  --error-surface: rgba(239, 68, 68, 0.12);
+  --info: #3B82F6;
+  --info-surface: rgba(59, 130, 246, 0.12);
+
+  /* ── CHART COLORS ──────────────────────────────────────────── */
+  --chart-1: #D1FF3B;
+  --chart-2: #5BE89C;
+  --chart-3: #FF7EAD;
+  --chart-4: #A78BFA;
+  --chart-5: #FBBF24;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * DARK MODE — Pilo Dark Aesthetic
+ * Deep black backgrounds, same accent, inverted surfaces
+ * ═══════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"],
+.dark {
+  /* ── FOUNDATION — Dark Backgrounds ────────────────────────── */
+  --bg-base: #0A0A0A;
+  --bg-elevated: #111111;
+  --bg-card: #111111;
+  --bg-overlay: rgba(17, 17, 17, 0.96);
+  --bg-deep: #050505;
+  --bg-glass: rgba(17, 17, 17, 0.88);
+
+  /* Surface elevation system */
+  --surface-0: #111111;
+  --surface-1: #111111;
+  --surface-2: #161616;
+  --surface-3: #1C1C1C;
+  --surface-4: #242424;
+
+  /* Legacy surface aliases */
+  --surface-bg: #0A0A0A;
+  --surface-card: #111111;
+  --surface-input: #1C1C1C;
+  --surface-elevated: #111111;
+
+  /* ── SURFACE WHITE — Inverted accent cards ────────────────── */
+  --surface-white: #FFFFFF;
+  --surface-white-soft: #F5F5F5;
+
+  /* ── TYPOGRAPHY — Light text on dark ─────────────────────── */
+  --text-primary: #FFFFFF;
+  --text-secondary: #A3A3A3;
+  --text-muted: #737373;
+  --text-disabled: #525252;
+  --text-inverse: #111111;
+
+  /* ── BORDER SYSTEM — Subtle light borders ─────────────────── */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-mid: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-inverse: rgba(17, 17, 17, 0.10);
+
+  /* ── SHADOW SYSTEM — Dark mode depth ──────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-lifted: 0 12px 40px rgba(0, 0, 0, 0.6);
+  --shadow-float: 0 20px 60px rgba(0, 0, 0, 0.7);
+  --shadow-nav: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+  /* ── ACCENT — Same Pilo lime, adjusted glow ───────────────── */
+  --pilo-glow: rgba(209, 255, 59, 0.30);
+  --pilo-glow-sm: rgba(209, 255, 59, 0.15);
+  --pilo-surface: rgba(209, 255, 59, 0.12);
+  --neon-glow: var(--pilo-glow);
+  --neon-glow-sm: var(--pilo-glow-sm);
+  --neon-surface: var(--pilo-surface);
+  --lime-glow: var(--pilo-glow);
+  --lime-glow-sm: var(--pilo-glow-sm);
+  --lime-surface: var(--pilo-surface);
+  --lime-soft: rgba(209, 255, 59, 0.08);
+  --accent-glow: var(--pilo-glow);
+  --accent-glow-sm: var(--pilo-glow-sm);
+  --accent-surface: var(--pilo-surface);
+  --accent-surface-strong: rgba(209, 255, 59, 0.20);
+}
+
+/* ================================================================
+ * BASE STYLES
+ * ================================================================ */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: var(--text-base);
+    line-height: 1.5;
+    min-height: 100dvh;
+    transition: background-color var(--duration-normal) var(--ease-out),
+                color var(--duration-normal) var(--ease-out);
+  }
+
+  img, video { 
+    max-width: 100%; 
+    height: auto; 
+    display: block; 
+  }
+  
+  button { 
+    cursor: pointer; 
+    font-family: inherit; 
+    border: none; 
+    background: none; 
+  }
+  
+  input, textarea, select { 
+    font-family: inherit; 
+    font-size: inherit; 
+  }
+  
+  a { 
+    color: inherit; 
+    text-decoration: none; 
+  }
+
+  ::selection {
+    background: var(--pilo);
+    color: var(--pilo-text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--pilo);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ================================================================
+ * PILO COMPONENT SYSTEM
+ * ================================================================ */
+@layer components {
+  
+  /* ── PHONE FRAME ─────────────────────────────────────────────── */
+  .phone-frame {
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: var(--bg-base);
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .screen {
+    padding-left: var(--space-5);
+    padding-right: var(--space-5);
+    padding-top: calc(var(--safe-top) + var(--space-6));
+    padding-bottom: calc(var(--safe-bottom) + 100px);
+  }
+
+  /* ── PILO BUTTONS ───────────────────────────────────────────── */
+  
+  /* Primary Button — Full Pilo accent, pill shape */
+  .ds-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 52px;
+    padding: 14px 28px;
+    font-family: inherit;
+    font-weight: var(--font-bold);
+    font-size: var(--text-base);
+    border-radius: var(--radius-pill);
+    border: none;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-smooth);
+    letter-spacing: -0.01em;
+  }
+
+  .ds-btn:active {
+    transform: scale(0.97);
+  }
+
+  .ds-btn-full { 
+    width: 100%; 
+  }
+
+  .ds-btn-primary {
+    background: var(--pilo);
+    color: var(--pilo-text);
+    box-shadow: 0 4px 16px var(--pilo-glow-sm);
+  }
+
+  .ds-btn-primary:hover {
+    background: var(--pilo-light);
+    box-shadow: 0 8px 24px var(--pilo-glow);
+    transform: translateY(-2px);
+  }
+
+  .ds-btn-primary:active {
+    transform: scale(0.97) translateY(0);
+  }
+
+  .ds-btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Secondary Button — Outlined pill */
+  .ds-btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1.5px solid var(--border-strong);
+  }
+
+  .ds-btn-secondary:hover {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+  }
+
+  .ds-btn-secondary:active {
+    transform: scale(0.97);
+  }
+
+  /* Ghost Button — Minimal interaction */
+  .ds-btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+  }
+
+  .ds-btn-ghost:hover {
+    color: var(--text-primary);
+    background: var(--surface-2);
+  }
+
+  /* Icon Button — Circular tap target */
+  .ds-btn-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: transparent;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all var(--duration-fast) var(--ease-smooth);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .ds-btn-icon:hover {
+    background: var(--surface-2);
+    color: var(--text-primary);
+  }
+
+  .ds-btn-icon:active {
+    transform: scale(0.92);
+  }
+
+  .ds-btn-icon-lg {
+    width: 56px;
+    height: 56px;
+  }
+
+  .ds-btn-icon-sm {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* ── PILO CARDS ─────────────────────────────────────────────── */
+
+  /* Base Card — Clean white/dark surface */
+  .ds-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    padding: var(--space-6);
+    transition: all var(--duration-normal) var(--ease-smooth);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Elevated Card — More prominence */
+  .ds-card-elevated {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-card);
+    transition: all var(--duration-normal) var(--ease-smooth);
+    cursor: pointer;
+  }
+
+  .ds-card-elevated:hover {
+    box-shadow: var(--shadow-lifted);
+    border-color: var(--border-mid);
+    transform: translateY(-2px);
+  }
+
+  /* Pilo Dark Card — High contrast accent card */
+  .ds-card-dark {
+    background: var(--surface-black);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-card);
+    padding: var(--space-6);
+    color: #FFFFFF;
+    box-shadow: var(--shadow-dark-md);
+  }
+
+  .ds-card-dark h1,
+  .ds-card-dark h2,
+  .ds-card-dark h3,
+  .ds-card-dark h4,
+  .ds-card-dark p,
+  .ds-card-dark span,
+  .ds-card-dark div {
+    color: #FFFFFF;
+  }
+
+  .ds-card-dark .text-secondary {
+    color: #A3A3A3 !important;
+  }
+
+  .ds-card-dark .text-muted {
+    color: #737373 !important;
+  }
+
+  /* Pilo Glow Card — Subtle accent glow */
+  .ds-card-glow {
+    background: var(--bg-card);
+    border: 1px solid rgba(209, 255, 59, 0.15);
+    border-radius: var(--radius-card);
+    padding: var(--space-6);
+    box-shadow: 0 8px 32px rgba(209, 255, 59, 0.08), var(--shadow-card);
+    transition: all var(--duration-normal) var(--ease-smooth);
+  }
+
+  .ds-card-glow:hover {
+    border-color: rgba(209, 255, 59, 0.25);
+    box-shadow: 0 12px 40px rgba(209, 255, 59, 0.12), var(--shadow-lifted);
+  }
+
+  /* Glass Card — Frosted overlay */
+  .ds-glass-card {
+    background: var(--bg-glass);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ── PILO INPUTS ────────────────────────────────────────────── */
+
+  .ds-input {
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 20px;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    transition: all var(--duration-fast) var(--ease-out);
+    outline: none;
+  }
+
+  .ds-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .ds-input:focus {
+    border-color: var(--pilo);
+    background: var(--surface-1);
+    box-shadow: 0 0 0 4px var(--pilo-glow-sm);
+  }
+
+  .ds-input-error {
+    border-color: var(--error);
+  }
+
+  .ds-input-error:focus {
+    border-color: var(--error);
+    box-shadow: 0 0 0 4px var(--error-surface);
+  }
+
+  /* ── PILO BADGES ────────────────────────────────────────────── */
+
+  .ds-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .ds-badge-pilo {
+    background: var(--pilo-surface);
+    border: 1px solid rgba(209, 255, 59, 0.25);
+    color: var(--pilo-text);
+  }
+
+  .ds-badge-dark {
+    background: var(--surface-3);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+  }
+
+  .ds-badge-muted {
+    background: var(--surface-4);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+  }
+
+  .ds-badge-success {
+    background: var(--success-surface);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    color: var(--success);
+  }
+
+  .ds-badge-warning {
+    background: var(--warning-surface);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: var(--warning);
+  }
+
+  .ds-badge-error {
+    background: var(--error-surface);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: var(--error);
+  }
+
+  /* ── PILO NAVIGATION ────────────────────────────────────────── */
+
+  /* Floating Bottom Nav — Pilo minimal style */
+  .ds-bottom-nav {
+    position: fixed;
+    bottom: calc(var(--safe-bottom) + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 390px;
+    padding: 10px 16px;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-nav);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: var(--space-2);
+    z-index: var(--z-sticky);
+  }
+
+  .ds-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 8px 12px;
+    min-width: 52px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
+    transition: all var(--duration-fast) var(--ease-smooth);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    outline: none;
+    border-radius: var(--radius-md);
+  }
+
+  .ds-nav-item .material-symbols-outlined {
+    font-size: 22px !important;
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    transition: all var(--duration-fast) var(--ease-smooth);
+  }
+
+  .ds-nav-item:hover {
+    color: var(--text-secondary);
+  }
+
+  .ds-nav-item.active {
+    color: var(--pilo);
+  }
+
+  .ds-nav-item.active .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    transform: scale(1.08);
+  }
+
+  /* Part Navigation Pills — Horizontal scroll */
+  .ds-part-nav {
+    display: flex;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ds-part-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ds-part-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 10px 18px;
+    white-space: nowrap;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    transition: all var(--duration-fast) var(--ease-smooth);
+    cursor: pointer;
+    border: none;
+    flex-shrink: 0;
+  }
+
+  .ds-part-pill:hover {
+    color: var(--text-primary);
+    background: var(--surface-3);
+  }
+
+  .ds-part-pill.active {
+    color: var(--pilo-text);
+    font-weight: 700;
+    background: var(--pilo);
+    box-shadow: 0 2px 8px var(--pilo-glow-sm);
+  }
+
+  /* ── PILO PROGRESS ─────────────────────────────────────────── */
+
+  .ds-progress-ring {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ds-progress-ring svg {
+    transform: rotate(-90deg);
+  }
+
+  .ds-progress-ring-track {
+    fill: none;
+    stroke: var(--surface-3);
+    stroke-width: 6;
+  }
+
+  .ds-progress-ring-fill {
+    fill: none;
+    stroke: var(--pilo);
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s var(--ease-smooth);
+    filter: drop-shadow(0 0 8px var(--pilo-glow));
+  }
+
+  .ds-progress-ring-text {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .ds-progress-bar-track {
+    width: 100%;
+    height: 8px;
+    background: var(--surface-3);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+  }
+
+  .ds-progress-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background: var(--pilo);
+    transition: width var(--duration-slow) var(--ease-smooth);
+    box-shadow: 0 0 12px var(--pilo-glow-sm);
+  }
+
+  /* ── PILO GOAL CARDS ────────────────────────────────────────── */
+
+  .ds-goal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    transition: all var(--duration-normal) var(--ease-smooth);
+    cursor: pointer;
+  }
+
+  .ds-goal-card:hover {
+    border-color: var(--border-mid);
+    box-shadow: var(--shadow-lifted);
+    transform: translateY(-2px);
+  }
+
+  .ds-goal-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+  }
+
+  .ds-goal-card-action {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pilo-surface);
+    color: var(--pilo-text);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-spring);
+    flex-shrink: 0;
+    border: none;
+  }
+
+  .ds-goal-card-action:hover {
+    background: var(--pilo);
+    box-shadow: 0 4px 16px var(--pilo-glow-sm);
+    transform: scale(1.05);
+  }
+
+  .ds-goal-card-title {
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+  }
+
+  .ds-goal-card-subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .ds-goal-card-progress {
+    margin-top: var(--space-4);
+  }
+
+  /* ── PILO FAB ───────────────────────────────────────────────── */
+
+  .ds-fab {
+    position: fixed;
+    bottom: calc(var(--safe-bottom) + 90px);
+    right: var(--space-5);
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-pill);
+    background: var(--pilo);
+    color: var(--pilo-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px var(--pilo-glow);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-spring);
+    z-index: var(--z-dropdown);
+    border: none;
+    font-size: 24px;
+  }
+
+  .ds-fab:hover {
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 12px 40px var(--pilo-glow);
+  }
+
+  .ds-fab:active {
+    transform: scale(0.95);
+  }
+
+  /* ── PILO HEADER ────────────────────────────────────────────── */
+
+  .ds-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    padding: calc(var(--safe-top) + var(--space-4)) var(--space-5) var(--space-4);
+    background: transparent;
+    transition: all var(--duration-normal) var(--ease-smooth);
+  }
+
+  .ds-header.scrolled {
+    background: var(--bg-glass);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .ds-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .ds-header-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+  }
+
+  .ds-header-logo {
+    font-size: var(--text-lg);
+    font-weight: var(--font-black);
+    letter-spacing: -0.02em;
+  }
+
+  /* ── PILO STAT CARDS ───────────────────────────────────────── */
+
+  .ds-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    text-align: center;
+    transition: all var(--duration-normal) var(--ease-smooth);
+  }
+
+  .ds-stat-card:hover {
+    border-color: var(--border-mid);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .ds-stat-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .ds-stat-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: var(--space-1);
+  }
+
+  /* ── PILO SKELETON ──────────────────────────────────────────── */
+
+  .ds-skeleton {
+    background: linear-gradient(90deg, 
+      var(--surface-2) 0%, 
+      var(--surface-3) 50%, 
+      var(--surface-2) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+  }
+
+  .ds-skeleton-text {
+    height: 14px;
+    border-radius: var(--radius-xs);
+  }
+
+  .ds-skeleton-heading {
+    height: 24px;
+    border-radius: var(--radius-sm);
+  }
+
+  .ds-skeleton-circle {
+    border-radius: var(--radius-full);
+  }
+
+  /* ── PILO SPINNER ───────────────────────────────────────────── */
+
+  .ds-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--pilo-surface);
+    border-top-color: var(--pilo);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .ds-spinner-lg {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+  }
+
+  .ds-spinner-sm {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+  }
+
+  /* ── PILO STATUS ───────────────────────────────────────────── */
+
+  .ds-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .ds-status-dot-success { background: var(--success); }
+  .ds-status-dot-warning { background: var(--warning); }
+  .ds-status-dot-error { background: var(--error); }
+  .ds-status-dot-pilo { background: var(--pilo); }
+
+  .ds-status-dot.pulse {
+    animation: pulseSoft 2s ease-in-out infinite;
+  }
+
+  /* ── PILO ORBS ──────────────────────────────────────────────── */
+
+  .ds-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .ds-orb-pilo {
+    background: radial-gradient(circle, var(--pilo) 0%, transparent 70%);
+    opacity: 0.06;
+  }
+
+  .ds-orb-sm { width: 300px; height: 300px; }
+  .ds-orb-md { width: 400px; height: 400px; }
+  .ds-orb-lg { width: 600px; height: 600px; }
+
+  /* ── PILO DIVIDER ───────────────────────────────────────────── */
+
+  .ds-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .ds-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+
+  .ds-divider-line-thick {
+    height: 2px;
+  }
+
+  /* ── PILO TOOLTIP ───────────────────────────────────────────── */
+
+  .ds-tooltip {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .ds-tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-black);
+    color: #FFFFFF;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--duration-fast) var(--ease-out);
+    z-index: var(--z-tooltip);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .ds-tooltip:hover .ds-tooltip-content {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ── PILO EMPTY STATE ───────────────────────────────────────── */
+
+  .ds-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-10) var(--space-5);
+    text-align: center;
+  }
+
+  .ds-empty-icon {
+    font-size: 48px;
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+  }
+
+  .ds-empty-title {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  .ds-empty-desc {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    max-width: 280px;
+    margin-bottom: var(--space-5);
+  }
+
+  /* ── BENTO GRID ─────────────────────────────────────────────── */
+
+  .ds-bento-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .ds-bento-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ds-bento-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .ds-bento-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    transition: all var(--duration-normal) var(--ease-smooth);
+  }
+
+  .ds-bento-item:hover {
+    border-color: var(--border-mid);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ── LANGUAGE TOGGLE ────────────────────────────────────────── */
+
+  .ds-lang-toggle {
+    display: flex;
+    gap: var(--space-1);
+    padding: 4px;
+    background: var(--surface-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+  }
+
+  .ds-lang-btn {
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-smooth);
+    color: var(--text-muted);
+    background: transparent;
+  }
+
+  .ds-lang-btn.active {
+    background: var(--pilo);
+    color: var(--pilo-text);
+  }
+
+  .ds-lang-btn:not(.active):hover {
+    color: var(--text-primary);
+  }
+
+  /* ── OTP INPUT ──────────────────────────────────────────────── */
+
+  .ds-otp-container {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+  }
+
+  .ds-otp-cell {
+    width: 48px;
+    height: 56px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    transition: all var(--duration-fast) var(--ease-out);
+    outline: none;
+  }
+
+  .ds-otp-cell:focus {
+    border-color: var(--pilo);
+    background: var(--surface-1);
+    box-shadow: 0 0 0 4px var(--pilo-glow-sm);
+  }
+
+  /* ── MATERIAL SYMBOLS ───────────────────────────────────────── */
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+
+  /* ── HOVER EFFECTS ──────────────────────────────────────────── */
+
+  .hover-lift {
+    transition: transform var(--duration-normal) var(--ease-spring),
+                box-shadow var(--duration-normal) var(--ease-smooth);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lifted);
+  }
+
+  .hover-scale {
+    transition: transform var(--duration-fast) var(--ease-spring);
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  .hover-glow {
+    transition: box-shadow var(--duration-normal) var(--ease-smooth);
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 8px 32px var(--pilo-glow);
+  }
+}
+
+/* ================================================================
+ * PILO ANIMATIONS
+ * ================================================================ */
+@layer utilities {
+  
+  /* ── ENTRANCE ANIMATIONS ────────────────────────────────────── */
+
+  .animate-fade-up {
+    animation: fadeUp var(--duration-slow) var(--ease-smooth) both;
+  }
+
+  @keyframes fadeUp {
+    from { 
+      opacity: 0; 
+      transform: translateY(20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn var(--duration-normal) var(--ease-out) both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .animate-scale-in {
+    animation: scaleIn var(--duration-normal) var(--ease-spring) both;
+  }
+
+  @keyframes scaleIn {
+    from { 
+      opacity: 0; 
+      transform: scale(0.92); 
+    }
+    to { 
+      opacity: 1; 
+      transform: scale(1); 
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp var(--duration-slow) var(--ease-smooth) both;
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0; 
+      transform: translateY(100%); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  .animate-slide-down {
+    animation: slideDown var(--duration-normal) var(--ease-out) both;
+  }
+
+  @keyframes slideDown {
+    from { 
+      opacity: 0; 
+      transform: translateY(-20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  .animate-slide-right {
+    animation: slideRight var(--duration-normal) var(--ease-smooth) both;
+  }
+
+  @keyframes slideRight {
+    from { 
+      opacity: 0; 
+      transform: translateX(24px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateX(0); 
+    }
+  }
+
+  /* ── LOOP ANIMATIONS ───────────────────────────────────────── */
+
+  .animate-pulse-soft {
+    animation: pulseSoft 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulseSoft {
+    0%, 100% { 
+      opacity: 1; 
+      transform: scale(1); 
+    }
+    50% { 
+      opacity: 0.7; 
+      transform: scale(0.95); 
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { 
+      opacity: 1; 
+      box-shadow: 0 0 20px var(--pilo-glow-sm); 
+    }
+    50% { 
+      opacity: 0.85; 
+      box-shadow: 0 0 40px var(--pilo-glow); 
+    }
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { 
+      transform: translateY(0px); 
+    }
+    50% { 
+      transform: translateY(-10px); 
+    }
+  }
+
+  .animate-float-slow {
+    animation: floatSlow 6s ease-in-out infinite;
+  }
+
+  @keyframes floatSlow {
+    0%, 100% { 
+      transform: translateY(0px) rotate(0deg); 
+    }
+    50% { 
+      transform: translateY(-15px) rotate(3deg); 
+    }
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── STAGGER DELAYS ─────────────────────────────────────────── */
+
+  .stagger-1 { animation-delay: 100ms; }
+  .stagger-2 { animation-delay: 200ms; }
+  .stagger-3 { animation-delay: 300ms; }
+  .stagger-4 { animation-delay: 400ms; }
+  .stagger-5 { animation-delay: 500ms; }
+  .stagger-6 { animation-delay: 600ms; }
+
+  /* ── PAGE TRANSITIONS ───────────────────────────────────────── */
+
+  .page-transition {
+    animation: fadeUp var(--duration-normal) var(--ease-smooth) both;
+  }
+
+  /* ── SCROLLBAR ──────────────────────────────────────────────── */
+
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── TEXT UTILITIES ─────────────────────────────────────────── */
+
+  .text-gradient-pilo {
+    background: linear-gradient(135deg, var(--pilo) 0%, var(--pilo-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* ── VISUAL EFFECTS ─────────────────────────────────────────── */
+
+  .bg-grain {
+    position: relative;
+  }
+
+  .bg-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+  }
+}
+
+/* ================================================================
+ * GLOBAL STYLES
+ * ================================================================ */
+
+/* Webkit Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-mid);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-mid) transparent;
+}
+
+/* ── PILO PREMIUM OVERLAY EFFECTS ─────────────────────────────── */
+
+/* Glow effect behind elements */
+.glow-pilo {
+  position: relative;
+}
+
+.glow-pilo::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, var(--pilo-glow) 0%, transparent 70%);
+  opacity: 0.5;
+  z-index: -1;
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+/* Subtle ambient light */
+.ambient-light {
+  position: relative;
+  overflow: hidden;
+}
+
+.ambient-light::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--pilo-surface) 0%, transparent 60%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ── NOTION-STYLE PILO PILLS ──────────────────────────────────── */
+
+.ds-notion-pill-container {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+}
+
+.ds-notion-pill {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all var(--duration-fast) var(--ease-smooth);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.ds-notion-pill:hover {
+  color: var(--text-primary);
+  background: var(--surface-3);
+}
+
+.ds-notion-pill.active {
+  color: var(--pilo-text);
+  background: var(--pilo);
+  border-color: var(--pilo);
+  box-shadow: 0 2px 8px var(--pilo-glow-sm);
+}
+
+/* ── MICRO BADGES ─────────────────────────────────────────────── */
+
+.ds-micro-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.ds-micro-badge-gold {
+  background: rgba(212, 163, 89, 0.15);
+  color: #D4A359;
+  border: 1px solid rgba(212, 163, 89, 0.25);
+}
+
+.ds-micro-badge-blue {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60A5FA;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.ds-micro-badge-green {
+  background: rgba(86, 190, 137, 0.15);
+  color: #56BE89;
+  border: 1px solid rgba(86, 190, 137, 0.25);
+}
+
+.ds-micro-badge-purple {
+  background: rgba(155, 93, 229, 0.15);
+  color: #A78BFA;
+  border: 1px solid rgba(155, 93, 229, 0.25);
+}
+
+/* ── LARK-STYLE ICON CIRCLES ──────────────────────────────────── */
+
+.ds-lark-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-fast) var(--ease-spring);
+}
+
+.ds-lark-icon-circle:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── PILO DARK CARD ACCENTS ───────────────────────────────────── */
+
+/* Hero card with gradient accent */
+.ds-hero-card {
+  background: linear-gradient(135deg, var(--surface-black) 0%, #1a1a1a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-card);
+  padding: var(--space-6);
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+}
+
+.ds-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, var(--pilo-glow) 0%, transparent 70%);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.ds-hero-card h1,
+.ds-hero-card h2,
+.ds-hero-card h3,
+.ds-hero-card h4,
+.ds-hero-card p,
+.ds-hero-card span,
+.ds-hero-card div {
+  color: #FFFFFF;
+  position: relative;
+  z-index: 1;
+}
+
+.ds-hero-card .text-secondary {
+  color: #A3A3A3 !important;
+}
+
+/* ── ACCESSIBILITY ────────────────────────────────────────────── */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border-subtle: rgba(17, 17, 17, 0.3);
+    --border-mid: rgba(17, 17, 17, 0.5);
+    --border-strong: rgba(17, 17, 17, 0.8);
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

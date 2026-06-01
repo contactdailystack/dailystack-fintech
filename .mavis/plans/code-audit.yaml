@@ -1,0 +1,155 @@
+﻿version: 1
+plan:
+  name: DailyStack Code Audit - comprehensive full-stack review
+  max_concurrency: 4
+  max_consecutive_failures: 2
+  max_cycles: 3
+tasks:
+  - id: code-quality-audit
+    title: "Code Architecture & Quality Audit"
+    prompt: |
+      You are a Senior Software Engineer and Code Architect performing a deep code audit of the DailyStack React frontend project.
+      
+      PROJECT PATH: D:\Coding Folder\dailystack\dailystack-frontend
+      
+      AUDIT SCOPE (read-only, write findings to deliverable.md):
+      1. Frontend Architecture: Analyze folder structure, component organization, routing, and overall architecture patterns
+      2. State Management: Examine React Context usage, state management patterns, props drilling issues
+      3. Component Structure: Analyze large components, tight coupling, component reusability, and separation of concerns
+      4. Code Quality: Identify duplicate logic, dead code, bad naming, tight coupling, large components
+      5. Scalability: Assess modularity, extensibility, and maintainability
+      6. TypeScript Usage: Check type safety, any-typing, missing types, circular dependencies
+      7. Reusability: Find opportunities for shared components, hooks, utilities
+      8. Error Handling: Check error boundaries, try-catch patterns, API error handling
+      
+      OUTPUT FORMAT: Write findings to deliverable.md in Thai language.
+      For each issue found, provide:
+      - File path and line number
+      - Problem description
+      - Impact severity (High/Medium/Low)
+      - Recommended fix with code example
+      
+      Also provide:
+      - Top Critical Issues (Top 5)
+      - Quick Win Improvements
+      - High Impact Refactors
+      
+      Return the commit hash when done.
+    assigned_to: coder
+    verified_by: verifier
+    verify_prompt: "Re-verify the findings by re-reading the source files. Check if each issue is real, severity is accurate, and code examples are correct. Do not simply trust the producer's output."
+    timeout_ms: 1800000
+  - id: ux-design-audit
+    title: "UX/UI & Design System Audit"
+    prompt: |
+      You are a Senior Product Designer and UX Specialist performing a comprehensive UX and design system audit.
+      
+      PROJECT PATH: D:\Coding Folder\dailystack\dailystack-frontend
+      
+      AUDIT SCOPE (read-only, write findings to deliverable.md):
+      1. Typography Consistency: Check font families, sizes, weights, line heights, letter spacing alignment
+      2. Color Consistency: Verify color palette usage, dark mode, theming, accessibility contrast ratios
+      3. Spacing System: Audit padding/margin conventions, component internal spacing
+      4. Component Consistency: Compare similar components for styling differences
+      5. Responsive Design: Analyze mobile-first quality, breakpoint usage, layout responsiveness
+      6. Mobile UX Quality: Check touch targets (min 44px), scroll behavior, safe areas, notch handling
+      7. UX Friction: Identify confusing flows, unclear CTAs, bad information hierarchy
+      8. Empty States: Check if all empty states have proper UI with guidance
+      9. Loading States: Check all loading states, skeleton loaders, progress indicators
+      10. Error Handling UX: Check error messages quality, error states, fallback UIs
+      11. Accessibility: Check ARIA labels, focus states, screen reader support
+      12. Animation Quality: Analyze animation performance, consistency, smoothness
+      
+      OUTPUT FORMAT: Write findings to deliverable.md in Thai language.
+      For each issue found, provide:
+      - File path/component name
+      - Problem description
+      - Impact severity (High/Medium/Low)
+      - UX impact explanation
+      - Recommended fix
+      - Mockup description if helpful
+      
+      Also provide:
+      - Top Critical UX Issues
+      - Friction Points causing user drop-off
+      - UX Priorities
+      
+      Return the commit hash when done.
+    assigned_to: general
+    verified_by: verifier
+    verify_prompt: "Re-browse the UI files and CSS files to independently verify each UX finding. Check if the issues are real UX problems and severity ratings are accurate."
+    timeout_ms: 1800000
+  - id: performance-audit
+    title: "Performance Analysis"
+    prompt: |
+      You are a Senior Frontend Performance Engineer performing a comprehensive performance audit.
+      
+      PROJECT PATH: D:\Coding Folder\dailystack\dailystack-frontend
+      
+      AUDIT SCOPE (read-only, write findings to deliverable.md):
+      1. Bundle Size: Analyze total bundle size, code splitting, lazy loading
+      2. React Performance: Find unnecessary re-renders, missing memo/useMemo/useCallback, large list rendering without virtualization
+      3. Image/Asset Optimization: Check image formats, lazy loading, CDN usage
+      4. Animation Performance: Identify layout thrashing animations, heavy CSS transitions
+      5. API Efficiency: Check for over-fetching, missing caching, N+1 queries in UI
+      6. Heavy Components: Identify components doing heavy computation on every render
+      7. Memory Leaks: Check for missing cleanup in useEffect, event listeners, subscriptions
+      8. Mobile Performance: Analyze initial load time, TTI (Time to Interactive), FCP
+      9. Style Performance: Check for expensive selectors (deep nesting), large CSS files
+      10. Virtualization: Check long list rendering, pagination vs infinite scroll choices
+      
+      OUTPUT FORMAT: Write findings to deliverable.md in Thai language.
+      For each issue found, provide:
+      - File path/component name
+      - Problem description
+      - Performance impact (specific numbers if possible)
+      - Severity (High/Medium/Low)
+      - Recommended fix with code example
+      
+      Also provide:
+      - Performance Priorities
+      - Estimated impact of each fix
+      - Low-hanging fruit wins
+      
+      Return the commit hash when done.
+    assigned_to: coder
+    verified_by: verifier
+    verify_prompt: "Re-analyze the performance issues by checking the code patterns. Verify if each issue is a genuine performance problem, re-render counts, bundle size impacts, and recommendations are actionable."
+    timeout_ms: 1800000
+  - id: security-audit
+    title: "Security & Business Logic Audit"
+    prompt: |
+      You are a Senior Security Engineer performing a security audit and business logic review.
+      
+      PROJECT PATH: D:\Coding Folder\dailystack\dailystack-frontend
+      
+      AUDIT SCOPE (read-only, write findings to deliverable.md):
+      1. Authentication Flow: Check token storage, refresh tokens, session handling, auth token leakage risks
+      2. Input Validation: Check form validation, XSS protection, SQL injection vectors
+      3. API Security: Check for exposed secrets, insecure API calls, CORS configuration
+      4. Privacy: Check for sensitive data logging, localStorage usage for sensitive info
+      5. Error Handling Security: Check for information leakage in error messages
+      6. Business Logic Gaps: Identify missing product flows, incomplete user journeys
+      7. Database Query Problems: Check N+1 queries, missing indexes, inefficient queries
+      8. Edge Cases: Check for unhandled edge cases in critical flows
+      9. API Structure: Check REST conventions, error response consistency
+      10. Scalability Architecture: Identify scaling bottlenecks, hard-coded limits
+      
+      OUTPUT FORMAT: Write findings to deliverable.md in Thai language.
+      For each issue found, provide:
+      - File path
+      - Problem description
+      - Security/impact severity (High/Medium/Low)
+      - Risk explanation
+      - Recommended fix
+      
+      Also provide:
+      - Security Priorities
+      - Critical Security Risks (High severity)
+      - Business Logic Gaps
+      
+      Return the commit hash when done.
+    assigned_to: general
+    verified_by: verifier
+    verify_prompt: "Re-verify the security findings by checking the actual code for auth flows, API calls, data storage. Verify severity ratings and check if recommendations address the actual vulnerability."
+    timeout_ms: 1800000

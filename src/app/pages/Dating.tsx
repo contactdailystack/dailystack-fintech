@@ -27,23 +27,25 @@ import {
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { useLanguage } from '../context/LanguageContext';
+import { Shell } from '../components/DesignSystem';
+import { DatingService, DatingProfileService } from '../../services/datingService';
 
 // ─── Design System ───────────────────────────────────────────────────────────
 const colors = {
-  primary: '#9B7ED9',      // Soft Lavender/Purple
-  primaryLight: '#B8A5E8',
-  primaryDark: '#7B5EC9',
-  background: '#FFFFFF',
-  surface: '#F5F5F5',
-  card: '#FFFFFF',
-  text: '#121212',
-  textSecondary: '#57606A',
-  textMuted: '#8B949E',
-  border: '#E5E7EB',
-  success: '#22C55E',
-  gold: '#F59E0B',
-  coral: '#F472B6',
-  lime: '#AAFF00',
+  primary: 'var(--lime)',      // Electric Lime/Green!
+  primaryLight: 'var(--lime-light)',
+  primaryDark: 'var(--lime-dim)',
+  background: 'var(--surface-bg)',
+  surface: 'var(--surface-card)',
+  card: 'var(--surface-card)',
+  text: 'var(--text-primary)',
+  textSecondary: 'var(--text-secondary)',
+  textMuted: 'var(--text-muted)',
+  border: 'var(--border-subtle)',
+  success: 'var(--success)',
+  gold: 'var(--warning)',
+  coral: 'var(--error)',
+  lime: 'var(--lime)',
 };
 
 // ─── Font Helper ─────────────────────────────────────────────────────────────
@@ -173,11 +175,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   >
     {/* Photo */}
     <div className="relative aspect-[4/5]">
-      <img
-        src={photos[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'}
-        alt={name}
-        className="w-full h-full object-cover"
-      />
+      {photos[0] ? (
+        <img
+          src={photos[0]}
+          alt={name}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full bg-[var(--surface-3)] flex items-center justify-center">
+          <span className="text-4xl">👤</span>
+        </div>
+      )}
       
       {/* Gradient */}
       <div 
@@ -339,8 +347,8 @@ const StatsCard: React.FC<StatsCardProps> = ({ value, label, icon: Icon, accent 
       >
         <Icon size={20} color={accent} />
       </div>
-      <div className="text-3xl font-black text-[#121212]">{value}</div>
-      <div className="text-xs text-[#8B949E] mt-1">{label}</div>
+      <div className="text-3xl font-black text-[var(--text-primary)]">{value}</div>
+      <div className="text-xs text-[var(--text-muted)] mt-1">{label}</div>
     </div>
   </div>
 );
@@ -354,7 +362,7 @@ const BottomTab: React.FC<{
 }> = ({ icon: Icon, label, active = false, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors relative ${active ? 'text-[#9B7ED9]' : 'text-[#8B949E]'}`}
+    className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors relative ${active ? 'text-[var(--lime)]' : 'text-[var(--text-muted)]'}`}
   >
     {active && (
       <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full" style={{ backgroundColor: colors.primary }} />
@@ -426,6 +434,11 @@ const Dating: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>('');
   const [isPremium, setIsPremium] = useState(false);
 
+  // Real data from API
+  const [matches, setMatches] = useState<any[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(true);
+  const [myProfile, setMyProfile] = useState<any>(null);
+
   const t = translations[language];
   const toggleLanguage = () => setLanguage(language === 'en' ? 'th' : 'en');
 
@@ -443,75 +456,76 @@ const Dating: React.FC = () => {
     checkUser();
   }, [navigate]);
 
+  // ── Load real matches from API ─────────────────────────────────────────────
+  useEffect(() => {
+    const loadMatches = async () => {
+      setLoadingMatches(true);
+      try {
+        const realMatches = await DatingService.match.getMatches();
+        setMatches(realMatches);
+      } catch (error) {
+        console.error('Failed to load matches:', error);
+        setMatches([]);
+      } finally {
+        setLoadingMatches(false);
+      }
+    };
+    loadMatches();
+  }, []);
+
+  // ── Load user profile ─────────────────────────────────────────────────────
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await DatingProfileService.getMyProfile();
+        setMyProfile(profile);
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+      }
+    };
+    loadProfile();
+  }, []);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
   };
 
-  // ── Mock Data ──────────────────────────────────────────────────────────────
-  const curatedMatches = [
-    {
-      id: '1',
-      name: 'Mika',
-      age: 28,
-      location: 'Bangkok',
-      photos: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'],
-      compatibility: 94,
-      occupation: 'Product Designer',
-      education: 'Chulalongkorn University',
-      mbti: 'INTJ',
-      bio: 'Loves deep conversations and quiet mornings ☕',
-      isUltraMatch: true,
-    },
-    {
-      id: '2',
-      name: 'Pim',
-      age: 26,
-      location: 'Thong Lo',
-      photos: ['https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400'],
-      compatibility: 89,
-      occupation: 'Software Engineer',
-      education: 'Kasetsart University',
-      bio: 'Coffee enthusiast and book lover 📚',
-    },
-    {
-      id: '3',
-      name: 'Natasha',
-      age: 29,
-      location: 'Sukhumvit',
-      photos: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400'],
-      compatibility: 87,
-      occupation: 'Marketing Manager',
-      education: 'Mahidol University',
-      bio: 'Adventure seeker who loves trying new things 🌍',
-    },
-  ];
+  // ── Real Data from API ────────────────────────────────────────────────────
+  // Map API matches to UI format
+  const curatedMatches = matches.slice(0, 5).map(m => ({
+    id: m.partnerId,
+    name: m.partnerName,
+    age: 0, // Not available in match data
+    location: '',
+    photos: m.partnerAvatar ? [m.partnerAvatar] : [],
+    compatibility: Math.round(m.compatibilityScore),
+    occupation: '',
+    education: '',
+    mbti: '',
+    bio: '',
+    isUltraMatch: m.isUltraMatch,
+  }));
 
-  const recentMatches = [
-    {
-      id: 'm1',
-      name: 'Mika',
-      photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
-      compatibility: 94,
-      lastMessage: 'That sounds amazing!',
-      unreadCount: 2,
-      isUltraMatch: true,
-    },
-    {
-      id: 'm2',
-      name: 'Pim',
-      photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-      compatibility: 89,
-      lastMessage: 'Nice to meet you!',
-      unreadCount: 0,
-    },
-  ];
+  const recentMatches = matches.slice(0, 5).map(m => ({
+    id: m.id,
+    name: m.partnerName,
+    photo: m.partnerAvatar,
+    compatibility: Math.round(m.compatibilityScore),
+    lastMessage: m.lastMessage || '',
+    unreadCount: m.unreadCount,
+    isUltraMatch: m.isUltraMatch,
+  }));
 
+  // Stats from real data
+  const avgCompatibility = matches.length > 0 
+    ? Math.round(matches.reduce((sum, m) => sum + m.compatibilityScore, 0) / matches.length)
+    : 0;
   const stats = [
-    { value: '3', label: t.totalMatches, icon: Heart },
-    { value: '91%', label: t.avgCompatibility, icon: Star },
-    { value: '2', label: t.activeChats, icon: MessageCircle },
-    { value: '48', label: t.profileViews, icon: Users },
+    { value: String(matches.length), label: t.totalMatches, icon: Heart },
+    { value: `${avgCompatibility}%`, label: t.avgCompatibility, icon: Star },
+    { value: String(matches.filter(m => m.unreadCount > 0).length), label: t.activeChats, icon: MessageCircle },
+    { value: '--', label: t.profileViews, icon: Users }, // Not available in current API
   ];
 
   const bottomTabs = [
@@ -523,56 +537,39 @@ const Dating: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-white text-[#121212] font-sans relative overflow-hidden">
-
-      {/* ── Background Decoration ─────────────────────────────────────────── */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-[#9B7ED9]/5 to-white" />
-        <FloatingCircle size={200} blur={80} duration={10} delay={0} className="top-0 right-0" color={colors.primary} />
-        <FloatingCircle size={150} blur={60} duration={8} delay={2} className="bottom-20 left-10" color={colors.primary} />
-        <FloatingCircle size={100} blur={40} duration={12} delay={1} className="top-1/3 right-1/4" color={colors.primaryLight} />
-      </div>
-
-      {/* ── Sticky Header ──────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-[#E5E7EB] px-4 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+    <Shell lang={language} showNav={true} showLangToggle={false} showOrbs={true} title={t.findYourMatch}>
+      <div className="px-4 py-6 max-w-4xl mx-auto select-none">
+        <div className="flex items-center justify-between gap-4 mb-4">
           <div>
-            <BadgeLabel icon={<Sparkles size={12} />}>
-              {language === 'th' ? 'โหมดเดท' : 'DATING MODE'}
-            </BadgeLabel>
-            <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-[#121212] mt-2 ${fontFor(language)}`}>
-              {t.findYourMatch}
-            </h1>
+            <span className="inline-flex items-center gap-1.5 bg-[var(--surface-3)] text-[var(--text-muted)] px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold tracking-wider">
+              ✨ {language === 'th' ? 'โหมดเดท' : 'DATING MODE'}
+            </span>
           </div>
-          
-          <div className="flex items-center gap-3">
-            {/* Language Toggle */}
-            <button
-              onClick={toggleLanguage}
-              className="px-3 py-2 rounded-full bg-[#F5F5F5] text-xs font-bold hover:text-[#9B7ED9] transition-colors"
-            >
-              <span className={language === 'en' ? 'text-[#9B7ED9]' : 'opacity-50'}>EN</span>
-              <span className="opacity-30 mx-1">/</span>
-              <span className={language === 'th' ? 'text-[#9B7ED9]' : 'opacity-50'}>TH</span>
-            </button>
-            
-            {/* Premium Badge */}
-            {isPremium ? (
-              <div className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#F59E0B]/10">
-                <Crown size={14} color={colors.gold} />
-                <span className="text-xs font-bold" style={{ color: colors.gold }}>{t.premium}</span>
-              </div>
-            ) : (
-              <button 
-                className="px-4 py-2 rounded-full text-xs font-bold text-white"
-                style={{ backgroundColor: colors.primary }}
-              >
-                {t.goPremium}
-              </button>
-            )}
-          </div>
+          {isPremium && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--warning)]/10 text-[10px] font-bold" style={{ color: colors.gold }}>
+              <Crown size={12} color={colors.gold} />
+              <span>{t.premium}</span>
+            </div>
+          )}
         </div>
-      </header>
+
+        {/* 5 sub-tabs Horizontal Pill Navigation */}
+        <div className="grid grid-cols-5 gap-1 p-1 bg-[var(--surface-2)] border border-[var(--border-subtle)] rounded-2xl font-space text-[10px] font-bold tracking-tight shadow-md mb-6">
+          {bottomTabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`py-2.5 text-center rounded-xl transition-all flex flex-col items-center justify-center gap-1 ${
+                activeTab === tab.key 
+                  ? 'bg-[var(--neon-surface)] text-[var(--neon)] border border-[var(--neon-glow-xs)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-3)]'
+              }`}
+            >
+              <tab.icon size={16} strokeWidth={activeTab === tab.key ? 2.5 : 1.8} />
+              <span className="text-[9px] font-bold tracking-tight leading-none mt-0.5">{tab.label}</span>
+            </button>
+          ))}
+        </div>
 
       {/* ── Main Content ───────────────────────────────────────────────────── */}
       <main className="relative z-10 max-w-4xl mx-auto px-4 py-6 pb-[calc(80px+env(safe-area-inset-bottom))]">
@@ -595,8 +592,8 @@ const Dating: React.FC = () => {
                 <Verified size={24} color="#FFF" />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-bold text-[#121212]">{t.verifyPhotos}</h3>
-                <p className="text-xs text-[#57606A]">{t.verifyDesc}</p>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">{t.verifyPhotos}</h3>
+                <p className="text-xs text-[var(--text-secondary)]">{t.verifyDesc}</p>
               </div>
               <ChevronRight size={20} color={colors.textMuted} />
             </div>
@@ -605,13 +602,13 @@ const Dating: React.FC = () => {
             <section>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <span className="inline-block font-mono text-[#9B7ED9] text-[10px] tracking-[0.3em] uppercase mb-1">
+                  <span className="inline-block font-mono text-[var(--lime)] text-[10px] tracking-[0.3em] uppercase mb-1">
                     Curated
                   </span>
-                  <h2 className={`text-2xl font-black tracking-tight text-[#121212] ${fontFor(language)}`}>
+                  <h2 className={`text-2xl font-black tracking-tight text-[var(--text-primary)] ${fontFor(language)}`}>
                     {t.todaysCurated}
                   </h2>
-                  <div className="h-[3px] w-12 bg-[#9B7ED9] rounded-full mt-2" />
+                  <div className="h-[3px] w-12 bg-[var(--lime)] rounded-full mt-2" />
                 </div>
                 <span 
                   className="px-3 py-1.5 rounded-full text-xs font-bold"
@@ -622,34 +619,62 @@ const Dating: React.FC = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {curatedMatches.map(match => (
-                  <ProfileCard
-                    key={match.id}
-                    {...match}
-                    onClick={() => navigate('/dating/discover')}
-                  />
-                ))}
+                {loadingMatches ? (
+                  // Loading skeleton
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="bg-[var(--surface-3)] rounded-2xl h-64 animate-pulse" />
+                  ))
+                ) : curatedMatches.length > 0 ? (
+                  curatedMatches.map(match => (
+                    <ProfileCard
+                      key={match.id}
+                      {...match}
+                      onClick={() => navigate('/dating/discover')}
+                    />
+                  ))
+                ) : (
+                  // Empty state
+                  <div className="col-span-full text-center py-12">
+                    <p className="text-[var(--text-secondary)]">
+                      {language === 'th' ? 'ยังไม่มีการแมตช์ที่คัดสรร' : 'No curated matches yet'}
+                    </p>
+                    <button
+                      onClick={() => navigate('/dating/discover')}
+                      className="mt-4 px-6 py-2 rounded-full bg-[var(--neon)] text-black text-sm font-bold"
+                    >
+                      {t.startDiscovery}
+                    </button>
+                  </div>
+                )}
               </div>
             </section>
 
             {/* Stats */}
             <section>
-              <h2 className={`text-xl font-black tracking-tight text-[#121212] mb-4 ${fontFor(language)}`}>
+              <h2 className={`text-xl font-black tracking-tight text-[var(--text-primary)] mb-4 ${fontFor(language)}`}>
                 {language === 'th' ? 'สถิติของคุณ' : 'Your Stats'}
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stats.map(stat => (
-                  <StatsCard key={stat.label} {...stat} />
-                ))}
-              </div>
+              {loadingMatches ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="bg-[var(--surface-3)] rounded-2xl h-20 animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {stats.map(stat => (
+                    <StatsCard key={stat.label} {...stat} />
+                  ))}
+                </div>
+              )}
             </section>
 
             {/* Recent Matches */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-[#121212]">{t.yourMatches}</h2>
+                <h2 className="text-lg font-bold text-[var(--text-primary)]">{t.yourMatches}</h2>
                 <button 
-                  className="text-xs font-medium text-[#9B7ED9] flex items-center gap-1 hover:underline"
+                  className="text-xs font-medium text-[var(--lime)] flex items-center gap-1 hover:underline"
                   onClick={() => navigate('/dating/matches')}
                 >
                   {language === 'th' ? 'ดูทั้งหมด' : 'See all'}
@@ -657,14 +682,33 @@ const Dating: React.FC = () => {
                 </button>
               </div>
               
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                {recentMatches.map(match => (
-                  <MatchCard
-                    key={match.id}
-                    {...match}
-                    onClick={() => navigate(`/dating/chat/${match.id}`)}
-                  />
-                ))}
+              <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-subtle)] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                {loadingMatches ? (
+                  // Loading skeleton
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-4 border-b border-[var(--border-subtle)]">
+                      <div className="w-12 h-12 rounded-full bg-[var(--surface-3)] animate-pulse" />
+                      <div className="flex-1">
+                        <div className="h-4 bg-[var(--surface-3)] rounded w-24 animate-pulse mb-2" />
+                        <div className="h-3 bg-[var(--surface-3)] rounded w-32 animate-pulse" />
+                      </div>
+                    </div>
+                  ))
+                ) : recentMatches.length > 0 ? (
+                  recentMatches.map(match => (
+                    <MatchCard
+                      key={match.id}
+                      {...match}
+                      onClick={() => navigate(`/dating/chat/${match.id}`)}
+                    />
+                  ))
+                ) : (
+                  <div className="p-8 text-center">
+                    <p className="text-[var(--text-secondary)]">
+                      {language === 'th' ? 'ยังไม่มีการแมตช์' : 'No matches yet'}
+                    </p>
+                  </div>
+                )}
               </div>
             </section>
           </div>
@@ -674,17 +718,29 @@ const Dating: React.FC = () => {
         {activeTab === 'likes' && (
           <div className="space-y-6">
             <div>
-              <span className="inline-block font-mono text-[#9B7ED9] text-[10px] tracking-[0.3em] uppercase mb-1">
+              <span className="inline-block font-mono text-[var(--lime)] text-[10px] tracking-[0.3em] uppercase mb-1">
                 {language === 'th' ? 'ความสนใจ' : 'Attention'}
               </span>
-              <h2 className={`text-3xl font-black tracking-tight text-[#121212] ${fontFor(language)}`}>
+              <h2 className={`text-3xl font-black tracking-tight text-[var(--text-primary)] ${fontFor(language)}`}>
                 {t.whoLikedYou}
               </h2>
-              <div className="h-[3px] w-12 bg-[#9B7ED9] rounded-full mt-2" />
+              <div className="h-[3px] w-12 bg-[var(--lime)] rounded-full mt-2" />
             </div>
             
-            {recentMatches.length > 0 ? (
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+            {loadingMatches ? (
+              <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-subtle)] overflow-hidden">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 p-4 border-b border-[var(--border-subtle)]">
+                    <div className="w-12 h-12 rounded-full bg-[var(--surface-3)] animate-pulse" />
+                    <div className="flex-1">
+                      <div className="h-4 bg-[var(--surface-3)] rounded w-24 animate-pulse mb-2" />
+                      <div className="h-3 bg-[var(--surface-3)] rounded w-32 animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : recentMatches.length > 0 ? (
+              <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-subtle)] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                 {recentMatches.map(match => (
                   <MatchCard
                     key={match.id}
@@ -694,14 +750,14 @@ const Dating: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 bg-white rounded-2xl border border-[#E5E7EB]">
-                <div className="w-20 h-20 rounded-full bg-[#F5F5F5] flex items-center justify-center mx-auto mb-4">
-                  <Heart size={32} className="text-[#8B949E]" />
+              <div className="text-center py-16 bg-[var(--surface-card)] rounded-2xl border border-[var(--border-subtle)]">
+                <div className="w-20 h-20 rounded-full bg-[var(--surface-input)] flex items-center justify-center mx-auto mb-4">
+                  <Heart size={32} className="text-[var(--text-muted)]" />
                 </div>
-                <p className="text-sm text-[#57606A]">
+                <p className="text-sm text-[var(--text-secondary)]">
                   {language === 'th' ? 'ยังไม่มีใครถูกใจคุณ' : 'No likes yet'}
                 </p>
-                <p className="text-xs text-[#8B949E] mt-1">
+                <p className="text-xs text-[var(--text-dim)] mt-1">
                   {language === 'th' ? 'ค้นหาเพิ่มเพื่อรับไลค์!' : 'Keep exploring to get likes!'}
                 </p>
               </div>
@@ -716,24 +772,24 @@ const Dating: React.FC = () => {
             <div 
               className="rounded-3xl p-8 text-center relative overflow-hidden"
               style={{
-                background: `linear-gradient(135deg, ${colors.primary}20, ${colors.primaryLight}20)`,
-                border: `1px solid ${colors.primary}30`
+                background: `linear-gradient(135deg, ${colors.primary}15, ${colors.primaryLight}05)`,
+                border: `1px solid ${colors.primary}20`
               }}
             >
               {/* Background glow */}
               <div 
                 className="absolute -top-20 -right-20 w-40 h-40 rounded-full"
-                style={{ background: `radial-gradient(circle, ${colors.primary}30, transparent 70%)`, filter: 'blur(40px)' }}
+                style={{ background: `radial-gradient(circle, ${colors.primary}20, transparent 70%)`, filter: 'blur(40px)' }}
               />
               
               <div className="relative z-10">
-                <div className="w-16 h-16 rounded-full bg-[#9B7ED9] flex items-center justify-center mx-auto mb-4">
-                  <Compass size={32} color="#FFF" />
+                <div className="w-16 h-16 rounded-full bg-[var(--lime-glow-sm)] flex items-center justify-center mx-auto mb-4 border border-[var(--lime)]/10">
+                  <Compass size={32} className="text-[var(--lime)]" />
                 </div>
-                <h2 className={`text-3xl font-black tracking-tight text-[#121212] ${fontFor(language)}`}>
+                <h2 className={`text-3xl font-black tracking-tight text-[var(--text-primary)] ${fontFor(language)}`}>
                   {t.readyToDiscover}
                 </h2>
-                <p className="text-sm text-[#57606A] mt-2">{t.findYourMatchDesc}</p>
+                <p className="text-sm text-[var(--text-secondary)] mt-2">{t.findYourMatchDesc}</p>
                 <PrimaryButton 
                   onClick={() => navigate('/dating/discover')}
                   className="mt-6"
@@ -751,10 +807,10 @@ const Dating: React.FC = () => {
                 { value: '12', label: language === 'th' ? 'ดูโปรไฟล์' : 'Views', icon: Users, color: colors.primary },
                 { value: '5', label: language === 'th' ? 'ไลค์ใหม่' : 'New Likes', icon: Star, color: colors.gold },
               ].map(stat => (
-                <div key={stat.label} className="bg-white rounded-2xl p-4 text-center border border-[#E5E7EB]">
+                <div key={stat.label} className="bg-[var(--surface-card)] rounded-2xl p-4 text-center border border-[var(--border-subtle)]">
                   <stat.icon size={20} color={stat.color} className="mx-auto mb-2" />
-                  <div className="text-2xl font-black text-[#121212]">{stat.value}</div>
-                  <div className="text-[10px] text-[#8B949E]">{stat.label}</div>
+                  <div className="text-2xl font-black text-[var(--text-primary)]">{stat.value}</div>
+                  <div className="text-[10px] text-[var(--text-muted)]">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -765,17 +821,17 @@ const Dating: React.FC = () => {
         {activeTab === 'chats' && (
           <div className="space-y-6">
             <div>
-              <span className="inline-block font-mono text-[#9B7ED9] text-[10px] tracking-[0.3em] uppercase mb-1">
+              <span className="inline-block font-mono text-[var(--lime)] text-[10px] tracking-[0.3em] uppercase mb-1">
                 {language === 'th' ? 'ข้อความ' : 'Messages'}
               </span>
-              <h2 className={`text-3xl font-black tracking-tight text-[#121212] ${fontFor(language)}`}>
+              <h2 className={`text-3xl font-black tracking-tight text-[var(--text-primary)] ${fontFor(language)}`}>
                 {t.chats}
               </h2>
-              <div className="h-[3px] w-12 bg-[#9B7ED9] rounded-full mt-2" />
+              <div className="h-[3px] w-12 bg-[var(--lime)] rounded-full mt-2" />
             </div>
             
             {recentMatches.length > 0 ? (
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-subtle)] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                 {recentMatches.map(match => (
                   <MatchCard
                     key={match.id}
@@ -785,14 +841,14 @@ const Dating: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 bg-white rounded-2xl border border-[#E5E7EB]">
-                <div className="w-20 h-20 rounded-full bg-[#F5F5F5] flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare size={32} className="text-[#8B949E]" />
+              <div className="text-center py-16 bg-[var(--surface-card)] rounded-2xl border border-[var(--border-subtle)]">
+                <div className="w-20 h-20 rounded-full bg-[var(--surface-input)] flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare size={32} className="text-[var(--text-muted)]" />
                 </div>
-                <p className="text-sm text-[#57606A]">
+                <p className="text-sm text-[var(--text-secondary)]">
                   {language === 'th' ? 'ยังไม่มีการสนทนา' : 'No conversations yet'}
                 </p>
-                <p className="text-xs text-[#8B949E] mt-1">
+                <p className="text-xs text-[var(--text-dim)] mt-1">
                   {language === 'th' ? 'เริ่มแมตช์เพื่อสนทนา!' : 'Start matching to chat!'}
                 </p>
               </div>
@@ -804,18 +860,24 @@ const Dating: React.FC = () => {
         {activeTab === 'profile' && (
           <div className="space-y-6">
             {/* Profile Header */}
-            <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+            <div className="bg-[var(--surface-card)] rounded-3xl p-6 border border-[var(--border-subtle)] shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <div 
                     className="w-20 h-20 rounded-full overflow-hidden"
                     style={{ border: `3px solid ${colors.primary}` }}
                   >
-                    <img 
-                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200"
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
+                    {myProfile?.photos?.[0] ? (
+                      <img 
+                        src={myProfile.photos[0]}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[var(--surface-3)] flex items-center justify-center">
+                        <User size={32} className="text-[var(--text-muted)]" />
+                      </div>
+                    )}
                   </div>
                   <div 
                     className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
@@ -825,20 +887,20 @@ const Dating: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-[#121212]">
-                    {userEmail?.split('@')[0] || 'User'}
+                  <h3 className="text-xl font-bold text-[var(--text-primary)]">
+                    {myProfile?.name || userEmail?.split('@')[0] || 'User'}
                   </h3>
-                  <p className="text-sm text-[#8B949E]">{userEmail}</p>
+                  <p className="text-sm text-[var(--text-secondary)]">{userEmail}</p>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#9B7ED9]/10 text-[#9B7ED9]">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--lime-glow-sm)] text-[var(--lime)]">
                       {t.premium}
                     </span>
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#F5F5F5] text-[#57606A]">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--surface-input)] text-[var(--text-secondary)]">
                       INTJ
                     </span>
                   </div>
                 </div>
-                <button>
+                <button onClick={() => navigate('/settings')}>
                   <Settings size={22} color={colors.textMuted} />
                 </button>
               </div>
@@ -852,7 +914,7 @@ const Dating: React.FC = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+            <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-subtle)] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
               {[
                 { icon: Sparkles, label: language === 'th' ? 'ซุปเปอร์ไลค์' : 'Super Like', color: colors.gold },
                 { icon: Heart, label: t.whoLikedYou, color: colors.coral },
@@ -860,7 +922,7 @@ const Dating: React.FC = () => {
               ].map((action, i) => (
                 <button
                   key={action.label}
-                  className="w-full flex items-center gap-4 p-4 hover:bg-[#F5F5F5] transition-colors"
+                  className="w-full flex items-center gap-4 p-4 hover:bg-[var(--surface-input)] transition-colors"
                   style={{ borderBottom: i < 2 ? `1px solid ${colors.border}` : 'none' }}
                   onClick={() => setActiveTab('likes')}
                 >
@@ -870,7 +932,7 @@ const Dating: React.FC = () => {
                   >
                     <action.icon size={18} color={action.color} />
                   </div>
-                  <span className="flex-1 text-left text-sm font-medium text-[#121212]">
+                  <span className="flex-1 text-left text-sm font-medium text-[var(--text-primary)]">
                     {action.label}
                   </span>
                   <ChevronRight size={18} color={colors.textMuted} />
@@ -881,7 +943,7 @@ const Dating: React.FC = () => {
             {/* Sign Out */}
             <button
               onClick={handleLogout}
-              className="w-full py-4 rounded-2xl text-sm font-medium bg-[#F5F5F5] text-red-500 hover:bg-red-50 transition-colors"
+              className="w-full py-4 rounded-2xl text-sm font-medium bg-[var(--surface-input)] text-red-400 hover:bg-red-500/10 transition-colors"
             >
               {t.signOut}
             </button>
@@ -889,32 +951,8 @@ const Dating: React.FC = () => {
         )}
       </main>
 
-      {/* ── Bottom Tab Bar ─────────────────────────────────────────────────── */}
-      <nav className="fixed bottom-0 inset-x-0 z-30 bg-white border-t border-[#E5E7EB] flex items-stretch pb-[env(safe-area-inset-bottom)]">
-        {bottomTabs.map(tab => (
-          <BottomTab 
-            key={tab.key} 
-            icon={tab.icon} 
-            label={tab.label} 
-            active={activeTab === tab.key}
-            onClick={() => setActiveTab(tab.key)}
-          />
-        ))}
-      </nav>
-
-      {/* ── CSS Animations ────────────────────────────────────────────────── */}
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(20px, -20px) scale(1.05); }
-        }
-        
-        [data-animate="float"] {
-          animation: float var(--duration, 8s) ease-in-out infinite;
-          animation-delay: var(--delay, 0s);
-        }
-      `}</style>
-    </div>
+      </div>
+    </Shell>
   );
 };
 

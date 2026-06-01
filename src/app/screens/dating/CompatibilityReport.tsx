@@ -63,139 +63,6 @@ interface CompatibilityData {
   relationshipPotential: 'excellent' | 'good' | 'moderate' | 'low';
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const mockReportData: CompatibilityData = {
-  overall: 94,
-  isUltraMatch: true,
-  dimensions: [
-    {
-      dimension: 'Lifestyle',
-      score: 92,
-      weight: 30,
-      icon: TrendingUp,
-      color: '#FF6B81',
-      description: 'How well your daily habits and life goals align',
-      descriptionTh: 'ความเข้ากันของการใช้ชีวิตประจำวันและเป้าหมายในชีวิต',
-      strengths: [
-        'Both prefer morning routines',
-        'Similar work-life balance values',
-        'Shared fitness and wellness priorities',
-      ],
-      challenges: [
-        'Different coffee shop preferences',
-        'Slight difference in social energy levels',
-      ],
-    },
-    {
-      dimension: 'Personality',
-      score: 96,
-      weight: 25,
-      icon: Smile,
-      color: '#FFD700',
-      description: 'Core personality traits and character alignment',
-      descriptionTh: 'บุคลิกภาพและลักษณะนิสัยหลักที่เข้ากัน',
-      strengths: [
-        'Both are growth-oriented and curious',
-        'Complementary introversion/extroversion balance',
-        'Shared sense of humor',
-      ],
-      challenges: [
-        'Both can be perfectionists at times',
-      ],
-    },
-    {
-      dimension: 'Emotional',
-      score: 88,
-      weight: 20,
-      icon: Heart,
-      color: '#FF3B30',
-      description: 'Emotional intelligence and relationship values',
-      descriptionTh: 'ความฉลาดทางอารมณ์และค่านิยมความสัมพันธ์',
-      strengths: [
-        'Similar emotional expressiveness',
-        'Both value honesty and vulnerability',
-        'Aligned long-term relationship goals',
-      ],
-      challenges: [
-        'Different comfort levels with deep conversations initially',
-      ],
-    },
-    {
-      dimension: 'Communication',
-      score: 91,
-      weight: 15,
-      icon: MessageCircle,
-      color: '#22C55E',
-      description: 'How you communicate and resolve differences',
-      descriptionTh: 'รูปแบบการสื่อสารและการแก้ไขความขัดแย้ง',
-      strengths: [
-        'Both prefer direct communication',
-        'Comfortable with text-based communication',
-        'Similar conflict resolution approaches',
-      ],
-      challenges: [
-        'Tendency to overthink responses',
-      ],
-    },
-  ],
-  sharedInterests: [
-    { name: 'Productivity', emoji: '📈', matchLevel: 'high' },
-    { name: 'Coffee', emoji: '☕', matchLevel: 'high' },
-    { name: 'Reading', emoji: '📚', matchLevel: 'medium' },
-    { name: 'Travel', emoji: '✈️', matchLevel: 'high' },
-    { name: 'Wellness', emoji: '🧘', matchLevel: 'medium' },
-    { name: 'Design', emoji: '🎨', matchLevel: 'low' },
-  ],
-  topStrengths: [
-    'Exceptional lifestyle alignment — you\'ll thrive together daily',
-    'Deep intellectual connection from day one',
-    'Mutual respect for personal growth and independence',
-    'Strong foundation for long-term relationship potential',
-  ],
-  topChallenges: [
-    'May need to consciously schedule social activities',
-    'Both need to practice patience in early dating phase',
-    'Different comfort zones around emotional vulnerability',
-  ],
-  aiRecommendations: [
-    {
-      title: 'Start with shared interests',
-      titleTh: 'เริ่มต้นด้วยความสนใจที่เหมือนกัน',
-      text: 'Your coffee shop adventures and travel stories are perfect conversation starters. Lean into these shared passions.',
-      textTh: 'การไปร้านกาแฟและเรื่องเล่าการเดินทางของคุณเป็นจุดเริ่มต้นบทสนทนาที่สมบูรณ์แบบ',
-      type: 'tip',
-    },
-    {
-      title: 'Embrace personality differences',
-      titleTh: 'ยอมรับความแตกต่างทางบุคลิกภาพ',
-      text: 'Your complementary energy levels can be a superpower — let your strengths balance each other out.',
-      textTh: 'ระดับพลังงานที่แตกต่างกันของคุณสามารถเป็นจุดแข็งได้ — ให้จุดแข็งของกันและกันชดเชยกัน',
-      type: 'opportunity',
-    },
-    {
-      title: 'Build emotional trust gradually',
-      titleTh: 'สร้างความไว้วางใจทางอารมณ์อย่างค่อยเป็นค่อยไป',
-      text: 'Take time to be vulnerable with each other. The best relationships are built on deep emotional trust.',
-      textTh: 'ใช้เวลาเปิดใจกับกันและกัน ความสัมพันธ์ที่ดีที่สุดถูกสร้างขึ้นจากความไว้วางใจทางอารมณ์ที่ลึกซึ้ง',
-      type: 'tip',
-    },
-  ],
-  conversationTips: [
-    'Ask about their ideal weekend — you\'ll likely find more overlap',
-    'Share a personal growth story; they\'ll appreciate the vulnerability',
-    'Discuss future goals early to confirm long-term alignment',
-    'Don\'t rush — your compatibility is strong, patience will pay off',
-  ],
-  relationshipPotential: 'excellent',
-};
-
-const mockUser: ReportUser = {
-  id: 'user-other',
-  name: 'Mika',
-  age: 28,
-  photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-};
-
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 const fontFor = (lang: 'en' | 'th') => lang === 'th' ? 'font-kanit' : 'font-sans';
 
@@ -325,20 +192,191 @@ const CompatibilityReport: React.FC = () => {
   const { userId } = useParams();
   const { lang } = useLanguage();
 
-  const [data, setData] = useState<CompatibilityData>(mockReportData);
-  const [user] = useState<ReportUser>(mockUser);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<CompatibilityData | null>(null);
+  const [user, setUser] = useState<ReportUser | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'dimensions' | 'tips'>('overview');
 
   useEffect(() => {
-    // TODO: Fetch real compatibility data from backend
-    // const fetchReport = async () => {
-    //   const { data } = await supabase.rpc('get_compatibility_report', { target_user_id: userId });
-    //   setData(data);
-    // };
-    // fetchReport();
+    const fetchReport = async () => {
+      if (!userId) {
+        setError('No user ID provided');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Get current user's profile
+        const myProfile = await DatingProfileService.getMyProfile();
+        if (!myProfile) {
+          throw new Error('Could not fetch your profile');
+        }
+
+        // Get match's profile from users table
+        const { data: matchUserData, error: matchError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (matchError || !matchUserData) {
+          throw new Error('Could not fetch match profile');
+        }
+
+        const matchProfile: Profile = {
+          id: matchUserData.id,
+          name: matchUserData.display_name || matchUserData.nickname || 'Anonymous',
+          age: matchUserData.age || 25,
+          location: matchUserData.location || 'Bangkok',
+          photos: matchUserData.dating_photos || [],
+          compatibility: 0,
+          lifestyleScore: 0,
+          personalityScore: 0,
+          insights: [],
+          interests: matchUserData.interests || [],
+          bio: matchUserData.bio || '',
+          relationshipGoal: matchUserData.relationship_goals || '',
+          occupation: matchUserData.occupation,
+          education: matchUserData.education,
+          mbti: matchUserData.mbti,
+          sleepSchedule: matchUserData.sleep_schedule,
+          workStyle: matchUserData.work_style,
+          socialEnergy: matchUserData.social_energy,
+          gender: matchUserData.gender,
+        };
+
+        // Set match user data for UI
+        setUser({
+          id: matchProfile.id,
+          name: matchProfile.name,
+          age: matchProfile.age,
+          photo: matchProfile.photos[0] || '',
+          gender: matchProfile.gender,
+        });
+
+        // Calculate compatibility using DatingAI
+        const myUserProfile = profileToUserProfile(myProfile);
+        const matchUserProfile = profileToUserProfile(matchProfile);
+        const compat = calculateCompatibility(myUserProfile, matchUserProfile);
+        const ultraMatch = isUltraMatch(compat);
+
+        // Find shared interests
+        const sharedInterests = myProfile.interests
+          .filter(i => matchProfile.interests.some(m => m.toLowerCase() === i.toLowerCase()))
+          .map(interest => ({
+            name: interest,
+            emoji: getInterestEmoji(interest),
+            matchLevel: 'high' as const,
+          }));
+
+        // Determine relationship potential
+        let relationshipPotential: 'excellent' | 'good' | 'moderate' | 'low' = 'moderate';
+        if (compat.overall >= 85) relationshipPotential = 'excellent';
+        else if (compat.overall >= 70) relationshipPotential = 'good';
+        else if (compat.overall >= 50) relationshipPotential = 'moderate';
+        else relationshipPotential = 'low';
+
+        // Build the compatibility data
+        const reportData: CompatibilityData = {
+          overall: compat.overall,
+          isUltraMatch: ultraMatch,
+          dimensions: [
+            {
+              dimension: 'Lifestyle',
+              score: compat.lifestyleScore,
+              weight: 30,
+              icon: TrendingUp,
+              color: '#FF6B81',
+              description: 'How well your daily habits and life goals align',
+              descriptionTh: 'ความเข้ากันของการใช้ชีวิตประจำวันและเป้าหมายในชีวิต',
+              strengths: compat.insights.filter((_, i) => i % 4 === 0).slice(0, 3),
+              challenges: compat.riskFactors.slice(0, 2),
+            },
+            {
+              dimension: 'Personality',
+              score: compat.personalityScore,
+              weight: 25,
+              icon: Smile,
+              color: '#FFD700',
+              description: 'Core personality traits and character alignment',
+              descriptionTh: 'บุคลิกภาพและลักษณะนิสัยหลักที่เข้ากัน',
+              strengths: compat.insights.filter((_, i) => i % 4 === 1).slice(0, 3),
+              challenges: [],
+            },
+            {
+              dimension: 'Emotional',
+              score: compat.emotionalScore,
+              weight: 20,
+              icon: Heart,
+              color: '#FF3B30',
+              description: 'Emotional intelligence and relationship values',
+              descriptionTh: 'ความฉลาดทางอารมณ์และค่านิยมความสัมพันธ์',
+              strengths: compat.insights.filter((_, i) => i % 4 === 2).slice(0, 3),
+              challenges: compat.riskFactors.filter((_, i) => i > 0).slice(0, 2),
+            },
+            {
+              dimension: 'Communication',
+              score: compat.communicationScore,
+              weight: 15,
+              icon: MessageCircle,
+              color: '#22C55E',
+              description: 'How you communicate and resolve differences',
+              descriptionTh: 'รูปแบบการสื่อสารและการแก้ไขความขัดแย้ง',
+              strengths: compat.insights.filter((_, i) => i % 4 === 3).slice(0, 3),
+              challenges: [],
+            },
+          ],
+          sharedInterests: sharedInterests.length > 0 ? sharedInterests : [
+            { name: 'No common interests found', emoji: '🔍', matchLevel: 'low' },
+          ],
+          topStrengths: compat.insights.slice(0, 4),
+          topChallenges: compat.riskFactors.slice(0, 3),
+          aiRecommendations: [
+            {
+              title: 'Start with shared interests',
+              titleTh: 'เริ่มต้นด้วยความสนใจที่เหมือนกัน',
+              text: sharedInterests.length > 0
+                ? `Your shared interests (${sharedInterests.map(s => s.name).join(', ')}) are perfect conversation starters.`
+                : 'Start with light topics to discover common ground.',
+              textTh: sharedInterests.length > 0
+                ? `ความสนใจที่เหมือนกัน (${sharedInterests.map(s => s.name).join(', ')}) เป็นจุดเริ่มต้นบทสนทนาที่ดี`
+                : 'แนะนำให้เริ่มต้นด้วยหัวข้อเบาๆ เพื่อค้นหาความสนใจร่วม',
+              type: 'tip',
+            },
+            {
+              title: 'Be authentic',
+              titleTh: 'เป็นตัวเอง',
+              text: 'Your compatibility score shows great potential. Be genuine and let things develop naturally.',
+              textTh: 'คะแนนความเข้ากันได้ของคุณแสดงศักยภาพที่ดี เป็นตัวเองและปล่อยให้สิ่งต่างๆ พัฒนาตามธรรมชาติ',
+              type: 'opportunity',
+            },
+          ],
+          conversationTips: [
+            'Ask about their ideal weekend',
+            'Share a personal growth story',
+            'Discuss future goals early',
+            'Be patient and let trust build',
+          ],
+          relationshipPotential,
+        };
+
+        setData(reportData);
+      } catch (err) {
+        console.error('Error fetching compatibility report:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load report');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReport();
   }, [userId]);
 
-  const potentialColor = getPotentialColor(data.relationshipPotential);
+  const potentialColor = data ? getPotentialColor(data.relationshipPotential) : '#888';
   const potentialLabels: Record<string, { en: string; th: string }> = {
     excellent: { en: 'Excellent', th: 'ยอดเยี่ยม' },
     good: { en: 'Good', th: 'ดีมาก' },
@@ -377,95 +415,136 @@ const CompatibilityReport: React.FC = () => {
       {/* ── Scrollable Content ──────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
 
-        {/* Hero Section */}
-        <div className="relative px-5 py-8 text-center overflow-hidden">
-          {/* Background glow */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-[#FF6B81]/10 blur-[100px]" />
-            {data.isUltraMatch && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-[#FFD700]/10 blur-[80px]" />
-            )}
+        {/* Loading State */}
+        {loading && (
+          <div className="relative px-5 py-8 text-center overflow-hidden">
+            <div className="flex items-center justify-center gap-0 mb-8">
+              <div className="w-20 h-20 rounded-full bg-[#21262D] animate-pulse" />
+              <div className="w-12 h-12 rounded-full bg-[#21262D] animate-pulse mx-2" />
+              <div className="w-20 h-20 rounded-full bg-[#21262D] animate-pulse" />
+            </div>
+            <div className="h-24 bg-[#21262D] rounded-2xl animate-pulse mb-4" />
+            <div className="space-y-3">
+              <div className="h-4 bg-[#21262D] rounded w-48 mx-auto animate-pulse" />
+              <div className="h-4 bg-[#21262D] rounded w-32 mx-auto animate-pulse" />
+            </div>
           </div>
+        )}
 
-          {/* User photos */}
-          <div className="relative flex items-center justify-center gap-0 mb-8 z-10">
-            {/* You */}
-            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#22C55E] shadow-lg shadow-[#22C55E]/30">
-              <div className="w-full h-full bg-gradient-to-br from-[#22C55E]/30 to-[#0D1117] flex items-center justify-center">
-                <span className="text-2xl">👤</span>
+        {/* Error State */}
+        {error && !loading && (
+          <div className="px-5 py-12 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#21262D] mb-4">
+              <AlertTriangle size={24} className="text-[#FF6B81]" />
+            </div>
+            <p className="text-[#8B949E] mb-4">{error}</p>
+            <button
+              onClick={() => navigate(-1)}
+              className="px-6 py-2 rounded-full bg-[#FF6B81] text-white text-sm font-bold"
+            >
+              {lang === 'th' ? 'กลับ' : 'Go Back'}
+            </button>
+          </div>
+        )}
+
+        {/* Main Content - only show when data is loaded */}
+        {!loading && !error && data && (
+          <>
+            {/* Hero Section */}
+            <div className="relative px-5 py-8 text-center overflow-hidden">
+              {/* Background glow */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-[#FF6B81]/10 blur-[100px]" />
+                {data.isUltraMatch && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-[#FFD700]/10 blur-[80px]" />
+                )}
               </div>
-            </div>
 
-            {/* Heart connector */}
-            <div className="relative -mx-2 z-10">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF6B81] to-[#FF3B30]
-                flex items-center justify-center shadow-lg shadow-[#FF6B81]/40 animate-pulse">
-                <Heart size={20} className="text-white" fill="white" />
+              {/* User photos */}
+              <div className="relative flex items-center justify-center gap-0 mb-8 z-10">
+                {/* You */}
+                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#22C55E] shadow-lg shadow-[#22C55E]/30">
+                  <div className="w-full h-full bg-gradient-to-br from-[#22C55E]/30 to-[#0D1117] flex items-center justify-center">
+                    <span className="text-2xl">👤</span>
+                  </div>
+                </div>
+
+                {/* Heart connector */}
+                <div className="relative -mx-2 z-10">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF6B81] to-[#FF3B30]
+                    flex items-center justify-center shadow-lg shadow-[#FF6B81]/40 animate-pulse">
+                    <Heart size={20} className="text-white" fill="white" />
+                  </div>
+                </div>
+
+                {/* Match */}
+                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#FF6B81] shadow-lg shadow-[#FF6B81]/30">
+                  {user?.photo ? (
+                    <img src={user.photo} alt={user?.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-[#21262D] flex items-center justify-center">
+                      <span className="text-2xl">👤</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Match */}
-            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#FF6B81] shadow-lg shadow-[#FF6B81]/30">
-              <img src={user.photo} alt={user.name} className="w-full h-full object-cover" />
-            </div>
-          </div>
+              {/* Ultra Match Badge */}
+              {data.isUltraMatch && (
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 mb-4
+                  bg-gradient-to-r from-[#FFD700] to-[#FFA500] rounded-full shadow-lg shadow-[#FFD700]/30 z-10">
+                  <Zap size={14} className="text-[#0D1117]" />
+                  <span className="text-xs font-black uppercase tracking-widest text-[#0D1117]">
+                    {lang === 'th' ? 'อัลตร้า แมตช์' : 'Ultra Match'}
+                  </span>
+                  <Crown size={14} className="text-[#0D1117]" />
+                </div>
+              )}
 
-          {/* Ultra Match Badge */}
-          {data.isUltraMatch && (
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 mb-4
-              bg-gradient-to-r from-[#FFD700] to-[#FFA500] rounded-full shadow-lg shadow-[#FFD700]/30 z-10">
-              <Zap size={14} className="text-[#0D1117]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#0D1117]">
-                {lang === 'th' ? 'อัลตร้า แมตช์' : 'Ultra Match'}
-              </span>
-              <Crown size={14} className="text-[#0D1117]" />
-            </div>
-          )}
+              {/* Overall score */}
+              <div className="mb-3 z-10">
+                <div className="inline-flex items-baseline gap-1">
+                  <span
+                    className="text-7xl font-black leading-none"
+                    style={{ color: getScoreColor(data.overall) }}
+                  >
+                    {data.overall}
+                  </span>
+                  <span
+                    className="text-3xl font-bold"
+                    style={{ color: getScoreColor(data.overall), opacity: 0.6 }}
+                  >
+                    %
+                  </span>
+                </div>
+                <p className={`text-sm font-medium mt-2 ${fontFor(lang)}`} style={{ color: getScoreColor(data.overall) }}>
+                  {lang === 'th' ? 'คะแนนความเข้ากันโดยรวม' : 'Overall Compatibility Score'}
+                </p>
+              </div>
 
-          {/* Overall score */}
-          <div className="mb-3 z-10">
-            <div className="inline-flex items-baseline gap-1">
-              <span
-                className="text-7xl font-black leading-none"
-                style={{ color: getScoreColor(data.overall) }}
+              {/* Overall label */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 z-10"
+                style={{ backgroundColor: `${potentialColor}15`, borderColor: `${potentialColor}30` }}
               >
-                {data.overall}
-              </span>
-              <span
-                className="text-3xl font-bold"
-                style={{ color: getScoreColor(data.overall), opacity: 0.6 }}
-              >
-                %
-              </span>
+                <span className="text-sm font-bold" style={{ color: potentialColor }}>
+                  {potentialLabels[data.relationshipPotential][lang]}
+                </span>
+                <span className="text-sm text-[#8B949E]">
+                  {lang === 'th' ? 'ศักยภาพความสัมพันธ์' : 'Relationship Potential'}
+                </span>
+              </div>
+
+              {/* Names */}
+              <p className="text-base text-[#8B949E] z-10">
+                {lang === 'th'
+                  ? `คุณและ ${user?.name} มีความเข้ากันได้ ${data.overall}%`
+                  : `You and ${user?.name} are ${data.overall}% compatible`}
+              </p>
             </div>
-            <p className={`text-sm font-medium mt-2 ${fontFor(lang)}`} style={{ color: getScoreColor(data.overall) }}>
-              {lang === 'th' ? 'คะแนนความเข้ากันโดยรวม' : 'Overall Compatibility Score'}
-            </p>
-          </div>
 
-          {/* Overall label */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 z-10"
-            style={{ backgroundColor: `${potentialColor}15`, borderColor: `${potentialColor}30` }}
-          >
-            <span className="text-sm font-bold" style={{ color: potentialColor }}>
-              {potentialLabels[data.relationshipPotential][lang]}
-            </span>
-            <span className="text-sm text-[var(--text-muted)]">
-              {lang === 'th' ? 'ศักยภาพความสัมพันธ์' : 'Relationship Potential'}
-            </span>
-          </div>
-
-          {/* Names */}
-          <p className="text-base text-[var(--text-secondary)] z-10">
-            {lang === 'th'
-              ? `คุณและ ${user.name} มีความเข้ากันได้ ${data.overall}%`
-              : `You and ${user.name} are ${data.overall}% compatible`}
-          </p>
-        </div>
-
-        {/* ── Tabs ──────────────────────────────────────────────────────── */}
-        <div className="sticky top-[57px] z-10 px-5 bg-[rgba(13,17,23,0.90)] backdrop-blur-xl py-3
-          flex gap-2 border-b border-[rgba(255,255,255,0.05)]">
+            {/* ── Tabs ──────────────────────────────────────────────────────── */}
+            <div className="sticky top-[57px] z-10 px-5 bg-[rgba(13,17,23,0.90)] backdrop-blur-xl py-3
+              flex gap-2 border-b border-[rgba(255,255,255,0.05)]">
           {[
             { key: 'overview', label: lang === 'th' ? 'ภาพรวม' : 'Overview' },
             { key: 'dimensions', label: lang === 'th' ? 'มิติ' : 'Dimensions' },
@@ -734,6 +813,8 @@ const CompatibilityReport: React.FC = () => {
           {/* Bottom spacing */}
           <div className="h-10" />
         </div>
+          </>
+        )}
       </div>
     </div>
   );

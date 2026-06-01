@@ -45,19 +45,7 @@ interface ChatState {
   matchId: string;
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const mockUser: ChatUser = {
-  id: 'user-1',
-  name: 'Mika',
-  age: 28,
-  photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-  compatibility: 94,
-  sharedInterests: ['Coffee', 'Reading', 'Travel', 'Productivity'],
-  online: true,
-};
-
-const mockMessages: DMessage[] = [];
-
+// ─── Icebreakers (static suggestions, not mock data) ─────────────────────────
 const icebreakers: Icebreaker[] = [
   { id: '1', text: "What's your go-to coffee order? ☕", category: 'fun' },
   { id: '2', text: "What's the most adventurous thing on your bucket list?", category: 'deep' },
@@ -67,7 +55,7 @@ const icebreakers: Icebreaker[] = [
 ];
 
 const icebreakerCategoryColors: Record<Icebreaker['category'], string> = {
-  fun: 'bg-[#FF6B81]/10 text-[#FF6B81] border-[#FF6B81]/20',
+  fun: 'bg-[rgba(86,190,137,0.1)] text-[#56be89] border-[#FF6B81]/20',
   deep: 'bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20',
   playful: 'bg-[#22C55E]/10 text-[#22C55E] border-[#22C55E]/20',
 };
@@ -171,7 +159,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isMe, showAvatar
         <div
           className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
             isMe
-              ? 'bg-gradient-to-br from-[#FF6B81] to-[#FF3B30] text-white rounded-br-md'
+              ? 'bg-gradient-to-br from-[#56be89] to-[#3D9E6E] text-white rounded-br-md'
               : isIcebreaker
               ? 'bg-[rgba(255,215,0,0.10)] text-[var(--text-primary)] border border-[rgba(255,215,0,0.15)] rounded-bl-md'
               : 'bg-[var(--semantic-surface-2)] text-[var(--text-primary)] rounded-bl-md'
@@ -213,7 +201,7 @@ const CompatibilitySidebar: React.FC<CompatibilitySidebarProps> = ({
         <h3 className="font-bold text-[var(--text-primary)]">
           {lang === 'th' ? 'ความเข้ากันได้' : 'Compatibility'}
         </h3>
-        <button onClick={onClose} className="w-8 h-8 rounded-full bg-[#21262D] flex items-center justify-center">
+        <button onClick={onClose} className="w-8 h-8 rounded-full bg-[#232D38] flex items-center justify-center">
           <ArrowLeft size={16} />
         </button>
       </div>
@@ -234,7 +222,7 @@ const CompatibilitySidebar: React.FC<CompatibilitySidebarProps> = ({
       {/* AI Insight */}
       <div className="p-4 rounded-2xl bg-[#FF6B81]/5 border border-[#FF6B81]/15">
         <div className="flex items-center gap-2 mb-2">
-          <Sparkles size={14} className="text-[#FF6B81]" />
+          <Sparkles size={14} className="text-[#56be89]" />
           <span className="text-xs font-bold text-[#FF6B81)]">
             {lang === 'th' ? 'ข้อมูลเชิงลึกจาก AI' : 'AI Insight'}
           </span>
@@ -255,7 +243,7 @@ const CompatibilitySidebar: React.FC<CompatibilitySidebarProps> = ({
           {user.sharedInterests.map((interest) => (
             <span
               key={interest}
-              className="px-3 py-1.5 bg-[rgba(255,107,129,0.10)] border border-[rgba(255,107,129,0.15)] rounded-full text-xs font-medium text-[#FF6B81]"
+              className="px-3 py-1.5 bg-[rgba(255,107,129,0.10)] border border-[rgba(255,107,129,0.15)] rounded-full text-xs font-medium text-[#56be89]"
             >
               {interest}
             </span>
@@ -266,7 +254,7 @@ const CompatibilitySidebar: React.FC<CompatibilitySidebarProps> = ({
       {/* View Report Button */}
       <button
         onClick={onViewReport}
-        className="mt-auto py-3 rounded-2xl bg-gradient-to-r from-[#FF6B81] to-[#FF3B30] text-white font-bold text-sm flex items-center justify-center gap-2"
+        className="mt-auto py-3 rounded-2xl bg-gradient-to-r from-[#56be89] to-[#3D9E6E] text-white font-bold text-sm flex items-center justify-center gap-2"
       >
         <Sparkles size={16} />
         {lang === 'th' ? 'ดูรายงานความเข้ากันได้' : 'View Compatibility Report'}
@@ -282,8 +270,8 @@ const ChatScreen: React.FC = () => {
   const { lang } = useLanguage();
 
   const [currentUserId, setCurrentUserId] = useState<string>('');
-  const [chatUser, setChatUser] = useState<ChatUser>(mockUser);
-  const [messages, setMessages] = useState<DMessage[]>(mockMessages);
+  const [chatUser, setChatUser] = useState<ChatUser | null>(null);
+  const [messages, setMessages] = useState<DMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -316,7 +304,7 @@ const ChatScreen: React.FC = () => {
                 id: partnerData.id,
                 name: partnerData.display_name || partnerData.nickname || 'Anonymous',
                 age: partnerData.age || 25,
-                photo: partnerData.dating_photos?.[0] || partnerData.avatar_url || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+                photo: partnerData.dating_photos?.[0] || partnerData.avatar_url || '',
                 compatibility: matchData.compatibilityScore,
                 sharedInterests: partnerData.interests || [],
                 online: true,
@@ -326,7 +314,7 @@ const ChatScreen: React.FC = () => {
                 id: matchData.partnerId,
                 name: matchData.partnerName,
                 age: 25,
-                photo: matchData.partnerAvatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+                photo: matchData.partnerAvatar || '',
                 compatibility: matchData.compatibilityScore,
                 sharedInterests: [],
                 online: true,
@@ -460,7 +448,7 @@ const ChatScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen h-[100dvh] bg-[#0D1117] font-sans feature-dating">
+    <div className="flex flex-col h-screen h-[100dvh] bg-[#1C232A] font-sans feature-dating">
 
       {/* Compatibility Sidebar */}
       {showSidebar && (
@@ -478,14 +466,14 @@ const ChatScreen: React.FC = () => {
         
         <button
           onClick={() => navigate('/dating')}
-          className="w-9 h-9 rounded-full bg-[#21262D] flex items-center justify-center hover:bg-[#30363D] transition-colors"
+          className="w-9 h-9 rounded-full bg-[#232D38] flex items-center justify-center hover:bg-[#30363D] transition-colors"
         >
           <ChevronLeft size={18} />
         </button>
 
         {/* User avatar */}
         <div className="relative cursor-pointer" onClick={() => setShowSidebar(true)}>
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#FF6B81]/30">
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[rgba(86,190,137,0.3)]">
             <img src={chatUser.photo} alt={chatUser.name} className="w-full h-full object-cover" />
           </div>
           {online && (
@@ -517,15 +505,15 @@ const ChatScreen: React.FC = () => {
 
         {/* Action buttons */}
         <div className="flex items-center gap-1">
-          <button className="w-9 h-9 rounded-full bg-[#21262D] flex items-center justify-center hover:bg-[#30363D] transition-colors">
+          <button className="w-9 h-9 rounded-full bg-[#232D38] flex items-center justify-center hover:bg-[#30363D] transition-colors">
             <Phone size={16} />
           </button>
-          <button className="w-9 h-9 rounded-full bg-[#21262D] flex items-center justify-center hover:bg-[#30363D] transition-colors">
+          <button className="w-9 h-9 rounded-full bg-[#232D38] flex items-center justify-center hover:bg-[#30363D] transition-colors">
             <Video size={16} />
           </button>
           <button
             onClick={() => setShowSidebar(true)}
-            className="w-9 h-9 rounded-full bg-[#21262D] flex items-center justify-center hover:bg-[#30363D] transition-colors"
+            className="w-9 h-9 rounded-full bg-[#232D38] flex items-center justify-center hover:bg-[#30363D] transition-colors"
           >
             <Info size={16} />
           </button>
@@ -537,11 +525,11 @@ const ChatScreen: React.FC = () => {
         
         {/* Date separator */}
         <div className="flex items-center gap-3 my-4">
-          <div className="flex-1 h-px bg-[rgba(255,255,255,0.08)]" />
+          <div className="flex-1 h-px bg-[rgba(255,255,255,0.06)]" />
           <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-medium">
             {lang === 'th' ? 'วันนี้' : 'Today'}
           </span>
-          <div className="flex-1 h-px bg-[rgba(255,255,255,0.08)]" />
+          <div className="flex-1 h-px bg-[rgba(255,255,255,0.06)]" />
         </div>
 
         {/* Messages */}
@@ -551,7 +539,7 @@ const ChatScreen: React.FC = () => {
             <div key={msg.id}>
               {msg.type === 'system' ? (
                 <div className="flex justify-center">
-                  <span className="text-[11px] text-[var(--text-muted)] bg-[#21262D] px-3 py-1 rounded-full">
+                  <span className="text-[11px] text-[var(--text-muted)] bg-[#232D38] px-3 py-1 rounded-full">
                     {msg.content}
                   </span>
                 </div>
@@ -587,7 +575,7 @@ const ChatScreen: React.FC = () => {
               disabled={sentIcebreakers.includes(ib.text) || sending}
               className={`shrink-0 px-3 py-2 rounded-xl border text-xs font-medium transition-all whitespace-nowrap
                 ${sentIcebreakers.includes(ib.text)
-                  ? 'opacity-40 cursor-not-allowed bg-[#21262D] border-[rgba(255,255,255,0.06)] text-[var(--text-muted)]'
+                  ? 'opacity-40 cursor-not-allowed bg-[#232D38] border-[rgba(255,255,255,0.06)] text-[var(--text-muted)]'
                   : icebreakerCategoryColors[ib.category] + ' hover:scale-[1.02] active:scale-[0.98]'
                 }`}
             >
@@ -601,8 +589,8 @@ const ChatScreen: React.FC = () => {
       <div className="shrink-0 px-4 py-3 border-t border-[rgba(255,255,255,0.06)] bg-[rgba(13,17,23,0.95)] backdrop-blur-xl">
         <div className="flex items-end gap-3">
           {/* Heart react */}
-          <button className="w-10 h-10 rounded-full bg-[#FF6B81]/10 flex items-center justify-center shrink-0 hover:bg-[#FF6B81]/20 transition-colors">
-            <Heart size={18} className="text-[#FF6B81]" fill="#FF6B81" />
+          <button className="w-10 h-10 rounded-full bg-[rgba(86,190,137,0.1)] flex items-center justify-center shrink-0 hover:bg-[#FF6B81]/20 transition-colors">
+            <Heart size={18} className="text-[#56be89]" fill="#FF6B81" />
           </button>
 
           {/* Text input */}
@@ -614,7 +602,7 @@ const ChatScreen: React.FC = () => {
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder={lang === 'th' ? 'พิมพ์ข้อความ...' : 'Type a message...'}
-              className="w-full px-4 py-3 pr-12 rounded-2xl bg-[#21262D] border border-[rgba(255,255,255,0.08)]
+              className="w-full px-4 py-3 pr-12 rounded-2xl bg-[#232D38] border border-[rgba(255,255,255,0.08)]
                 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
                 focus:border-[#FF6B81]/40 focus:outline-none transition-all resize-none"
               disabled={sending}
@@ -627,8 +615,8 @@ const ChatScreen: React.FC = () => {
             disabled={!newMessage.trim() || sending}
             className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all
               ${newMessage.trim()
-                ? 'bg-gradient-to-br from-[#FF6B81] to-[#FF3B30] text-white shadow-lg shadow-[#FF6B81]/30 hover:scale-105 active:scale-90'
-                : 'bg-[#21262D] text-[var(--text-muted)] cursor-not-allowed'
+                ? 'bg-gradient-to-br from-[#56be89] to-[#3D9E6E] text-white shadow-lg shadow-[#FF6B81]/30 hover:scale-105 active:scale-90'
+                : 'bg-[#232D38] text-[var(--text-muted)] cursor-not-allowed'
               }`}
           >
             <Send size={16} className={sending ? 'animate-pulse' : ''} />
