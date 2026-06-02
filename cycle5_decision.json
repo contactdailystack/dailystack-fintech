@@ -1,0 +1,19 @@
+{
+  "last_cycle": [
+    { "task_id": "fe-p0-p1-fixes", "verdict": "accept", "reason": "Already done in cycle 1. Clearing stale task." },
+    { "task_id": "security-review", "verdict": "accept", "reason": "Audit done. Clearing stale task." },
+    { "task_id": "qa-gate", "verdict": "accept", "reason": "Old QA session. Restarting with general agent." },
+    { "task_id": "security-fix", "verdict": "accept", "reason": "Coder completed the fix." }
+  ],
+  "next_cycle": [
+    {
+      "task_id": "qa-restart",
+      "title": "QA Gate — Production Readiness Verification",
+      "prompt": "Run QA verification in D:\\Coding Folder\\dailystack\\dailystack-frontend:\\n\\n## Pre-flight\\n- Run npm run build — must pass\\n- Run npm run lint — must pass\\n\\n## Browser Tests (use Playwright via mavis mcp call playwright)\\n1. Navigate to http://localhost:5173/dashboard — should redirect to /auth (no loop)\\n2. Navigate to http://localhost:5173/ — should redirect to /auth for unauthenticated users\\n3. Navigate to http://localhost:5173/memberships — should redirect to /auth\\n4. Navigate to http://localhost:5173/settings — should redirect to /auth\\n\\n## Output\\nWrite a QA Gate Report as deliverable.md:\\n- GATE PASS or GATE FAIL\\n- If FAIL: list each bug with steps to reproduce, expected vs actual, severity (P1/P2/P3), and evidence\\n- Write deliverable.md in C:\\Users\\Pick\\.mavis\\plans\\plan_56170b83\\outputs\\qa-gate\\",
+      "assigned_to": "general",
+      "timeout_ms": 900000
+    }
+  ],
+  "plan_complete": false,
+  "message_to_user": "Old stale tasks cleared. QA restarting with general agent."
+}

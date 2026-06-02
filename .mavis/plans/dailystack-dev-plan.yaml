@@ -1,0 +1,132 @@
+﻿version: 1
+plan:
+  name: "DailyStack Development Plan - Competitor Integration"
+  description: "รวมจุดเด่นจาก Money Manager + Rocket Money พัฒนาเป็นจุดแข็งของ DailyStack"
+  max_concurrency: 4
+  max_consecutive_failures: 2
+  max_cycles: 3
+  auto_reject_retries: 1
+tasks:
+  - id: competitor-analysis
+    title: "วิเคราะห์ Feature Matrix ของ Competitors"
+    role: produce
+    prompt: |
+      วิเคราะห์และจัดทำ Feature Matrix ที่ละเอียดของ Money Manager และ Rocket Money
+      โดยแบ่งเป็น:
+      1. จุดเด่น (Features) ที่ DailyStack ควร adopt
+      2. จุดอ่อน (Weaknesses) ที่ DailyStack สามารถหาทางแก้ไขได้
+      3. Feature gaps ที่ยังไม่มีใครทำดีในตลาด
+      
+      คำนึงถึง Thai market และ localization เป็นพิเศษ
+      
+      Output เป็น markdown table ที่ชัดเจน
+    assigned_to: ux-researcher
+    verified_by: agent-0d555903f4aa
+    verify_prompt: "ตรวจสอบว่า feature matrix ครอบคลุมทุก feature สำคัญ และ insights สมเหตุสมผล"
+
+  - id: product-strategy
+    title: "กำหนด Product Strategy และ Feature Prioritization"
+    role: produce
+    prompt: |
+      จากผลวิเคราะห์ competitor analysis:
+      1. กำหนด MVP features ที่ต้องมี (Must-have)
+      2. V2 features ที่ควรมี (Should-have)
+      3. V3 features ที่เป็น nice-to-have
+      
+      โดยพิจารณาจาก:
+      - ความยากในการพัฒนา vs คุณค่าที่ได้รับ
+      - Technical feasibility ในโปรเจกต์ปัจจุบัน (React + Supabase + Capacitor)
+      - User pain points ที่แก้ได้
+      
+      Output: PRD document ที่ระบุ roadmap, priorities, และ MVP scope
+    assigned_to: agent-0d555903f4aa
+    verified_by: ux-researcher
+    verify_prompt: "ตรวจสอบว่า strategy สอดคล้องกับ competitor analysis และเป็นไปได้ในทาง technical"
+    depends_on: [competitor-analysis]
+
+  - id: system-design
+    title: "ออกแบบ System Architecture สำหรับ New Features"
+    role: produce
+    prompt: |
+      ออกแบบ system architecture สำหรับ features ใหม่:
+      1. Subscription Tracker & Detector
+      2. Bill Negotiation Integration (หรือ reminders)
+      3. Smart Savings Automation
+      4. Bank Account Sync (optional, opt-in)
+      5. Investment Portfolio View
+      
+      ระบุ:
+      - Database schema changes (Supabase)
+      - API structure
+      - Frontend component architecture
+      - State management approach
+      
+      โปรเจกต์ปัจจุบัน: React 19 + TypeScript + Vite + Supabase + Capacitor + TailwindCSS
+    assigned_to: frontend-architect
+    verified_by: backend-developer
+    verify_prompt: "ตรวจสอบว่า architecture เป็นไปได้จริง และ integrate กับ codebase ปัจจุบันได้"
+
+  - id: ux-design
+    title: "ออกแบบ UX/UI สำหรับ New Features"
+    role: produce
+    prompt: |
+      ออกแบบ UX/UI สำหรับ new features ทั้งหมด:
+      1. Subscription Dashboard - แสดง recurring charges ทั้งหมด
+      2. Bill Calendar View - timeline ของ upcoming bills
+      3. Smart Savings Card - automation savings feature
+      4. Investment Portfolio View
+      5. Subscription Cancellation Flow
+      6. Bank Connection (opt-in) onboarding
+      
+      Design principles:
+      - Mobile-first (Capacitor mobile app)
+      - Keep Thai/English bilingual support
+      - Emerald Mint theme ปัจจุบัน
+      - Financial Health Score เป็น hero metric
+      
+      Output: Component specs + Design tokens
+    assigned_to: ui-designer
+    verified_by: ux-researcher
+    verify_prompt: "ตรวจสอบว่า UX designs ตอบโจทย์ user pain points จาก competitor analysis"
+
+  - id: implementation-plan
+    title: "สร้าง Implementation Roadmap"
+    role: produce
+    prompt: |
+      จาก product strategy และ system design:
+      1. แบ่งงานเป็น phases ชัดเจน
+      2. ระบุ technical tasks สำหรับแต่ละ phase
+      3. ประมาณการ timeline และ effort
+      4. ระบุ dependencies และ blockers
+      
+      Phases:
+      - Phase 1: MVP (Subscription Tracker + Bill Reminders)
+      - Phase 2: Smart Savings + Budget Automation
+      - Phase 3: Investment View + Bank Sync (optional)
+      
+      Output: Implementation roadmap เป็น markdown พร้อม phase breakdown
+    assigned_to: agent-0d555903f4aa
+    verified_by: frontend-architect
+    verify_prompt: "ตรวจสอบว่า roadmap เป็นไปได้จริงทาง technical และ timeline สมเหตุสมผล"
+    depends_on: [product-strategy, system-design]
+
+  - id: final-deliverable
+    title: "รวบรวม Final Development Plan Document"
+    role: produce
+    prompt: |
+      รวบรวมทุก deliverables จาก tasks ก่อนหน้าเป็น document เดียว:
+      1. Executive Summary
+      2. Competitor Analysis Summary
+      3. Product Strategy & Roadmap
+      4. System Architecture
+      5. UX/UI Designs
+      6. Implementation Phases
+      
+      เขียนเป็นภาษาไทย/English ที่เข้าใจง่าย
+      เหมาะสำหรับ present ให้ stakeholders
+      
+      Output: Final comprehensive development plan document
+    assigned_to: coder
+    verified_by: agent-0d555903f4aa
+    verify_prompt: "ตรวจสอบว่า document สมบูรณ์ และทุกส่วนมีความสอดคล้องกัน"
+    depends_on: [implementation-plan, ux-design]

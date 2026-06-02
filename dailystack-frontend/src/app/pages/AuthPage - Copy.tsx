@@ -39,7 +39,7 @@ const DailyStackLogo: React.FC<{ className?: string }> = ({ className }) => (
       {/* Inner S cut-out highlight */}
       <path
         d="M50 29 L72 39 L50 47 L28 39 Z"
-        fill="#1c232a" opacity="0.35"
+        fill="#000000" opacity="0.35"
       />
     </svg>
 

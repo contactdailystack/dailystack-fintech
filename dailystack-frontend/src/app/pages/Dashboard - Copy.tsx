@@ -13,14 +13,14 @@ const DailyStackLogo: React.FC<{ className?: string }> = ({ className }) => (
     <svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="ds-grad-db" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#56be89" />
+          <stop offset="0%" stopColor="#d2ff00" />
           <stop offset="100%" stopColor="#3a9e68" />
         </linearGradient>
       </defs>
       <path d="M50 78 L18 62 L18 58 L50 74 L82 58 L82 62 Z" fill="url(#ds-grad-db)" opacity="0.55" />
       <path d="M50 66 L18 50 L18 46 L50 62 L82 46 L82 50 Z" fill="url(#ds-grad-db)" opacity="0.78" />
       <path d="M50 22 L82 38 L50 54 L18 38 Z" fill="url(#ds-grad-db)" />
-      <path d="M50 29 L72 39 L50 47 L28 39 Z" fill="#1c232a" opacity="0.35" />
+      <path d="M50 29 L72 39 L50 47 L28 39 Z" fill="#000000" opacity="0.35" />
     </svg>
     <span className="text-sm font-black tracking-[0.18em] uppercase leading-none font-sans select-none">
       <span className="text-white">DAILY</span>

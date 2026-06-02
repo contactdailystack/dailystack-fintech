@@ -1,0 +1,41 @@
+name: CI - scan, build, smoke
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  scan-and-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Secret scan (repo-local)
+        run: npm run scan:secrets || true
+      - name: Build
+        run: npm run build
+      - name: Smoke check (artifact existence)
+        run: |
+          if [ -s dist/index.html ]; then echo "smoke ok"; else echo "dist/index.html missing" && exit 1; fi
+
+  deploy-staging:
+    needs: scan-and-build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(github.ref, 'refs/heads/main')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy placeholder (requires secrets)
+        env:
+          HOSTING_API_KEY: ${{ secrets.HOSTING_API_KEY }}
+        run: |
+          echo "Deploy step placeholder — configure provider deploy command here."

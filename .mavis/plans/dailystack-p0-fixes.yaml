@@ -1,0 +1,176 @@
+version: 1
+plan:
+  name: "DailyStack P0-P1 Production Fixes"
+  max_concurrency: 3
+  max_consecutive_failures: 2
+  max_cycles: 6
+  message_to_user: "กำลังกระจายงานไปให้ agents — FE fix, Security review และ QA verification วิ่งขนานกัน"
+
+tasks:
+  # ─────────────────────────────────────────────
+  # TRACK 1: Frontend P0 + P1 Fixes
+  # ─────────────────────────────────────────────
+  - id: fe-p0-p1-fixes
+    title: "แก้ไข P0 + P1 Frontend Bugs ทั้งหมด"
+    prompt: |
+      แก้ไข bugs ตาม implementation plan ที่อยู่ที่ C:\Users\Pick\Desktop\DailyStack\implementation_plan.md
+
+      WORKSPACE: D:\Coding Folder\dailystack\dailystack-frontend
+
+      ## P0 — Critical (แก้ก่อน)
+
+      1. AppRoutes.tsx (src/app/routes/AppRoutes.tsx)
+         - แก้ redirect ให้ unauthenticated users ไป /auth แทน / ที่ทำให้เกิด loop
+         - Root path / ให้ตรวจ session: logged in → /dashboard, logged out → /auth
+
+      2. Dashboard.tsx (src/app/pages/Dashboard.tsx)
+         - เปลี่ยน useEffect checkUser: ถ้าไม่มี session ให้ navigate ไป /auth แทน /
+
+      3. Onboarding.tsx (src/app/pages/Onboarding.tsx)
+         - ลบ manual supabase.from('user_profiles').upsert() ที่ใช้ column ผิด (interests)
+         - ใช้ saveOnboardingProfile จาก authService.ts แทน (column ชื่อ interest_tags ไม่ใช่ interests)
+
+      ## P1 — High
+
+      4. AuthPage.tsx (src/app/pages/AuthPage.tsx)
+         - หลัง OTP verify สำเร็จ ให้เรียก getProfile จาก authService
+         - ถ้า onboarding_completed_at มีค่า → ไป /dashboard โดยตรง
+         - ถ้าไม่มี → ไป /onboarding (สำหรับ first-time user)
+
+      5. Memberships.tsx (src/app/pages/Memberships.tsx)
+         - เพิ่ม session check useEffect ให้ redirect ไป /auth ถ้าไม่มี session
+
+      6. Settings.tsx (src/app/pages/Settings.tsx)
+         - เพิ่ม session check useEffect ให้ redirect ไป /auth ถ้าไม่มี session
+
+      7. PWA assets (public/assets/logos/)
+         - Rename pwa-192x192.png.png → pwa-192x192.png
+         - Rename pwa-512x512.png.png → pwa-512x512.png
+
+      ## P2 — Medium
+
+      8. Lint fixes
+         - LanguageContext.tsx: แก้ React Fast Refresh warning
+         - supabaseClient.ts: ลบ unused error variables ใน catch blocks
+         - main.tsx: ลบ unused variables (e, err), แก้ @ts-ignore
+         - analytics.ts: เปลี่ยน Record<string, any> → Record<string, unknown>
+
+      หลังแก้เสร็จ: รัน npm run build และ npm run lint ให้ผ่านทั้งหมด
+      เขียน summary ของสิ่งที่แก้ไปแต่ละจุด
+
+    assigned_to: senior-fe-eng
+    verified_by: security-eng
+    verify_prompt: |
+      ตรวจสอบว่า senior-fe-eng แก้ไขตาม implementation plan จริง:
+
+      1. อ่าน AppRoutes.tsx ดูว่า root / ตรวจ session แล้ว redirect ถูกต้อง (auth→/auth, loggedin→/dashboard)
+      2. อ่าน Dashboard.tsx ดูว่า redirect ไป /auth ไม่ใช่ /
+      3. อ่าน Onboarding.tsx ดูว่าใช้ saveOnboardingProfile จาก authService แล้ว
+      4. อ่าน AuthPage.tsx ดูว่ามีการ check onboarding_completed_at ก่อน redirect
+      5. อ่าน Memberships.tsx และ Settings.tsx ดูว่ามี session guard แล้ว
+      6. ตรวจสอบว่าไฟล์ PWA ใน public/assets/logos/ ถูก rename แล้ว
+      7. รัน npm run build และ npm run lint ต้องผ่านทั้งหมด
+      8. ดู key files ที่เกี่ยวกับ auth/RLS ว่ามี security issues ใหม่เกิดขึ้นมั้ย
+
+      FAIL ถ้า:
+      - npm run build หรือ npm run lint ยังมี errors
+      - Redirect logic ยังผิด
+      - Onboarding ยังใช้ column ผิด
+      - Route guards ยังไม่มี
+      - PWA files ยังไม่ถูก rename
+
+  # ─────────────────────────────────────────────
+  # TRACK 2: Security Review — runs parallel with FE
+  # ─────────────────────────────────────────────
+  - id: security-review
+    title: "Security Audit — Client-side Authorization & RLS"
+    role: verify-as-task
+    prompt: |
+      ทำ security audit ตาม qa_audit_report.md ที่ C:\Users\Pick\Desktop\DailyStack\qa_audit_report.md
+
+      WORKSPACE: D:\Coding Folder\dailystack\dailystack-frontend
+
+      Focus เฉพาะ security issues:
+
+      1. Client-side Authorization Vulnerability
+         - Public routes ไม่มี router-level guard
+         - คนแปลกหน้าเข้า /memberships, /settings ได้โดยตรง
+         - ตรวจสอบว่า FE fixes ที่ senior-fe-eng ทำมาได้แก้ปัญหานี้หรือยัง
+
+      2. RLS Exposure
+         - Query filters เขียนตรงใน frontend files
+         - ถ้า RLS ถูก disable ใน Supabase จะมีปัญหา
+         - แนะนำ mitigation ถ้ายังมี risk
+
+      3. Auth Flow Security
+         - ดู AuthPage.tsx ว่า OTP flow มี vulnerabilities มั้ย
+         - ดู Dashboard.tsx ว่า session check มี race condition มั้ย
+
+      4. Supabase Auth Hardening
+         - ตรวจสอบ authService.ts ว่า session management ปลอดภัยมั้ย
+         - มี hardcoded secrets หรือ exposed tokens มั้ย
+
+      Output: Security audit report
+      - PASS หรือ FAIL พร้อมเหตุผล
+      - ถ้า FAIL: ระบุ exact files + lines ที่ต้องแก้
+      - ถ้า PASS: ยืนยันว่า vulnerability ถูก fix แล้ว
+
+    assigned_to: security-eng
+    depends_on: [fe-p0-p1-fixes]
+    verified_by: qa-tester
+    verify_prompt: |
+      QA Tester ตรวจสอบว่า security audit ครอบคลุม:
+      1. Client-side authorization vulnerability — มี route guards ครบทุก private page
+      2. RLS exposure risk — ไม่มี hardcoded queries ที่เปิดช่องโหว่
+      3. Auth flow — OTP และ session management ปลอดภัย
+      4. Secrets exposure — ไม่มี hardcoded API keys หรือ tokens
+
+  # ─────────────────────────────────────────────
+  # TRACK 3: QA Gate — final gate after all fixes
+  # ─────────────────────────────────────────────
+  - id: qa-gate
+    title: "QA Gate — Production Readiness Verification"
+    role: verify-as-task
+    prompt: |
+      ทำ QA verification หลังจาก FE fixes + Security review เสร็จแล้ว
+
+      WORKSPACE: D:\Coding Folder\dailystack\dailystack-frontend
+
+      ## Pre-flight
+      - รัน npm run build → ต้อง pass ไม่มี errors
+      - รัน npm run lint → ต้อง pass ไม่มี errors
+
+      ## Critical Bugs Verification
+      1. Infinite Redirect Loop
+         - เปิด /dashboard ใน incognito ต้อง redirect ไป /auth ไม่ใช่ loop
+         - เปิด / ต้อง redirect ไป /auth สำหรับ unauthenticated user
+
+      2. Onboarding Save Success
+         - สมัคร user ใหม่ → ทำ onboarding → ต้องบันทึกสำเร็จ → ไป /dashboard
+         - ตรวจสอบว่าไม่มี silent failure อีก
+
+      ## High Priority Verification
+      3. Returning User Flow
+         - user เก่าที่มี onboarding_completed_at → login แล้วไป /dashboard โดยตรง
+
+      4. Route Guards
+         - เปิด /memberships ใน incognito → ต้อง redirect ไป /auth
+         - เปิด /settings ใน incognito → ต้อง redirect ไป /auth
+
+      5. PWA Assets
+         - ตรวจ manifest icons ต้อง resolve ได้ไม่มี 404
+
+      ## Bug Report Format (ถ้าพบ issues)
+      ทุก bug ต้องมี:
+      1. Test case ID
+      2. Steps to reproduce
+      3. Expected vs Actual behavior
+      4. Severity: P1/P2/P3
+      5. Evidence
+
+      Output: QA Gate Report
+      - GATE PASS หรือ GATE FAIL
+      - ถ้า FAIL: ระบุ bug reports ที่ต้องแก้ก่อน deploy
+
+    assigned_to: qa-tester
+    depends_on: [fe-p0-p1-fixes]

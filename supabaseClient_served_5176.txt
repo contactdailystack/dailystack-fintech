@@ -1,0 +1,71 @@
+﻿import { createClient } from "/node_modules/.vite/deps/@supabase_supabase-js.js?v=c47ce50e";
+// Helper to read environment variables from Vite's import.meta.env when available,
+// and fall back to Node's process.env for test / Node contexts (Playwright, SSR, etc.).
+function readEnv(key) {
+	try {
+		// Try Vite's import.meta.env first (works in the browser via Vite).
+		// Access via (import.meta as any) to avoid TS errors when compiled to Node.
+		// Wrap in try/catch because import.meta may not be available in some runtimes.
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const im = import.meta?.env;
+		if (im && typeof im[key] !== "undefined" && im[key] !== "") {
+			return String(im[key]);
+		}
+	} catch {}
+	// Node / Playwright runner environment
+	try {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const pe = globalThis?.process?.env;
+		if (pe) {
+			if (pe[key]) return String(pe[key]);
+			// Allow reading non-VITE variants: VITE_SUPABASE_URL -> SUPABASE_URL
+			if (key.startsWith("VITE_")) {
+				const alt = key.replace(/^VITE_/, "");
+				if (pe[alt]) return String(pe[alt]);
+			}
+		}
+	} catch {}
+	return "";
+}
+// Read Vite inlined env first (direct property access helps Vite replace at build/dev time),
+// then fall back to process.env for Node/test contexts.
+const _viteEnv = import.meta?.env;
+const supabaseUrl = (_viteEnv?.VITE_SUPABASE_URL ?? _viteEnv?.SUPABASE_URL) || (globalThis?.process?.env?.VITE_SUPABASE_URL ?? globalThis?.process?.env?.SUPABASE_URL) || "";
+const supabaseAnonKey = (_viteEnv?.VITE_SUPABASE_ANON_KEY ?? _viteEnv?.SUPABASE_ANON_KEY) || (globalThis?.process?.env?.VITE_SUPABASE_ANON_KEY ?? globalThis?.process?.env?.SUPABASE_ANON_KEY) || "";
+// If environment variables are missing, log warnings instead of crashing the app during development.
+const isProd = (() => {
+	try {
+		// Prefer Vite mode when available
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const im = import.meta?.env;
+		if (im && im.MODE) return im.MODE === "production";
+	} catch {}
+	try {
+		// Fallback to NODE_ENV
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const pe = globalThis?.process?.env;
+		if (pe && pe.NODE_ENV) return pe.NODE_ENV === "production";
+	} catch {}
+	return false;
+})();
+if (!supabaseUrl || !supabaseAnonKey) {
+	if (isProd) {
+		throw new Error("Missing Supabase environment variables in production environment");
+	}
+	// In dev/test we warn â this prevents Playwright/Node runs from crashing when envs
+	// are intentionally provided via dotenv/process.env instead of Vite's import.meta.env.
+	console.error("â ï¸ [CRITICAL ERROR]: Missing Supabase env vars (VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY or SUPABASE_URL/SUPABASE_ANON_KEY)");
+	console.warn("â¹ï¸ Fix: Provide Supabase credentials via a .env file or environment variables for tests.");
+}
+// Use placeholder values so the app can render even when env vars are absent.
+export const supabase = createClient(supabaseUrl || "https://placeholder.supabase.co", supabaseAnonKey || "placeholder-key");
+// Helper to expose the resolved credentials (useful for diagnostics in dev/test)
+export function getSupabaseCredentials() {
+	return {
+		url: supabaseUrl,
+		anonKey: supabaseAnonKey,
+		usingPlaceholder: !supabaseUrl || !supabaseAnonKey
+	};
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJtYXBwaW5ncyI6IkFBQUEsU0FBUyxvQkFBb0I7OztBQUk3QixTQUFTLFFBQVEsS0FBcUI7Q0FDcEMsSUFBSTs7Ozs7RUFLRixNQUFNLEtBQU0sT0FBTyxNQUFjO0VBQ2pDLElBQUksTUFBTSxPQUFPLEdBQUcsU0FBUyxlQUFlLEdBQUcsU0FBUyxJQUFJO0dBQzFELE9BQU8sT0FBTyxHQUFHLElBQUk7RUFDdkI7Q0FDRixRQUFRLENBRVI7O0NBR0EsSUFBSTs7RUFFRixNQUFNLEtBQU0sWUFBb0IsU0FBUztFQUN6QyxJQUFJLElBQUk7R0FDTixJQUFJLEdBQUcsTUFBTSxPQUFPLE9BQU8sR0FBRyxJQUFJOztHQUVsQyxJQUFJLElBQUksV0FBVyxPQUFPLEdBQUc7SUFDM0IsTUFBTSxNQUFNLElBQUksUUFBUSxVQUFVLEVBQUU7SUFDcEMsSUFBSSxHQUFHLE1BQU0sT0FBTyxPQUFPLEdBQUcsSUFBSTtHQUNwQztFQUNGO0NBQ0YsUUFBUSxDQUVSO0NBRUEsT0FBTztBQUNUOzs7QUFJQSxNQUFNLFdBQVksT0FBTyxNQUFjO0FBQ3ZDLE1BQU0sZUFBZSxVQUFVLHFCQUFxQixVQUFVLGtCQUN2RCxZQUFvQixTQUFTLEtBQUsscUJBQXNCLFlBQW9CLFNBQVMsS0FBSyxpQkFBaUI7QUFDbEgsTUFBTSxtQkFBbUIsVUFBVSwwQkFBMEIsVUFBVSx1QkFDaEUsWUFBb0IsU0FBUyxLQUFLLDBCQUEyQixZQUFvQixTQUFTLEtBQUssc0JBQXNCOztBQUc1SCxNQUFNLGdCQUFnQjtDQUNwQixJQUFJOzs7RUFHRixNQUFNLEtBQU0sT0FBTyxNQUFjO0VBQ2pDLElBQUksTUFBTSxHQUFHLE1BQU0sT0FBTyxHQUFHLFNBQVM7Q0FDeEMsUUFBUSxDQUVSO0NBQ0EsSUFBSTs7O0VBR0YsTUFBTSxLQUFNLFlBQW9CLFNBQVM7RUFDekMsSUFBSSxNQUFNLEdBQUcsVUFBVSxPQUFPLEdBQUcsYUFBYTtDQUNoRCxRQUFRLENBRVI7Q0FDQSxPQUFPO0FBQ1QsR0FBRztBQUVILElBQUksQ0FBQyxlQUFlLENBQUMsaUJBQWlCO0NBQ3BDLElBQUksUUFBUTtFQUNWLE1BQU0sSUFBSSxNQUFNLGtFQUFrRTtDQUNwRjs7O0NBSUEsUUFBUSxNQUFNLDZIQUE2SDtDQUMzSSxRQUFRLEtBQUssMEZBQTBGO0FBQ3pHOztBQUdBLE9BQU8sTUFBTSxXQUFXLGFBQ3RCLGVBQWUsbUNBQ2YsbUJBQW1CLGlCQUNyQjs7QUFHQSxPQUFPLFNBQVMseUJBQXlCO0NBQ3ZDLE9BQU87RUFDTCxLQUFLO0VBQ0wsU0FBUztFQUNULGtCQUFrQixDQUFDLGVBQWUsQ0FBQztDQUNyQztBQUNGIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbInN1cGFiYXNlQ2xpZW50LnRzIl0sInZlcnNpb24iOjMsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGNyZWF0ZUNsaWVudCB9IGZyb20gJ0BzdXBhYmFzZS9zdXBhYmFzZS1qcyc7XHJcblxyXG4vLyBIZWxwZXIgdG8gcmVhZCBlbnZpcm9ubWVudCB2YXJpYWJsZXMgZnJvbSBWaXRlJ3MgaW1wb3J0Lm1ldGEuZW52IHdoZW4gYXZhaWxhYmxlLFxyXG4vLyBhbmQgZmFsbCBiYWNrIHRvIE5vZGUncyBwcm9jZXNzLmVudiBmb3IgdGVzdCAvIE5vZGUgY29udGV4dHMgKFBsYXl3cmlnaHQsIFNTUiwgZXRjLikuXHJcbmZ1bmN0aW9uIHJlYWRFbnYoa2V5OiBzdHJpbmcpOiBzdHJpbmcge1xyXG4gIHRyeSB7XHJcbiAgICAvLyBUcnkgVml0ZSdzIGltcG9ydC5tZXRhLmVudiBmaXJzdCAod29ya3MgaW4gdGhlIGJyb3dzZXIgdmlhIFZpdGUpLlxyXG4gICAgLy8gQWNjZXNzIHZpYSAoaW1wb3J0Lm1ldGEgYXMgYW55KSB0byBhdm9pZCBUUyBlcnJvcnMgd2hlbiBjb21waWxlZCB0byBOb2RlLlxyXG4gICAgLy8gV3JhcCBpbiB0cnkvY2F0Y2ggYmVjYXVzZSBpbXBvcnQubWV0YSBtYXkgbm90IGJlIGF2YWlsYWJsZSBpbiBzb21lIHJ1bnRpbWVzLlxyXG4gICAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIEB0eXBlc2NyaXB0LWVzbGludC9uby1leHBsaWNpdC1hbnlcclxuICAgIGNvbnN0IGltID0gKGltcG9ydC5tZXRhIGFzIGFueSk/LmVudjtcclxuICAgIGlmIChpbSAmJiB0eXBlb2YgaW1ba2V5XSAhPT0gJ3VuZGVmaW5lZCcgJiYgaW1ba2V5XSAhPT0gJycpIHtcclxuICAgICAgcmV0dXJuIFN0cmluZyhpbVtrZXldKTtcclxuICAgIH1cclxuICB9IGNhdGNoIHtcclxuICAgIC8vIGlnbm9yZSDigJQgZmFsbGJhY2sgdG8gcHJvY2Vzcy5lbnYgYmVsb3dcclxuICB9XHJcblxyXG4gIC8vIE5vZGUgLyBQbGF5d3JpZ2h0IHJ1bm5lciBlbnZpcm9ubWVudFxyXG4gIHRyeSB7XHJcbiAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgQHR5cGVzY3JpcHQtZXNsaW50L25vLWV4cGxpY2l0LWFueVxyXG4gICAgY29uc3QgcGUgPSAoZ2xvYmFsVGhpcyBhcyBhbnkpPy5wcm9jZXNzPy5lbnY7XHJcbiAgICBpZiAocGUpIHtcclxuICAgICAgaWYgKHBlW2tleV0pIHJldHVybiBTdHJpbmcocGVba2V5XSk7XHJcbiAgICAgIC8vIEFsbG93IHJlYWRpbmcgbm9uLVZJVEUgdmFyaWFudHM6IFZJVEVfU1VQQUJBU0VfVVJMIC0+IFNVUEFCQVNFX1VSTFxyXG4gICAgICBpZiAoa2V5LnN0YXJ0c1dpdGgoJ1ZJVEVfJykpIHtcclxuICAgICAgICBjb25zdCBhbHQgPSBrZXkucmVwbGFjZSgvXlZJVEVfLywgJycpO1xyXG4gICAgICAgIGlmIChwZVthbHRdKSByZXR1cm4gU3RyaW5nKHBlW2FsdF0pO1xyXG4gICAgICB9XHJcbiAgICB9XHJcbiAgfSBjYXRjaCB7XHJcbiAgICAvLyBpZ25vcmVcclxuICB9XHJcblxyXG4gIHJldHVybiAnJztcclxufVxyXG5cclxuLy8gUmVhZCBWaXRlIGlubGluZWQgZW52IGZpcnN0IChkaXJlY3QgcHJvcGVydHkgYWNjZXNzIGhlbHBzIFZpdGUgcmVwbGFjZSBhdCBidWlsZC9kZXYgdGltZSksXHJcbi8vIHRoZW4gZmFsbCBiYWNrIHRvIHByb2Nlc3MuZW52IGZvciBOb2RlL3Rlc3QgY29udGV4dHMuXHJcbmNvbnN0IF92aXRlRW52ID0gKGltcG9ydC5tZXRhIGFzIGFueSk/LmVudjtcclxuY29uc3Qgc3VwYWJhc2VVcmwgPSAoX3ZpdGVFbnY/LlZJVEVfU1VQQUJBU0VfVVJMID8/IF92aXRlRW52Py5TVVBBQkFTRV9VUkwpXHJcbiAgfHwgKChnbG9iYWxUaGlzIGFzIGFueSk/LnByb2Nlc3M/LmVudj8uVklURV9TVVBBQkFTRV9VUkwgPz8gKGdsb2JhbFRoaXMgYXMgYW55KT8ucHJvY2Vzcz8uZW52Py5TVVBBQkFTRV9VUkwpIHx8ICcnO1xyXG5jb25zdCBzdXBhYmFzZUFub25LZXkgPSAoX3ZpdGVFbnY/LlZJVEVfU1VQQUJBU0VfQU5PTl9LRVkgPz8gX3ZpdGVFbnY/LlNVUEFCQVNFX0FOT05fS0VZKVxyXG4gIHx8ICgoZ2xvYmFsVGhpcyBhcyBhbnkpPy5wcm9jZXNzPy5lbnY/LlZJVEVfU1VQQUJBU0VfQU5PTl9LRVkgPz8gKGdsb2JhbFRoaXMgYXMgYW55KT8ucHJvY2Vzcz8uZW52Py5TVVBBQkFTRV9BTk9OX0tFWSkgfHwgJyc7XHJcblxyXG4vLyBJZiBlbnZpcm9ubWVudCB2YXJpYWJsZXMgYXJlIG1pc3NpbmcsIGxvZyB3YXJuaW5ncyBpbnN0ZWFkIG9mIGNyYXNoaW5nIHRoZSBhcHAgZHVyaW5nIGRldmVsb3BtZW50LlxyXG5jb25zdCBpc1Byb2QgPSAoKCkgPT4ge1xyXG4gIHRyeSB7XHJcbiAgICAvLyBQcmVmZXIgVml0ZSBtb2RlIHdoZW4gYXZhaWxhYmxlXHJcbiAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgQHR5cGVzY3JpcHQtZXNsaW50L25vLWV4cGxpY2l0LWFueVxyXG4gICAgY29uc3QgaW0gPSAoaW1wb3J0Lm1ldGEgYXMgYW55KT8uZW52O1xyXG4gICAgaWYgKGltICYmIGltLk1PREUpIHJldHVybiBpbS5NT0RFID09PSAncHJvZHVjdGlvbic7XHJcbiAgfSBjYXRjaCB7XHJcbiAgICAvLyBpZ25vcmVcclxuICB9XHJcbiAgdHJ5IHtcclxuICAgIC8vIEZhbGxiYWNrIHRvIE5PREVfRU5WXHJcbiAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgQHR5cGVzY3JpcHQtZXNsaW50L25vLWV4cGxpY2l0LWFueVxyXG4gICAgY29uc3QgcGUgPSAoZ2xvYmFsVGhpcyBhcyBhbnkpPy5wcm9jZXNzPy5lbnY7XHJcbiAgICBpZiAocGUgJiYgcGUuTk9ERV9FTlYpIHJldHVybiBwZS5OT0RFX0VOViA9PT0gJ3Byb2R1Y3Rpb24nO1xyXG4gIH0gY2F0Y2gge1xyXG4gICAgLy8gaWdub3JlXHJcbiAgfVxyXG4gIHJldHVybiBmYWxzZTtcclxufSkoKTtcclxuXHJcbmlmICghc3VwYWJhc2VVcmwgfHwgIXN1cGFiYXNlQW5vbktleSkge1xyXG4gIGlmIChpc1Byb2QpIHtcclxuICAgIHRocm93IG5ldyBFcnJvcignTWlzc2luZyBTdXBhYmFzZSBlbnZpcm9ubWVudCB2YXJpYWJsZXMgaW4gcHJvZHVjdGlvbiBlbnZpcm9ubWVudCcpO1xyXG4gIH1cclxuXHJcbiAgLy8gSW4gZGV2L3Rlc3Qgd2Ugd2FybiDigJQgdGhpcyBwcmV2ZW50cyBQbGF5d3JpZ2h0L05vZGUgcnVucyBmcm9tIGNyYXNoaW5nIHdoZW4gZW52c1xyXG4gIC8vIGFyZSBpbnRlbnRpb25hbGx5IHByb3ZpZGVkIHZpYSBkb3RlbnYvcHJvY2Vzcy5lbnYgaW5zdGVhZCBvZiBWaXRlJ3MgaW1wb3J0Lm1ldGEuZW52LlxyXG4gIGNvbnNvbGUuZXJyb3IoJ+KaoO+4jyBbQ1JJVElDQUwgRVJST1JdOiBNaXNzaW5nIFN1cGFiYXNlIGVudiB2YXJzIChWSVRFX1NVUEFCQVNFX1VSTC9WSVRFX1NVUEFCQVNFX0FOT05fS0VZIG9yIFNVUEFCQVNFX1VSTC9TVVBBQkFTRV9BTk9OX0tFWSknKTtcclxuICBjb25zb2xlLndhcm4oJ+KEue+4jyBGaXg6IFByb3ZpZGUgU3VwYWJhc2UgY3JlZGVudGlhbHMgdmlhIGEgLmVudiBmaWxlIG9yIGVudmlyb25tZW50IHZhcmlhYmxlcyBmb3IgdGVzdHMuJyk7XHJcbn1cclxuXHJcbi8vIFVzZSBwbGFjZWhvbGRlciB2YWx1ZXMgc28gdGhlIGFwcCBjYW4gcmVuZGVyIGV2ZW4gd2hlbiBlbnYgdmFycyBhcmUgYWJzZW50LlxyXG5leHBvcnQgY29uc3Qgc3VwYWJhc2UgPSBjcmVhdGVDbGllbnQoXHJcbiAgc3VwYWJhc2VVcmwgfHwgJ2h0dHBzOi8vcGxhY2Vob2xkZXIuc3VwYWJhc2UuY28nLFxyXG4gIHN1cGFiYXNlQW5vbktleSB8fCAncGxhY2Vob2xkZXIta2V5J1xyXG4pO1xyXG5cclxuLy8gSGVscGVyIHRvIGV4cG9zZSB0aGUgcmVzb2x2ZWQgY3JlZGVudGlhbHMgKHVzZWZ1bCBmb3IgZGlhZ25vc3RpY3MgaW4gZGV2L3Rlc3QpXHJcbmV4cG9ydCBmdW5jdGlvbiBnZXRTdXBhYmFzZUNyZWRlbnRpYWxzKCkge1xyXG4gIHJldHVybiB7XHJcbiAgICB1cmw6IHN1cGFiYXNlVXJsLFxyXG4gICAgYW5vbktleTogc3VwYWJhc2VBbm9uS2V5LFxyXG4gICAgdXNpbmdQbGFjZWhvbGRlcjogIXN1cGFiYXNlVXJsIHx8ICFzdXBhYmFzZUFub25LZXksXHJcbiAgfTtcclxufSJdfQ==

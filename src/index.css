@@ -1,0 +1,29 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+/* ตั้งค่าพื้นฐาน: บังคับใช้ Space Grotesk เป็นหลักสำหรับระบบ */
+body {
+  font-family: 'Space Grotesk', sans-serif !important;
+}
+
+/* สร้างคลาสสำหรับภาษาไทยโดยเฉพาะ */
+.font-kanit {
+  font-family: 'Kanit', sans-serif !important;
+}
+
+/* Timeline animations */
+@keyframes slideUpFade {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-timeline-item {
+  animation-name: slideUpFade;
+  animation-duration: 360ms;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(.2,.9,.2,1);
+}
+
+.timeline-search {
+  -webkit-appearance: none;
+  appearance: none;
+}
