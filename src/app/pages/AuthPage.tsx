@@ -300,7 +300,10 @@ const StepCredentials: React.FC<StepCredentialsProps> = ({
             />
           </span>
           <span className={`text-[10px] text-[#555555] font-medium leading-normal ${fontFor(lang)}`}>
-            {t.agreeText}
+            {t.agreeText} {' '}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#CCFF00]">ข้อกำหนดการใช้งาน</a>
+            {' '}&{' '}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#CCFF00]">นโยบายความเป็นส่วนตัว</a>
           </span>
         </label>
       )}
@@ -388,8 +391,8 @@ const StepVerify: React.FC<StepVerifyProps> = ({
       inputMode="numeric"
       pattern="[0-9]*"
       value={code}
-      placeholder="00000000"
-      maxLength={8}
+      placeholder="000000"
+      maxLength={6}
       autoComplete="one-time-code"
       onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
       className="
@@ -400,6 +403,8 @@ const StepVerify: React.FC<StepVerifyProps> = ({
         outline-none transition-all duration-200
       "
     />
+    {/* OTP helper text */}
+    <p className="text-[10px] text-[#555555] text-center mt-1">กรอกรหัส OTP 6 หลักที่ส่งไปยังอีเมลของคุณ</p>
 
     {/* Resend timer — green = alive signal */}
     <div className="text-center select-none">

@@ -1,0 +1,52 @@
+name: Sentry Release & Source Maps
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-upload-sourcemaps:
+    name: Build and upload sourcemaps to Sentry
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Create Sentry release
+        id: sentry_release
+        run: |
+          export RELEASE=${{ github.sha }}
+          echo "RELEASE=$RELEASE" >> $GITHUB_ENV
+          npx @sentry/cli releases new -p ${{ secrets.SENTRY_PROJECT }} $RELEASE
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+
+      - name: Upload sourcemaps to Sentry
+        run: |
+          RELEASE=${{ env.RELEASE }}
+          npx @sentry/cli releases files $RELEASE upload-sourcemaps ./dist --url-prefix '~/assets' --rewrite
+          npx @sentry/cli releases finalize $RELEASE
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+
+      - name: Set Sentry release env var for deployment
+        run: |
+          echo "SENTRY_RELEASE=${{ env.RELEASE }}" >> $GITHUB_ENV

@@ -15,6 +15,10 @@ import {
   updateUserSubscription,
   deleteUserSubscription,
 } from '../services/subscriptionService';
+import { fetchUserWallets, updateWalletBalance, type UserWallet } from '../services/walletService';
+import { fetchUserTransactions, addUserTransaction, type UserTransaction } from '../services/transactionService';
+import { parseBankSms, resolveWalletIdByBankName, type ParsedSmsResult } from '../utils/bankSmsParser';
+import { CANCELLATION_PLAYBOOKS, type Playbook } from '../data/cancellationPlaybooks';
 import { getProfile } from '../services/authService';
 import {
   fetchCancellationProgress,
@@ -264,200 +268,26 @@ const BottomTabButton: React.FC<NavItem> = ({ icon: Icon, label, active, locked,
   </button>
 );
 
-// ─── Cancellation Playbooks Database (Legally Researched Thai & Global Rules) ───
-interface PlaybookContactInfo {
-  channel: string;
-  details: string;
-  hours?: string;
-  phone?: string;
-  url?: string;
-}
-
-interface Playbook {
-  provider_name: string;
-  category: string;
-  notice_period_days: number;
-  cancellation_method: string;
-  required_documents: string[];
-  estimated_duration: string;
-  penalty_information: string;
-  contact_information: PlaybookContactInfo;
-}
-
-const CANCELLATION_PLAYBOOKS: Record<string, Playbook> = {
-  'Premium Gym Club': {
-    provider_name: 'Premium Gym Club',
-    category: 'Health & Fitness',
-    notice_period_days: 30,
-    cancellation_method: 'ติดต่อยื่นคำร้องด้วยตนเอง ณ คลับสาขาที่สมัครสมาชิก',
-    required_documents: ['บัตรสมาชิก (Physical หรือ Digital Card)', 'บัตรประจำตัวประชาชน'],
-    estimated_duration: '30 วัน (มีผลในรอบบิลถัดไปหลังจากได้รับการยืนยัน)',
-    penalty_information: 'หากยกเลิกก่อนครบกำหนดตามสัญญา (สัญญา 12 เดือน) มีค่าธรรมเนียมยกเลิกก่อนกำหนด 3,000 บาท ยกเว้นกรณีเจ็บป่วย/ประสบอุบัติเหตุที่ไม่สามารถออกกำลังกายได้ตามความเห็นแพทย์ (ต้องใช้ใบรับรองแพทย์จากโรงพยาบาล) หรือศูนย์บริการไม่สามารถเปิดให้บริการได้ติดต่อกันเกิน 7 วัน ตามประกาศควบคุมธุรกิจฟิตเนส สคบ. พ.ศ. 2554',
-    contact_information: {
-      channel: 'ฝ่ายบริการลูกค้าประจำสาขา (Customer Service)',
-      details: 'กรุณาเดินทางไปติดต่อ ณ คลับสาขาที่ท่านลงนามสมัครใช้บริการ เพื่อทำการกรอกแบบฟอร์มยืนยันตัวตน',
-      phone: '02-123-4567',
-      hours: 'จันทร์ - ศุกร์ 06:00 - 22:00 น. / เสาร์ - อาทิตย์ 08:00 - 22:00 น.'
-    }
-  },
-  'Netflix Premium': {
-    provider_name: 'Netflix Premium',
-    category: 'Entertainment',
-    notice_period_days: 0,
-    cancellation_method: 'กดยกเลิกออนไลน์ผ่านทางเว็บเบราว์เซอร์หรือแอปพลิเคชัน',
-    required_documents: ['ไม่มีเอกสารหลักฐานที่ต้องยื่น'],
-    estimated_duration: 'มีผลทันที (ท่านสามารถรับชมต่อได้จนกว่าจะสิ้นสุดรอบการคิดเงินปัจจุบัน)',
-    penalty_information: 'ไม่มีค่าปรับหรือข้อผูกมัดสัญญาใดๆ สามารถยกเลิกและเปิดใช้งานใหม่ได้ทุกเมื่อ',
-    contact_information: {
-      channel: 'Netflix Help Center',
-      details: 'กดยกเลิกที่เมนู บัญชี > ยกเลิกสมาชิก บนเว็บไซต์หลัก',
-      url: 'https://netflix.com/youraccount'
-    }
-  },
-  'Spotify Duo': {
-    provider_name: 'Spotify Duo',
-    category: 'Entertainment',
-    notice_period_days: 0,
-    cancellation_method: 'กดยกเลิกผ่านหน้าจัดการบัญชีบนเว็บไซต์',
-    required_documents: ['ไม่มีเอกสารหลักฐานที่ต้องยื่น'],
-    estimated_duration: 'มีผลทันที เมื่อครบรอบบิลระบบจะปรับสถานะเป็นบัญชีทั่วไป (Free) โดยไม่มีค่าใช้จ่าย',
-    penalty_information: 'ไม่มีค่าปรับหรือข้อผูกมัด สามารถกดยกเลิกสิทธิ์พรีเมียมเพื่อหยุดการเรียกเก็บเงินได้ตลอดเวลา',
-    contact_information: {
-      channel: 'Spotify Account Settings',
-      details: 'เข้าเว็บไซต์หลัก ไปที่โปรไฟล์ > บัญชี > แผนบริการของคุณ > เปลี่ยนแผนบริการ > ยกเลิกพรีเมียม',
-      url: 'https://accounts.spotify.com'
-    }
-  },
-  'ChatGPT Plus': {
-    provider_name: 'ChatGPT Plus',
-    category: 'Productivity',
-    notice_period_days: 1,
-    cancellation_method: 'กดยกเลิกแผนบริการผ่าน Stripe Billing Portal',
-    required_documents: ['ไม่มีเอกสารหลักฐานที่ต้องยื่น'],
-    estimated_duration: 'มีผลทันที (ต้องดำเนินการก่อนครบกำหนดตัดเงินอย่างน้อย 24 ชั่วโมง)',
-    penalty_information: 'ไม่มีค่าปรับ ต้องกดยกเลิกล่วงหน้า 24 ชั่วโมงก่อนถึงกำหนดต่ออายุเพื่อระงับการเรียกชำระค่าบริการรอบถัดไป',
-    contact_information: {
-      channel: 'OpenAI Billing Settings',
-      details: 'เข้าหน้าเว็บ ChatGPT ไปที่ Settings > My Plan > Manage my subscription เพื่อเปิดหน้าต่าง Stripe Customer Portal และกดยกเลิกแผนบริการ',
-      url: 'https://chatgpt.com'
-    }
-  }
-};
-
-// ─── Bank SMS Regex Parsing Utility ──────────────────────────────────────────
-interface ParsedSmsResult {
-  amount: number;
-  walletId: string;
-  categoryName: string;
-  notes: string;
-  bankName: string;
-}
-
-const parseBankSms = (text: string): ParsedSmsResult | null => {
-  const scbRegex = /SCB:\s*จ่ายบัตร\s*[xX]-\d+\s*จำนวน\s*([\d,.]+)\s*บาท\s*ที่\s*(.+)/i;
-  const kbankRegex = /KBank:\s*โอนเงิน\s*([\d,.]+)\s*บาท\s*ไปยัง\s*(.+)/i;
-  const uobRegex = /UOB:\s*รูดบัตร\s*[xX]-\d+\s*จำนวน\s*([\d,.]+)\s*บาท\s*ที่\s*(.+)/i;
-
-  let amount = 0;
-  let notes = '';
-  let bankName = '';
-  let walletId = '2'; // default to SCB
-
-  if (scbRegex.test(text)) {
-    const match = text.match(scbRegex);
-    if (match) {
-      amount = parseFloat(match[1].replace(/,/g, ''));
-      notes = match[2].trim();
-      bankName = 'SCB';
-      walletId = '4'; // SCB Credit Card or Visa Credit
-    }
-  } else if (kbankRegex.test(text)) {
-    const match = text.match(kbankRegex);
-    if (match) {
-      amount = parseFloat(match[1].replace(/,/g, ''));
-      notes = match[2].trim();
-      bankName = 'KBank';
-      walletId = '3'; // KBank Account
-    }
-  } else if (uobRegex.test(text)) {
-    const match = text.match(uobRegex);
-    if (match) {
-      amount = parseFloat(match[1].replace(/,/g, ''));
-      notes = match[2].trim();
-      bankName = 'UOB';
-      walletId = '4'; // Visa Credit
-    }
-  } else {
-    // Generic fallback parser
-    const genericAmountRegex = /(?:จำนวน|โอนเงิน|จ่าย)\s*([\d,.]+)\s*บาท/i;
-    const amountMatch = text.match(genericAmountRegex);
-    if (amountMatch) {
-      amount = parseFloat(amountMatch[1].replace(/,/g, ''));
-    }
-    
-    if (text.toLowerCase().includes('scb')) {
-      bankName = 'SCB';
-      walletId = '2';
-    } else if (text.toLowerCase().includes('kbank')) {
-      bankName = 'KBank';
-      walletId = '3';
-    } else if (text.toLowerCase().includes('uob')) {
-      bankName = 'UOB';
-      walletId = '4';
-    } else {
-      bankName = 'Cash Pocket';
-      walletId = '1';
-    }
-    notes = text.length > 30 ? text.substring(0, 30) + '...' : text;
-  }
-
-  if (amount <= 0) return null;
-
-  // Keyword-based category mapping
-  let categoryName = 'Food & Dining'; // default
-  const lowerNotes = notes.toLowerCase();
-  if (lowerNotes.includes('starbuck') || lowerNotes.includes('coffee') || lowerNotes.includes('cafe') || lowerNotes.includes('กาแฟ')) {
-    categoryName = 'Specialty Coffee';
-  } else if (lowerNotes.includes('grab') || lowerNotes.includes('bts') || lowerNotes.includes('mrt') || lowerNotes.includes('taxi') || lowerNotes.includes('เเท็กซี่') || lowerNotes.includes('ขนส่ง')) {
-    categoryName = 'Transportation';
-  } else if (lowerNotes.includes('somtam') || lowerNotes.includes('ส้มตำ') || lowerNotes.includes('อาหาร') || lowerNotes.includes('shabu') || lowerNotes.includes('ชาบู') || lowerNotes.includes('mk')) {
-    categoryName = 'Food & Dining';
-  }
-
-  return { amount, walletId, categoryName, notes, bankName };
-};
-
 // ─── Main Dashboard Component ─────────────────────────────────────────────────
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState<string>('');
 
   // ─── Financial Subsystem State ───
-  const [wallets, setWallets] = useState<Wallet[]>([
-    { id: '1', name: 'Cash Pocket', type: 'cash', balance: 1350, color: 'from-[#CCFF00] to-[#CCFF00]' },
-    { id: '2', name: 'SCB Savings', type: 'bank', balance: 20000, color: 'from-[#6366f1] to-[#4f46e5]' },
-    { id: '3', name: 'KBank Account', type: 'bank', balance: 15000, color: 'from-[#10b981] to-[#059669]' },
-    { id: '4', name: 'Visa Credit', type: 'credit_card', balance: 10000, color: 'from-[#f59e0b] to-[#d97706]' }
-  ]);
+  // FIX: Initialize with empty arrays - load from database on mount
+  const [wallets, setWallets] = useState<Wallet[]>([]);
 
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loadingSubscriptions, setLoadingSubscriptions] = useState<boolean>(true);
+  const [loadingWallets, setLoadingWallets] = useState<boolean>(true);
+  const [loadingTransactions, setLoadingTransactions] = useState<boolean>(true);
   const [subscriptionFormOpen, setSubscriptionFormOpen] = useState<boolean>(false);
   const [subscriptionDraft, setSubscriptionDraft] = useState<Subscription | null>(null);
   const [subscriptionSaving, setSubscriptionSaving] = useState<boolean>(false);
   const [subscriptionError, setSubscriptionError] = useState<string>('');
 
-  const [budgets, setBudgets] = useState<Budget[]>([
-    { categoryName: 'Food & Dining', limit: 8000, spent: 4200, color: 'bg-primary' },
-    { categoryName: 'Transportation', limit: 3000, spent: 750, color: 'bg-blue-400' },
-    { categoryName: 'Specialty Coffee', limit: 2000, spent: 900, color: 'bg-amber-500' }
-  ]);
-
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    { id: '1', walletName: 'SCB Savings', categoryName: 'Specialty Coffee', amount: 150, notes: 'Premium Drip', date: 'Today' },
-    { id: '2', walletName: 'Cash Pocket', categoryName: 'Food & Dining', amount: 240, notes: 'Lunch', date: 'Today' },
-    { id: '3', walletName: 'KBank Account', categoryName: 'Transportation', amount: 450, notes: 'Ride home', date: 'Yesterday' }
-  ]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const formatSubscriptionDate = (date: string) => {
     const parsed = new Date(date);
@@ -506,7 +336,46 @@ const Dashboard: React.FC = () => {
       }
     };
 
+    const loadWallets = async () => {
+      setLoadingWallets(true);
+      try {
+        const walletData = await fetchUserWallets();
+        setWallets(walletData.map((w: UserWallet) => ({
+          id: w.id,
+          name: w.name,
+          type: w.wallet_type,
+          balance: Number(w.balance),
+          color: w.color_gradient,
+        })));
+      } catch (err) {
+        console.error('[Dashboard] Unable to load wallets:', err);
+      } finally {
+        setLoadingWallets(false);
+      }
+    };
+
+    const loadTransactions = async () => {
+      setLoadingTransactions(true);
+      try {
+        const txData = await fetchUserTransactions(20);
+        setTransactions(txData.map((t: UserTransaction) => ({
+          id: t.id,
+          walletName: t.wallet_name,
+          categoryName: t.category_name,
+          amount: Number(t.amount),
+          notes: t.notes || '',
+          date: new Date(t.transaction_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        })));
+      } catch (err) {
+        console.error('[Dashboard] Unable to load transactions:', err);
+      } finally {
+        setLoadingTransactions(false);
+      }
+    };
+
     loadSubscriptions();
+    loadWallets();
+    loadTransactions();
   }, []);
 
   const openSubscriptionForm = (subscription?: Subscription) => {
@@ -594,17 +463,26 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteSubscription = async (subscriptionId: string) => {
-    const shouldDelete = window.confirm('ลบ subscription นี้จริงหรือไม่?');
-    if (!shouldDelete) return;
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
+  const handleDeleteSubscription = async (subscriptionId: string) => {
+    setPendingDeleteId(subscriptionId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteSubscription = async () => {
+    if (!pendingDeleteId) return;
+    setDeleteConfirmOpen(false);
     try {
-      await deleteUserSubscription(subscriptionId);
-      setSubscriptions((prev) => prev.filter((sub) => sub.id !== subscriptionId));
+      await deleteUserSubscription(pendingDeleteId);
+      setSubscriptions((prev) => prev.filter((sub) => sub.id !== pendingDeleteId));
     } catch (err) {
       console.error('[Dashboard] delete subscription failed:', err);
-      window.alert('ลบ subscription ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      // Show error via toast instead of window.alert
+      setSmsToast?.('ลบ subscription ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
     }
+    setPendingDeleteId(null);
   };
 
   const nextRenewalSubscription = useMemo(() => {
@@ -951,7 +829,9 @@ const Dashboard: React.FC = () => {
     });
 
     // 2. Low Balance Warning (-10 points if SCB Savings is below 5,000 THB)
-    const scbWallet = wallets.find((w) => w.id === '2');
+    const scbWallet = wallets.find(
+      (w) => w.name.toLowerCase().includes('scb') || w.name.includes('ไทยพาณิชย์')
+    );
     if (scbWallet && scbWallet.balance < 5000) {
       score -= 10;
     }
@@ -1095,18 +975,27 @@ const Dashboard: React.FC = () => {
     };
   }, []);
 
-  const editDeadlineSettings = () => {
-    try {
-      const n = window.prompt('Notify when <= days (current: ' + notificationThreshold + ')', String(notificationThreshold));
-      const u = window.prompt('Urgent badge when <= days (current: ' + urgentBadgeDays + ')', String(urgentBadgeDays));
-      if (n !== null) {
-        const nv = Math.max(0, parseInt(n, 10) || notificationThreshold);
-        setNotificationThreshold(nv);
-        localStorage.setItem('notif_threshold_v1', String(nv));
-        // persist to server
-        (async () => {
-          try {
-            const { data: { user } } = await supabase.auth.getUser();
+  const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
+  const [settingsThreshold, setSettingsThreshold] = useState(notificationThreshold);
+  const [settingsUrgent, setSettingsUrgent] = useState(urgentBadgeDays);
+
+  const openDeadlineSettings = () => {
+    setSettingsThreshold(notificationThreshold);
+    setSettingsUrgent(urgentBadgeDays);
+    setSettingsSheetOpen(true);
+  };
+
+  const saveDeadlineSettings = () => {
+    const nv = Math.max(0, settingsThreshold);
+    const uv = Math.max(0, settingsUrgent);
+    setNotificationThreshold(nv);
+    setUrgentBadgeDays(uv);
+    localStorage.setItem('notif_threshold_v1', String(nv));
+    localStorage.setItem('urgent_badge_days_v1', String(uv));
+    setSettingsSheetOpen(false);
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
             if (user) {
               await supabase.from('user_settings').upsert({ user_id: user.id, notif_threshold: nv }, { onConflict: 'user_id' });
             }
@@ -1114,25 +1003,10 @@ const Dashboard: React.FC = () => {
             console.error('Failed to persist notif threshold to server:', e);
           }
         })();
+      } catch (err) {
+        console.error('Failed to persist settings to server:', err);
       }
-      if (u !== null) {
-        const uv = Math.max(0, parseInt(u, 10) || urgentBadgeDays);
-        setUrgentBadgeDays(uv);
-        localStorage.setItem('urgent_badge_days_v1', String(uv));
-        (async () => {
-          try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-              await supabase.from('user_settings').upsert({ user_id: user.id, urgent_badge_days: uv }, { onConflict: 'user_id' });
-            }
-          } catch (e) {
-            console.error('Failed to persist urgent badge days to server:', e);
-          }
-        })();
-      }
-    } catch (err) {
-      console.error('Failed to update deadline settings:', err);
-    }
+    })();
   };
 
   // Trigger browser notifications (once per subscription) when close to deadline
@@ -1179,24 +1053,25 @@ const Dashboard: React.FC = () => {
   const handleConfirmSmsTransaction = () => {
     if (!parsedResult) return;
 
-    const { amount, walletId, categoryName, notes, bankName } = parsedResult;
+    const { amount, categoryName, notes, bankName } = parsedResult;
 
-    // 1. Deduct from wallet balance
+    // Resolve actual wallet UUID from bank name
+    const resolvedWalletId = resolveWalletIdByBankName(bankName, wallets);
+    const activeWallet = wallets.find((w) => w.id === resolvedWalletId);
+
+    // 1. Deduct from wallet balance (optimistic update)
+    let newWalletBalance = 0;
     setWallets((prev) =>
-      prev.map((w) =>
-        w.id === walletId ? { ...w, balance: Math.max(0, w.balance - amount) } : w
-      )
+      prev.map((w) => {
+        if (w.id === resolvedWalletId) {
+          newWalletBalance = Math.max(0, w.balance - amount);
+          return { ...w, balance: newWalletBalance };
+        }
+        return w;
+      })
     );
 
-    // 2. Increase budget spent
-    setBudgets((prev) =>
-      prev.map((b) =>
-        b.categoryName === categoryName ? { ...b, spent: b.spent + amount } : b
-      )
-    );
-
-    // 3. Add to transaction history list
-    const activeWallet = wallets.find((w) => w.id === walletId);
+    // 2. Add to transaction history list (optimistic update)
     const newTx: Transaction = {
       id: Date.now().toString(),
       walletName: activeWallet ? activeWallet.name : bankName,
@@ -1206,6 +1081,19 @@ const Dashboard: React.FC = () => {
       date: 'Today',
     };
     setTransactions((prev) => [newTx, ...prev]);
+
+    // 3. Persist to database (async, non-blocking)
+    if (resolvedWalletId) {
+      updateWalletBalance(resolvedWalletId, newWalletBalance).catch(console.error);
+      addUserTransaction({
+        wallet_id: resolvedWalletId,
+        wallet_name: activeWallet ? activeWallet.name : bankName,
+        category_name: categoryName,
+        amount,
+        notes: notes || '',
+        transaction_date: new Date().toISOString().split('T')[0],
+      }).catch(console.error);
+    }
 
     trackEvent('sms_transaction_logged', { amount, bankName, categoryName });
     triggerHaptic('success');
@@ -1218,7 +1106,15 @@ const Dashboard: React.FC = () => {
   // ─── Transaction Logger Sheet UI State ───
   const [isLogOpen, setIsLogOpen] = useState<boolean>(false);
   const [inputAmount, setInputAmount] = useState<string>('0');
-  const [selectedWalletId, setSelectedWalletId] = useState<string>('2'); // default to SCB
+  const [selectedWalletId, setSelectedWalletId] = useState<string>('');
+
+  // Set default wallet once wallets are loaded from DB
+  useEffect(() => {
+    if (wallets.length > 0 && !selectedWalletId) {
+      const defaultWallet = wallets.find((w) => w.type === 'bank') || wallets[0];
+      setSelectedWalletId(defaultWallet.id);
+    }
+  }, [wallets, selectedWalletId]);
   const [selectedCategoryName, setSelectedCategoryName] = useState<string>('Food & Dining');
   const [inputNotes, setInputNotes] = useState<string>('');
 
@@ -1260,14 +1156,19 @@ const Dashboard: React.FC = () => {
     const parsedAmount = parseFloat(inputAmount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) return;
 
-    // Deduct from wallet balance
+    // Deduct from wallet balance (optimistic update)
+    let newWalletBalance = 0;
     setWallets((prev) =>
-      prev.map((w) =>
-        w.id === selectedWalletId ? { ...w, balance: Math.max(0, w.balance - parsedAmount) } : w
-      )
+      prev.map((w) => {
+        if (w.id === selectedWalletId) {
+          newWalletBalance = Math.max(0, w.balance - parsedAmount);
+          return { ...w, balance: newWalletBalance };
+        }
+        return w;
+      })
     );
 
-    // Add to transaction list
+    // Add to transaction list (optimistic update)
     const activeWallet = wallets.find((w) => w.id === selectedWalletId);
     const newTx: Transaction = {
       id: Date.now().toString(),
@@ -1279,12 +1180,18 @@ const Dashboard: React.FC = () => {
     };
     setTransactions((prev) => [newTx, ...prev]);
 
-    // Increase budget spent if budget category matches
-    setBudgets((prev) =>
-      prev.map((b) =>
-        b.categoryName === selectedCategoryName ? { ...b, spent: b.spent + parsedAmount } : b
-      )
-    );
+    // Persist to database (async, non-blocking)
+    if (selectedWalletId) {
+      updateWalletBalance(selectedWalletId, newWalletBalance).catch(console.error);
+      addUserTransaction({
+        wallet_id: selectedWalletId,
+        wallet_name: activeWallet ? activeWallet.name : 'Wallet',
+        category_name: selectedCategoryName,
+        amount: parsedAmount,
+        notes: inputNotes.trim() || '',
+        transaction_date: new Date().toISOString().split('T')[0],
+      }).catch(console.error);
+    }
 
     trackEvent('financial_transaction_logged', { amount: parsedAmount, category: selectedCategoryName });
     triggerHaptic('success');
@@ -1302,9 +1209,9 @@ const Dashboard: React.FC = () => {
   const navItems: NavItem[] = [
     {
       icon: Compass,
-      label: 'Discover',
+      label: 'Dashboard',
       active: true,
-      onClick: () => trackEvent('feature_usage', { feature: 'discover_tab' }),
+      onClick: () => {}, // Already on Dashboard
     },
     {
       icon: WalletCards,
@@ -1612,7 +1519,7 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 <div className="pt-2.5 border-t border-white/10 text-[10px] text-gray-400 font-kanit flex justify-between items-center">
-                  <span>บัญชีปลายทาง: <strong className="text-white font-bold">{wallets.find(w => w.id === parsedResult.walletId)?.name || parsedResult.bankName}</strong></span>
+                  <span>บัญชีปลายทาง: <strong className="text-white font-bold">{(() => { const wid = resolveWalletIdByBankName(parsedResult.bankName, wallets); return wallets.find(w => w.id === wid)?.name || parsedResult.bankName; })()}</strong></span>
                   <span>งวดงบประมาณ: <strong className="text-white font-bold">{parsedResult.categoryName}</strong></span>
                 </div>
 
@@ -1790,7 +1697,7 @@ const Dashboard: React.FC = () => {
             {/* Budget Planners & Dynamic Gauges */}
             <div className="bg-white border-0 shadow-lg rounded-2xl p-5 space-y-4 text-[#000000]">
               <h3 className="font-black text-[#000000] text-sm flex items-center gap-2">
-                <Compass size={16} className="text-[#000000]" /> Category Budgets (June)
+                <Compass size={16} className="text-[#000000]" /> Category Budgets ({new Date().toLocaleDateString('en-US', { month: 'long' })})
               </h3>
               
               <div className="space-y-4">
@@ -1950,7 +1857,7 @@ const Dashboard: React.FC = () => {
                 จำนวนเงินที่ต้องการบันทึก
               </p>
               <p className="text-4xl font-extrabold text-primary font-mono tracking-tight">
-                {parseFloat(inputAmount).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                {(isNaN(parseFloat(inputAmount)) ? 0 : parseFloat(inputAmount)).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                 <span className="text-xs text-primary/70 font-normal ml-2">THB</span>
               </p>
             </div>

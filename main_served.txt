@@ -1,4 +1,7 @@
-﻿import.meta.env = {"BASE_URL": "/", "DEV": true, "MODE": "development", "PROD": false, "SSR": false, "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttZmxncnh0ZnNpcnlxd2RnZ3BjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMzc0NjcsImV4cCI6MjA5MzkxMzQ2N30.EhblfTNtB87Ha--njSFKqyjle75N6e2UJMV39MeGBzo", "VITE_SUPABASE_URL": "https://kmflgrxtfsiryqwdggpc.supabase.co"};const StrictMode = __vite__cjsImport0_react["StrictMode"];const createRoot = __vite__cjsImport1_reactDom_client["createRoot"];const _jsxDEV = __vite__cjsImport4_react_jsxDevRuntime["jsxDEV"];import __vite__cjsImport0_react from "/node_modules/.vite/deps/react.js?v=c47ce50e";
+﻿// Inlined environment variables removed for security. Provide these via runtime
+// environment variables (import.meta.env or process.env). Hardcoded credentials
+// were redacted.
+const StrictMode = __vite__cjsImport0_react["StrictMode"];const createRoot = __vite__cjsImport1_reactDom_client["createRoot"];const _jsxDEV = __vite__cjsImport4_react_jsxDevRuntime["jsxDEV"];import __vite__cjsImport0_react from "/node_modules/.vite/deps/react.js?v=c47ce50e";
 import __vite__cjsImport1_reactDom_client from "/node_modules/.vite/deps/react-dom_client.js?v=c47ce50e";
 import "/src/styles/theme.css?t=1780326927911";
 import App from "/src/App.tsx?t=1780326927911";

@@ -1,0 +1,13 @@
+{
+  "name": "Retention Cohorts - DailyStack",
+  "dataset_query": {
+    "type": "native",
+    "native": {
+      "query": "-- Retention cohorts (D1, D7, D30)\nWITH first_activity AS (\n  SELECT user_id, MIN(created_at) AS first_seen\n  FROM user_events\n  WHERE event_name IN ('signup_completed','first_subscription_added')\n  GROUP BY user_id\n), events AS (\n  SELECT ue.user_id, ue.created_at, fa.first_seen\n  FROM user_events ue\n  JOIN first_activity fa ON fa.user_id = ue.user_id\n  WHERE ue.created_at BETWEEN fa.first_seen AND fa.first_seen + interval '30 days'\n)\nSELECT date_trunc('day', first_seen) AS cohort_day,\n  COUNT(DISTINCT user_id) AS cohort_size,\n  COUNT(DISTINCT CASE WHEN created_at < first_seen + interval '1 day' THEN user_id END) AS d0_active,\n  COUNT(DISTINCT CASE WHEN created_at < first_seen + interval '2 day' THEN user_id END) AS d1_active,\n  COUNT(DISTINCT CASE WHEN created_at < first_seen + interval '8 day' THEN user_id END) AS d7_active,\n  COUNT(DISTINCT CASE WHEN created_at < first_seen + interval '31 day' THEN user_id END) AS d30_active\nFROM events\nGROUP BY cohort_day\nORDER BY cohort_day;"
+    },
+    "database": 1
+  },
+  "visualization_settings": {},
+  "display": "table",
+  "description": "Cohort retention table for D0/D1/D7/D30"
+}

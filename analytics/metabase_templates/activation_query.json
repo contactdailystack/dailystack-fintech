@@ -1,0 +1,13 @@
+{
+  "name": "Activation Funnel - DailyStack",
+  "dataset_query": {
+    "type": "native",
+    "native": {
+      "query": "-- Activation funnel (replace :start_date and :end_date in Metabase)\nSELECT date_trunc('day', created_at) AS day,\n  count(*) FILTER (WHERE event_name = 'signup_completed') AS signups,\n  count(DISTINCT user_id) FILTER (WHERE event_name = 'first_subscription_added') AS first_added,\n  count(DISTINCT user_id) FILTER (WHERE event_name = 'second_subscription_added') AS second_added,\n  count(DISTINCT user_id) FILTER (WHERE event_name = 'aha_moment_seen') AS aha_seen\nFROM user_events\nWHERE created_at BETWEEN {{start_date}} AND {{end_date}}\nGROUP BY day\nORDER BY day;"
+    },
+    "database": 1
+  },
+  "visualization_settings": {},
+  "display": "table",
+  "description": "Daily activation funnel: signups → add1 → add2 → aha"
+}

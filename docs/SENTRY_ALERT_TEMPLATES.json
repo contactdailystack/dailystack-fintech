@@ -1,0 +1,40 @@
+{
+  "alerts": [
+    {
+      "name": "High error spike",
+      "type": "metric",
+      "condition": {
+        "metric": "error_count",
+        "threshold": 200,
+        "interval_minutes": 5
+      },
+      "actions": [
+        { "type": "slack", "channel": "#alerts" },
+        { "type": "pagerduty", "service": "ops-service" }
+      ]
+    },
+    {
+      "name": "New release regressions",
+      "type": "issue",
+      "condition": {
+        "metric": "errors_in_release",
+        "compare_to_previous": true
+      },
+      "actions": [
+        { "type": "slack", "channel": "#deploy-alerts" }
+      ]
+    },
+    {
+      "name": "Frequent specific error",
+      "type": "metric",
+      "condition": {
+        "metric": "error_fingerprint_count",
+        "threshold": 50,
+        "interval_minutes": 10
+      },
+      "actions": [
+        { "type": "slack", "channel": "#alerts" }
+      ]
+    }
+  ]
+}

@@ -4,8 +4,6 @@ This template provides a minimal setup to get React working in Vite with HMR and
 
 Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
 ## React Compiler
 
@@ -70,4 +68,20 @@ export default defineConfig([
     },
   },
 ])
+
+## Closed-Beta Readiness — Quick Ops
+
+- CI smoke tests: see `.github/workflows/ci-smoke-tests.yml`.
+- Run local smoke test (requires Supabase envs):
+
+```bash
+export SUPABASE_URL=... 
+export SUPABASE_ANON_KEY=...
+npm run smoke
+```
+
+- Rotate Supabase keys: consult `docs/PR_ROTATE_SUPABASE_KEYS.md` and `docs/ROTATE_SUPABASE_KEYS.md`.
+
+- Sentry alerts: templates in `docs/SENTRY_ALERT_TEMPLATES.json` and helper script `scripts/create_sentry_alerts.sh` (manual review recommended).
+
 ```

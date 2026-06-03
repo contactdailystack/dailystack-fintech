@@ -1,4 +1,7 @@
-﻿import.meta.env = {"BASE_URL": "/", "DEV": true, "MODE": "development", "PROD": false, "SSR": false, "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttZmxncnh0ZnNpcnlxd2RnZ3BjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMzc0NjcsImV4cCI6MjA5MzkxMzQ2N30.EhblfTNtB87Ha--njSFKqyjle75N6e2UJMV39MeGBzo", "VITE_SUPABASE_URL": "https://kmflgrxtfsiryqwdggpc.supabase.co"};import { createClient } from "/node_modules/.vite/deps/@supabase_supabase-js.js?v=c47ce50e";
+﻿// Inlined environment variables removed for security. Provide these via
+// runtime environment variables (import.meta.env or process.env). Hardcoded
+// credentials were redacted.
+import { createClient } from "/node_modules/.vite/deps/@supabase_supabase-js.js?v=c47ce50e";
 // Helper to read environment variables from Vite's import.meta.env when available,
 // and fall back to Node's process.env for test / Node contexts (Playwright, SSR, etc.).
 function readEnv(key) {

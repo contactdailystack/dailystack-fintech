@@ -1,0 +1,38 @@
+name: CI Smoke Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  smoke-tests:
+    name: Build + Smoke Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run smoke tests
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          npm run smoke || (echo 'Smoke tests failed' && exit 1)
+
+      - name: Optional: run e2e (if enabled)
+        if: ${{ env.RUN_E2E == 'true' }}
+        run: |
+          echo 'E2E run placeholder'

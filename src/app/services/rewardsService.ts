@@ -83,58 +83,12 @@ export const PREMIUM_CARD_PRESETS = [
   }
 ];
 
-// Fallback Mock Cards in case Database has no entries
-const MOCK_USER_CARDS: CreditCardData[] = [
-  {
-    id: 'mock-scb',
-    card_name: 'SCB M Live',
-    bank_name: 'SCB',
-    card_type: 'visa',
-    color_gradient: 'from-[#6366f1] to-[#4f46e5]',
-    last_four: '8829',
-    rules: [
-      { categoryName: 'Food & Dining', cashbackPercent: 5.0, pointsMultiplier: 3 },
-      { categoryName: 'Specialty Coffee', cashbackPercent: 5.0, pointsMultiplier: 3 },
-      { categoryName: 'Transportation', cashbackPercent: 2.0, pointsMultiplier: 1 },
-      { categoryName: 'Active & Fitness', cashbackPercent: 1.0, pointsMultiplier: 1 }
-    ]
-  },
-  {
-    id: 'mock-citi',
-    card_name: 'Citi Cashback',
-    bank_name: 'Citi',
-    card_type: 'visa',
-    color_gradient: 'from-[#0ea5e9] to-[#0284c7]',
-    last_four: '1092',
-    rules: [
-      { categoryName: 'Transportation', cashbackPercent: 11.0, pointsMultiplier: 1 },
-      { categoryName: 'Food & Dining', cashbackPercent: 1.0, pointsMultiplier: 1 },
-      { categoryName: 'Specialty Coffee', cashbackPercent: 5.0, pointsMultiplier: 1 },
-      { categoryName: 'Active & Fitness', cashbackPercent: 1.0, pointsMultiplier: 1 }
-    ]
-  },
-  {
-    id: 'mock-cash',
-    card_name: 'Cash Pocket',
-    bank_name: 'Wallet',
-    card_type: 'cash',
-    color_gradient: 'from-[#CCFF00] to-[#CCFF00]',
-    last_four: 'CASH',
-    rules: [
-      { categoryName: 'Food & Dining', cashbackPercent: 0.0, pointsMultiplier: 0 },
-      { categoryName: 'Specialty Coffee', cashbackPercent: 0.0, pointsMultiplier: 0 },
-      { categoryName: 'Transportation', cashbackPercent: 0.0, pointsMultiplier: 0 },
-      { categoryName: 'Active & Fitness', cashbackPercent: 0.0, pointsMultiplier: 0 }
-    ]
-  }
-];
-
-// ─── Database Operations (Supabase Layer with Mock Fallback) ───
+// ─── Database Operations (Supabase Layer) ───
 
 export const fetchUserCreditCards = async (): Promise<CreditCardData[]> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return MOCK_USER_CARDS;
+    if (!user) return [];
 
     const { data, error } = await supabase
       .from('user_credit_cards')

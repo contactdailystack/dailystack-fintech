@@ -5,6 +5,7 @@ import {
   Coffee, Utensils, MapPin, Dumbbell, ShieldCheck, TrendingUp, Info
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { supabase } from '../services/supabaseClient';
 import { trackEvent } from '../../utils/analytics';
 import {
   fetchUserCreditCards,
@@ -116,12 +117,17 @@ export const RewardsHub: React.FC = () => {
 
   useEffect(() => {
     const loadCards = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/auth');
+        return;
+      }
       const fetched = await fetchUserCreditCards();
       setCards(fetched);
       setLoading(false);
     };
     loadCards();
-  }, []);
+  }, [navigate]);
 
   // Compute recommendation derived state synchronously during render (React Best Practice)
   const recommendation = cards.length > 0

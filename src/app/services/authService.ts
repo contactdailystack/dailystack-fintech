@@ -312,18 +312,28 @@ export async function sendOtp(
   }
 
   try {
+    // Client-side protection: prevent rapid repeat sends for same email
+    try {
+      const key = `dailystack:otp:last:${email.trim().toLowerCase()}`;
+      const last = Number(window.localStorage.getItem(key) || '0');
+      const now = Date.now();
+      const throttleMs = 60 * 1000; // 60 seconds
+      if (last && now - last < throttleMs) {
+        const remaining = Math.ceil((throttleMs - (now - last)) / 1000);
+        const err = new Error(`OTP_THROTTLED:${remaining}`);
+        // attach a code for programmatic handling
+        (err as any).code = 'OTP_THROTTLED';
+        (err as any).remaining = remaining;
+        throw err;
+      }
+    } catch (e) {
+      // ignore storage errors
+    }
     // Log request-level diagnostics to help debug 'Failed to fetch' issues.
-    // Do NOT log sensitive secrets in production — this is only for dev/test debugging.
-    console.debug('[sendOtp] Supabase URL:', creds.url);
-    console.debug('[sendOtp] Using placeholder creds:', creds.usingPlaceholder);
-
-    // Construct the REST endpoint the client will call so we can see the exact URL.
-    const authEndpoint = (creds.url || '').replace(/\/$/, '') + '/auth/v1/otp';
-    console.debug('[sendOtp] Expected auth REST endpoint:', authEndpoint);
-
-    // Log the headers that the Supabase client will include for the request.
-    // We avoid printing the full anonKey but show whether it's present.
-    console.debug('[sendOtp] Headers: { apikey: <present?>', !!creds.anonKey, ', Authorization: Bearer <present?>', !!creds.anonKey, '}');
+    // Dev diagnostics: only print non-sensitive indicators when explicitly enabled.
+    if ((import.meta.env as any)?.VITE_ENABLE_DEV_DIAG === 'true') {
+      console.debug('[sendOtp] Supabase URL present:', !!creds.url, 'Using placeholder:', !!creds.usingPlaceholder);
+    }
 
     const res = await supabase.auth.signInWithOtp({
       email: email.trim().toLowerCase(),
@@ -332,11 +342,30 @@ export async function sendOtp(
         data: options?.data,
       },
     });
+    if ((import.meta.env as any)?.VITE_ENABLE_DEV_DIAG === 'true') {
+      try {
+        // Avoid logging sensitive tokens — show only high-level status
+        console.debug('[sendOtp] Supabase SDK response (status):', !!res?.data?.user, !!res?.error);
+      } catch {
+        // ignore
+      }
+    }
 
-    console.debug('[sendOtp] Supabase SDK response', JSON.stringify(res));
+    // On success, record timestamp to throttle future sends from this client
+    try {
+      if (!res.error) {
+        const key = `dailystack:otp:last:${email.trim().toLowerCase()}`;
+        window.localStorage.setItem(key, String(Date.now()));
+      }
+    } catch (e) {
+      // ignore storage errors
+    }
     return res;
   } catch (error) {
     // Provide a rich error log to the console to capture network layer failures.
+    // If we threw an OTP_THROTTLED error above, pass it through so UI can handle remaining seconds
+    if ((error as any)?.code === 'OTP_THROTTLED') throw error;
+
     console.error('[sendOtp] Error calling supabase.auth.signInWithOtp', {
       message: (error as Error).message ?? String(error),
       stack: (error as Error).stack ?? null,
