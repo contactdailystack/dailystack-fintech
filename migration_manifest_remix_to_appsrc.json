@@ -1,0 +1,80 @@
+{
+  "manifest": [
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/main.tsx",
+      "target": "app/src/main.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/index.css",
+      "target": "app/src/index.css"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/types.ts",
+      "target": "app/src/lib/types.ts"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/data/mockFintechData.ts",
+      "target": "app/src/data/mockFintechData.ts"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/data/wireframeMetadata.ts",
+      "target": "app/src/data/wireframeMetadata.ts"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/data/translations.ts",
+      "target": "app/src/data/translations.ts"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/App.tsx",
+      "target": "app/src/App.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/InsightsPage.tsx",
+      "target": "app/src/components/InsightsPage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/DatabasePage.tsx",
+      "target": "app/src/components/DatabasePage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/DashboardPage.tsx",
+      "target": "app/src/components/DashboardPage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/AuthPage.tsx",
+      "target": "app/src/components/AuthPage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/AICoachPage.tsx",
+      "target": "app/src/components/AICoachPage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/ActivityPage.tsx",
+      "target": "app/src/components/ActivityPage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/PaywallPage.tsx",
+      "target": "app/src/components/PaywallPage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/OnboardingPage.tsx",
+      "target": "app/src/components/OnboardingPage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/MorePage.tsx",
+      "target": "app/src/components/MorePage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/StateSimulatorWrapper.tsx",
+      "target": "app/src/components/StateSimulatorWrapper.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/ProfileSettingsPage.tsx",
+      "target": "app/src/components/ProfileSettingsPage.tsx"
+    },
+    {
+      "source": "docs/executive-briefs/remix_-my-closet---final-step (1)/src/components/WeeklyStoryPage.tsx",
+      "target": "app/src/components/WeeklyStoryPage.tsx"
+    }
+  ]
+}

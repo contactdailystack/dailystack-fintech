@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="375" height="812" viewBox="0 0 375 812" xmlns="http://www.w3.org/2000/svg">
+  <rect width="375" height="812" fill="#161821"/>
+  <!-- Header / Search -->
+  <rect x="0" y="0" width="375" height="72" fill="#12141C" />
+  <rect x="16" y="88" width="343" height="44" rx="10" fill="#232733" />
+  <!-- Filter chips -->
+  <rect x="16" y="144" width="100" height="32" rx="16" fill="#2D313E" />
+  <rect x="124" y="144" width="100" height="32" rx="16" fill="#2D313E" />
+  <rect x="232" y="144" width="100" height="32" rx="16" fill="#2D313E" />
+  <!-- Group header -->
+  <rect x="16" y="196" width="343" height="28" rx="8" fill="#1A1D26" />
+  <!-- List items -->
+  <rect x="16" y="236" width="343" height="56" rx="12" fill="#232733" />
+  <rect x="16" y="300" width="343" height="56" rx="12" fill="#232733" />
+  <rect x="16" y="364" width="343" height="56" rx="12" fill="#232733" />
+  <rect x="16" y="428" width="343" height="56" rx="12" fill="#232733" />
+  <!-- Bottom nav -->
+  <rect x="0" y="756" width="375" height="56" fill="#12141C" />
+</svg>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="375" height="672" viewBox="0 0 375 672" xmlns="http://www.w3.org/2000/svg">
+  <rect width="375" height="672" fill="#161821" />
+  <!-- Bottom sheet background -->
+  <rect x="0" y="240" width="375" height="432" rx="20" fill="#1A1D26" />
+  <!-- Drag handle -->
+  <rect x="158" y="252" width="58" height="6" rx="3" fill="#2D313E" />
+  <!-- Amount display -->
+  <text x="36" y="300" fill="#F8FAFC" font-family="Inter, sans-serif" font-size="36" font-weight="700">฿ 0.00</text>
+  <!-- Category selector -->
+  <rect x="16" y="340" width="343" height="56" rx="12" fill="#232733" />
+  <!-- Note input -->
+  <rect x="16" y="406" width="343" height="40" rx="10" fill="#0F1724" />
+  <!-- Keypad -->
+  <rect x="18" y="458" width="339" height="176" rx="12" fill="#12141C" />
+  <rect x="30" y="474" width="80" height="48" rx="8" fill="#232733" />
+  <rect x="118" y="474" width="80" height="48" rx="8" fill="#232733" />
+  <rect x="206" y="474" width="80" height="48" rx="8" fill="#232733" />
+  <rect x="30" y="530" width="80" height="48" rx="8" fill="#232733" />
+  <rect x="118" y="530" width="80" height="48" rx="8" fill="#232733" />
+  <rect x="206" y="530" width="80" height="48" rx="8" fill="#232733" />
+  <!-- Save CTA -->
+  <rect x="16" y="640" width="343" height="56" rx="14" fill="#C7FF2E" />
+  <text x="186" y="676" fill="#000000" font-family="Inter, sans-serif" font-size="16" font-weight="700" text-anchor="middle">Save Expense</text>
+</svg>

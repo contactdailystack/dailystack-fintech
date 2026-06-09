@@ -1,0 +1,20 @@
+{
+  "name": "app",
+  "private": true,
+  "dependencies": {
+    "lucide-react": "^1.17.0",
+    "motion": "^12.40.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "vite": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:app": "npm --prefix app run dev -- --host",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}

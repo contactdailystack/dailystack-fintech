@@ -1,0 +1,67 @@
+# ===========================
+# DailyStack - .gitignore
+# ===========================
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+build/
+*/dist/
+
+# Environment - NEVER COMMIT
+.env
+.env.local
+.env.*.local
+.env.production
+.env.production.local
+*.env
+
+# Supabase temp files
+supabase/.temp/
+
+# OpenCode / AI workspace temp
+.opencode/tmp/
+.opencode/cache/
+.mavis/plans/
+.mavis/sessions/
+.mavis/tmp/
+
+# Test artifacts
+test-results/
+reports/html/
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Logs
+*.log
+npm-debug.log*
+
+# Playwright
+playwright-report/
+test-results/
+
+# Large binary files
+*.png
+*.jpg
+*.gif
+*.svg
+!app/public/*.svg
+!app/src/**/*.svg
+
+# Mavis agent artifacts
+.mavis/**/*.md
+.mavis/**/*.json
+!.mavis/skills/

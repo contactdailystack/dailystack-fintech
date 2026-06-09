@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="375" height="812" viewBox="0 0 375 812" xmlns="http://www.w3.org/2000/svg">
+  <rect width="375" height="812" fill="#161821"/>
+  <text x="20" y="44" fill="#F8FAFC" font-family="Inter, sans-serif" font-size="18" font-weight="700">Spending Patterns</text>
+  <rect x="16" y="64" width="343" height="220" rx="12" fill="#1A1D26" />
+  <text x="36" y="96" fill="#F8FAFC" font-family="Inter, sans-serif" font-size="14">Heatmap: Day × Hour</text>
+  <rect x="16" y="296" width="343" height="120" rx="12" fill="#232733" />
+  <text x="36" y="328" fill="#F8FAFC" font-family="Inter, sans-serif" font-size="13">Weekly trends & spikes</text>
+  <rect x="0" y="756" width="375" height="56" fill="#12141C" />
+</svg>
