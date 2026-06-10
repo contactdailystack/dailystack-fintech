@@ -38,6 +38,7 @@ const MoneyTwinPage          = lazy(() => import('./components/MoneyTwinPage'));
 
 // Wallet + FBIS
 import { getOrCreateWallet } from './services/walletService';
+import { loadTransactions, dbTransactionToActivityTx } from './services/transactionService';
 import { getOrInitFBIS } from './services/fbisService';
 import type { FBISMetaRecord } from './services/fbisService';
 
@@ -114,26 +115,32 @@ function AppShell() {
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [fbis, setFbis] = useState<FBISMetaRecord | null>(null);
 
-  // Load real wallet + FBIS data from Supabase on mount
-  useEffect(() => {
-    if (!auth.user) return;
+    // Load real wallet + FBIS data from Supabase on mount
+    useEffect(() => {
+      if (!auth.user) return;
 
-    const loadRealtimeData = async () => {
-      const [wallet, fbisData] = await Promise.all([
-        getOrCreateWallet(),
-        getOrInitFBIS(),
-      ]);
+      const loadRealtimeData = async () => {
+        const [wallet, fbisData, dbTxs] = await Promise.all([
+          getOrCreateWallet(),
+          getOrInitFBIS(),
+          loadTransactions(),
+        ]);
 
-      setProfile(prev => ({
-        ...prev,
-        balance: wallet.balance,
-        portfolioValue: wallet.balance, // portfolio tied to wallet for now
-      }));
-      setFbis(fbisData);
-    };
+        setProfile(prev => ({
+          ...prev,
+          balance: wallet.balance,
+          portfolioValue: wallet.balance,
+        }));
+        setFbis(fbisData);
 
-    loadRealtimeData();
-  }, [auth.user]);
+        // Replace mock transactions with real data from Supabase (if any)
+        if (dbTxs.length > 0) {
+          setTransactions(dbTxs.map(tx => dbTransactionToActivityTx(tx)));
+        }
+      };
+
+      loadRealtimeData();
+    }, [auth.user]);
 
   // Keep profile in sync with auth state
   useEffect(() => {

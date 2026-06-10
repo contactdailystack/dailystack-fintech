@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DollarSign, BrainCircuit, Activity, Sparkles, ChevronRight, Check, Shield, Target, Globe } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../data/translations';
 import { supabase } from '../supabaseClient';
 
@@ -67,13 +67,16 @@ export default function OnboardingPage({ onComplete, lang, setLang, onCurrencySe
             {lang === 'en' ? 'EN' : 'TH'}
           </button>
 
-          <button 
-            id="btn-skip-onboarding"
-            onClick={onComplete}
-            className="font-mono text-[10px] uppercase tracking-widest transition-colors cursor-pointer text-zinc-500 hover:text-white"
-          >
-            {t.introductionSkip}
-          </button>
+            <button
+              id="btn-skip-onboarding"
+              onClick={async () => {
+                await saveOnboardingPreferences();
+                onComplete();
+              }}
+              className="font-mono text-[10px] uppercase tracking-widest transition-colors cursor-pointer text-zinc-500 hover:text-white"
+            >
+              {t.introductionSkip}
+            </button>
         </div>
       </div>
 

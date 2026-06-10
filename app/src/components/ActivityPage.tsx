@@ -8,6 +8,7 @@ import { Transaction, UserProfile, Emotion } from '../types';
 import { Language } from '../data/translations';
 import { useAuthContext } from '../services/AuthContext';
 import { recordStreakDay, addPositiveXP } from '../services/fbisService';
+import { saveTransaction } from '../services/transactionService';
 
 interface ActivityPageProps {
   transactions: Transaction[];
@@ -240,6 +241,27 @@ export default function ActivityPage({
     };
 
     onAddTransaction(newTx);
+
+    // Persist to Supabase — fire-and-forget
+    saveTransaction({
+      amount: finalAmount,
+      description: merchant.trim(),
+      category,
+      emotion,
+      why: why.trim() || (lang === 'en' ? 'Logged mindfully.' : 'บันทึกอย่างมีสติ'),
+      workspace,
+      location: activeFormFields.location ? locationValue : undefined,
+      timeOfDay: new Date().getHours() >= 21 ? 'Midnight' : (new Date().getHours() >= 17 ? 'Evening' : 'Afternoon'),
+      dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()],
+      intent: activeFormFields.intent ? intent : undefined,
+      riskScore,
+      habitScore,
+      behavioralCategory: derivedBehavioralCategory,
+      patternMatch: aiPresetPattern ? aiPresetPattern.matchingTerm : 'Unplanned Outflow',
+      goalImpact: derivedBehavioralCategory === 'Investment' ? 'Optimizes Vanguard index speed by 11.2%' : (derivedBehavioralCategory === 'Impulse' ? 'Minor budget drift warning' : 'Normal routine balance'),
+      behaviorImpact: derivedBehavioralCategory === 'Impulse' ? 'Dopamine levels inflation trigger' : 'Core stability index reinforced',
+      financialHealthImpact: finalAmount > 0 ? 'Expands reserve capital multipliers' : 'Marginal utility subtraction',
+    });
 
     // Update profile balance or portfolio
     if (emotion === 'Investment') {

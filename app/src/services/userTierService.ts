@@ -120,9 +120,15 @@ export const updateUserDisplayName = async (displayName: string): Promise<boolea
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
 
+    const cleanName = displayName
+      .replace(/<[^>]*>/g, '')
+      .replace(/[<>'"&]/g, '')
+      .trim()
+      .slice(0, 100);
+
     const { error } = await supabase
       .from('users')
-      .update({ display_name: displayName, updated_at: new Date().toISOString() })
+      .update({ display_name: cleanName, updated_at: new Date().toISOString() })
       .eq('id', user.id);
 
     if (error) throw error;

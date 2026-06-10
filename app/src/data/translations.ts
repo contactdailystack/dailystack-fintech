@@ -1,4 +1,4 @@
-﻿﻿export type Language = 'en' | 'th';
+﻿export type Language = 'en' | 'th';
 
 export interface TranslationDict {
   // Navigation tabs
@@ -112,7 +112,7 @@ export interface TranslationDict {
   baseCurrencySub: string;
   baseCurrencySelect: string;
   baseCurrencyConfirm: string;
-  baseCurrencyThai: string;
+  baseCurrencyTHB: string;
   baseCurrencyUsd: string;
   baseCurrencyEur: string;
   baseCurrencyGbp: string;
@@ -445,7 +445,7 @@ export const translations: Record<Language, TranslationDict> = {
     baseCurrencySub: "Choose your primary currency for all calculations and tracking",
     baseCurrencySelect: "Select Currency",
     baseCurrencyConfirm: "Confirm Currency",
-    baseCurrencyThai: "Thai Baht (THB)",
+    baseCurrencyTHB: "Thai Baht (THB)",
     baseCurrencyUsd: "US Dollar (USD)",
     baseCurrencyEur: "Euro (EUR)",
     baseCurrencyGbp: "British Pound (GBP)",
@@ -771,7 +771,7 @@ alternativeLocked: "ELITE Tier Required",
     baseCurrencySub: "เลือกสกุลเงินหลักสำหรับการคำนวณและติดตามทั้งหมด",
     baseCurrencySelect: "เลือกสกุลเงิน",
     baseCurrencyConfirm: "ยืนยันสกุลเงิน",
-    baseCurrencyThai: "บาทไทย (THB)",
+    baseCurrencyTHB: "บาทไทย (THB)",
     baseCurrencyUsd: "ดอลลาร์สหรัฐ (USD)",
     baseCurrencyEur: "ยูโร (EUR)",
     baseCurrencyGbp: "ปอนด์สเตอร์ลิง (GBP)",
