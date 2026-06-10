@@ -1,10 +1,8 @@
-import { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ShieldCheck, Fingerprint, ArrowRight, AlertCircle } from 'lucide-react';
+﻿import { useState } from 'react';
+import { Mail, Lock, Eye, EyeOff, ShieldCheck, Fingerprint, ArrowRight, AlertCircle, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations, Language } from '../data/translations';
-import { signIn, signUp, requestOtp, verifyOtp } from '../services/authService';
-import { OTPInput } from './OTPInput';
-import { supabase } from '../supabaseClient';
+import { signIn, signUp, resendConfirmationEmail } from '../services/authService';
 
 interface AuthPageProps {
   onLoginSuccess: (email: string) => void;
@@ -12,26 +10,24 @@ interface AuthPageProps {
   setLang: (lang: Language) => void;
 }
 
-type AuthMode = 'login' | 'otp-verify';
+type AuthView = 'login' | 'register' | 'email-confirmation';
 
 export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [authView, setAuthView] = useState<AuthView>('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [authMode, setAuthMode] = useState<AuthMode>('login');
-  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
-  const [otpSent, setOtpSent] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const t = translations[lang];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
-    if (isRegistering && password.length < 8) {
+    if (authView === 'register' && password.length < 8) {
       setError(lang === 'en' ? 'Password must be at least 8 characters.' : 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
       return;
     }
@@ -40,18 +36,12 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
     setLoading(true);
 
     try {
-      if (isRegistering) {
+      if (authView === 'register') {
         const result = await signUp({ email, password, fullName });
-        if (result.success && result.user) {
-          // OTP flow: signup successful, now send OTP
-          setPendingUserId(result.user.id);
-          const otpResult = await requestOtp(result.user.id, email);
-          if (otpResult.success) {
-            setOtpSent(true);
-            setAuthMode('otp-verify');
-          } else {
-            setError(otpResult.error || (lang === 'en' ? 'Failed to send verification code.' : 'ไม่สามารถส่งรหัสยืนยันได้'));
-          }
+        if (result.success && result.needsEmailConfirmation) {
+          setAuthView('email-confirmation');
+        } else if (result.success) {
+          onLoginSuccess(email);
         } else {
           setError(result.error || (lang === 'en' ? 'Registration failed.' : 'การลงทะเบียนล้มเหลว'));
         }
@@ -68,41 +58,28 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
     }
   };
 
-  // OTP verification handlers
-  const handleOtpVerify = async (otp: string): Promise<boolean> => {
-    if (!pendingUserId) return false;
-    const result = await verifyOtp(pendingUserId, otp);
-    return result.success;
-  };
-
-  const handleOtpResend = async (): Promise<void> => {
-    if (!pendingUserId || !email) return;
-    const result = await requestOtp(pendingUserId, email);
+  const handleResendConfirmation = async () => {
+    setResending(true);
+    setError(null);
+    const result = await resendConfirmationEmail(email);
     if (!result.success) {
-      throw new Error(result.error || 'Failed to resend OTP');
+      setError(result.error || (lang === 'en' ? 'Failed to resend email.' : 'ไม่สามารถส่งอีเมลอีกครั้ง'));
     }
+    setResending(false);
   };
 
-  const handleOtpBack = async () => {
-    // Sign out the pending user and go back
-    await supabase.auth.signOut();
-    setAuthMode('login');
-    setPendingUserId(null);
-    setOtpSent(false);
+  const handleBackToLogin = () => {
+    setAuthView('login');
     setEmail('');
     setPassword('');
     setFullName('');
-    setIsRegistering(false);
-  };
-
-  const handleOtpSuccess = () => {
-    onLoginSuccess(email);
+    setError(null);
   };
 
   const handleGoogleOAuth = async () => {
-    const { supabase } = await import('../supabaseClient');
     setError(null);
     setLoading(true);
+    const { supabase } = await import('../supabaseClient');
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -115,17 +92,82 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
     }
   };
 
-  // OTP verification screen
-  if (authMode === 'otp-verify') {
+  // Email confirmation screen
+  if (authView === 'email-confirmation') {
     return (
-      <OTPInput
-        email={email}
-        mode="verify"
-        lang={lang}
-        onVerify={handleOtpVerify}
-        onResend={handleOtpResend}
-        onBack={handleOtpBack}
-      />
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-[#0C0D0E]">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full bg-[#C7FF2E]/10 blur-[100px] pointer-events-none" />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md border rounded-[28px] p-8 md:p-10 backdrop-blur-md relative z-10 bg-[#131416]/90 border-[#222428] shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            className="w-20 h-20 rounded-full bg-[#C7FF2E]/20 flex items-center justify-center mx-auto mb-6"
+          >
+            <Mail className="w-10 h-10 text-[#C7FF2E]" />
+          </motion.div>
+
+          <h2 className="font-display text-2xl font-extrabold text-white mb-2">
+            {lang === 'en' ? 'Check Your Email' : 'ตรวจสอบอีเมลของคุณ'}
+          </h2>
+
+          <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+            {lang === 'en'
+              ? "We've sent a confirmation link to"
+              : 'เราได้ส่งลิงก์ยืนยันไปยัง'}
+            <br />
+            <span className="text-[#C7FF2E] font-mono font-bold">{email}</span>
+          </p>
+
+          <p className="text-xs text-zinc-500 mb-6">
+            {lang === 'en'
+              ? 'Click the link in the email to activate your account.'
+              : 'คลิกลิงก์ในอีเมลเพื่อเปิดใช้งานบัญชีของคุณ'}
+          </p>
+
+          {error && (
+            <div className="mb-4 flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleResendConfirmation}
+            disabled={resending}
+            className="w-full py-3 rounded-2xl flex items-center justify-center gap-2 font-medium text-sm transition-all cursor-pointer bg-[#1A1B1E] border border-[#2B2D31] text-white hover:bg-[#25282E] disabled:opacity-50"
+          >
+            {resending ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>{lang === 'en' ? 'Sending...' : 'กำลังส่ง...'}</span>
+              </>
+            ) : (
+              <>
+                <Mail className="w-4 h-4" />
+                <span>{lang === 'en' ? "Didn't receive it? Resend" : 'ไม่ได้รับอีเมล? ส่งอีกครั้ง'}</span>
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handleBackToLogin}
+            className="mt-4 text-xs text-zinc-500 hover:text-[#C7FF2E] transition-colors cursor-pointer"
+          >
+            {lang === 'en' ? '← Back to login' : '← กลับไปหน้าเข้าสู่ระบบ'}
+          </button>
+        </motion.div>
+
+        <div className="absolute bottom-6 flex items-center gap-2 text-[10px] font-mono text-zinc-650">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+          <span>AES-256 BANK GRADE SECURED</span>
+        </div>
+      </div>
     );
   }
 
@@ -178,7 +220,7 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5" id="auth-form">
 
-          {isRegistering && (
+          {authView === 'register' && (
             <div className="space-y-1.5" id="field-name">
               <label className="block font-mono text-[10px] uppercase tracking-wider text-zinc-400">
                 {lang === 'en' ? 'Full Name' : 'ชื่อ-นามสกุล'}
@@ -221,7 +263,7 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
               <label className="block font-mono text-[10px] uppercase tracking-wider text-zinc-400">
                 {t.password}
               </label>
-              {!isRegistering && (
+              {authView !== 'register' && (
                 <button
                   type="button"
                   className="font-mono text-[9px] uppercase tracking-wider hover:underline text-[#C7FF2E]"
@@ -240,7 +282,7 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={isRegistering ? (lang === 'en' ? 'Min. 8 characters' : 'อย่างน้อย 8 ตัวอักษร') : '••••••••••••'}
+                placeholder={authView === 'register' ? (lang === 'en' ? 'Min. 8 characters' : 'อย่างน้อย 8 ตัวอักษร') : '•••••••••••'}
                 className="w-full border rounded-2xl pl-11 pr-11 py-3.5 text-sm transition-all duration-200 font-mono bg-[#1A1B1E] border-[#2B2D31] text-white placeholder-zinc-500 focus:border-[#C7FF2E] focus:ring-1 focus:ring-[#C7FF2E]/35"
               />
               <button
@@ -265,7 +307,7 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
             ) : (
               <>
                 <span className="font-display font-semibold text-sm">
-                  {isRegistering ? t.initAccount : t.enterOS}
+                  {authView === 'register' ? t.initAccount : t.enterOS}
                 </span>
                 <ArrowRight className="w-4 h-4" />
               </>
@@ -299,14 +341,14 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
 
         {/* Toggle register / login */}
         <p className="text-center font-mono text-[10px] uppercase tracking-wider mt-8 text-zinc-500" id="auth-toggle">
-          {isRegistering ? t.alreadyEngineered : t.newToDailyStack}
+          {authView === 'register' ? t.alreadyEngineered : t.newToDailyStack}
           <button
             id="btn-auth-mode-toggle"
             type="button"
             className="hover:underline ml-1 uppercase font-bold text-[#C7FF2E]"
-            onClick={() => { setIsRegistering(!isRegistering); setError(null); }}
+            onClick={() => { setAuthView(authView === 'register' ? 'login' : 'register'); setError(null); }}
           >
-            {isRegistering ? t.loginCore : t.registerSecurely}
+            {authView === 'register' ? t.loginCore : t.registerSecurely}
           </button>
         </p>
       </motion.div>
