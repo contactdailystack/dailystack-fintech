@@ -168,7 +168,7 @@ export default function OnboardingPage({ onComplete, lang, setLang, onCurrencySe
                             {curr.code}
                           </div>
                           <div className="text-[10px] text-zinc-500">
-                            {t[`baseCurrency${curr.code}` as keyof typeof t] || curr.code}
+                            {String(t[`baseCurrency${curr.code}` as keyof typeof t] || curr.code)}
                           </div>
                         </div>
                       </div>
@@ -363,23 +363,6 @@ export default function OnboardingPage({ onComplete, lang, setLang, onCurrencySe
               }`}
             >
               <span>{activeStep === steps.length ? t.launchOS : t.nextStep}</span>
-              <ChevronRight className="w-4 h-4 font-bold" />
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-              }}
-              disabled={activeStep === 1 && selectedChallenge === null}
-              className={`w-full sm:w-auto px-8 py-4 rounded-2xl flex items-center justify-center gap-2 transition-all font-display font-extrabold text-xs uppercase tracking-wider ${
-                activeStep === 1 && selectedChallenge === null
-                  ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
-                  : 'text-black hover:scale-[1.01] cursor-pointer bg-[#C7FF2E] hover:bg-white'
-              }`}
-            >
-              <span>{activeStep === steps.length - 1 ? t.launchOS : t.nextStep}</span>
               <ChevronRight className="w-4 h-4 font-bold" />
             </button>
           )}

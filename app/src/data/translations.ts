@@ -1,4 +1,4 @@
-﻿export type Language = 'en' | 'th';
+﻿﻿export type Language = 'en' | 'th';
 
 export interface TranslationDict {
   // Navigation tabs
@@ -777,7 +777,7 @@ alternativeLocked: "ELITE Tier Required",
     baseCurrencyGbp: "ปอนด์สเตอร์ลิง (GBP)",
     baseCurrencyJpy: "เยนญี่ปุ่น (JPY)",
     baseCurrencySgd: "ดอลลาร์สิงคโปร์ (SGD)",
- "เรดาร์วิเคราะห์เอกลักษณ์เชิงจิตวิทยาการเงิน",
+    identityRadar: "การวิเคราะห์เรดาร์ระบุตัวตน",
     coreSignature: "รหัสระบุเอกลักษณ์พฤติกรรมทางการเงินขั้นพื้นฐาน",
     confidenceScore: "คะแนนความถูกต้องแม่นยำในการถอดสัญชาตญาณ",
     biometricIndicators: "ตัวบ่งชี้ชีวมาตรทางการเงินขั้นสูง",
