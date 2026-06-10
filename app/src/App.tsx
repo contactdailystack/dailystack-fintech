@@ -121,14 +121,21 @@ function AppShell() {
     setProfile(prev => ({
       ...prev,
       plan: auth.tier,
-      email: auth.user?.email || prev.email,
-      name: auth.profileName || prev.name,
-    }));
-  }, [auth.tier, auth.user?.email, auth.profileName]);
-
-  const handleUpdateProfile = (updatedFields: Partial<UserProfile>) => {
-    setProfile(prev => ({ ...prev, ...updatedFields }));
-  };
+        email: auth.user?.email || prev.email,
+        name: auth.profileName || prev.name,
+      }));
+    }, [auth.tier, auth.user?.email, auth.profileName]);
+  
+    const handleUpdateProfile = async (updatedFields: Partial<UserProfile>) => {
+      // Update local state
+      setProfile(prev => ({ ...prev, ...updatedFields }));
+      
+      // Persist display_name to Supabase users table if provided
+      if (updatedFields.name) {
+        const { updateUserDisplayName } = await import('./services/userTierService');
+        await updateUserDisplayName(updatedFields.name);
+      }
+    };
 
   const handleAddTransaction = (newTx: Transaction) => {
     setTransactions(prev => [newTx, ...prev]);

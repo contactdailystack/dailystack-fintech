@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DollarSign, BrainCircuit, Activity, Sparkles, ChevronRight, Check, Shield, Target } from 'lucide-react';
+import { DollarSign, BrainCircuit, Activity, Sparkles, ChevronRight, Check, Shield, Target, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { translations, Language } from '../data/translations';
 
@@ -7,12 +7,25 @@ interface OnboardingPageProps {
   onComplete: () => void;
   lang: Language;
   setLang: (lang: Language) => void;
+  onCurrencySelect?: (currency: string) => void;
 }
 
-export default function OnboardingPage({ onComplete, lang, setLang }: OnboardingPageProps) {
+export type SupportedCurrency = 'THB' | 'USD' | 'EUR' | 'GBP' | 'JPY' | 'SGD';
+
+const CURRENCIES: { code: SupportedCurrency; icon: string; flag: string }[] = [
+  { code: 'THB', icon: '฿', flag: '🇹🇭' },
+  { code: 'USD', icon: '$', flag: '🇺🇸' },
+  { code: 'EUR', icon: '€', flag: '🇪🇺' },
+  { code: 'GBP', icon: '£', flag: '🇬🇧' },
+  { code: 'JPY', icon: '¥', flag: '🇯🇵' },
+  { code: 'SGD', icon: 'S$', flag: '🇸🇬' },
+];
+
+export default function OnboardingPage({ onComplete, lang, setLang, onCurrencySelect }: OnboardingPageProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [isCommitted, setIsCommitted] = useState(false);
   const [selectedChallenge, setSelectedChallenge] = useState<number | null>(null);
+  const [selectedCurrency, setSelectedCurrency] = useState<SupportedCurrency | null>(null);
 
   const t = translations[lang];
   const steps = t.onboardingSteps;
@@ -69,7 +82,7 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
 
                 <div className="flex items-center justify-between mb-8" id="carousel-bulletins">
                   <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
-                    {t.moduleLabel} {activeStep + 1} / {steps.length}
+                    {t.moduleLabel} {activeStep + 1} / {steps.length + 1}
                   </span>
                   <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono tracking-widest uppercase bg-[#C7FF2E]/10 text-[#C7FF2E]">
                     <Target className="w-3 h-3" /> CORE CHALLENGE
@@ -113,14 +126,64 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
                   ))}
                 </div>
               </div>
-            ) : activeStep === 3 ? (
+            ) : activeStep === 2 ? (
+              /* Step 3: Base Currency Selection */
+              <div className="p-8 rounded-[32px] border relative overflow-hidden transition-all duration-300 bg-[#131416] border-[#222428]" id="currency-card">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#C7FF2E]/5 rounded-bl-[120px]" />
+
+                <div className="flex items-center justify-between mb-8" id="carousel-bulletins">
+                  <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
+                    {t.moduleLabel} {activeStep + 1} / {steps.length + 1}
+                  </span>
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono tracking-widest uppercase bg-[#C7FF2E]/10 text-[#C7FF2E]">
+                    <Globe className="w-3 h-3" /> BASE CURRENCY
+                  </span>
+                </div>
+
+                <div className="text-center mb-6">
+                  <h2 className="font-display text-xl md:text-2xl font-extrabold tracking-tight text-white">
+                    {t.baseCurrencyTitle}
+                  </h2>
+                  <p className="text-sm text-zinc-500 mt-2">
+                    {t.baseCurrencySub}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" id="currency-options">
+                  {CURRENCIES.map((curr) => (
+                    <button
+                      key={curr.code}
+                      id={`btn-currency-${curr.code}`}
+                      onClick={() => setSelectedCurrency(curr.code)}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all duration-200 cursor-pointer ${
+                        selectedCurrency === curr.code
+                          ? 'bg-[#C7FF2E]/10 border-[#C7FF2E] text-[#C7FF2E]'
+                          : 'bg-[#1A1B1E] border-[#2B2D31] text-zinc-300 hover:border-zinc-600'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl font-mono font-bold">{curr.icon}</span>
+                        <div>
+                          <div className={`font-display font-extrabold text-xs ${selectedCurrency === curr.code ? 'text-[#C7FF2E]' : 'text-white'}`}>
+                            {curr.code}
+                          </div>
+                          <div className="text-[10px] text-zinc-500">
+                            {t[`baseCurrency${curr.code}` as keyof typeof t] || curr.code}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : activeStep === 4 ? (
               /* Step 5: Commitment Declaration */
               <div className="p-8 rounded-[32px] border relative overflow-hidden transition-all duration-300 bg-[#131416] border-[#222428]" id="commitment-card">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#C7FF2E]/5 rounded-bl-[120px]" />
 
                 <div className="flex items-center justify-between mb-8" id="carousel-bulletins">
                   <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
-                    {t.moduleLabel} {activeStep + 1} / {steps.length}
+                    {t.moduleLabel} {activeStep + 1} / {steps.length + 1}
                   </span>
                   <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono tracking-widest uppercase bg-[#C7FF2E]/10 text-[#C7FF2E]">
                     <Shield className="w-3 h-3" /> {t.commitmentTitle}
@@ -133,7 +196,7 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
                       {t.commitmentSubtitle}
                     </h2>
                     <div className="font-display text-2xl md:text-3xl font-extrabold tracking-tight text-[#C7FF2E]">
-                      {steps[activeStep].statsVal}
+                      {steps[3].statsVal}
                     </div>
                   </div>
 
@@ -164,14 +227,14 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
                 </div>
               </div>
             ) : (
-              /* Steps 0, 2, 4: Visual showcase + narrative */
+              /* Steps 0, 3, 5: Visual showcase + narrative */
               <>
                 <div className="p-8 rounded-[32px] border relative overflow-hidden transition-all duration-300 bg-[#131416] border-[#222428]" id="visual-showcase">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#C7FF2E]/5 rounded-bl-[120px]" />
 
                   <div className="flex items-center justify-between mb-8" id="carousel-bulletins">
                     <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
-                      {t.moduleLabel} {activeStep + 1} / {steps.length}
+                      {t.moduleLabel} {activeStep + 1} / {steps.length + 1}
                     </span>
                     <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono tracking-widest uppercase bg-[#C7FF2E]/10 text-[#C7FF2E]">
                       <Sparkles className="w-3 h-3" /> {t.luxurySystem}
@@ -184,10 +247,10 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
                         {t.immediateImpact}
                       </h2>
                       <div className="font-display text-4xl md:text-5xl font-extrabold mt-2 mb-1 tracking-tight text-[#C7FF2E]">
-                        {steps[activeStep].statsVal}
+                        {steps[activeStep === 5 ? 4 : activeStep]?.statsVal || '$0'}
                       </div>
                       <p className="text-xs text-zinc-500 font-mono">
-                        {steps[activeStep].statsLabel}
+                        {steps[activeStep === 5 ? 4 : activeStep]?.statsLabel || ''}
                       </p>
                     </div>
 
@@ -211,10 +274,10 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
                 {/* Narrative text block */}
                 <div className="space-y-4" id="carousel-narrative">
                   <h1 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight leading-tight text-white">
-                    {steps[activeStep].title}
+                    {steps[activeStep === 5 ? 4 : activeStep]?.title || t.brand}
                   </h1>
                   <p className="text-sm md:text-base leading-relaxed font-sans max-w-xl text-zinc-400">
-                    {steps[activeStep].desc}
+                    {steps[activeStep === 5 ? 4 : activeStep]?.desc || ''}
                   </p>
                 </div>
               </>
@@ -228,7 +291,7 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
         
         {/* Navigation Dot indicators */}
         <div className="flex gap-2" id="positional-dots">
-          {steps.map((_, i) => (
+          {[...Array(steps.length + 1)].map((_, i) => (
             <button
                id={`btn-dot-${i}`}
                key={i}
@@ -246,12 +309,12 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
                onClick={() => setActiveStep(prev => prev - 1)}
                className="px-6 py-3.5 rounded-2xl font-mono text-[11px] uppercase tracking-widest transition-colors cursor-pointer text-zinc-400 hover:text-white"
             >
-              {lang === 'en' ? 'Back' : 'ย้อนกลับ'}
+              {lang === 'en' ? 'Back' : 'กลับ'}
             </button>
           )}
 
-          {/* Step 4 Commitment Controls */}
-          {activeStep === 3 ? (
+          {/* Step 5 Commitment Controls */}
+          {activeStep === 4 ? (
             <>
               <button
                 id="btn-decline-commitment"
@@ -262,7 +325,12 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
               </button>
               <button
                 id="btn-confirm-commitment"
-                onClick={onComplete}
+                onClick={() => {
+                  if (selectedCurrency && onCurrencySelect) {
+                    onCurrencySelect(selectedCurrency);
+                  }
+                  onComplete();
+                }}
                 disabled={!isCommitted}
                 className={`w-full sm:w-auto px-8 py-4 rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer font-display font-extrabold text-xs uppercase tracking-wider ${
                   isCommitted 
@@ -278,11 +346,31 @@ export default function OnboardingPage({ onComplete, lang, setLang }: Onboarding
             <button
               id="btn-next-step"
               onClick={() => {
-                if (activeStep < steps.length - 1) {
+                if (activeStep < steps.length) {
                   setActiveStep(prev => prev + 1);
                 } else {
+                  if (selectedCurrency && onCurrencySelect) {
+                    onCurrencySelect(selectedCurrency);
+                  }
                   onComplete();
                 }
+              }}
+              disabled={(activeStep === 1 && selectedChallenge === null) || (activeStep === 2 && selectedCurrency === null)}
+              className={`w-full sm:w-auto px-8 py-4 rounded-2xl flex items-center justify-center gap-2 transition-all font-display font-extrabold text-xs uppercase tracking-wider ${
+                (activeStep === 1 && selectedChallenge === null) || (activeStep === 2 && selectedCurrency === null)
+                  ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
+                  : 'text-black hover:scale-[1.01] cursor-pointer bg-[#C7FF2E] hover:bg-white'
+              }`}
+            >
+              <span>{activeStep === steps.length ? t.launchOS : t.nextStep}</span>
+              <ChevronRight className="w-4 h-4 font-bold" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
               }}
               disabled={activeStep === 1 && selectedChallenge === null}
               className={`w-full sm:w-auto px-8 py-4 rounded-2xl flex items-center justify-center gap-2 transition-all font-display font-extrabold text-xs uppercase tracking-wider ${

@@ -110,3 +110,24 @@ export const getTierPrice = (tier: SubscriptionTier): string => ({
 export const getTierAnnualPrice = (tier: SubscriptionTier): number => ({
   basic: 0, pro: 990, elite: 1990,
 }[tier]);
+
+
+/**
+ * Update the user's display_name in `users` table.
+ */
+export const updateUserDisplayName = async (displayName: string): Promise<boolean> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from('users')
+      .update({ display_name: displayName, updated_at: new Date().toISOString() })
+      .eq('id', user.id);
+
+    if (error) throw error;
+    return true;
+  } catch {
+    return false;
+  }
+};

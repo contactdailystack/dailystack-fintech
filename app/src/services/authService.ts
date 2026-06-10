@@ -91,3 +91,76 @@ export const onAuthStateChange = (callback: AuthCallback): (() => void) => {
   // Return cleanup function
   return () => data.subscription.unsubscribe();
 };
+
+
+// ��� OTP Functions ��������������������
+
+export interface OtpResult {
+  success: boolean;
+  error?: string;
+  code?: string;
+}
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+/**
+ * Request a new OTP for email verification.
+ * Returns success + expires_in seconds, or error message.
+ */
+export const requestOtp = async (userId: string, email: string): Promise<{ success: boolean; error?: string; expires_in?: number }> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/resend-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ user_id: userId, email }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      return { success: false, error: json.error || 'Failed to send OTP' };
+    }
+
+    return { success: true, expires_in: json.expires_in };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Network error during OTP request';
+    return { success: false, error: message };
+  }
+};
+
+/**
+ * Verify an OTP code.
+ * Returns success or error with optional code for UI handling.
+ */
+export const verifyOtp = async (userId: string, otpCode: string): Promise<OtpResult> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ user_id: userId, otp_code: otpCode }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      return { success: false, error: json.error, code: json.code };
+    }
+
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Network error during OTP verification';
+    return { success: false, error: message };
+  }
+};

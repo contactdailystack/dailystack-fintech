@@ -1,4 +1,4 @@
-export type Language = 'en' | 'th';
+﻿export type Language = 'en' | 'th';
 
 export interface TranslationDict {
   // Navigation tabs
@@ -106,6 +106,18 @@ export interface TranslationDict {
   loginCore: string;
   registerSecurely: string;
   bankSecured: string;
+
+  // Base Currency Selection
+  baseCurrencyTitle: string;
+  baseCurrencySub: string;
+  baseCurrencySelect: string;
+  baseCurrencyConfirm: string;
+  baseCurrencyThai: string;
+  baseCurrencyUsd: string;
+  baseCurrencyEur: string;
+  baseCurrencyGbp: string;
+  baseCurrencyJpy: string;
+  baseCurrencySgd: string;
 
   // AI Coach / Radar Screen
   identityRadar: string;
@@ -428,6 +440,18 @@ export const translations: Record<Language, TranslationDict> = {
     registerSecurely: "Register Securely",
     bankSecured: "AES-256 BANK GRADE SECURED",
 
+    // Base Currency Selection
+    baseCurrencyTitle: "Select Your Base Currency",
+    baseCurrencySub: "Choose your primary currency for all calculations and tracking",
+    baseCurrencySelect: "Select Currency",
+    baseCurrencyConfirm: "Confirm Currency",
+    baseCurrencyThai: "Thai Baht (THB)",
+    baseCurrencyUsd: "US Dollar (USD)",
+    baseCurrencyEur: "Euro (EUR)",
+    baseCurrencyGbp: "British Pound (GBP)",
+    baseCurrencyJpy: "Japanese Yen (JPY)",
+    baseCurrencySgd: "Singapore Dollar (SGD)",
+
     identityRadar: "IDENTITY ANALYSIS RADAR",
     coreSignature: "Core Financial Signature",
     confidenceScore: "ANALYSIS INTEGRITY CONFIDENCE",
@@ -741,7 +765,19 @@ alternativeLocked: "ELITE Tier Required",
     registerSecurely: "ติดตั้งรักษาสิทธิปลอดภัยสูงสุด",
     bankSecured: "คุ้มครองเครือข่ายด้วยระบบถอดรหัสระดับ AES-256",
 
-    identityRadar: "เรดาร์วิเคราะห์เอกลักษณ์เชิงจิตวิทยาการเงิน",
+
+    // Base Currency Selection
+    baseCurrencyTitle: "เลือกสกุลเงินหลักของคุณ",
+    baseCurrencySub: "เลือกสกุลเงินหลักสำหรับการคำนวณและติดตามทั้งหมด",
+    baseCurrencySelect: "เลือกสกุลเงิน",
+    baseCurrencyConfirm: "ยืนยันสกุลเงิน",
+    baseCurrencyThai: "บาทไทย (THB)",
+    baseCurrencyUsd: "ดอลลาร์สหรัฐ (USD)",
+    baseCurrencyEur: "ยูโร (EUR)",
+    baseCurrencyGbp: "ปอนด์สเตอร์ลิง (GBP)",
+    baseCurrencyJpy: "เยนญี่ปุ่น (JPY)",
+    baseCurrencySgd: "ดอลลาร์สิงคโปร์ (SGD)",
+ "เรดาร์วิเคราะห์เอกลักษณ์เชิงจิตวิทยาการเงิน",
     coreSignature: "รหัสระบุเอกลักษณ์พฤติกรรมทางการเงินขั้นพื้นฐาน",
     confidenceScore: "คะแนนความถูกต้องแม่นยำในการถอดสัญชาตญาณ",
     biometricIndicators: "ตัวบ่งชี้ชีวมาตรทางการเงินขั้นสูง",

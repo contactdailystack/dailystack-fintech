@@ -2,13 +2,17 @@ import { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, Fingerprint, ArrowRight, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations, Language } from '../data/translations';
-import { signIn, signUp } from '../services/authService';
+import { signIn, signUp, requestOtp, verifyOtp } from '../services/authService';
+import { OTPInput } from './OTPInput';
+import { supabase } from '../supabaseClient';
 
 interface AuthPageProps {
   onLoginSuccess: (email: string) => void;
   lang: Language;
   setLang: (lang: Language) => void;
 }
+
+type AuthMode = 'login' | 'otp-verify';
 
 export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProps) {
   const [email, setEmail] = useState('');
@@ -18,6 +22,9 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
   const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<AuthMode>('login');
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [otpSent, setOtpSent] = useState(false);
 
   const t = translations[lang];
 
@@ -35,8 +42,16 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
     try {
       if (isRegistering) {
         const result = await signUp({ email, password, fullName });
-        if (result.success) {
-          onLoginSuccess(email);
+        if (result.success && result.user) {
+          // OTP flow: signup successful, now send OTP
+          setPendingUserId(result.user.id);
+          const otpResult = await requestOtp(result.user.id, email);
+          if (otpResult.success) {
+            setOtpSent(true);
+            setAuthMode('otp-verify');
+          } else {
+            setError(otpResult.error || (lang === 'en' ? 'Failed to send verification code.' : 'ไม่สามารถส่งรหัสยืนยันได้'));
+          }
         } else {
           setError(result.error || (lang === 'en' ? 'Registration failed.' : 'การลงทะเบียนล้มเหลว'));
         }
@@ -45,12 +60,43 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
         if (result.success) {
           onLoginSuccess(email);
         } else {
-          setError(result.error || (lang === 'en' ? 'Invalid credentials.' : 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'));
+          setError(result.error || (lang === 'en' ? 'Invalid credentials.' : 'ข้อมูลเข้าสู่ระบบไม่ถูกต้อง'));
         }
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  // OTP verification handlers
+  const handleOtpVerify = async (otp: string): Promise<boolean> => {
+    if (!pendingUserId) return false;
+    const result = await verifyOtp(pendingUserId, otp);
+    return result.success;
+  };
+
+  const handleOtpResend = async (): Promise<void> => {
+    if (!pendingUserId || !email) return;
+    const result = await requestOtp(pendingUserId, email);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to resend OTP');
+    }
+  };
+
+  const handleOtpBack = async () => {
+    // Sign out the pending user and go back
+    await supabase.auth.signOut();
+    setAuthMode('login');
+    setPendingUserId(null);
+    setOtpSent(false);
+    setEmail('');
+    setPassword('');
+    setFullName('');
+    setIsRegistering(false);
+  };
+
+  const handleOtpSuccess = () => {
+    onLoginSuccess(email);
   };
 
   const handleGoogleOAuth = async () => {
@@ -68,6 +114,20 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
       setLoading(false);
     }
   };
+
+  // OTP verification screen
+  if (authMode === 'otp-verify') {
+    return (
+      <OTPInput
+        email={email}
+        mode="verify"
+        lang={lang}
+        onVerify={handleOtpVerify}
+        onResend={handleOtpResend}
+        onBack={handleOtpBack}
+      />
+    );
+  }
 
   return (
     <div id="auth-container" className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-[#0C0D0E]">
