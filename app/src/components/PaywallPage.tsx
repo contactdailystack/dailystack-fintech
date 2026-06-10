@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import QRCode from 'qrcode';
+import SlideToUpgrade from './SlideToUpgrade';
+
 import { UserProfile } from '../types';
 import { translations, Language } from '../data/translations';
 import {
@@ -514,31 +516,20 @@ export default function PaywallPage({
                       </p>
                     )}
                   </div>
-                  <button
-                    id="btn-execute-upgrade"
-                    onClick={handleUpgradeTrigger}
-                    disabled={loading || qrLoading}
-                    className={`font-display font-extrabold text-xs py-4 px-8 rounded-xl uppercase tracking-wider hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 cursor-pointer flex items-center gap-2 ${selectedTier === 'elite' ? 'bg-[#FFD700] text-black' : 'bg-[#C7FF2E] text-black'}`}
-                  >
-                    {qrLoading || loading ? (
-                      <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <span>
-                          {selectedTierData.price === 0
-                            ? lang === 'en'
-                              ? 'Current Plan'
-                              : 'แพลนปัจจุบัน'
-                            : lang === 'en'
-                            ? 'Upgrade Now'
-                            : 'อัพเกรดเลย'}
-                        </span>
-                        {selectedTierData.price > 0 && (
-                          <ArrowRight className="w-4 h-4" />
-                        )}
-                      </>
-                    )}
-                  </button>
+                   {selectedTierData.price > 0 ? (
+                     <div className="w-44">
+                       <SlideToUpgrade
+                         onSlideComplete={handleUpgradeTrigger}
+                         lang={lang}
+                         tierColor={selectedTier === 'elite' ? '#FFD700' : '#C7FF2E'}
+                         isLoading={loading || qrLoading}
+                       />
+                     </div>
+                   ) : (
+                     <span className="text-xs font-mono text-white/40 px-4 py-2">
+                       {lang === 'en' ? 'Current Plan' : 'แพลนปัจจุบัน'}
+                     </span>
+                   )}
                 </div>
               </div>
               <div className="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-white/10">
