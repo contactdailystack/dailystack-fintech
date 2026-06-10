@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import {
   LayoutDashboard, BrainCircuit, BarChart3, Settings, Crown, Star, Activity,
   X, Sliders, Sparkles, Target, Ruler, Zap, Microscope, Smartphone, Gem, Target as TargetIcon, CreditCard,
@@ -16,6 +17,7 @@ import type { SubscriptionTier } from './services/userTierService';
 
 // DailyStack sub-pages imports — code-split with React.lazy
 const AuthPage              = lazy(() => import('./components/AuthPage'));
+const AuthCallbackPage      = lazy(() => import('./components/AuthCallbackPage'));
 const OnboardingPage         = lazy(() => import('./components/OnboardingPage'));
 const DashboardPage          = lazy(() => import('./components/DashboardPage'));
 const ActivityPage           = lazy(() => import('./components/ActivityPage'));
@@ -56,8 +58,25 @@ import {
 export default function App() {
   return (
     <AuthProvider>
-      <AppShell />
+      <Routes>
+        <Route path="/auth/callback" element={<AuthCallbackPageWrapper />} />
+        <Route path="/*" element={<AppShell />} />
+      </Routes>
     </AuthProvider>
+  );
+}
+
+function AuthCallbackPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#0C0D0E]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-2 rounded-full animate-spin border-[#C7FF2E] border-t-transparent" />
+        </div>
+      </div>
+    }>
+      <AuthCallbackPage />
+    </Suspense>
   );
 }
 

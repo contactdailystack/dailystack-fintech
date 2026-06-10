@@ -28,9 +28,18 @@ export default function ProfileSettingsPage({
 
   const t = translations[lang];
 
+  const cleanDisplayName = (name: string): string => {
+    return name
+      .replace(/<[^>]*>/g, '')
+      .replace(/[<>'"&]/g, '')
+      .trim()
+      .slice(0, 100);
+  };
+
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateProfile({ name, email });
+    const safeName = cleanDisplayName(name);
+    onUpdateProfile({ name: safeName, email });
   };
 
   return (

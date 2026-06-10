@@ -45,10 +45,27 @@ serve(async (req: Request) => {
     }
 
     // ── Parse body ────────────────────────────────────────────────────────
-    const { tier, amount: clientAmount, currency = "thb", userId, productName } = await req.json();
+    const { tier, action, payment_intent_id, amount: clientAmount, currency = "thb", userId, productName } = await req.json();
+
+    // ── check_status action ────────────────────────────────────────────────
+    if (action === "check_status") {
+      if (!payment_intent_id) {
+        return new Response(JSON.stringify({ error: "Missing payment_intent_id" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const pi = await stripe.paymentIntents.retrieve(payment_intent_id);
+      return new Response(
+        JSON.stringify({ status: pi.status }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Server-side price enforcement - never trust client amount
-    const prices: Record<string, number> = { pro: 99, elite: 199 };
+    const prices: Record<string, number> = {
+      pro: parseInt(Deno.env.get("STRIPE_PRICE_PRO") ?? "99"),
+      elite: parseInt(Deno.env.get("STRIPE_PRICE_ELITE") ?? "199"),
+    };
     const amount = prices[tier];
     if (!amount) {
       return new Response(JSON.stringify({ error: "Invalid tier" }), {

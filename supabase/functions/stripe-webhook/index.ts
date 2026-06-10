@@ -68,7 +68,10 @@ serve(async (req: Request) => {
 
         // P0 Security Fix: validate amount matches expected tier price
         // This prevents clients from hacking metadata to upgrade to expensive tiers at cheap prices
-        const expectedPrices: Record<string, number> = { pro: 9900, elite: 19900 }; // in satang
+        const expectedPrices: Record<string, number> = {
+          pro: parseInt(Deno.env.get("STRIPE_PRICE_PRO") ?? "9900"),
+          elite: parseInt(Deno.env.get("STRIPE_PRICE_ELITE") ?? "19900"),
+        };
         const expectedAmount = expectedPrices[tier];
         if (!expectedAmount || pi.amount !== expectedAmount) {
           console.error(`[stripe-webhook] Amount mismatch: expected ${expectedAmount} satang for tier ${tier}, got ${pi.amount}`);

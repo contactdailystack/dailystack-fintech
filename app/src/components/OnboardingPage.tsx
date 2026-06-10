@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DollarSign, BrainCircuit, Activity, Sparkles, ChevronRight, Check, Shield, Target, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { translations, Language } from '../data/translations';
+import { supabase } from '../supabaseClient';
 
 interface OnboardingPageProps {
   onComplete: () => void;
@@ -29,6 +30,19 @@ export default function OnboardingPage({ onComplete, lang, setLang, onCurrencySe
 
   const t = translations[lang];
   const steps = t.onboardingSteps;
+
+  const saveOnboardingPreferences = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const updates: Record<string, unknown> = {};
+    if (selectedCurrency) updates.base_currency = selectedCurrency;
+    if (selectedChallenge !== null) updates.challenge = selectedChallenge;
+
+    if (Object.keys(updates).length > 0) {
+      await supabase.from('users').update(updates).eq('id', session.user.id);
+    }
+  };
 
   return (
     <div id="onboarding-viewport" className="min-h-screen flex flex-col justify-between p-6 md:p-10 relative overflow-hidden bg-[#0C0D0E] text-white">
@@ -325,7 +339,8 @@ export default function OnboardingPage({ onComplete, lang, setLang, onCurrencySe
               </button>
               <button
                 id="btn-confirm-commitment"
-                onClick={() => {
+                onClick={async () => {
+                  await saveOnboardingPreferences();
                   if (selectedCurrency && onCurrencySelect) {
                     onCurrencySelect(selectedCurrency);
                   }
@@ -345,10 +360,11 @@ export default function OnboardingPage({ onComplete, lang, setLang, onCurrencySe
           ) : (
             <button
               id="btn-next-step"
-              onClick={() => {
+              onClick={async () => {
                 if (activeStep < steps.length) {
                   setActiveStep(prev => prev + 1);
                 } else {
+                  await saveOnboardingPreferences();
                   if (selectedCurrency && onCurrencySelect) {
                     onCurrencySelect(selectedCurrency);
                   }

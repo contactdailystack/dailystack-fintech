@@ -8,14 +8,17 @@ interface SlideToUpgradeProps {
   lang: Language;
   tierColor: string; // e.g. '#C7FF2E' or '#FFD700'
   isLoading?: boolean;
+  disabled?: boolean;
 }
 
-export default function SlideToUpgrade({
-  onSlideComplete,
-  lang,
-  tierColor,
-  isLoading = false,
-}: SlideToUpgradeProps) {
+export default function SlideToUpgrade(props: SlideToUpgradeProps) {
+  const {
+    onSlideComplete,
+    lang,
+    tierColor,
+    isLoading = false,
+    disabled = false,
+  } = props;
   const t = translations[lang];
   const trackRef = useRef<HTMLDivElement>(null);
   const [sliderPos, setSliderPos] = useState(0);
@@ -23,6 +26,7 @@ export default function SlideToUpgrade({
   const [isComplete, setIsComplete] = useState(false);
   const [trackWidth, setTrackWidth] = useState(0);
   const startXRef = useRef(0);
+  const isDisabled = isLoading || disabled;
 
   useEffect(() => {
     if (trackRef.current) {
@@ -31,7 +35,7 @@ export default function SlideToUpgrade({
   }, []);
 
   const handleMove = (clientX: number) => {
-    if (isComplete || isLoading) return;
+    if (isComplete || isDisabled) return;
     const dx = clientX - startXRef.current;
     const clamped = Math.max(0, Math.min(dx, trackWidth));
     setSliderPos(clamped);
@@ -43,7 +47,7 @@ export default function SlideToUpgrade({
 
   // Mouse events
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (isComplete || isLoading) return;
+    if (isComplete || isDisabled) return;
     e.preventDefault();
     setIsDragging(true);
     startXRef.current = e.clientX - sliderPos;
@@ -51,7 +55,7 @@ export default function SlideToUpgrade({
 
   // Touch events
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isComplete || isLoading) return;
+    if (isComplete || isDisabled) return;
     setIsDragging(true);
     startXRef.current = e.touches[0].clientX - sliderPos;
   };
@@ -80,7 +84,7 @@ export default function SlideToUpgrade({
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleEnd);
     };
-  }, [isDragging, isComplete, isLoading]);
+  }, [isDragging, isComplete, isDisabled]);
 
   const progress = trackWidth > 0 ? (sliderPos / trackWidth) * 100 : 0;
 
@@ -108,7 +112,7 @@ export default function SlideToUpgrade({
             : 'bg-[#1A1B1E] border border-[#2B2D31]'}
         `}
         onClick={() => {
-          if (!isComplete && !isLoading && sliderPos === 0) {
+          if (!isComplete && !isDisabled && sliderPos === 0) {
             setSliderPos(trackWidth * 0.9);
             setIsComplete(true);
             onSlideComplete();
@@ -168,7 +172,7 @@ export default function SlideToUpgrade({
             className={`
               absolute top-1 left-1 w-12 h-12 rounded-xl flex items-center justify-center
               transition-shadow duration-200 cursor-grab active:cursor-grabbing
-              ${isLoading
+              ${isDisabled
                 ? 'bg-[#2B2D31] cursor-not-allowed'
                 : isDragging
                 ? 'bg-[#C7FF2E] shadow-[0_0_20px_rgba(199,255,46,0.4)] cursor-grabbing'

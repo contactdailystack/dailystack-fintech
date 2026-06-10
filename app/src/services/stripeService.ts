@@ -59,7 +59,11 @@ export async function createPromptPayPayment(
 export async function checkPaymentStatus(paymentIntentId: string): Promise<{
   status: "pending" | "succeeded" | "failed" | "cancelled" | "expired";
 }> {
-  return authedFetch(
-    `${edgeUrl("create-payment-intent")}?payment_intent_id=${paymentIntentId}`
-  );
+  return authedFetch(edgeUrl("create-payment-intent"), {
+    method: "POST",
+    body: JSON.stringify({
+      action: "check_status",
+      payment_intent_id: paymentIntentId,
+    }),
+  });
 }

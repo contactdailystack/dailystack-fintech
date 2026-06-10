@@ -10,13 +10,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabaseOptions: any = {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    emailRedirectTo: `${window.location.origin}/auth/callback`,
+  },
+};
+
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-key',
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-  }
+  supabaseOptions
 );

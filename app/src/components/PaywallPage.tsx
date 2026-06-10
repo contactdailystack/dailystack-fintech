@@ -127,6 +127,9 @@ export default function PaywallPage({
   const [countdown, setCountdown] = useState(900);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
+  const [creatingPayment, setCreatingPayment] = useState(false);
+  const [pollingStatus, setPollingStatus] = useState<'idle' | 'waiting_for_confirmation'>('idle');
+  const STORAGE_KEY = 'dailystack_pending_payment';
   const t = translations[lang];
   const selectedTierData = tiers.find((tier) => tier.id === selectedTier) || tiers[1];
 
@@ -149,6 +152,27 @@ export default function PaywallPage({
     return () => clearInterval(timer);
   }, [showQR, countdown, lang]);
 
+  // ── P0+P1 Fix 3: Restore pending payment from localStorage on mount ──────
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const { paymentIntentId: storedId, tier: storedTier, expiresAt } = JSON.parse(stored);
+        if (Date.now() < expiresAt) {
+          setPaymentIntentId(storedId);
+          setSelectedTier(storedTier as 'pro' | 'elite');
+          setShowQR(true);
+          setCountdown(Math.floor((expiresAt - Date.now()) / 1000));
+          setPollingStatus('waiting_for_confirmation');
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (!showQR || !paymentIntentId) return;
     const poll = async () => {
@@ -157,7 +181,10 @@ export default function PaywallPage({
         if (result.status === 'succeeded') {
           setShowQR(false);
           setUpgraded(true);
+          localStorage.removeItem(STORAGE_KEY);
           onUpgradeComplete(selectedTier);
+        } else if (result.status === 'pending') {
+          setPollingStatus('waiting_for_confirmation');
         } else if (['failed', 'cancelled', 'expired'].includes(result.status)) {
           setPaymentError(
             result.status === 'expired'
@@ -169,6 +196,7 @@ export default function PaywallPage({
               : 'ชำระเงินล้มเหลว'
           );
           setShowQR(false);
+          localStorage.removeItem(STORAGE_KEY);
         }
       } catch (err) {
         console.warn('[PaywallPage] Payment status poll error:', err);
@@ -179,15 +207,18 @@ export default function PaywallPage({
   }, [showQR, paymentIntentId, selectedTier, onUpgradeComplete, lang]);
 
   const handleUpgradeTrigger = async () => {
+    if (creatingPayment) return;
     if (selectedTierData.price === 0) {
       setUpgraded(true);
       onUpgradeComplete(selectedTier);
       return;
     }
+    setCreatingPayment(true);
     setQrLoading(true);
     setPaymentError(null);
     setShowQR(true);
     setCountdown(900);
+    setPollingStatus('waiting_for_confirmation');
     try {
       const result = await createPromptPayPayment(selectedTier);
       const qrDataUrl = await QRCode.toDataURL(result.qrData, {
@@ -197,21 +228,28 @@ export default function PaywallPage({
       });
       setQrImageUrl(qrDataUrl);
       setPaymentIntentId(result.paymentIntentId);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        paymentIntentId: result.paymentIntentId,
+        tier: selectedTier,
+        expiresAt: Date.now() + 15 * 60 * 1000,
+      }));
       setQrLoading(false);
     } catch (err) {
       setPaymentError(err instanceof Error ? err.message : 'Failed to create payment.');
       setShowQR(false);
       setQrLoading(false);
+    } finally {
+      setCreatingPayment(false);
     }
   };
 
   const handleCancelQR = () => {
-    // PromptPay QR payments cannot be cancelled once generated.
-    // User must let it expire or await timeout.
     setShowQR(false);
     setQrImageUrl(null);
     setPaymentIntentId(null);
     setPaymentError(null);
+    setPollingStatus('idle');
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const formatCountdown = (secs: number) => {
@@ -286,16 +324,24 @@ export default function PaywallPage({
                   <div className="w-12 h-12 border-3 border-[#C7FF2E] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : qrImageUrl ? (
-                <div className="relative flex items-center justify-center mb-6">
-                  <div className="p-4 rounded-2xl border-2 border-[#C7FF2E]/30 bg-white">
-                    <img src={qrImageUrl} alt="PromptPay QR" className="w-[240px] h-[240px]" />
+                <div className="relative flex flex-col items-center mb-6">
+                  <div className="relative flex items-center justify-center">
+                    <div className="p-4 rounded-2xl border-2 border-[#C7FF2E]/30 bg-white">
+                      <img src={qrImageUrl} alt="PromptPay QR" className="w-[240px] h-[240px]" />
+                    </div>
+                    <div
+                      className={`absolute -top-3 -right-3 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-mono font-bold ${countdown < 120 ? 'bg-red-500 text-white' : 'bg-[#C7FF2E] text-black'}`}
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      {formatCountdown(countdown)}
+                    </div>
                   </div>
-                  <div
-                    className={`absolute -top-3 -right-3 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-mono font-bold ${countdown < 120 ? 'bg-red-500 text-white' : 'bg-[#C7FF2E] text-black'}`}
-                  >
-                    <Clock className="w-3.5 h-3.5" />
-                    {formatCountdown(countdown)}
-                  </div>
+                  {pollingStatus === 'waiting_for_confirmation' && (
+                    <div className="flex items-center gap-2 mt-3 text-sm text-amber-400/70">
+                      <div className="w-2 h-2 rounded-full bg-amber-400/50 animate-pulse" />
+                      <span>{lang === 'en' ? 'Waiting for bank confirmation...' : 'รอการยืนยันจากธนาคาร...'}</span>
+                    </div>
+                  )}
                 </div>
               ) : null}
 
@@ -518,12 +564,13 @@ export default function PaywallPage({
                   </div>
                    {selectedTierData.price > 0 ? (
                      <div className="w-44">
-                       <SlideToUpgrade
-                         onSlideComplete={handleUpgradeTrigger}
-                         lang={lang}
-                         tierColor={selectedTier === 'elite' ? '#FFD700' : '#C7FF2E'}
-                         isLoading={loading || qrLoading}
-                       />
+<SlideToUpgrade
+                          onSlideComplete={handleUpgradeTrigger}
+                          lang={lang}
+                          tierColor={selectedTier === 'elite' ? '#FFD700' : '#C7FF2E'}
+                          isLoading={loading || qrLoading}
+                          disabled={creatingPayment}
+                        />
                      </div>
                    ) : (
                      <span className="text-xs font-mono text-white/40 px-4 py-2">
