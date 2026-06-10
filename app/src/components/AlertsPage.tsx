@@ -46,9 +46,9 @@ const CATEGORY_OPTIONS: { value: AlertCategory; label: string; icon: React.React
 ];
 
 const SEVERITY_OPTIONS: { value: AlertSeverity; label: string; color: string }[] = [
-  { value: 'critical', label: 'Critical', color: 'bg-red-500' },
+  { value: 'critical', label: 'Critical', color: 'calm-warning-critical' },
   { value: 'alert', label: 'Alert', color: 'bg-orange-500' },
-  { value: 'warning', label: 'Warning', color: 'bg-yellow-500' },
+  { value: 'warning', label: 'Warning', color: 'calm-warning' },
   { value: 'info', label: 'Info', color: 'bg-emerald-500' },
 ];
 

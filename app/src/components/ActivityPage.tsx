@@ -536,7 +536,7 @@ export default function ActivityPage({
                     <div className="space-y-1 text-left flex-1 min-w-0">
                       <div className="flex items-center gap-2.5 flex-wrap">
                         <h4 className="font-display font-extrabold text-sm text-zinc-150 leading-none truncate">{tx.merchant}</h4>
-                        <span className="text-[10px] font-mono text-zinc-400">
+                        <span className="text-[10px] font-mono text-zinc-400 text-secondary-data">
                           {lang === 'en' ? tx.category : (tx.category === 'Deposit' ? 'ฝากเข้า' : (tx.category === 'Transfer' ? 'โอนออก' : (tx.category === 'Withdrawal' ? 'ถอนออก' : tx.category)))}
                         </span>
                         
@@ -588,7 +588,7 @@ export default function ActivityPage({
                       {lang === 'en' ? meta.label : meta.labelTh}
                     </span>
 
-                    <span className={`font-mono text-sm font-extrabold tracking-tight ${isOutbound ? 'text-zinc-100' : 'text-brand'}`}>
+                    <span className={`font-mono text-sm font-extrabold tracking-tight text-secondary-unit ${isOutbound ? 'text-zinc-100' : 'text-brand'}`}>
                       {isOutbound ? '' : '+'}${Math.abs(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
@@ -877,7 +877,7 @@ export default function ActivityPage({
               </div>
 
               {formError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-xs font-mono flex items-center gap-2 animate-bounce" id="action-error-box">
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-xl text-xs font-mono flex items-center gap-2 animate-bounce calm-warning" id="action-error-box">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>{formError}</span>
                 </div>

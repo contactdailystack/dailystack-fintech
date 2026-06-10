@@ -422,7 +422,7 @@ export default function PaywallPage({
                     onClick={() =>
                       !isDisabled && setSelectedTier(tier.id as 'pro' | 'elite')
                     }
-                    className={`relative rounded-2xl border-2 p-5 text-left transition-all ${isSelected && !isDisabled ? tier.borderColor + ' ' + tier.bgColor : isDark ? 'border-white/10 bg-[#171C15]' : 'border-slate-200 bg-white'} ${isDisabled ? 'opacity-60' : 'hover:border-white/20 cursor-pointer'}`}
+                    className={`relative rounded-2xl border-2 p-5 text-left transition-all ${isSelected && !isDisabled ? tier.borderColor + ' ' + tier.bgColor + ' z-axis-primary glass-primary' : isDark ? 'border-white/10 bg-[#171C15] z-axis-secondary' : 'border-slate-200 bg-white z-axis-secondary'} ${isDisabled ? 'opacity-60' : 'hover:border-white/20 cursor-pointer'}`}
                     disabled={isDisabled}
                   >
                     {tier.badge && (
@@ -442,7 +442,7 @@ export default function PaywallPage({
                         </p>
                       </div>
                       <div className="py-3 border-t border-b border-white/10">
-                        <p className={`font-display font-black text-2xl ${tier.color}`}>
+                        <p className={`font-display font-black text-2xl text-secondary-unit ${tier.color}`}>
                           {tier.price === 0 ? 'FREE' : '฿' + tier.price}
                         </p>
                         {tier.price > 0 && (

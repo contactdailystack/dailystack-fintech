@@ -226,7 +226,7 @@ export default function DashboardPage({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch" id="command-snapshot-grid">
         
         {/* Left Card: Core Balance Capsule */}
-        <div className="col-span-1 lg:col-span-7 border rounded-[30px] p-6 md:p-8 relative overflow-hidden flex flex-col justify-between min-h-[290px] bg-[#1A1D26]/90 border-[#2D313E] shadow-xl hover:shadow-[#C7FF2E]/5 hover:-translate-y-0.5 hover:border-[#C7FF2E]/40 duration-300 transition-all" id="cmd-balance-card">
+        <div className="col-span-1 lg:col-span-7 border rounded-[30px] p-6 md:p-8 relative overflow-hidden flex flex-col justify-between min-h-[290px] bg-[#1A1D26]/90 border-[#2D313E] shadow-xl hover:shadow-[#C7FF2E]/5 hover:-translate-y-0.5 hover:border-[#C7FF2E]/40 duration-300 transition-all breathing-aura-card z-axis-primary" id="cmd-balance-card">
           <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[340px] h-[340px] pointer-events-none opacity-20">
             <svg viewBox="0 0 100 100" className="w-full h-full text-zinc-600 animate-spin-slow">
               <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5" />
@@ -255,7 +255,7 @@ export default function DashboardPage({
           </div>
  
           <div className="py-5 z-10 text-left" id="balance-readout">
-            <div className="text-4xl md:text-6xl font-extrabold font-display tracking-tight leading-none text-white hover:scale-[1.01] transition-transform duration-200">
+            <div className="text-4xl md:text-6xl font-extrabold font-display tracking-tight leading-none text-white hover:scale-[1.01] transition-transform duration-200 text-primary-highlight">
               ${profile.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest mt-2 flex items-center gap-1.5">
@@ -296,7 +296,7 @@ export default function DashboardPage({
         </div>
 
         {/* Right Card: Dynamic Portfolio Total */}
-        <div className="col-span-1 lg:col-span-5 border rounded-[30px] p-6 relative overflow-hidden flex flex-col justify-between bg-[#1A1D26]/90 border-[#2D313E] shadow-xl hover:shadow-[#C7FF2E]/5 hover:-translate-y-0.5 hover:border-[#C7FF2E]/40 duration-300 transition-all" id="cmd-portfolio-card">
+        <div className="col-span-1 lg:col-span-5 border rounded-[30px] p-6 relative overflow-hidden flex flex-col justify-between bg-[#1A1D26]/90 border-[#2D313E] shadow-xl hover:shadow-[#C7FF2E]/5 hover:-translate-y-0.5 hover:border-[#C7FF2E]/40 duration-300 transition-all z-axis-primary" id="cmd-portfolio-card">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7FF2E]/10 rounded-bl-[100px] pointer-events-none" />
           
           <div className="space-y-3 text-left">
@@ -509,7 +509,7 @@ export default function DashboardPage({
             </div>
             <div className="pt-2 border-t border-[#2D313E]/80 flex items-center justify-between text-[10px] font-mono text-zinc-300">
               <span>{lang === 'en' ? 'Current State:' : 'สถานะสัปดาห์นี้:'}</span>
-              <span className={impulseCount <= 1 ? "text-emerald-400 font-bold" : "text-amber-500"}>
+              <span className={impulseCount <= 1 ? "text-emerald-400 font-bold" : "calm-warning"}>
                 {impulseCount} / 1 {lang === 'en' ? 'impulses' : 'รายการ'}
               </span>
             </div>
@@ -652,7 +652,7 @@ export default function DashboardPage({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start" id="home-stock-ledger-grid">
         
         {/* Interactive Stock List */}
-        <div className="col-span-1 lg:col-span-5 border rounded-[32px] p-6 bg-[#1A1D26]/90 border-[#2D313E] shadow-xl" id="stock-list-home">
+        <div className="col-span-1 lg:col-span-5 border rounded-[32px] p-6 bg-[#1A1D26]/90 border-[#2D313E] shadow-xl z-axis-secondary" id="stock-list-home">
           <div className="flex items-center justify-between mb-6" id="performance-header">
             <div className="text-left">
               <h3 className="font-display font-extrabold text-lg text-white">{t.assetPerformance}</h3>
@@ -703,7 +703,7 @@ export default function DashboardPage({
         </div>
 
         {/* Home Overview Guide: Answers 'What are the transformational benefits of Pro/Elite plan?' */}
-        <div className="col-span-1 lg:col-span-7 border rounded-[32px] p-6 bg-[#1A1D26]/90 border-[#2D313E] shadow-xl text-left flex flex-col justify-between h-full hover:border-[#C7FF2E]/30 duration-300 transition-all" id="conversion-blueprint-home">
+        <div className="col-span-1 lg:col-span-7 border rounded-[32px] p-6 bg-[#1A1D26]/90 border-[#2D313E] shadow-xl text-left flex flex-col justify-between h-full hover:border-[#C7FF2E]/30 duration-300 transition-all z-axis-secondary" id="conversion-blueprint-home">
           <div className="space-y-4">
             <span className="font-mono text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-full border border-[#2D313E] font-bold bg-[#232733] text-zinc-300">
               {lang === 'en' ? 'EVOLUTION ROADMAP' : 'แผนพัฒนาศักยภาพด้านอภิสิทธิ์'}
