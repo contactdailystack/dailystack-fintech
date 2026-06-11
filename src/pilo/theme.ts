@@ -23,7 +23,7 @@ export const theme = {
     // Semantic States
     success: '#CCFF00',         // Electric Green success
     warning: '#FFB020',         // Attention states
-    error: '#FF4D4D',           // Destructive / error states
+    error: '#F59E0B',           // Destructive / error states
     
     // Borders
     borderSubtle: 'rgba(255, 255, 255, 0.08)',

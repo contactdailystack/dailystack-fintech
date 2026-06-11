@@ -20,7 +20,7 @@ export const newFeatureTokens = {
   status: {
     success:  '#34D399',
     warning:  '#FBBF24',
-    error:    '#FF4D4D',
+    error:    '#F59E0B',
     info:     '#60A5FA',
     neutral:  '#999999',
   },
@@ -37,7 +37,7 @@ export const newFeatureTokens = {
 
   // ── 4. Calendar View ──────────────────────────────────────────────
   calendar: {
-    dueToday:    '#FF4D4D',
+    dueToday:    '#F59E0B',
     paid:        '#CCFF00',
     upcoming:    '#999999',
     todayBorder: '#CCFF00',
@@ -49,8 +49,8 @@ export const newFeatureTokens = {
   investment: {
     gain:      '#34D399',
     gainBg:    'rgba(52, 211, 153, 0.12)',
-    loss:      '#FF4D4D',
-    lossBg:    'rgba(255, 77, 77, 0.12)',
+    loss:      '#F59E0B',
+    lossBg:    'rgba(245, 158, 11, 0.12)',
     neutral:   '#999999',
     chartLine: '#CCFF00',
     chartFill: 'rgba(204, 255, 0, 0.10)',
@@ -82,8 +82,8 @@ export const newFeatureTokens = {
     sheet:      '0 -4px 40px rgba(0, 0, 0, 0.60)',
     primaryGlow:'0 4px 20px rgba(199, 255, 0, 0.30)',
     savingsGlow:'0 4px 30px rgba(52, 211, 153, 0.25)',
-    lossGlow:   '0 4px 20px rgba(255, 77, 77, 0.25)',
-    errorGlow:  '0 4px 20px rgba(255, 77, 77, 0.25)',
+    lossGlow:   '0 4px 20px rgba(245, 158, 11, 0.25)',
+    errorGlow:  '0 4px 20px rgba(245, 158, 11, 0.25)',
   },
 
   // ── 9. Typography Scale (New / Feature-Specific) ──────────────────

@@ -333,7 +333,7 @@ export const RewardsHub: React.FC = () => {
                   inputMode="numeric"
                   value={purchaseAmount}
                   onChange={(e) => setPurchaseAmount(e.target.value.replace(/[^0-9]/g, ''))}
-                  className="w-full px-4 py-3 min-h-[48px] bg-gray-50 border border-black/10 rounded-xl text-[#000000] font-mono text-base focus:border-[#CCFF00] focus:bg-white outline-none"
+                  className="w-full px-4 py-3 min-h-[48px] bg-gray-50 border border-black/10 rounded-xl text-[#000000] font-mono text-base focus:border-[#C7FF2E] focus:bg-white outline-none"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold font-mono">THB</span>
               </div>
@@ -344,7 +344,7 @@ export const RewardsHub: React.FC = () => {
                   <button
                     key={val}
                     onClick={() => setPurchaseAmount(val)}
-                    className="px-2.5 py-1 text-[10px] font-bold bg-gray-50 border border-black/5 rounded-full hover:border-[#CCFF00] text-gray-500 hover:text-[#000000] shadow-sm transition-all"
+                    className="px-2.5 py-1 text-[10px] font-bold bg-gray-50 border border-black/5 rounded-full hover:border-[#C7FF2E] text-gray-500 hover:text-[#000000] shadow-sm transition-all"
                   >
                     {val} B
                   </button>
@@ -414,7 +414,7 @@ export const RewardsHub: React.FC = () => {
                       </div>
                       <button
                         onClick={handleSimulatePayment}
-                        className="px-3 py-1.5 bg-[#CCFF00] hover:bg-[#CCFF00]/90 text-[#000000] text-[10px] font-black rounded-lg transition-all active:scale-[0.97]"
+                        className="px-3 py-1.5 bg-[#C7FF2E] hover:bg-[#C7FF2E]/90 text-[#000000] text-[10px] font-black rounded-lg transition-all active:scale-[0.97]"
                       >
                         Simulate Saving
                       </button>
@@ -441,7 +441,7 @@ export const RewardsHub: React.FC = () => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className="text-xs font-black text-red-500 font-mono">-{alt.savingsAmount.toFixed(1)} B</span>
+                          <span className="text-xs font-black text-amber-500 font-mono">-{alt.savingsAmount.toFixed(1)} B</span>
                           <p className="text-[9px] text-gray-500 font-semibold uppercase mt-1 leading-none">-{alt.cashbackPercent}%</p>
                         </div>
                       </div>
@@ -538,7 +538,7 @@ export const RewardsHub: React.FC = () => {
             )}
 
             {errorMsg && (
-              <div className="p-3 mb-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl flex items-start gap-2 text-xs font-kanit select-none">
+              <div className="p-3 mb-4 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl flex items-start gap-2 text-xs font-kanit select-none">
                 <Info size={16} className="shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
@@ -600,7 +600,7 @@ export const RewardsHub: React.FC = () => {
                       value={customBankName}
                       onChange={(e) => setCustomBankName(e.target.value)}
                       placeholder={t.bankNamePlaceholder}
-                      className="w-full bg-gray-50 px-4 py-3 min-h-[44px] rounded-xl border border-black/5 text-[#000000] placeholder-gray-400 text-xs focus:border-[#CCFF00] outline-none font-semibold font-kanit"
+                      className="w-full bg-gray-50 px-4 py-3 min-h-[44px] rounded-xl border border-black/5 text-[#000000] placeholder-gray-400 text-xs focus:border-[#C7FF2E] outline-none font-semibold font-kanit"
                     />
                   </div>
                   <div>
@@ -612,7 +612,7 @@ export const RewardsHub: React.FC = () => {
                       value={customCardName}
                       onChange={(e) => setCustomCardName(e.target.value)}
                       placeholder={t.cardNamePlaceholder}
-                      className="w-full bg-gray-50 px-4 py-3 min-h-[44px] rounded-xl border border-black/5 text-[#000000] placeholder-gray-400 text-xs focus:border-[#CCFF00] outline-none font-semibold font-kanit"
+                      className="w-full bg-gray-50 px-4 py-3 min-h-[44px] rounded-xl border border-black/5 text-[#000000] placeholder-gray-400 text-xs focus:border-[#C7FF2E] outline-none font-semibold font-kanit"
                     />
                   </div>
                 </div>
@@ -629,7 +629,7 @@ export const RewardsHub: React.FC = () => {
                     inputMode="decimal"
                     value={customCashbackRate}
                     onChange={(e) => setCustomCashbackRate(e.target.value.replace(/[^0-9.]/g, ''))}
-                    className="w-full bg-gray-50 px-4 py-3 min-h-[44px] rounded-xl border border-black/5 text-[#000000] text-xs focus:border-[#CCFF00] outline-none font-mono font-semibold"
+                    className="w-full bg-gray-50 px-4 py-3 min-h-[44px] rounded-xl border border-black/5 text-[#000000] text-xs focus:border-[#C7FF2E] outline-none font-mono font-semibold"
                   />
                 </div>
               )}
@@ -646,7 +646,7 @@ export const RewardsHub: React.FC = () => {
                   maxLength={4}
                   onChange={(e) => setLastFour(e.target.value.replace(/[^0-9]/g, ''))}
                   placeholder="e.g. 8824"
-                  className="w-full bg-gray-50 px-4 py-3 min-h-[44px] rounded-xl border border-black/5 text-[#000000] placeholder-gray-400 text-xs focus:border-[#CCFF00] outline-none font-mono font-semibold"
+                  className="w-full bg-gray-50 px-4 py-3 min-h-[44px] rounded-xl border border-black/5 text-[#000000] placeholder-gray-400 text-xs focus:border-[#C7FF2E] outline-none font-mono font-semibold"
                 />
               </div>
             </div>

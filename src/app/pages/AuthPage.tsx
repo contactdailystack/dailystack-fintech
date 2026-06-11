@@ -9,7 +9,7 @@ import { useLanguage } from '../context/LanguageContext';
 // ─── Pilo Color Strategy ─────────────────────────────────────────────────────
 //
 //  #0D0D0D  Pilo Black     → Primary Background (dark screens, cards, nav)
-//  #B9F72B  Electric Green → ONE CTA per screen + active states + live data
+//  #C7FF2E  Electric Green → ONE CTA per screen + active states + live data
 //  #FFFFFF  Pure White     → Content surface (light card, input bg)
 //  #1A1A1A  Charcoal       → Secondary surface (cards on dark bg)
 //  #555555  Mid Gray       → Inactive icons, secondary text
@@ -72,14 +72,14 @@ const localTranslations = {
 const DailyStackLogo: React.FC<{ className?: string; dark?: boolean }> = ({ className, dark = false }) => (
   <div className={`flex items-center gap-2.5 ${className ?? ''}`}>
     <svg width="26" height="26" viewBox="0 0 100 100" fill="none">
-      <path d="M50 78 L18 62 L18 58 L50 74 L82 58 L82 62 Z" fill="#B9F72B" opacity="0.5" />
-      <path d="M50 66 L18 50 L18 46 L50 62 L82 46 L82 50 Z" fill="#B9F72B" opacity="0.75" />
-      <path d="M50 22 L82 38 L50 54 L18 38 Z" fill="#B9F72B" />
+      <path d="M50 78 L18 62 L18 58 L50 74 L82 58 L82 62 Z" fill="#C7FF2E" opacity="0.5" />
+      <path d="M50 66 L18 50 L18 46 L50 62 L82 46 L82 50 Z" fill="#C7FF2E" opacity="0.75" />
+      <path d="M50 22 L82 38 L50 54 L18 38 Z" fill="#C7FF2E" />
       <path d="M50 29 L72 39 L50 47 L28 39 Z" fill="#000000" opacity="0.3" />
     </svg>
     <span className="text-[11px] font-black tracking-[0.2em] uppercase leading-none select-none">
       <span className={dark ? 'text-white' : 'text-[#0D0D0D]'}>DAILY</span>
-      <span className="text-[#B9F72B]">STACK</span>
+      <span className="text-[#C7FF2E]">STACK</span>
     </span>
   </div>
 );
@@ -93,7 +93,7 @@ const StepBar: React.FC<{ current: number; total: number }> = ({ current, total 
         className="h-[3px] rounded-full transition-all duration-500"
         style={{
           flex: i < current ? 2 : 1,
-          background: i < current ? '#B9F72B' : 'rgba(255,255,255,0.12)',
+          background: i < current ? '#C7FF2E' : 'rgba(255,255,255,0.12)',
         }}
       />
     ))}
@@ -124,7 +124,7 @@ const InputField: React.FC<InputFieldProps> = ({ label, icon, ...props }) => (
           w-full min-h-[48px] px-4 py-3 rounded-xl text-sm text-[#0D0D0D] font-medium
           bg-white border border-black/8 placeholder-[#AAAAAA]
           outline-none transition-all duration-200
-          focus:border-[#B9F72B] focus:ring-4 focus:ring-[#B9F72B]/12
+          focus:border-[#C7FF2E] focus:ring-4 focus:ring-[#C7FF2E]/12
           ${icon ? 'pl-10' : 'pl-4'}
           ${props.className ?? ''}
         `}
@@ -142,7 +142,7 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({ loading, children, ...pro
   <button
     {...props}
     className={`
-      w-full min-h-[50px] rounded-xl font-bold text-sm text-[#0D0D0D] bg-[#B9F72B]
+      w-full min-h-[50px] rounded-xl font-bold text-sm text-[#0D0D0D] bg-[#C7FF2E]
       hover:bg-[#c8ff3d] active:scale-[0.98] transition-all duration-150
       disabled:opacity-35 disabled:cursor-not-allowed
       flex items-center justify-center gap-2
@@ -183,52 +183,52 @@ const HeroIllustration: React.FC<{ className?: string }> = ({ className }) => (
     className={className}
   >
     {/* Green glow core */}
-    <circle cx="180" cy="180" r="88" fill="#B9F72B" opacity="0.08" />
-    <circle cx="180" cy="180" r="62" fill="#B9F72B" opacity="0.1" />
+    <circle cx="180" cy="180" r="88" fill="#C7FF2E" opacity="0.08" />
+    <circle cx="180" cy="180" r="62" fill="#C7FF2E" opacity="0.1" />
 
     {/* Phone frame */}
     <rect x="142" y="96" width="76" height="138" rx="12" fill="#1A1A1A" stroke="#333333" strokeWidth="1.5" />
     {/* Screen */}
     <rect x="148" y="106" width="64" height="112" rx="6" fill="#0D0D0D" />
     {/* Status dot — green = alive */}
-    <circle cx="180" cy="112" r="2.5" fill="#B9F72B" />
+    <circle cx="180" cy="112" r="2.5" fill="#C7FF2E" />
     {/* Map mini */}
     <rect x="152" y="120" width="56" height="38" rx="4" fill="#1A1A1A" />
-    <path d="M160 138 L170 130 L180 135 L192 126 L200 132" stroke="#B9F72B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="192" cy="126" r="3" fill="#B9F72B" />
+    <path d="M160 138 L170 130 L180 135 L192 126 L200 132" stroke="#C7FF2E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="192" cy="126" r="3" fill="#C7FF2E" />
     {/* Book ride button */}
-    <rect x="152" y="166" width="56" height="14" rx="7" fill="#B9F72B" />
+    <rect x="152" y="166" width="56" height="14" rx="7" fill="#C7FF2E" />
     <rect x="152" y="186" width="56" height="10" rx="5" fill="#1A1A1A" />
     <rect x="152" y="202" width="28" height="8" rx="4" fill="#1A1A1A" />
 
     {/* Card floating left */}
     <rect x="60" y="155" width="72" height="45" rx="8" fill="#1A1A1A" stroke="#2A2A2A" strokeWidth="1" />
-    <rect x="68" y="163" width="20" height="14" rx="3" fill="#B9F72B" opacity="0.9" />
+    <rect x="68" y="163" width="20" height="14" rx="3" fill="#C7FF2E" opacity="0.9" />
     <rect x="68" y="182" width="36" height="4" rx="2" fill="#333333" />
     <rect x="68" y="190" width="24" height="4" rx="2" fill="#2A2A2A" />
     {/* Connector line */}
-    <line x1="132" y1="177" x2="142" y2="177" stroke="#B9F72B" strokeWidth="1" strokeDasharray="3 2" opacity="0.5" />
+    <line x1="132" y1="177" x2="142" y2="177" stroke="#C7FF2E" strokeWidth="1" strokeDasharray="3 2" opacity="0.5" />
 
     {/* Stats card floating right */}
     <rect x="228" y="140" width="72" height="56" rx="8" fill="#1A1A1A" stroke="#2A2A2A" strokeWidth="1" />
     <text x="236" y="157" fill="#555555" fontSize="7" fontFamily="sans-serif" fontWeight="600">SAVINGS</text>
-    <text x="236" y="172" fill="#B9F72B" fontSize="13" fontFamily="sans-serif" fontWeight="800">$2,840</text>
+    <text x="236" y="172" fill="#C7FF2E" fontSize="13" fontFamily="sans-serif" fontWeight="800">$2,840</text>
     <rect x="236" y="177" width="48" height="3" rx="1.5" fill="#1F1F1F" />
-    <rect x="236" y="177" width="34" height="3" rx="1.5" fill="#B9F72B" opacity="0.8" />
+    <rect x="236" y="177" width="34" height="3" rx="1.5" fill="#C7FF2E" opacity="0.8" />
     <text x="236" y="190" fill="#555555" fontSize="7" fontFamily="sans-serif">72% of goal</text>
     {/* Connector line */}
-    <line x1="218" y1="168" x2="228" y2="168" stroke="#B9F72B" strokeWidth="1" strokeDasharray="3 2" opacity="0.5" />
+    <line x1="218" y1="168" x2="228" y2="168" stroke="#C7FF2E" strokeWidth="1" strokeDasharray="3 2" opacity="0.5" />
 
     {/* Bottom reward pill */}
-    <rect x="148" y="250" width="64" height="20" rx="10" fill="#1A1A1A" stroke="#B9F72B" strokeWidth="0.8" />
-    <circle cx="161" cy="260" r="4" fill="#B9F72B" />
+    <rect x="148" y="250" width="64" height="20" rx="10" fill="#1A1A1A" stroke="#C7FF2E" strokeWidth="0.8" />
+    <circle cx="161" cy="260" r="4" fill="#C7FF2E" />
     <text x="170" y="263" fill="#FFFFFF" fontSize="7.5" fontFamily="sans-serif" fontWeight="700">320 pts</text>
 
     {/* Orbit dots */}
-    <circle cx="116" cy="120" r="3" fill="#B9F72B" opacity="0.4" />
-    <circle cx="244" cy="248" r="3" fill="#B9F72B" opacity="0.4" />
-    <circle cx="130" cy="236" r="2" fill="#B9F72B" opacity="0.25" />
-    <circle cx="252" cy="120" r="2" fill="#B9F72B" opacity="0.25" />
+    <circle cx="116" cy="120" r="3" fill="#C7FF2E" opacity="0.4" />
+    <circle cx="244" cy="248" r="3" fill="#C7FF2E" opacity="0.4" />
+    <circle cx="130" cy="236" r="2" fill="#C7FF2E" opacity="0.25" />
+    <circle cx="252" cy="120" r="2" fill="#C7FF2E" opacity="0.25" />
   </svg>
 );
 
@@ -256,7 +256,7 @@ const StepCredentials: React.FC<StepCredentialsProps> = ({
 
       {/* Header */}
       <div className="space-y-1 mb-5">
-        <span className="inline-block px-2 py-0.5 rounded text-[9px] font-black tracking-[0.16em] uppercase bg-[#B9F72B]/10 text-[#B9F72B] select-none">
+        <span className="inline-block px-2 py-0.5 rounded text-[9px] font-black tracking-[0.16em] uppercase bg-[#C7FF2E]/10 text-[#C7FF2E] select-none">
           {t.step1Label}
         </span>
         <h2 className={`text-2xl font-black text-white leading-tight tracking-tight ${fontFor(lang)}`}>
@@ -296,21 +296,21 @@ const StepCredentials: React.FC<StepCredentialsProps> = ({
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
-              className="w-4 h-4 rounded border-white/10 accent-[#B9F72B] cursor-pointer"
+              className="w-4 h-4 rounded border-white/10 accent-[#C7FF2E] cursor-pointer"
             />
           </span>
           <span className={`text-[10px] text-[#555555] font-medium leading-normal ${fontFor(lang)}`}>
             {t.agreeText} {' '}
-            <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#CCFF00]">ข้อกำหนดการใช้งาน</a>
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#C7FF2E]">ข้อกำหนดการใช้งาน</a>
             {' '}&{' '}
-            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#CCFF00]">นโยบายความเป็นส่วนตัว</a>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#C7FF2E]">นโยบายความเป็นส่วนตัว</a>
           </span>
         </label>
       )}
 
       {/* Error */}
       {errorMsg && (
-        <p className="text-red-400 text-[11px] bg-red-400/8 border border-red-400/18 rounded-xl px-4 py-3 font-semibold">
+        <p className="text-amber-400 text-[11px] bg-amber-400/8 border border-amber-400/18 rounded-xl px-4 py-3 font-semibold">
           {errorMsg}
         </p>
       )}
@@ -378,7 +378,7 @@ const StepVerify: React.FC<StepVerifyProps> = ({
 
     {/* Header */}
     <div className="space-y-1 mb-5">
-      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-black tracking-[0.16em] uppercase bg-[#B9F72B]/10 text-[#B9F72B] select-none">
+      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-black tracking-[0.16em] uppercase bg-[#C7FF2E]/10 text-[#C7FF2E] select-none">
         {t.step2Label}
       </span>
       <h2 className="text-2xl font-black text-white leading-tight tracking-tight">{t.verifyCode}</h2>
@@ -399,7 +399,7 @@ const StepVerify: React.FC<StepVerifyProps> = ({
         w-full min-h-[56px] px-4 py-4 rounded-xl
         text-center text-2xl tracking-[0.55em] font-mono font-bold
         bg-[#1A1A1A] border border-white/10 text-white
-        focus:border-[#B9F72B] focus:ring-4 focus:ring-[#B9F72B]/12
+        focus:border-[#C7FF2E] focus:ring-4 focus:ring-[#C7FF2E]/12
         outline-none transition-all duration-200
       "
     />
@@ -411,13 +411,13 @@ const StepVerify: React.FC<StepVerifyProps> = ({
       {timeLeft > 0 ? (
         <p className="text-[11px] text-[#555555] font-medium">
           Resend in{' '}
-          <span className="text-[#B9F72B] font-black tabular-nums">{timeLeft}s</span>
+          <span className="text-[#C7FF2E] font-black tabular-nums">{timeLeft}s</span>
         </p>
       ) : (
         <button
           type="button"
           onClick={onResend}
-          className="text-[11px] text-[#B9F72B] hover:text-[#B9F72B]/75 font-bold underline underline-offset-4 py-1"
+          className="text-[11px] text-[#C7FF2E] hover:text-[#C7FF2E]/75 font-bold underline underline-offset-4 py-1"
         >
           {t.resend}
         </button>
@@ -425,7 +425,7 @@ const StepVerify: React.FC<StepVerifyProps> = ({
     </div>
 
     {errorMsg && (
-      <p className="text-red-400 text-[11px] bg-red-400/8 border border-red-400/18 rounded-xl px-4 py-3 font-semibold text-center">
+      <p className="text-amber-400 text-[11px] bg-amber-400/8 border border-amber-400/18 rounded-xl px-4 py-3 font-semibold text-center">
         {errorMsg}
       </p>
     )}
@@ -448,9 +448,9 @@ const StepSuccess: React.FC<StepSuccessProps> = ({ t, lang, onContinue }) => (
   <div className="text-center space-y-6 py-2 select-none">
     {/* Green check — alive signal */}
     <div className="relative mx-auto w-16 h-16">
-      <div className="absolute inset-0 rounded-full bg-[#B9F72B]/15 scale-125" />
-      <div className="relative w-16 h-16 bg-[#B9F72B]/10 border border-[#B9F72B]/25 rounded-full flex items-center justify-center">
-        <CheckCircle2 className="w-7 h-7 text-[#B9F72B]" strokeWidth={1.75} />
+      <div className="absolute inset-0 rounded-full bg-[#C7FF2E]/15 scale-125" />
+      <div className="relative w-16 h-16 bg-[#C7FF2E]/10 border border-[#C7FF2E]/25 rounded-full flex items-center justify-center">
+        <CheckCircle2 className="w-7 h-7 text-[#C7FF2E]" strokeWidth={1.75} />
       </div>
     </div>
     <div>

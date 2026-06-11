@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
+  Calendar,
   Check,
   ChevronRight,
   CreditCard,
@@ -29,6 +30,7 @@ interface SubscriptionDraft {
   amount: number;
   nextBillingDate: string;
   logoColor: string;
+  billing_cycle: 'monthly' | 'yearly' | 'weekly';
 }
 
 const STEPS = [
@@ -81,7 +83,7 @@ const ProgressIndicator: React.FC<{ currentStep: number }> = ({ currentStep }) =
             </div>
             <span
               className={`text-[9px] font-black uppercase tracking-widest whitespace-nowrap hidden sm:block ${
-                index <= currentStep ? 'text-[#CCFF00]' : 'text-white/30'
+                index <= currentStep ? 'text-[#C7FF2E]' : 'text-white/30'
               }`}
             >
               {step.label}
@@ -170,15 +172,31 @@ const Onboarding: React.FC = () => {
     const verifyOnboarding = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        console.debug('[Onboarding] supabase.auth.getUser user:', user);
+        let effectiveUser = user;
+        if (!effectiveUser) {
+          // Fallback for test/dev: try reading the persisted supabase token from localStorage
+          try {
+            const raw = window.localStorage.getItem('supabase.auth.token');
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              effectiveUser = parsed?.user ?? parsed?.currentSession?.user ?? null;
+              console.debug('[Onboarding] fallback parsed user from localStorage:', effectiveUser);
+            }
+          } catch (e) {
+            // ignore parse errors and proceed with null user
+          }
+        }
+        if (!effectiveUser) return;
 
-        const profile = await getProfile(user.id);
+        const profile = await getProfile(effectiveUser.id);
+        console.debug('[Onboarding] loaded profile:', profile);
         if (profile?.onboarding_completed_at) {
           navigate('/dashboard');
           return;
         }
 
-        setNickname(user.user_metadata?.nickname || user.user_metadata?.full_name?.split(' ')[0] || '');
+        setNickname(effectiveUser.user_metadata?.nickname || effectiveUser.user_metadata?.full_name?.split(' ')[0] || '');
       } catch (err) {
         console.error('Onboarding redirect check failed:', err);
       }
@@ -207,6 +225,7 @@ const Onboarding: React.FC = () => {
           amount: template.defaultAmount,
           nextBillingDate: getDefaultBillingDate(prev.length),
           logoColor: template.logoColor,
+          billing_cycle: 'monthly' as const,
         },
       ];
     });
@@ -242,8 +261,60 @@ const Onboarding: React.FC = () => {
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user session found.');
+      let { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        try {
+          const raw = window.localStorage.getItem('supabase.auth.token');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            // derive user from common token shapes
+            user = parsed?.user ?? parsed?.currentSession?.user ?? parsed?.session?.user ?? null;
+            console.debug('[Onboarding] handleNext fallback parsed token:', {
+              hasUser: !!user,
+              hasSession: !!(parsed?.currentSession || parsed?.session),
+            });
+
+            // If no SDK user but token contains access_token, restore session for client (dev/test only)
+            const sessionCandidate = parsed?.currentSession ?? parsed?.session ?? null;
+            if (!user && sessionCandidate && sessionCandidate.access_token) {
+              try {
+                if ((import.meta.env as any)?.MODE !== 'production') {
+                  // supabase-js v2: setSession accepts access_token + refresh_token
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  await (supabase.auth as any).setSession({
+                    access_token: sessionCandidate.access_token,
+                    refresh_token: sessionCandidate.refresh_token,
+                  });
+                  console.debug('[Onboarding] restored Supabase session from localStorage token');
+                }
+              } catch (e) {
+                console.warn('[Onboarding] failed to restore Supabase session from token:', e);
+              }
+
+              // re-read user from SDK after attempting to set session
+              try {
+                const res = await supabase.auth.getUser();
+                user = res?.data?.user ?? user;
+              } catch (e) {
+                // ignore
+              }
+            }
+          }
+        } catch (e) {
+          // ignore parse errors
+        }
+      }
+      // In development, allow a dev-only fallback user to help reproduce saving errors
+      if (!user) {
+        const isProd = (import.meta.env as any)?.MODE === 'production';
+        if (!isProd) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          user = { id: 'dev-debug-user', user_metadata: { nickname } } as any;
+          console.debug('[Onboarding] Using dev fallback user id to allow local testing');
+        } else {
+          throw new Error('No authenticated user session found.');
+        }
+      }
 
       for (const draft of drafts) {
         await addUserSubscription({
@@ -251,6 +322,7 @@ const Onboarding: React.FC = () => {
           amount: Number(draft.amount),
           next_billing_date: draft.nextBillingDate,
           category: draft.category,
+          billing_cycle: draft.billing_cycle,
         });
       }
 
@@ -274,8 +346,23 @@ const Onboarding: React.FC = () => {
 
       navigate('/dashboard');
     } catch (err) {
-      console.error('Error during subscription onboarding:', err);
-      setError('Unable to save your setup. Please try again before continuing.');
+      // Log richer error info to help debug backend/SDK failures
+      try {
+        console.error('Error during subscription onboarding:', {
+          message: (err as any)?.message ?? String(err),
+          stack: (err as any)?.stack ?? null,
+          supabaseError: (err as any)?.error ?? null,
+        });
+      } catch (e) {
+        console.error('Error during subscription onboarding (fallback):', err);
+      }
+
+      // In development show the underlying error message in the UI to aid debugging.
+      const isProd = (import.meta.env as any)?.MODE === 'production';
+      const friendly = isProd
+        ? 'Unable to save your setup. Please try again (see console for details).'
+        : `Unable to save your setup. ${((err as any)?.message ?? String(err))}`;
+      setError(friendly);
     } finally {
       setLoading(false);
     }
@@ -391,20 +478,63 @@ const Onboarding: React.FC = () => {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                      <div>
+                        <label className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Name</span>
+                          <input
+                            value={draft.name}
+                            onChange={(e) => updateDraft(draft.id, { name: e.target.value })}
+                            className="min-h-[48px] w-full rounded-xl border border-black/5 bg-gray-50 px-3 text-sm font-bold outline-none focus:border-primary"
+                          />
+                        </label>
+                      </div>
+                      <div>
+                        <label className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Amount / month</span>
+                          <input
+                            value={String(draft.amount)}
+                            onChange={(e) => updateDraft(draft.id, { amount: Number(e.target.value) || 0 })}
+                            type="number"
+                            className="min-h-[48px] w-full rounded-xl border border-black/5 bg-gray-50 px-3 text-sm font-bold outline-none focus:border-primary"
+                          />
+                        </label>
+                      </div>
+                      <div>
+                        <label className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Next billing</span>
+                          <input
+                            type="date"
+                            value={draft.nextBillingDate}
+                            onChange={(event) => updateDraft(draft.id, { nextBillingDate: event.target.value })}
+                            className="min-h-[48px] w-full rounded-xl border border-black/5 bg-gray-50 px-3 text-sm font-bold outline-none focus:border-primary"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mt-3">
                       <label className="space-y-1">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Name</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Amount / month</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Next billing</span>
-                        <input
-                          type="date"
-                          value={draft.nextBillingDate}
-                          onChange={(event) => updateDraft(draft.id, { nextBillingDate: event.target.value })}
-                          className="min-h-[48px] w-full rounded-xl border border-black/5 bg-gray-50 px-3 text-sm font-bold outline-none focus:border-primary"
-                        />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30 flex items-center gap-1">
+                          <Calendar size={10} /> Billing cycle
+                        </span>
+                        <div className="flex gap-2">
+                          {(['monthly', 'yearly', 'weekly'] as const).map((cycle) => (
+                            <button
+                              key={cycle}
+                              type="button"
+                              onClick={() => updateDraft(draft.id, { billing_cycle: cycle })}
+                              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                                draft.billing_cycle === cycle
+                                  ? 'bg-primary text-black shadow-[0_4px_12px_rgba(199,255,46,0.3)]'
+                                  : 'bg-white/10 text-white/50 hover:bg-white/20'
+                              }`}
+                            >
+                              {cycle === 'monthly' && <Calendar size={12} />}
+                              {cycle === 'yearly' && <Calendar size={12} />}
+                              {cycle === 'weekly' && <Calendar size={12} />}
+                              {cycle.charAt(0).toUpperCase() + cycle.slice(1)}
+                            </button>
+                          ))}
+                        </div>
                       </label>
                     </div>
                   </div>
@@ -454,7 +584,7 @@ const Onboarding: React.FC = () => {
             )}
 
             {error && (
-              <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-center text-sm font-bold text-red-400">
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-center text-sm font-bold text-amber-400">
                 {error}
               </div>
             )}

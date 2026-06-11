@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Circle, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Circle, AlertCircle, Check } from 'lucide-react';
 
 interface StepTrackerProps {
   currentStep: number;
@@ -70,7 +70,7 @@ export const CancellationStepTracker: React.FC<StepTrackerProps> = ({
                           : 'bg-white border-gray-300 text-gray-400'
                     }`}
                   >
-                    {isCompleted ? '✓' : index + 1}
+                    {isCompleted ? <Check size={14} className="text-white" /> : index + 1}
                   </div>
                 </div>
               );

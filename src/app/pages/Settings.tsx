@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { trackEvent } from '../../utils/analytics';
-import { User, Save, ChevronLeft } from 'lucide-react';
+import { User, Save, ChevronLeft, HelpCircle, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const Settings: React.FC = () => {
@@ -209,6 +209,34 @@ export const Settings: React.FC = () => {
             </div>
           </div>
 
+          {/* Help & Support */}
+          <div className="mt-6 pt-5 border-t border-black/5">
+            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-3 font-kanit">Help & Support</label>
+            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <HelpCircle size={16} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-black">ต้องการความช่วยเหลือ?</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">ติดต่อทีมสนับสนุนของเราได้ตลอดเวลา</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <a
+                  href="mailto:support@dailystack.app"
+                  className="flex items-center gap-2 px-3 py-2.5 bg-white border border-black/5 rounded-lg text-xs font-semibold text-black hover:bg-gray-100 transition-all"
+                >
+                  <Mail size={14} className="text-gray-500" />
+                  support@dailystack.app
+                </a>
+                <p className="text-[10px] text-gray-400 text-center">
+                  เราตอบกลับภายใน 24 ชั่วโมง
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Save button — 52px height, clear affordance */}
           <button
             onClick={handleSave}
@@ -220,7 +248,7 @@ export const Settings: React.FC = () => {
               transition-all disabled:opacity-40 shadow-[0_8px_32px_rgba(199,255,46,0.35)]"
           >
             <Save size={17} strokeWidth={3} />
-            {loading ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
+            {loading ? 'Saving…' : saved ? 'Saved' : 'Save'}
           </button>
         </div>
       </main>

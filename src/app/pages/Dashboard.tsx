@@ -5,7 +5,7 @@ import {
   LogOut, Compass, WalletCards, Gift,
   User, Settings, Sparkles, MapPin, Lock,
   Plus, CreditCard, Coffee, Utensils, Dumbbell,
-  AlertTriangle, Check, ShieldAlert, MessageSquare,
+  AlertTriangle, Check, ShieldAlert, MessageSquare, Zap, FileText, HelpCircle, Info, X,
 } from 'lucide-react';
 import { trackEvent } from '../../utils/analytics';
 import { triggerHaptic } from '../../utils/haptics';
@@ -41,8 +41,8 @@ const DailyStackLogo: React.FC<{ className?: string }> = ({ className }) => (
     <svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="ds-grad-db" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#CCFF00" />
-          <stop offset="100%" stopColor="#CCFF00" />
+          <stop offset="0%" stopColor="#C7FF2E" />
+          <stop offset="100%" stopColor="#C7FF2E" />
         </linearGradient>
       </defs>
       <path d="M50 78 L18 62 L18 58 L50 74 L82 58 L82 62 Z" fill="url(#ds-grad-db)" opacity="0.55" />
@@ -59,11 +59,14 @@ const DailyStackLogo: React.FC<{ className?: string }> = ({ className }) => (
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface NavItem {
-  icon: React.ElementType;
+  icon?: React.ElementType;
   label: string;
   active?: boolean;
   locked?: boolean;
   onClick?: () => void;
+  /** Custom image icon — supports adjustable size via className */
+  iconSrc?: string;
+  iconAlt?: string;
 }
 
 interface Wallet {
@@ -243,7 +246,7 @@ const SideNavButton: React.FC<NavItem> = ({ icon: Icon, label, active, locked, o
 );
 
 // ─── Mobile Bottom Tab Button ─────────────────────────────────────────────────
-const BottomTabButton: React.FC<NavItem> = ({ icon: Icon, label, active, locked, onClick }) => (
+const BottomTabButton: React.FC<NavItem> = ({ icon: Icon, label, active, locked, onClick, iconSrc, iconAlt }) => (
   <button
     onClick={locked ? undefined : onClick}
     className={`flex flex-col items-center justify-center gap-1 flex-1 py-3 min-h-[56px]
@@ -255,8 +258,16 @@ const BottomTabButton: React.FC<NavItem> = ({ icon: Icon, label, active, locked,
         : 'text-gray-500 active:text-[#000000]'
     }`}
   >
-    <div className="relative">
-      <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
+    <div className="relative flex items-center justify-center">
+      {iconSrc ? (
+        <img
+          src={iconSrc}
+          alt={iconAlt ?? label}
+          className="object-contain w-6 h-6 rounded-sm"
+        />
+      ) : (
+        <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
+      )}
       {locked && (
         <Lock size={10} className="absolute -top-1 -right-1 text-gray-400" />
       )}
@@ -492,12 +503,16 @@ const Dashboard: React.FC = () => {
     )[0];
   }, [subscriptions]);
 
-  const totalSubscriptionSpend = useMemo(() => subscriptions.reduce((sum, item) => sum + item.amount, 0), [subscriptions]);
+  const totalSubscriptionSpend = useMemo(() => subscriptions.reduce((sum, item) => {
+    const monthlyAmount = item.billing_cycle === 'yearly' ? item.amount / 12
+      : item.billing_cycle === 'weekly' ? item.amount * 4.33
+      : item.amount;
+    return sum + monthlyAmount;
+  }, 0), [subscriptions]);
 
-  const estimatedSavings = useMemo(() => {
-    return subscriptions
-      .filter((item) => item.utilizationWarning)
-      .reduce((sum, item) => sum + Math.round(item.amount * 0.35), 0);
+  const underusedSubscriptions = useMemo(() => {
+    const count = subscriptions.filter((item) => item.utilizationWarning).length;
+    return count > 0 ? `${count} service${count > 1 ? 's' : ''} appear${count === 1 ? 's' : ''} underused` : null;
   }, [subscriptions]);
 
   // ─── SMS Auto-Ingestion Sandbox State ───
@@ -996,15 +1011,11 @@ const Dashboard: React.FC = () => {
     (async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-              await supabase.from('user_settings').upsert({ user_id: user.id, notif_threshold: nv }, { onConflict: 'user_id' });
-            }
-          } catch (e) {
-            console.error('Failed to persist notif threshold to server:', e);
-          }
-        })();
-      } catch (err) {
-        console.error('Failed to persist settings to server:', err);
+        if (user) {
+          await supabase.from('user_settings').upsert({ user_id: user.id, notif_threshold: nv }, { onConflict: 'user_id' });
+        }
+      } catch (e) {
+        console.error('Failed to persist notif threshold to server:', e);
       }
     })();
   };
@@ -1208,7 +1219,8 @@ const Dashboard: React.FC = () => {
 
   const navItems: NavItem[] = [
     {
-      icon: Compass,
+      iconSrc: '/tab-logo.jpg',
+      iconAlt: 'DailyStack',
       label: 'Dashboard',
       active: true,
       onClick: () => {}, // Already on Dashboard
@@ -1233,6 +1245,7 @@ const Dashboard: React.FC = () => {
 
   const secondaryNav: NavItem[] = [
     { icon: User, label: 'Profile', onClick: () => navigate('/settings') },
+    { icon: HelpCircle, label: 'Help', onClick: () => window.open('mailto:support@dailystack.app', '_blank') },
     { icon: Settings, label: 'Settings', onClick: () => navigate('/settings') },
   ];
 
@@ -1275,7 +1288,7 @@ const Dashboard: React.FC = () => {
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 w-full px-3 py-3 text-sm font-medium min-h-[44px]
-            text-red-400/70 hover:text-red-400 hover:bg-red-400/8 rounded-xl transition-all mt-2"
+            text-amber-400/70 hover:text-amber-400 hover:bg-amber-400/8 rounded-xl transition-all mt-2"
         >
           <LogOut size={18} strokeWidth={1.8} /> Sign Out
         </button>
@@ -1285,7 +1298,7 @@ const Dashboard: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Sticky Header */}
-        <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl border-b border-black/5
+        <header className="sticky top-0 z-20 bg-[#0B0F0A]/90 backdrop-blur-xl border-b border-white/5
           px-4 md:px-10 py-3.5 md:py-5 flex justify-between items-center gap-3">
           <div className="md:hidden">
             <DailyStackLogo />
@@ -1312,7 +1325,7 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center gap-2 px-3 py-2 bg-gray-50
               rounded-full text-xs text-[#000000] font-bold border border-black/5
               max-w-[140px] sm:max-w-[200px] md:max-w-none overflow-hidden">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#CCFF00] animate-pulse shrink-0 shadow-[0_0_6px_#CCFF00]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C7FF2E] animate-pulse shrink-0 shadow-[0_0_6px_#C7FF2E]" />
               <span className="truncate">{userEmail || 'Loading…'}</span>
             </div>
           </div>
@@ -1450,28 +1463,28 @@ const Dashboard: React.FC = () => {
                 จำลองข้อความ SMS จากธนาคาร:
               </p>
               <div className="flex flex-wrap gap-2">
-                <button
+                  <button
                   onClick={() => setSmsText('SCB: จ่ายบัตร x-8829 จำนวน 250.00 บาท ที่ Starbucks')}
                   className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-black/5 rounded-full text-xs font-bold font-mono transition-all"
                 >
-                  ⚡ SCB (Starbucks)
+                  <span className="inline-flex items-center gap-1"><Zap size={12} className="text-amber-500" /> SCB (Starbucks)</span>
                 </button>
-                <button
+                  <button
                   onClick={() => setSmsText('KBank: โอนเงิน 120.00 บาท ไปยัง นายสมชาย (ร้านอาหาร)')}
                   className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-black/5 rounded-full text-xs font-bold font-mono transition-all"
                 >
-                  ⚡ KBank (Food)
+                  <span className="inline-flex items-center gap-1"><Zap size={12} className="text-amber-500" /> KBank (Food)</span>
                 </button>
-                <button
+                  <button
                   onClick={() => setSmsText('UOB: รูดบัตร x-1234 จำนวน 1,200.00 บาท ที่ Tops Supermarket')}
                   className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-black/5 rounded-full text-xs font-bold font-mono transition-all"
                 >
-                  ⚡ UOB (Tops)
+                  <span className="inline-flex items-center gap-1"><Zap size={12} className="text-amber-500" /> UOB (Tops)</span>
                 </button>
                 {smsText && (
                   <button
                     onClick={() => { setSmsText(''); }}
-                    className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200/20 rounded-full text-xs font-bold font-mono transition-all ml-auto"
+                    className="px-3 py-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 border border-amber-200/20 rounded-full text-xs font-bold font-mono transition-all ml-auto"
                   >
                     Clear
                   </button>
@@ -1485,7 +1498,7 @@ const Dashboard: React.FC = () => {
                 value={smsText}
                 onChange={(e) => setSmsText(e.target.value)}
                 placeholder="วางข้อความเเจ้งยอดเงิน SMS ของคุณตรงนี้ เช่น 'SCB: จ่ายบัตร x-8829 จำนวน 250.00 บาท ที่ Starbucks'..."
-                className="w-full bg-gray-50 border border-black/10 rounded-xl p-3 text-xs focus:border-[#CCFF00] focus:bg-white outline-none font-semibold font-kanit min-h-[64px]"
+                className="w-full bg-gray-50 border border-black/10 rounded-xl p-3 text-xs focus:border-[#C7FF2E] focus:bg-white outline-none font-semibold font-kanit min-h-[64px]"
               />
             </div>
 
@@ -1533,8 +1546,8 @@ const Dashboard: React.FC = () => {
               </div>
             ) : (
               smsText && (
-                <div className="p-3 bg-amber-50 text-amber-800 border border-amber-200/20 rounded-xl text-center text-xs font-semibold font-kanit">
-                  ⚠️ ยังไม่สามารถวิเคราะห์ข้อมูลได้ กรุณาลองปรับเเต่งข้อความหรือใช้ Preset ตัวอย่าง
+                <div className="p-3 bg-amber-50 text-amber-800 border border-amber-200/20 rounded-xl text-center text-xs font-semibold font-kanit flex items-center justify-center gap-2">
+                  <AlertTriangle size={12} className="shrink-0" /> ยังไม่สามารถวิเคราะห์ข้อมูลได้ กรุณาลองปรับเเต่งข้อความหรือใช้ Preset ตัวอย่าง
                 </div>
               )
             )}
@@ -1586,7 +1599,7 @@ const Dashboard: React.FC = () => {
                 <div className="space-y-2 mt-3">
                   {cancellationDeadlineAlerts.map((alert) => (
                     <div key={alert.subscriptionId} className="p-3 bg-amber-50 border border-amber-200 rounded-3xl text-amber-900 text-xs">
-                      <p className="font-black">⚠️ ต้องแจ้งยกเลิก {alert.name} ภายใน {alert.deadline.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                      <p className="font-black flex items-center gap-1"><AlertTriangle size={12} className="shrink-0" /> ต้องแจ้งยกเลิก {alert.name} ภายใน {alert.deadline.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                       <p className="mt-1 text-[11px] text-amber-900/90">
                         เหลือเวลาอีก {alert.daysLeft} วันก่อนวันกำหนดแจ้งยกเลิก
                       </p>
@@ -1616,9 +1629,18 @@ const Dashboard: React.FC = () => {
                       <p className="mt-2 text-[10px] text-gray-500">ค่าใช้จ่าย subscription ต่อเดือนทั้งหมด</p>
                     </div>
                     <div className="p-4 rounded-3xl bg-[#F7F7F7] border border-black/5 text-[#000000] shadow-sm">
-                      <p className="text-[10px] uppercase tracking-[0.2em] font-black text-gray-500">Potential Savings</p>
-                      <p className="mt-2 text-2xl font-black text-[#000000]">{estimatedSavings.toLocaleString()} THB</p>
-                      <p className="mt-2 text-[10px] text-gray-500">จาก {subscriptions.filter((s) => s.utilizationWarning).length} บริการที่ดูเหมือนใช้งานน้อย</p>
+                      <p className="text-[10px] uppercase tracking-[0.2em] font-black text-gray-500">Underused Services</p>
+                      {underusedSubscriptions ? (
+                        <>
+                          <p className="mt-2 text-2xl font-black text-[#000000]">{underusedSubscriptions}</p>
+                          <p className="mt-2 text-[10px] text-gray-500">Start tracking to see real savings</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="mt-2 text-2xl font-black text-[#000000]">0</p>
+                          <p className="mt-2 text-[10px] text-gray-500">All services are actively used</p>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -1647,7 +1669,7 @@ const Dashboard: React.FC = () => {
                                 const d = cancellationDeadlineMap.get(s.id)?.daysLeft ?? 0;
                                 if (d <= urgentBadgeDays) {
                                   return (
-                                    <span className="ml-2 inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-600 text-white text-[12px] font-black">
+                                    <span className="ml-2 inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-600 text-white text-[12px] font-black">
                                       {d}
                                     </span>
                                   );
@@ -1665,14 +1687,14 @@ const Dashboard: React.FC = () => {
                                 >Edit</button>
                                 <button
                                   onClick={() => handleDeleteSubscription(s.id)}
-                                  className="px-3 py-2 text-[10px] font-black uppercase tracking-widest bg-red-50 text-red-600 rounded-full hover:bg-red-100 transition"
+                                  className="px-3 py-2 text-[10px] font-black uppercase tracking-widest bg-amber-50 text-amber-600 rounded-full hover:bg-amber-100 transition"
                                 >Delete</button>
                               </div>
                             </div>
                           </div>
 
                           {s.utilizationWarning && (
-                            <div className="mt-3 pt-3 border-t border-black/5 text-[10px] text-red-500 font-kanit font-black flex items-start gap-1.5">
+                            <div className="mt-3 pt-3 border-t border-black/5 text-[10px] text-amber-500 font-kanit font-black flex items-start gap-1.5">
                               <ShieldAlert size={12} className="shrink-0 mt-0.5" />
                               <span>{s.utilizationWarning}</span>
                             </div>
@@ -1704,15 +1726,15 @@ const Dashboard: React.FC = () => {
                 {overBudgetCategories.length > 0 || nearBudgetCategories.length > 0 ? (
                   <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 space-y-2">
                     {overBudgetCategories.length > 0 && (
-                      <p className="font-black">⚠️ คุณกำลังใช้งบเกินใน {overBudgetCategories.length} หมวดหมู่: {overBudgetCategories.map((b) => b.categoryName).join(', ')}</p>
+                      <p className="font-black flex items-center gap-1"><AlertTriangle size={12} className="shrink-0" /> คุณกำลังใช้งบเกินใน {overBudgetCategories.length} หมวดหมู่: {overBudgetCategories.map((b) => b.categoryName).join(', ')}</p>
                     )}
                     {nearBudgetCategories.length > 0 && (
-                      <p className="font-semibold">ℹ️ งบประมาณใกล้เต็มใน {nearBudgetCategories.length} หมวดหมู่: {nearBudgetCategories.map((b) => b.categoryName).join(', ')}</p>
+                      <p className="font-semibold flex items-center gap-1"><Info size={12} className="shrink-0" /> งบประมาณใกล้เต็มใน {nearBudgetCategories.length} หมวดหมู่: {nearBudgetCategories.map((b) => b.categoryName).join(', ')}</p>
                     )}
                   </div>
                 ) : (
                   <div className="rounded-3xl border border-green-200 bg-emerald-50 p-4 text-xs text-emerald-900">
-                    🎉 งบของคุณยังอยู่ในระดับปลอดภัย ขอบคุณที่ติดตามการใช้จ่ายอย่างใกล้ชิด
+                    <Sparkles size={14} className="inline mr-1" />งบของคุณยังอยู่ในระดับปลอดภัย ขอบคุณที่ติดตามการใช้จ่ายอย่างใกล้ชิด
                   </div>
                 )}
 
@@ -1744,7 +1766,7 @@ const Dashboard: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center text-[10px] text-gray-500 font-mono">
                         <span className="font-bold">ใช้ไปแล้ว {percent}%</span>
-                        {isHigh && <span className="text-red-500 font-black flex items-center gap-1 font-kanit"><AlertTriangle size={10} /> เกินงบที่กำหนด!</span>}
+                        {isHigh && <span className="text-amber-500 font-black flex items-center gap-1 font-kanit"><AlertTriangle size={10} /> เกินงบที่กำหนด!</span>}
                       </div>
                     </div>
                   );
@@ -1800,7 +1822,7 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs font-black text-red-500 font-mono">-{tx.amount} THB</span>
+                    <span className="text-xs font-black text-amber-500 font-mono">-{tx.amount} THB</span>
                     <p className="text-[9px] text-gray-500 mt-0.5">{tx.date}</p>
                   </div>
                 </div>
@@ -1811,24 +1833,17 @@ const Dashboard: React.FC = () => {
         </main>
       </div>
 
-      {/* ── Mobile Navigation Bar ──────────────────────────────────────── */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30
-        bg-dark-card/95 backdrop-blur-xl border-t border-white/5
-        flex items-stretch pb-[env(safe-area-inset-bottom)]">
-        {navItems.map((item) => (
-          <BottomTabButton key={item.label} {...item} />
-        ))}
-        <BottomTabButton
-          icon={Settings}
-          label="Settings"
-          onClick={() => navigate('/settings')}
-        />
-        <BottomTabButton
-          icon={LogOut}
-          label="Sign Out"
-          onClick={handleLogout}
-        />
-      </nav>
+      {/* ── Zero-Button: Gesture Hint (bottom, mobile only) ─────────────── */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-20 flex flex-col items-center pb-[calc(12px+env(safe-area-inset-bottom))] pointer-events-none">
+        <p className="text-[10px] text-white/25 font-kanit tracking-widest uppercase animate-breathe-ring">
+          ปัดลงเพื่อบันทึก
+        </p>
+        <div className="mt-1 w-6 h-6 flex flex-col items-center gap-0.5">
+          <div className="w-px h-1.5 bg-white/20 rounded-full" />
+          <div className="w-px h-1 bg-white/30 rounded-full" />
+          <div className="w-px h-0.5 bg-white/40 rounded-full" />
+        </div>
+      </div>
 
       {/* ── Quick Expense Logger Bottom Sheet ─────────────────────────── */}
       {isLogOpen && (
@@ -1943,7 +1958,7 @@ const Dashboard: React.FC = () => {
                     onClick={() => handleKeypadPress(key)}
                     className="p-3 bg-[#000000] active:bg-[#000000]/80 text-white rounded-xl transition-all flex items-center justify-center min-h-[48px] shadow-sm hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    {key === 'back' ? '←' : key}
+                    {key === 'back' ? <X size={18} /> : key}
                   </button>
                 ))}
               </div>
@@ -1983,7 +1998,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             {subscriptionError && (
-              <div className="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-sm">
+              <div className="mb-4 p-3 rounded-2xl bg-amber-50/10 border border-amber-500/30 text-amber-500 text-sm">
                 {subscriptionError}
               </div>
             )}
@@ -2184,8 +2199,8 @@ const Dashboard: React.FC = () => {
                         <span className="text-[10px] text-gray-400 block uppercase font-bold tracking-wider">เอกสารที่ต้องใช้แสดง</span>
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {activePlaybook.required_documents.map((doc, idx) => (
-                            <span key={idx} className="px-2.5 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-700 border border-black/5">
-                              📄 {doc}
+                            <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-700 border border-black/5">
+                              <FileText size={12} className="text-gray-500" /> {doc}
                             </span>
                           ))}
                         </div>
@@ -2193,8 +2208,8 @@ const Dashboard: React.FC = () => {
 
                       <div>
                         <span className="text-[10px] text-gray-400 block uppercase font-bold tracking-wider">เงื่อนไขค่าธรรมเนียมและค่าปรับ</span>
-                        <p className="text-xs font-semibold text-gray-700 bg-red-50 border border-red-100 rounded-xl p-3 mt-1 leading-relaxed">
-                          ⚠️ {activePlaybook.penalty_information}
+                        <p className="text-xs font-semibold text-amber-500 bg-amber-50/10 border border-amber-500/30 rounded-xl p-3 mt-1 leading-relaxed flex items-start gap-1.5">
+                          <AlertTriangle size={12} className="shrink-0 mt-0.5" /> {activePlaybook.penalty_information}
                         </p>
                       </div>
 
@@ -2214,7 +2229,7 @@ const Dashboard: React.FC = () => {
                               href={activePlaybook.contact_information.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] font-black text-black bg-[#CCFF00] px-2.5 py-1.5 rounded-lg border border-black/10 mt-1 shadow-sm uppercase tracking-wider"
+                              className="inline-flex items-center gap-1 text-[10px] font-black text-black bg-[#C7FF2E] px-2.5 py-1.5 rounded-lg border border-black/10 mt-1 shadow-sm uppercase tracking-wider"
                             >
                               ไปยังเว็บไซต์ผู้ให้บริการ ↗
                             </a>
@@ -2323,7 +2338,7 @@ const Dashboard: React.FC = () => {
                               {doc.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? (
                                 <img src={doc.fileUrl} alt="Preview" className="w-full h-full object-cover" />
                               ) : (
-                                <span className="text-[20px]">📄</span>
+                                <FileText size={20} className="text-gray-400" />
                               )}
                             </div>
 
@@ -2497,7 +2512,7 @@ const Dashboard: React.FC = () => {
                                 {doc.fileName.match(/\.(jpg|jpeg|png|gif)$/i) ? (
                                   <img src={doc.fileUrl} alt="Preview" className="w-full h-full object-cover" />
                                 ) : (
-                                  <span className="text-[24px]">📄</span>
+                                  <FileText size={24} className="text-gray-400" />
                                 )}
                               </div>
                               <p className="text-[10px] font-black truncate" title={doc.fileName}>{doc.fileName}</p>
@@ -2539,7 +2554,7 @@ const Dashboard: React.FC = () => {
 
                     {/* Celebration badge */}
                     <div className="inline-flex w-16 h-16 rounded-full bg-primary border-4 border-black/5 items-center justify-center text-3xl shrink-0 shadow-lg animate-bounce">
-                      🎉
+                      <Sparkles size={32} className="text-[#0B0F0A]" />
                     </div>
 
                     <div className="space-y-1">
@@ -2551,7 +2566,7 @@ const Dashboard: React.FC = () => {
 
                     {/* Saved Box */}
                     <div className="bg-[#000000] rounded-2xl p-5 text-center shadow-lg border border-white/5 relative overflow-hidden group max-w-sm mx-auto">
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-[#CCFF00]/10 rounded-full blur-2xl pointer-events-none" />
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7FF2E]/10 rounded-full blur-2xl pointer-events-none" />
 
                       <p className="text-[10px] text-primary uppercase tracking-widest font-black mb-1.5">
                         ยอดการประหยัดเงินสุทธิของท่าน (Net Money Saved)
