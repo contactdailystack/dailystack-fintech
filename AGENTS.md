@@ -63,6 +63,7 @@ When auditing feature renames across the codebase:
 - Preload first-paint faces in index.html: inter-var-latin + jetbrains-mono-var-latin (crossorigin); Noto Thai intentionally NOT preloaded (EN users shouldn't pay for it)
 - AuthContext render-first: user state set immediately on session restore/login, getUserProfile() enrichment runs async after (−1 RTT to TTI); guards against stale-user overwrite via prev.user?.id check
 - MEASURED & REVERTED: removing lucide-react from manualChunks produced 30+ icon micro-chunks, inflated SubscriptionTrackerPage 75→93KB and net-zero byte savings — vendor-icons shared chunk KEPT (rationale commented in vite.config.ts)
+- Shipped: commit 0823825 (branch + main fast-forward from 09f07fa) → vercel --prod READY dpl_9TJczEpKRbZnLGfX7CHZy2zkXTxp, live at https://dailystack-fintech.vercel.app (preloads verified in prod HTML)
 - TypeScript: 0 errors; production build passes
 
 ### 2026-08-24 (RM parity round 3: auto-discovery + cancel instructions + net income)
