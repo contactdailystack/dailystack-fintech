@@ -34,7 +34,7 @@ import { loadSubscriptions } from '../services/subscriptionService';
 import { MERCHANT_DATABASE, CATEGORY_META } from './SubscriptionTrackerPage';
 
 // ─── Design Tokens ──────────────────────────────────────────────────────────
-const ACCENT = '#56be89';
+const ACCENT = '#0FB0CE';
 const TEXT = '#111827';
 const TEXT_MUTED = '#666666';
 const BORDER = '#E5E5E5';
@@ -330,7 +330,7 @@ export default function CSVImportModal({ isOpen, onClose, onImportComplete, lang
 
           {/* Header */}
           <div className="flex items-center justify-between px-5 pb-3 shrink-0">
-            <h2 className="text-[17px] font-bold" style={{ color: TEXT, fontFamily: lang === 'th' ? 'Kanit, sans-serif' : 'Inter, sans-serif' }}>
+            <h2 className="text-[17px] font-bold" style={{ color: TEXT, fontFamily: lang === 'th' ? 'Noto Sans Thai, sans-serif' : 'Inter, sans-serif' }}>
               {lang === 'th' ? 'นำเข้าจากไฟล์' : 'Import from File'}
             </h2>
             <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100" aria-label="Close">
@@ -359,8 +359,8 @@ export default function CSVImportModal({ isOpen, onClose, onImportComplete, lang
                     flex flex-col items-center justify-center gap-3 py-10 px-4 rounded-2xl border-2 border-dashed cursor-pointer
                     transition-all active:scale-[0.98]
                     ${dragOver
-                      ? 'border-[#56be89] bg-[rgba(86,190,137,0.06)]'
-                      : 'border-[#E5E5E5] bg-gray-50 hover:border-[#56be89] hover:bg-[rgba(86,190,137,0.04)]'
+                      ? 'border-[#0FB0CE] bg-[rgba(15, 176, 206,0.06)]'
+                      : 'border-[#E5E5E5] bg-gray-50 hover:border-[#0FB0CE] hover:bg-[rgba(15, 176, 206,0.04)]'
                     }
                   `}
                 >

@@ -111,7 +111,7 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
     <div
       className="min-h-screen pb-24"
       style={{
-        backgroundColor: '#0B0F0A',
+        backgroundColor: '#050D1F',
         fontFamily: '"Inter", sans-serif',
       }}
     >
@@ -220,7 +220,7 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
                 w-2.5 h-2.5 rounded-full transition-all duration-200
                 ${
                   (selectedCard || cards[0]?.id) === card.id
-                    ? 'bg-[#56be89] w-6'
+                    ? 'bg-[#0FB0CE] w-6'
                     : 'bg-zinc-600 hover:bg-zinc-500'
                 }
               `}
@@ -236,12 +236,12 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
             onClick={() => setShowAddCardModal(true)}
             className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl"
             style={{
-              backgroundColor: 'rgba(86, 190, 137, 0.1)',
-              border: '1px solid rgba(86, 190, 137, 0.2)',
+              backgroundColor: 'rgba(15, 176, 206, 0.1)',
+              border: '1px solid rgba(15, 176, 206, 0.2)',
             }}
           >
-            <Plus className="w-6 h-6" style={{ color: '#56be89' }} />
-            <span className="text-xs font-medium" style={{ color: '#56be89' }}>
+            <Plus className="w-6 h-6" style={{ color: '#0FB0CE' }} />
+            <span className="text-xs font-medium" style={{ color: '#0FB0CE' }}>
               {lang === 'en' ? 'Add Card' : 'เพิ่มบัตร'}
             </span>
           </button>
@@ -288,7 +288,7 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
                 w-full p-4 rounded-xl flex items-center gap-4 transition-all duration-200
                 ${
                   (selectedCard || cards[0]?.id) === card.id
-                    ? 'bg-[#1F2328] border border-[#56be89]/30'
+                    ? 'bg-[#1F2328] border border-[#0FB0CE]/30'
                     : 'bg-[#1A1A1A] border border-[#2A2A2A]'
                 }
               `}
@@ -299,7 +299,7 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
                 style={{
                   background:
                     card.variant === 'lime'
-                      ? 'linear-gradient(135deg, #56be89 0%, #A3D91A 100%)'
+                      ? 'linear-gradient(135deg, #0FB0CE 0%, #A3D91A 100%)'
                       : card.variant === 'emerald'
                       ? 'linear-gradient(135deg, #00E676 0%, #00A843 100%)'
                       : 'linear-gradient(135deg, #FFD700 0%, #FFB300 100%)',
@@ -334,8 +334,8 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
         onClick={() => setShowAddCardModal(true)}
         className="fixed bottom-24 left-1/2 -translate-x-1/2 flex items-center gap-2 px-6 py-3 rounded-full shadow-lg"
         style={{
-          backgroundColor: '#56be89',
-          boxShadow: '0 4px 24px rgba(86, 190, 137, 0.4)',
+          backgroundColor: '#0FB0CE',
+          boxShadow: '0 4px 24px rgba(15, 176, 206, 0.4)',
         }}
       >
         <Plus className="w-5 h-5 text-black" strokeWidth={2.5} />
@@ -382,7 +382,7 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
                   <input
                     type="text"
                     placeholder="•••• •••• •••• ••••"
-                    className="w-full px-4 py-3 rounded-xl bg-[#0B0F0A] border border-[#2A2A2A] text-white placeholder-zinc-500 focus:border-[#56be89] focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl bg-[#050D1F] border border-[#2A2A2A] text-white placeholder-zinc-500 focus:border-[#0FB0CE] focus:outline-none"
                   />
                 </div>
 
@@ -394,7 +394,7 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
                     <input
                       type="text"
                       placeholder="MM/YY"
-                      className="w-full px-4 py-3 rounded-xl bg-[#0B0F0A] border border-[#2A2A2A] text-white placeholder-zinc-500 focus:border-[#56be89] focus:outline-none"
+                      className="w-full px-4 py-3 rounded-xl bg-[#050D1F] border border-[#2A2A2A] text-white placeholder-zinc-500 focus:border-[#0FB0CE] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -404,7 +404,7 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
                     <input
                       type="text"
                       placeholder="•••"
-                      className="w-full px-4 py-3 rounded-xl bg-[#0B0F0A] border border-[#2A2A2A] text-white placeholder-zinc-500 focus:border-[#56be89] focus:outline-none"
+                      className="w-full px-4 py-3 rounded-xl bg-[#050D1F] border border-[#2A2A2A] text-white placeholder-zinc-500 focus:border-[#0FB0CE] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -416,13 +416,13 @@ export default function MyCardsPage({ lang, onBack }: MyCardsPageProps) {
                   <input
                     type="text"
                     placeholder={lang === 'en' ? 'Name on card' : 'ชื่อที่แสดงบนบัตร'}
-                    className="w-full px-4 py-3 rounded-xl bg-[#0B0F0A] border border-[#2A2A2A] text-white placeholder-zinc-500 focus:border-[#56be89] focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl bg-[#050D1F] border border-[#2A2A2A] text-white placeholder-zinc-500 focus:border-[#0FB0CE] focus:outline-none"
                   />
                 </div>
 
                 <button
                   className="w-full py-4 rounded-xl font-bold text-black mt-4"
-                  style={{ backgroundColor: '#56be89' }}
+                  style={{ backgroundColor: '#0FB0CE' }}
                 >
                   {lang === 'en' ? 'Add Card' : 'เพิ่มบัตร'}
                 </button>

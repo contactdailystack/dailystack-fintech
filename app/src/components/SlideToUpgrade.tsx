@@ -8,7 +8,7 @@ import { translations, Language } from '../data/translations';
 interface SlideToUpgradeProps {
   onSlideComplete: () => void;
   lang?: Language;
-  tierColor: string; // e.g. '#56be89' or '#FFD700'
+  tierColor: string; // e.g. '#0FB0CE' or '#FFD700'
   isLoading?: boolean;
   disabled?: boolean;
 }
@@ -106,7 +106,7 @@ export default function SlideToUpgrade(props: SlideToUpgradeProps) {
           }}
           disabled={isDisabled || completed}
           aria-label={t.slideConfirm}
-          className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-mono text-sm uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#56be89] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
+          className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-mono text-sm uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0FB0CE] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
             completed ? 'text-white/40' : 'text-white/30'
           } ${isDisabled || completed ? 'cursor-not-allowed opacity-50' : ''}`}
           style={{
@@ -127,7 +127,7 @@ export default function SlideToUpgrade(props: SlideToUpgradeProps) {
         /* Normal: slide gesture */
         <div
           ref={trackRef}
-          className={`relative h-14 rounded-2xl overflow-hidden select-none ${completed ? 'bg-[#56be89]/20 border border-[#56be89]/40' : 'bg-[#1A1B1E] border border-[#2B2D31]'}`}
+          className={`relative h-14 rounded-2xl overflow-hidden select-none ${completed ? 'bg-[#0FB0CE]/20 border border-[#0FB0CE]/40' : 'bg-[#1A1B1E] border border-[#2B2D31]'}`}
           tabIndex={0}
           role="group"
           aria-label={t.slideConfirm}
@@ -191,7 +191,7 @@ export default function SlideToUpgrade(props: SlideToUpgradeProps) {
             tabIndex={0}
             aria-label={t.slideConfirm}
             aria-disabled={isDisabled ? 'true' : 'false'}
-            className={`absolute top-1 left-1 w-12 h-12 rounded-xl flex items-center justify-center ${dragging ? 'cursor-grabbing' : 'cursor-pointer'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#56be89] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent`}
+            className={`absolute top-1 left-1 w-12 h-12 rounded-xl flex items-center justify-center ${dragging ? 'cursor-grabbing' : 'cursor-pointer'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0FB0CE] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent`}
             style={{
               transform: `translateX(${pos}px)`,
               transitionProperty: 'transform',
@@ -221,7 +221,7 @@ export default function SlideToUpgrade(props: SlideToUpgradeProps) {
             {isLoading ? (
               <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: `${tierColor}44`, borderTopColor: tierColor }} />
             ) : (
-              <ArrowRight className="w-4 h-4" style={{ color: dragging ? '#0B0F0A' : '#888' }} />
+              <ArrowRight className="w-4 h-4" style={{ color: dragging ? '#050D1F' : '#888' }} />
             )}
           </div>
         </div>

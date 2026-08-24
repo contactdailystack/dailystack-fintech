@@ -18,7 +18,7 @@ import { semantic, text, border } from '../color-tokens';
 import { motionTokens, toSeconds, easing } from '../motion-tokens';
 
 // ─── Design Tokens ──────────────────────────────────────────────────
-const ACCENT = '#56be89';
+const ACCENT = '#0FB0CE';
 const MUTED = '#888888';
 const BACKGROUND = '#1A1A1A';
 const BORDER = '#2A2A2A';
@@ -152,10 +152,10 @@ const TransactionIllustration: React.FC<{ className?: string }> = ({ className }
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.5, type: 'spring' }}
     />
-    <motion.line x1="90" y1="35" x2="90" y2="45" stroke="#0B0F0A" strokeWidth="2" strokeLinecap="round"
+    <motion.line x1="90" y1="35" x2="90" y2="45" stroke="#050D1F" strokeWidth="2" strokeLinecap="round"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
     />
-    <motion.line x1="85" y1="40" x2="95" y2="40" stroke="#0B0F0A" strokeWidth="2" strokeLinecap="round"
+    <motion.line x1="85" y1="40" x2="95" y2="40" stroke="#050D1F" strokeWidth="2" strokeLinecap="round"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
     />
   </motion.svg>
@@ -192,7 +192,7 @@ const SubscriptionIllustration: React.FC<{ className?: string }> = ({ className 
       <motion.circle
         key={i}
         cx={45 + i * 15} cy="40" r="3"
-        fill="#0B0F0A"
+        fill="#050D1F"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 + i * 0.1 }}
@@ -219,7 +219,7 @@ const SubscriptionIllustration: React.FC<{ className?: string }> = ({ className 
       animate={{ scale: 1 }}
       transition={{ delay: 0.5, type: 'spring' }}
     />
-    <motion.text x="95" y="89" textAnchor="middle" fill="#0B0F0A" fontSize="12" fontWeight="bold"
+    <motion.text x="95" y="89" textAnchor="middle" fill="#050D1F" fontSize="12" fontWeight="bold"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
     >
       ?
@@ -266,10 +266,10 @@ const CardIllustration: React.FC<{ className?: string }> = ({ className }) => (
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.4, type: 'spring' }}
     />
-    <motion.line x1="85" y1="63" x2="85" y2="77" stroke="#0B0F0A" strokeWidth="2.5" strokeLinecap="round"
+    <motion.line x1="85" y1="63" x2="85" y2="77" stroke="#050D1F" strokeWidth="2.5" strokeLinecap="round"
       initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.5 }}
     />
-    <motion.line x1="78" y1="70" x2="92" y2="70" stroke="#0B0F0A" strokeWidth="2.5" strokeLinecap="round"
+    <motion.line x1="78" y1="70" x2="92" y2="70" stroke="#050D1F" strokeWidth="2.5" strokeLinecap="round"
       initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.5 }}
     />
   </motion.svg>
@@ -367,7 +367,7 @@ const InsightsIllustration: React.FC<{ className?: string }> = ({ className }) =
     />
     <motion.path
       d="M95 22 L95 26 M91 28 L91 32 M99 28 L99 32 M93 35 L93 38 M97 35 L97 38"
-      stroke="#0B0F0A"
+      stroke="#050D1F"
       strokeWidth="2"
       strokeLinecap="round"
       initial={{ opacity: 0 }}
@@ -478,7 +478,7 @@ const ErrorIllustration: React.FC<{ className?: string }> = ({ className }) => (
     />
     <motion.path
       d="M95 28 L98 32 L92 32 M95 28 L92 32 L98 32"
-      stroke="#0B0F0A"
+      stroke="#050D1F"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -611,23 +611,23 @@ const variantPresets: Record<EmptyStateVariant, {
   },
   'transactions': {
     icon: 'CreditCard',
-    iconColor: '#56be89',
+    iconColor: '#0FB0CE',
   },
   'subscriptions': {
     icon: 'RefreshCw',
-    iconColor: '#56be89',
+    iconColor: '#0FB0CE',
   },
   'cards': {
     icon: 'CreditCard',
-    iconColor: '#56be89',
+    iconColor: '#0FB0CE',
   },
   'goals': {
     icon: 'TrendingUp',
-    iconColor: '#56be89',
+    iconColor: '#0FB0CE',
   },
   'insights': {
     icon: 'TrendingUp',
-    iconColor: '#56be89',
+    iconColor: '#0FB0CE',
   },
 };
 

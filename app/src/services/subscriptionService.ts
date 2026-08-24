@@ -20,11 +20,17 @@ export interface Subscription {
   color?: string;
   icon?: string;
   isActive: boolean;
+  /** ISO date of the last confirmed payment. Stored in DB `notes` column
+   *  (no dedicated column yet — see migration backlog). Written by Mark-as-Paid. */
   lastPaidDate?: string;
+  /** ISO date the subscription row was created — used for ghost heuristics */
+  createdAt?: string;
   paidDates?: number[];
   skipDates?: number[];
   priceChange?: number;
   isGhost?: boolean;
+  /** Free-trial tracking (#3): ISO date when the trial converts to paid */
+  trialEndDate?: string;
 }
 
 // ─── DB ↔ Local Type Mappers ─────────────────────────────────────────────────
@@ -43,6 +49,8 @@ function dbRowToSubscription(row: DBSubscriptionRow): Subscription {
     billingCycle: row.billing_cycle,   // DB: billing_cycle → local: billingCycle
     isActive: row.is_active,           // DB: is_active → local: isActive
     lastPaidDate: row.notes || undefined,
+    createdAt: row.created_at || undefined,
+    trialEndDate: row.trial_end_date || undefined,
   };
 }
 
@@ -62,6 +70,7 @@ function subscriptionToDbRow(sub: Omit<Subscription, 'id'>): Partial<DBSubscript
     next_billing_date: nextBilling.toISOString().split('T')[0],
     is_active: sub.isActive,
     notes: sub.lastPaidDate || null,
+    trial_end_date: sub.trialEndDate || null,
   };
 }
 
@@ -76,6 +85,7 @@ interface DBSubscriptionRow {
   next_billing_date: string | null;
   is_active: boolean;
   notes: string | null;
+  trial_end_date: string | null;
   created_at: string;
   updated_at: string;
 }

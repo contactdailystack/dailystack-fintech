@@ -5,7 +5,7 @@
  *
  * Token Migration v1.0 — CSS Variable Foundation
  * - All appearance colors via CSS variables (--bg-page, --text-primary, etc.)
- * - Brand color #56BE89 used sparingly: CTA, active state, key insight
+ * - Brand color #0FB0CE used sparingly: CTA, active state, key insight
  * - Business logic (Health Score, Money Twin) unchanged
  *
  * Design Tokens:
@@ -17,7 +17,7 @@
  *
  * Appearance:
  * - White 80%, Soft Gray 15%, CI Green 5%
- * - Font: Inter + Kanit (Thai) + JetBrains Mono (numbers)
+ * - Font: Inter + Noto Sans Thai (Thai) + JetBrains Mono (numbers)
  */
 
 import { useState, useEffect, useMemo } from 'react';
@@ -28,12 +28,18 @@ import {
   ShoppingBag, Film, Package, Sparkles, Shield, Eye, EyeOff,
   CalendarDays, Minus, AlertCircle, CheckCircle2,
   ArrowUpRight, ArrowDownRight,
+  SlidersHorizontal, ChevronUp, ChevronDown, Wallet, X, Check,
 } from 'lucide-react';
 import { Language } from '../data/translations';
 import { Transaction } from '../types';
 import { haptics } from '../services/hapticService';
 import { loadSubscriptions } from '../services/subscriptionService';
 import type { Subscription } from '../services/subscriptionService';
+import { computeSafeToSpend } from '../services/safeToSpend';
+import {
+  loadBudgets, monthSpendByBudgetKey, subscribeBudgets,
+} from '../services/budgetStore';
+import type { UserBudget } from '../services/budgetStore';
 
 // ============================================================
 // TYPE DEFINITIONS
@@ -167,7 +173,7 @@ const fmtCompact = (amount: number, lang: Language): string => {
 };
 
 const getFont = (lang: Language) =>
-  lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif';
+  lang === 'th' ? '"Noto Sans Thai", sans-serif' : '"Inter", sans-serif';
 
 // ============================================================
 // FINANCIAL HEALTH SCORE CALCULATION v3.0
@@ -1075,14 +1081,14 @@ function RecentMoves({ transactions, lang, showAmounts, onToggle, onViewAll }: {
 
   const catConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
     food: { icon: <Utensils className="w-4 h-4" />, color: '#F97316', bg: 'rgba(249,115,22,0.12)' },
-    transport: { icon: <Car className="w-4 h-4" />, color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
+    transport: { icon: <Car className="w-4 h-4" />, color: '#1786C2', bg: 'rgba(23, 134, 194,0.12)' },
     shopping: { icon: <ShoppingBag className="w-4 h-4" />, color: '#EC4899', bg: 'rgba(236,72,153,0.12)' },
     entertainment: { icon: <Film className="w-4 h-4" />, color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)' },
     subscription: { icon: <CreditCard className="w-4 h-4" />, color: 'var(--brand-primary)', bg: 'var(--brand-primary-muted)' },
     bills: { icon: <Package className="w-4 h-4" />, color: '#EF4444', bg: 'rgba(239,68,68,0.12)' },
   };
 
-  const getCat = (cat: string) => catConfig[cat] || {
+  const getCat = (cat: string) => catConfig[(cat || '').toLowerCase()] || {
     icon: <Package className="w-4 h-4" />, color: 'var(--text-muted)', bg: 'var(--bg-surface)',
   };
 
@@ -1307,6 +1313,11 @@ function UpcomingBills({ subs, lang, showAmounts, onSeeAll }: {
                 {dayNum(date)}
               </p>
             </div>
+            <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[13px] font-bold text-white"
+              style={{ backgroundColor: sub.color || 'var(--brand-primary)' }}
+              aria-hidden="true">
+              {(sub.name || '?').charAt(0).toUpperCase()}
+            </div>
             <div className="flex-1 min-w-0">
               <p className="truncate" style={{ fontFamily: getFont(lang), fontSize: '0.8125rem',
                 fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -1369,17 +1380,416 @@ function SkeletonCard({ h = 120 }: { h?: number }) {
 }
 
 // ============================================================
+// DASHBOARD CUSTOMIZATION (#7) — section order/visibility prefs
+// ============================================================
+const DASH_SECTIONS: { id: string; labelEn: string; labelTh: string }[] = [
+  { id: 'safe', labelEn: 'Safe to Spend', labelTh: 'เงินที่ใช้ได้ปลอดภัย' },
+  { id: 'upcoming', labelEn: 'Upcoming Bills', labelTh: 'รายการที่จะถึง' },
+  { id: 'rings', labelEn: 'Budget Rings', labelTh: 'วงแหวนงบประมาณ' },
+  { id: 'insight', labelEn: 'Smart Insight', labelTh: 'คำแนะนำอัจฉริยะ' },
+  { id: 'stats', labelEn: 'Quick Stats', labelTh: 'สถิติด่วน' },
+  { id: 'recent', labelEn: 'Recent Activity', labelTh: 'กิจกรรมล่าสุด' },
+  { id: 'actions', labelEn: 'Quick Actions', labelTh: 'ทางลัด' },
+];
+const DEFAULT_DASH_ORDER = DASH_SECTIONS.map((s) => s.id);
+const DASH_PREFS_KEY = 'pickswise.dash.v1';
+
+function loadDashPrefs(): { order: string[]; hidden: string[] } {
+  try {
+    const raw = localStorage.getItem(DASH_PREFS_KEY);
+    if (!raw) return { order: DEFAULT_DASH_ORDER, hidden: [] };
+    const p = JSON.parse(raw);
+    const order = Array.isArray(p.order)
+      ? [...p.order.filter((id: string) => DEFAULT_DASH_ORDER.includes(id)),
+         ...DEFAULT_DASH_ORDER.filter((id) => !p.order.includes(id))]
+      : DEFAULT_DASH_ORDER;
+    const hidden = Array.isArray(p.hidden) ? p.hidden : [];
+    return { order, hidden };
+  } catch {
+    return { order: DEFAULT_DASH_ORDER, hidden: [] };
+  }
+}
+
+function saveDashPrefs(prefs: { order: string[]; hidden: string[] }): void {
+  try { localStorage.setItem(DASH_PREFS_KEY, JSON.stringify(prefs)); } catch { /* noop */ }
+}
+
+// ============================================================
+// ACTIVATION CHECKLIST — RM-style "win moment": 3 steps to set up,
+// auto-hides once everything is done
+// ============================================================
+const CHECKLIST_KEY = 'pickswise.checklist.dismissed.v1';
+function ActivationChecklist({
+  hasSubs, hasTxs, hasBudgets, lang, onNavigate,
+}: {
+  hasSubs: boolean;
+  hasTxs: boolean;
+  hasBudgets: boolean;
+  lang: Language;
+  onNavigate: (tab: string) => void;
+}) {
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem(CHECKLIST_KEY) === '1'; } catch { return false; }
+  });
+
+  if (dismissed) return null;
+  const steps = [
+    { done: hasSubs, labelTh: 'เพิ่มการสมัครรายแรก', labelEn: 'Add your first subscription', tab: 'subscriptions' },
+    { done: hasTxs, labelTh: 'บันทึกหรือนำเข้ารายจ่าย', labelEn: 'Record or import expenses', tab: 'activity' },
+    { done: hasBudgets, labelTh: 'ตั้งงบประมาณ', labelEn: 'Set a budget', tab: 'budget' },
+  ];
+  const doneCount = steps.filter(s => s.done).length;
+
+  // All done → mark dismissed permanently and disappear
+  useEffect(() => {
+    if (doneCount === steps.length) {
+      try { localStorage.setItem(CHECKLIST_KEY, '1'); } catch { /* noop */ }
+      setDismissed(true);
+    }
+  }, [doneCount]);
+
+  if (doneCount === steps.length) return null;
+
+  const dismiss = () => {
+    try { localStorage.setItem(CHECKLIST_KEY, '1'); } catch { /* noop */ }
+    haptics.fire('SELECT');
+    setDismissed(true);
+  };
+
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white p-4 mb-3 relative">
+      <button
+        type="button"
+        onClick={dismiss}
+        aria-label={lang === 'th' ? 'ปิด' : 'Dismiss'}
+        className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors"
+      >
+        <X className="w-4 h-4" />
+      </button>
+      <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-500">
+        {lang === 'th' ? 'ตั้งค่าเริ่มต้น' : 'Get started'}
+      </p>
+      <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--brand-primary)' }}>
+        {lang === 'th'
+          ? `พร้อมใช้งาน ${doneCount}/3 ขั้นตอน`
+          : `${doneCount} of 3 steps complete`}
+      </p>
+      <div className="mt-3 space-y-1.5">
+        {steps.map((step) => (
+          <button
+            key={step.tab}
+            type="button"
+            disabled={step.done}
+            onClick={() => { haptics.fire('SELECT'); onNavigate(step.tab); }}
+            className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-colors ${
+              step.done ? '' : 'hover:bg-zinc-50 active:bg-zinc-100'
+            }`}
+          >
+            <span
+              className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{
+                backgroundColor: step.done ? 'var(--success)' : '#F4F4F5',
+                color: step.done ? '#fff' : '#A1A1AA',
+              }}
+            >
+              <Check className="w-3 h-3" strokeWidth={3} />
+            </span>
+            <span
+              className="text-xs"
+              style={{
+                color: step.done ? '#A1A1AA' : '#27272A',
+                textDecoration: step.done ? 'line-through' : 'none',
+                fontWeight: step.done ? 400 : 600,
+              }}
+            >
+              {lang === 'th' ? step.labelTh : step.labelEn}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// SAFE TO SPEND — RM hero metric
+// balance − recurring obligations due before next payday (30d fallback)
+// ============================================================
+function SafeToSpendCard({
+  balance, paydayDay, subs, lang, showAmounts, onSeeBills,
+}: {
+  balance: number;
+  paydayDay?: number | null;
+  subs: { id: string; name: string; amount: number; dueDate: number }[];
+  lang: Language;
+  showAmounts: boolean;
+  onSeeBills: () => void;
+}) {
+  const result = useMemo(
+    () => computeSafeToSpend({ balance, paydayDay, subs }),
+    [balance, paydayDay, subs]
+  );
+  const negative = result.amount < 0;
+
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white p-4 mb-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-500">
+            {lang === 'th' ? 'เงินที่ใช้ได้ปลอดภัย' : 'Safe to Spend'}
+          </p>
+          <p
+            className="mt-1 font-bold"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'clamp(1.5rem, 6vw, 1.875rem)',
+              letterSpacing: '-0.03em',
+              lineHeight: 1,
+              color: negative ? 'var(--error)' : 'var(--brand-primary)',
+            }}
+          >
+            {showAmounts ? `฿${result.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : '••••'}
+          </p>
+          <p className="mt-1.5 text-[11px] leading-snug text-zinc-500">
+            {negative
+              ? (lang === 'th'
+                ? `เงินไม่พบสำหรับบิลถึงวัน pay · หนี้ระยะสั้นเกินดุล`
+                : `Not enough for upcoming bills · short by ฿${Math.abs(result.totalObligations - balance).toLocaleString()}`)
+              : result.obligations.length === 0
+                ? (lang === 'th'
+                  ? `ไม่มีบิลที่จะมาถึงในอีก ${result.windowDays} วัน`
+                  : `No bills due in the next ${result.windowDays} days`)
+                : (lang === 'th'
+                  ? `หลังหักบิล ฿${result.totalObligations.toLocaleString()} จาก ${result.obligations.length} รายการ · ${result.windowDays} วันข้างหน้า`
+                  : `After ฿${result.totalObligations.toLocaleString()} in bills across ${result.obligations.length} items · ${result.windowDays} days ahead`)}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onSeeBills}
+          className="flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
+          style={{ backgroundColor: 'var(--brand-tint, #E0F2FC)', color: 'var(--brand-primary)' }}
+        >
+          {lang === 'th' ? 'ดูบิล' : 'View bills'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// BUDGET RINGS (#5) — Rocket Money pattern, top categories
+// ============================================================
+function BudgetRing({ pct, color }: { pct: number; color: string }) {
+  const r = 24;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.min(pct, 1);
+  const strokeColor = pct > 1 ? 'var(--error)' : pct > 0.8 ? 'var(--warning)' : color;
+  return (
+    <svg width="56" height="56" viewBox="0 0 56 56" className="shrink-0">
+      <circle cx="28" cy="28" r={r} fill="none" stroke="var(--border-default)" strokeWidth="5" />
+      <motion.circle
+        cx="28" cy="28" r={r} fill="none"
+        stroke={strokeColor} strokeWidth="5" strokeLinecap="round"
+        strokeDasharray={c}
+        initial={{ strokeDashoffset: c }}
+        animate={{ strokeDashoffset: c * (1 - clamped) }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        transform="rotate(-90 28 28)"
+      />
+      <text x="28" y="31" textAnchor="middle" fill="var(--text-primary)"
+        style={{ fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+        {Math.round(pct * 100)}%
+      </text>
+    </svg>
+  );
+}
+
+function BudgetRings({ transactions, budgets, lang, showAmounts, onSeeAll }: {
+  transactions: Transaction[];
+  budgets: UserBudget[];
+  lang: Language;
+  showAmounts: boolean;
+  onSeeAll: () => void;
+}) {
+  const spendMap = useMemo(() => monthSpendByBudgetKey(transactions), [transactions]);
+  const fmtB = (n: number) => `฿${n.toLocaleString()}`;
+  if (budgets.length === 0) return null;
+
+  return (
+    <div className="mb-3 rounded-2xl p-4"
+      style={{ background: 'var(--card-bg)', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-sm)' }}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Wallet className="w-4 h-4" style={{ color: 'var(--brand-primary)' }} />
+          <p style={{ fontFamily: getFont(lang), fontSize: '0.625rem',
+            color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            {lang === 'th' ? 'ผู้พิทักษ์การใช้จ่าย' : 'Spending Guardian'}
+          </p>
+        </div>
+        <button onClick={() => { haptics.fire('SELECT'); onSeeAll(); }}
+          className="text-[11px] font-medium min-h-[32px] px-1 flex items-center"
+          style={{ color: 'var(--brand-primary)', fontFamily: getFont(lang) }}>
+          {lang === 'th' ? 'ทั้งหมด' : 'See all'}
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+      <div className="flex gap-4 overflow-x-auto pb-1">
+        {budgets.slice(0, 4).map((b) => {
+          const spent = spendMap.get(b.key) || 0;
+          const pct = b.limit > 0 ? spent / b.limit : 0;
+          return (
+            <div key={b.key} className="flex flex-col items-center gap-1.5 shrink-0 w-[76px]">
+              <BudgetRing pct={pct} color={b.color} />
+              <span className="text-[10px] font-medium text-center leading-tight truncate w-full"
+                style={{ color: 'var(--text-secondary)', fontFamily: getFont(lang) }}>
+                {lang === 'th' ? b.nameTh : b.nameEn}
+              </span>
+              <span className="text-[9px]" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                {showAmounts ? `${fmtB(spent)} / ${fmtB(b.limit)}` : '•••'}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// CUSTOMIZE SHEET (#7)
+// ============================================================
+function DashCustomizeSheet({ open, order, hidden, onApply, onClose, lang }: {
+  open: boolean;
+  order: string[];
+  hidden: string[];
+  onApply: (order: string[], hidden: string[]) => void;
+  onClose: () => void;
+  lang: Language;
+}) {
+  const [localOrder, setLocalOrder] = useState(order);
+  const [localHidden, setLocalHidden] = useState<string[]>(hidden);
+
+  useEffect(() => {
+    if (open) { setLocalOrder(order); setLocalHidden(hidden); }
+  }, [open, order, hidden]);
+
+  if (!open) return null;
+
+  const move = (id: string, dir: -1 | 1) => {
+    const idx = localOrder.indexOf(id);
+    const next = idx + dir;
+    if (idx < 0 || next < 0 || next >= localOrder.length) return;
+    const copy = [...localOrder];
+    [copy[idx], copy[next]] = [copy[next], copy[idx]];
+    setLocalOrder(copy);
+    haptics.fire('SELECT');
+  };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-end justify-center"
+        style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          className="w-full max-w-md rounded-t-3xl p-5 pb-8"
+          style={{ background: 'var(--card-bg)' }}
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-label={lang === 'th' ? 'ปรับแต่งหน้าหลัก' : 'Customize dashboard'}
+        >
+          <h3 className="text-[16px] font-bold mb-1"
+            style={{ color: 'var(--text-primary)', fontFamily: getFont(lang) }}>
+            {lang === 'th' ? 'ปรับแต่งหน้าหลัก' : 'Customize Dashboard'}
+          </h3>
+          <p className="text-[12px] mb-4" style={{ color: 'var(--text-muted)' }}>
+            {lang === 'th' ? 'เลือกเซกชันที่แสดงและลำดับ' : 'Choose which sections to show and their order'}
+          </p>
+
+          <div className="space-y-2 mb-5">
+            {localOrder.map((id, i) => {
+              const meta = DASH_SECTIONS.find((s) => s.id === id)!;
+              const isHidden = localHidden.includes(id);
+              return (
+                <div key={id}
+                  className="flex items-center justify-between px-3 py-2.5 rounded-xl"
+                  style={{ backgroundColor: 'var(--bg-surface, rgba(128,128,128,0.06))', opacity: isHidden ? 0.45 : 1 }}>
+                  <button
+                    onClick={() => {
+                      setLocalHidden(isHidden ? localHidden.filter((x) => x !== id) : [...localHidden, id]);
+                      haptics.fire('SELECT');
+                    }}
+                    className="flex items-center gap-2.5 flex-1 min-h-[36px]"
+                  >
+                    <span className="w-9 h-5 rounded-full relative transition-all shrink-0"
+                      style={{ backgroundColor: isHidden ? 'rgba(128,128,128,0.35)' : 'var(--brand-primary)' }}>
+                      <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all"
+                        style={{ left: isHidden ? 2 : 18 }} />
+                    </span>
+                    <span className="text-[13px] font-medium text-left"
+                      style={{ color: 'var(--text-primary)', fontFamily: getFont(lang) }}>
+                      {lang === 'th' ? meta.labelTh : meta.labelEn}
+                    </span>
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => move(id, -1)} disabled={i === 0}
+                      className="min-w-[36px] min-h-[36px] rounded-lg flex items-center justify-center disabled:opacity-25"
+                      aria-label="Move up">
+                      <ChevronUp className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                    </button>
+                    <button onClick={() => move(id, 1)} disabled={i === localOrder.length - 1}
+                      className="min-w-[36px] min-h-[36px] rounded-lg flex items-center justify-center disabled:opacity-25"
+                      aria-label="Move down">
+                      <ChevronDown className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={onClose}
+              className="flex-1 py-3 rounded-xl text-[14px] font-semibold min-h-[48px]"
+              style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)', fontFamily: getFont(lang) }}>
+              {lang === 'th' ? 'ยกเลิก' : 'Cancel'}
+            </button>
+            <button
+              onClick={() => { haptics.fire('CRISP_CLICK'); onApply(localOrder, localHidden); }}
+              className="flex-1 py-3 rounded-xl text-[14px] font-bold min-h-[48px]"
+              style={{ background: 'var(--brand-primary)', color: 'var(--brand-on-primary)', fontFamily: getFont(lang) }}
+            >
+              {lang === 'th' ? 'บันทึก' : 'Save'}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+// ============================================================
 // MAIN COMPONENT
 // ============================================================
 export default function DashboardPage({
   profile, transactions, onNavigate, lang,
-  notificationCount = 0, monthlyBudget = 5000, onAddTransaction,
+  notificationCount = 0, monthlyBudget: monthlyBudgetProp, onAddTransaction,
   isAuthenticated = false,
 }: DashboardPageProps) {
   const [showAmounts, setShowAmounts] = useState(true);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [showScoreBreakdown, setShowScoreBreakdown] = useState(false);
   const [activeSubs, setActiveSubs] = useState<Subscription[]>([]);
+  // ── Dashboard customization (#7) ──
+  const [{ order: dashOrder, hidden: dashHidden }, setDashPrefs] = useState(loadDashPrefs);
+  const [showCustomize, setShowCustomize] = useState(false);
+  // ── Budget rings (#5) ──
+  const [budgets, setBudgets] = useState<UserBudget[]>(loadBudgets);
 
   useEffect(() => {
     let cancelled = false;
@@ -1392,6 +1802,8 @@ export default function DashboardPage({
       });
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => subscribeBudgets(() => setBudgets(loadBudgets())), []);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -1412,6 +1824,17 @@ export default function DashboardPage({
   const currentSpend = useMemo(() =>
     monthTx.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0),
     [monthTx]);
+
+  // Effective budget: explicit prop wins; otherwise derive from budget store
+  // (never fall back to an arbitrary hardcoded amount — P1-11)
+  const monthlyBudget = useMemo(() => {
+    if (monthlyBudgetProp && monthlyBudgetProp > 0) return monthlyBudgetProp;
+    try {
+      return loadBudgets().reduce((s, b) => s + (b.limit || 0), 0);
+    } catch {
+      return 0;
+    }
+  }, [monthlyBudgetProp]);
 
   const { score: healthScore, confidence, dataCompleteness, availableFactors } = computeHealthScore(
     transactions, monthlyBudget, profile.savings || 0, profile.balance || 0, !!isAuthenticated
@@ -1523,6 +1946,16 @@ export default function DashboardPage({
             >
               <Settings className="w-4.5 h-4.5" style={{ color: 'var(--text-muted)' }} />
             </button>
+
+            {/* Customize dashboard (#7) */}
+            <button
+              onClick={() => { haptics.fire('SELECT'); setShowCustomize(true); }}
+              className="min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-1"
+              style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-default)' }}
+              aria-label={lang === 'th' ? 'ปรับแต่งหน้าหลัก' : 'Customize dashboard'}
+            >
+              <SlidersHorizontal className="w-4.5 h-4.5" style={{ color: 'var(--text-muted)' }} />
+            </button>
           </div>
         </div>
 
@@ -1602,96 +2035,147 @@ export default function DashboardPage({
           </div>
         </div>
 
-        {/* ── Section 1.5: Upcoming Bills (Rocket Money pattern) ── */}
-        <UpcomingBills
-          subs={activeSubs}
+        {/* ── Activation checklist (RM-style win moment; auto-hides when done/dismissed) ── */}
+        <ActivationChecklist
+          hasSubs={activeSubs.length > 0}
+          hasTxs={transactions.length > 0}
+          hasBudgets={budgets.some((b) => b.limit > 0)}
           lang={lang}
-          showAmounts={showAmounts}
-          onSeeAll={() => onNavigate('subscriptions')}
+          onNavigate={(tab) => onNavigate(tab)}
         />
 
-        {/* ── Section 2: Smart Insight Card ── */}
-        <div className="mb-3">
-          <SmartInsightCard insight={topInsight} lang={lang}
-            onAction={() => {
-              haptics.fire('SELECT');
-              // Wire insight card CTA to meaningful destination
-              const action = topInsight.action || '';
-              if (action.includes('Review') || action.includes('ดูรายละเอียด')) {
-                onNavigate('activity');
-              } else if (action.includes('View budget') || action.includes('งบ')) {
-                onNavigate('budget');
-              } else if (action.includes('summary') || action.includes('สรุป') || action.includes('View')) {
-                onNavigate('stories');
-              } else if (action.includes('goal') || action.includes('เป้า')) {
-                onNavigate('simulation');
-              } else if (action.includes('Add') || action.includes('เพิ่ม')) {
-                // FAB handles add transaction; navigate to activity
-                onNavigate('activity');
-              } else {
-                // Default: go to activity
-                onNavigate('activity');
-              }
-            }}
-          />
-        </div>
-
-        {/* ── Section 3: Quick Stats Grid ── */}
-        <div className="mb-3">
-          <QuickStatsGrid
-            savings={profile.savings || 0}
-            goalProgress={40}
-            creditBalance={profile.creditCardBalance || 0}
-            payday={profile.paydayDay || 1}
-            portfolioValue={profile.portfolioValue ?? 0}
-            lang={lang}
-            showAmounts={showAmounts}
-          />
-        </div>
-
-        {/* ── Section 4: Recent Transactions ── */}
-        <div className="mb-3">
-          <RecentMoves transactions={transactions} lang={lang}
-            showAmounts={showAmounts}
-            onToggle={() => { haptics.fire('SELECT'); setShowAmounts(a => !a); }}
-            onViewAll={() => onNavigate('activity')}
-          />
-        </div>
-
-        {/* ── Section 5: Quick Actions — Apple HIG: ≥ 44x44px ── */}
-        <div className="mb-3">
-          <p style={{ fontFamily: getFont(lang), fontSize: '0.625rem', color: 'var(--text-muted)',
-            letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
-            {lang === 'th' ? 'ลัดเลา' : 'Quick Actions'}
-          </p>
-          <div className="flex gap-2">
-            {[
-              { label: lang === 'th' ? 'รายจ่ายประจำ' : 'Recurring', icon: <CreditCard className="w-4 h-4" />,
-                color: 'var(--brand-primary)', onClick: () => onNavigate('subscriptions') },
-              { label: lang === 'th' ? 'ตั้งเป้า' : 'Set goal', icon: <Target className="w-4 h-4" />,
-                color: 'var(--info)', onClick: () => onNavigate('simulation') },
-              { label: lang === 'th' ? 'สรุปรายเดือน' : 'Summary', icon: <CalendarDays className="w-4 h-4" />,
-                color: 'var(--success)', onClick: () => onNavigate('stories') },
-            ].map((action) => (
-              <motion.button key={action.label}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => { haptics.fire('SELECT'); action.onClick(); }}
-                className="flex-1 min-h-[48px] py-3 rounded-xl flex items-center justify-center gap-2"
-                style={{
-                  backgroundColor: 'var(--card-bg)',
-                  border: '1px solid var(--border-default)',
-                  boxShadow: 'var(--shadow-sm)',
-                }}
-              >
-                <span style={{ color: action.color }}>{action.icon}</span>
-                <span style={{ fontFamily: getFont(lang), fontSize: '0.6875rem', fontWeight: 500,
-                  color: 'var(--text-secondary)' }}>
-                  {action.label}
-                </span>
-              </motion.button>
-            ))}
-          </div>
-        </div>
+        {/* ── Dynamic sections (#7): order/visibility from Customize sheet ── */}
+        {dashOrder.filter((sectionId) => !dashHidden.includes(sectionId)).map((sectionId) => {
+          switch (sectionId) {
+            case 'safe':
+              return (
+                <div key={sectionId} className="mb-3">
+                  <SafeToSpendCard
+                    balance={profile.balance}
+                    paydayDay={profile.paydayDay ?? null}
+                    subs={activeSubs.map((s) => ({ id: s.id, name: s.name, amount: s.amount, dueDate: s.dueDate }))}
+                    lang={lang}
+                    showAmounts={showAmounts}
+                    onSeeBills={() => { haptics.fire('SELECT'); onNavigate('subscriptions'); }}
+                  />
+                </div>
+              );
+            case 'upcoming':
+              return (
+                <div key={sectionId} className="mb-3">
+                  {/* Upcoming Bills (Rocket Money pattern) */}
+                  <UpcomingBills
+                    subs={activeSubs}
+                    lang={lang}
+                    showAmounts={showAmounts}
+                    onSeeAll={() => onNavigate('subscriptions')}
+                  />
+                </div>
+              );
+            case 'rings':
+              return (
+                <div key={sectionId} className="mb-3">
+                  <BudgetRings
+                    transactions={transactions}
+                    budgets={budgets}
+                    lang={lang}
+                    showAmounts={showAmounts}
+                    onSeeAll={() => onNavigate('budget')}
+                  />
+                </div>
+              );
+            case 'insight':
+              return (
+                <div key={sectionId} className="mb-3">
+                  <SmartInsightCard insight={topInsight} lang={lang}
+                    onAction={() => {
+                      haptics.fire('SELECT');
+                      // Wire insight card CTA to meaningful destination
+                      const action = topInsight.action || '';
+                      if (action.includes('Review') || action.includes('ดูรายละเอียด')) {
+                        onNavigate('activity');
+                      } else if (action.includes('View budget') || action.includes('งบ')) {
+                        onNavigate('budget');
+                      } else if (action.includes('summary') || action.includes('สรุป') || action.includes('View')) {
+                        onNavigate('insights');
+                      } else if (action.includes('goal') || action.includes('เป้า')) {
+                        onNavigate('simulation');
+                      } else if (action.includes('Add') || action.includes('เพิ่ม')) {
+                        // FAB handles add transaction; navigate to activity
+                        onNavigate('activity');
+                      } else {
+                        // Default: go to activity
+                        onNavigate('activity');
+                      }
+                    }}
+                  />
+                </div>
+              );
+            case 'stats':
+              return (
+                <div key={sectionId} className="mb-3">
+                  <QuickStatsGrid
+                    savings={profile.savings || 0}
+                    goalProgress={40}
+                    creditBalance={profile.creditCardBalance || 0}
+                    payday={profile.paydayDay || 1}
+                    portfolioValue={profile.portfolioValue ?? 0}
+                    lang={lang}
+                    showAmounts={showAmounts}
+                  />
+                </div>
+              );
+            case 'recent':
+              return (
+                <div key={sectionId} className="mb-3">
+                  <RecentMoves transactions={transactions} lang={lang}
+                    showAmounts={showAmounts}
+                    onToggle={() => { haptics.fire('SELECT'); setShowAmounts(a => !a); }}
+                    onViewAll={() => onNavigate('activity')}
+                  />
+                </div>
+              );
+            case 'actions':
+              return (
+                <div key={sectionId} className="mb-3">
+                  {/* Quick Actions — Apple HIG: ≥ 44x44px */}
+                  <p style={{ fontFamily: getFont(lang), fontSize: '0.625rem', color: 'var(--text-muted)',
+                    letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+                    {lang === 'th' ? 'ทางลัด' : 'Quick Actions'}
+                  </p>
+                  <div className="flex gap-2">
+                    {[
+                      { label: lang === 'th' ? 'รายจ่ายประจำ' : 'Recurring', icon: <CreditCard className="w-4 h-4" />,
+                        color: 'var(--brand-primary)', onClick: () => onNavigate('subscriptions') },
+                      { label: lang === 'th' ? 'ตั้งเป้า' : 'Set goal', icon: <Target className="w-4 h-4" />,
+                        color: 'var(--info)', onClick: () => onNavigate('simulation') },
+                      { label: lang === 'th' ? 'สรุปรายเดือน' : 'Summary', icon: <CalendarDays className="w-4 h-4" />,
+                        color: 'var(--success)', onClick: () => onNavigate('insights') },
+                    ].map((action) => (
+                      <motion.button key={action.label}
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => { haptics.fire('SELECT'); action.onClick(); }}
+                        className="flex-1 min-h-[48px] py-3 rounded-xl flex items-center justify-center gap-2"
+                        style={{
+                          backgroundColor: 'var(--card-bg)',
+                          border: '1px solid var(--border-default)',
+                          boxShadow: 'var(--shadow-sm)',
+                        }}
+                      >
+                        <span style={{ color: action.color }}>{action.icon}</span>
+                        <span style={{ fontFamily: getFont(lang), fontSize: '0.6875rem', fontWeight: 500,
+                          color: 'var(--text-secondary)' }}>
+                          {action.label}
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              );
+            default:
+              return null;
+          }
+        })}
 
         <div style={{ height: 8 }} />
       </div>
@@ -1709,6 +2193,23 @@ export default function DashboardPage({
             score={healthScore}
             lang={lang}
             onClose={() => setShowScoreBreakdown(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showCustomize && (
+          <DashCustomizeSheet
+            open={showCustomize}
+            order={dashOrder}
+            hidden={dashHidden}
+            onApply={(order, hidden) => {
+              setDashPrefs({ order, hidden });
+              saveDashPrefs({ order, hidden });
+              setShowCustomize(false);
+            }}
+            onClose={() => setShowCustomize(false)}
+            lang={lang}
           />
         )}
       </AnimatePresence>

@@ -35,9 +35,9 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
 
   const getGreetingText = () => {
     if (lang === 'en') {
-      return `Hello ${profile.name}. I have mapped your current transactional psychology into our database core. Your blueprint aligns with "${displayArchetype}". Ask me anything below to recalibrate.`;
+      return `Hello ${profile.name}. I've reviewed your recent spending patterns. Your profile aligns with "${displayArchetype}". Ask me anything below to recalibrate.`;
     } else {
-      return `สวัสดีคุณ ${profile.name} ระบบ DailyStack ได้ประมวลผลคำนวณด้านอารมณ์และจิตวิทยาของคุณเข้าสู่ฐานสารนิเวศวิเคราะห์เสร็จสิ้น พิมพ์เขียวของคุณตรงกับกลุ่มแบบแผน "${displayArchetype}" สอบถามข้อสงสัยเพื่อปรับระดับพอร์ตอัจฉริยะได้ทันที`;
+      return `สวัสดีคุณ ${profile.name} เราได้วิเคราะห์รูปแบบการใช้จ่ายล่าสุดของคุณแล้ว โปรไฟล์ของคุณตรงกับกลุ่ม "${displayArchetype}" สอบถามข้อสงสัยเพื่อปรับแผนการเงินได้ทันที`;
     }
   };
 
@@ -202,7 +202,7 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
               <div className="space-y-1.5" id="slider-impulse">
                 <div className="flex justify-between text-xs font-mono">
                   <span className={theme === 'dark' ? 'text-zinc-400' : 'text-zinc-600'}>{t.impulseRating}</span>
-                  <span className={`font-bold ${theme === 'dark' ? 'text-[#56be89]' : 'text-amber-600'}`}>{interpretation.radarAnalysis.impulseRating}/100</span>
+                  <span className={`font-bold ${theme === 'dark' ? 'text-[#0FB0CE]' : 'text-amber-600'}`}>{interpretation.radarAnalysis.impulseRating}/100</span>
                 </div>
                 <div className={`w-full h-2 rounded-full overflow-hidden border ${theme === 'dark' ? 'bg-zinc-950 border-zinc-900' : 'bg-[#F2F2F7] border-transparent'}`}>
                   <div className="h-full bg-amber-400 rounded-full" style={{ width: `${interpretation.radarAnalysis.impulseRating}%` }} />
@@ -280,13 +280,13 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
                 key={i}
                 className={`flex gap-3 max-w-[85%] ${isCoach ? 'mr-auto items-start' : 'ml-auto flex-row-reverse items-end'}`}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isCoach ? (theme === 'dark' ? 'bg-[#56be89]/10 text-[#56be89]' : 'bg-[#007AFF]/10 text-[#007AFF]') : (theme === 'dark' ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-205 text-slate-705')}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isCoach ? (theme === 'dark' ? 'bg-[#0FB0CE]/10 text-[#0FB0CE]' : 'bg-[#007AFF]/10 text-[#007AFF]') : (theme === 'dark' ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-205 text-slate-705')}`}>
                   {isCoach
                     ? <Bot className="w-4 h-4" />
                     : <User className="w-4 h-4" />
                   }
                 </div>
-                <div className={`p-4 rounded-3xl text-sm leading-relaxed text-left ${isCoach ? (theme === 'dark' ? 'bg-[#1A1B1E] border border-zinc-900 rounded-tl-none text-zinc-300' : 'bg-white border border-slate-205 rounded-tl-none text-zinc-805 shadow-sm') : (theme === 'dark' ? 'bg-[#56be89] text-black font-semibold rounded-br-none' : 'bg-[#007AFF] text-white font-medium rounded-br-none shadow-sm')}`}>
+                <div className={`p-4 rounded-3xl text-sm leading-relaxed text-left ${isCoach ? (theme === 'dark' ? 'bg-[#1A1B1E] border border-zinc-900 rounded-tl-none text-zinc-300' : 'bg-white border border-slate-205 rounded-tl-none text-zinc-805 shadow-sm') : (theme === 'dark' ? 'bg-[#0FB0CE] text-black font-semibold rounded-br-none' : 'bg-[#007AFF] text-white font-medium rounded-br-none shadow-sm')}`}>
                   {msg.text}
                   <span className={`block text-[10px] font-mono mt-1 text-right ${isCoach ? 'text-zinc-500' : 'text-zinc-200/80'}`}>{msg.time}</span>
                 </div>
@@ -296,8 +296,8 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
 
           {loading && (
             <div className="flex gap-3 justify-start mr-auto items-start animate-pulse" id="chat-loading-ind">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-[#56be89]/10' : 'bg-slate-100'}`}>
-                <Loader className={`w-4 h-4 animate-spin ${theme === 'dark' ? 'text-[#56be89]' : 'text-[#007AFF]'}`} />
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-[#0FB0CE]/10' : 'bg-slate-100'}`}>
+                <Loader className={`w-4 h-4 animate-spin ${theme === 'dark' ? 'text-[#0FB0CE]' : 'text-[#007AFF]'}`} />
               </div>
               <div className={`p-4 rounded-3xl rounded-tl-none text-xs font-mono text-left ${theme === 'dark' ? 'bg-[#1A1B1E] border border-zinc-900 text-zinc-500' : 'bg-slate-100 border border-slate-200 text-zinc-650'}`}>
                 {t.chatProcessing}
@@ -316,13 +316,13 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
             onChange={(e) => setInputMessage(e.target.value)}
             disabled={loading}
             placeholder={t.chatPlaceholder}
-            className={`flex-1 border rounded-2xl px-5 py-3 text-xs transition-all font-sans focus:outline-none focus:ring-1 ${theme === 'dark' ? 'bg-zinc-950 border-zinc-900 focus:border-[#56be89]/30 text-white focus:ring-[#56be89]/10 placeholder-zinc-500' : 'bg-[#F2F2F7] border-transparent text-[#1D1D1F] placeholder-[#8E8E93] focus:bg-white focus:border-[#007AFF] focus:ring-[#007AFF]/35'}`}
+            className={`flex-1 border rounded-2xl px-5 py-3 text-xs transition-all font-sans focus:outline-none focus:ring-1 ${theme === 'dark' ? 'bg-zinc-950 border-zinc-900 focus:border-[#0FB0CE]/30 text-white focus:ring-[#0FB0CE]/10 placeholder-zinc-500' : 'bg-[#F2F2F7] border-transparent text-[#1D1D1F] placeholder-[#8E8E93] focus:bg-white focus:border-[#007AFF] focus:ring-[#007AFF]/35'}`}
           />
           <button
             id="btn-chat-submit"
             type="submit"
             disabled={loading || !inputMessage.trim()}
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center cursor-pointer transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95 ${theme === 'dark' ? 'bg-[#56be89] hover:bg-white text-black shadow-md' : 'bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-sm'}`}
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center cursor-pointer transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95 ${theme === 'dark' ? 'bg-[#0FB0CE] hover:bg-white text-black shadow-md' : 'bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-sm'}`}
           >
             <Send className="w-4 h-4 font-bold" />
           </button>

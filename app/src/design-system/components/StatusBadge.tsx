@@ -68,10 +68,10 @@ const variantColors: Record<StatusBadgeVariant, {
     dot: '#FF5C73',
   },
   info: {
-    bg: 'rgba(59, 130, 246, 0.15)',
-    border: 'rgba(59, 130, 246, 0.3)',
-    text: '#3B82F6',
-    dot: '#3B82F6',
+    bg: 'rgba(23, 134, 194, 0.15)',
+    border: 'rgba(23, 134, 194, 0.3)',
+    text: '#1786C2',
+    dot: '#1786C2',
   },
   neutral: {
     bg: 'rgba(136, 136, 136, 0.15)',

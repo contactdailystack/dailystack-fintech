@@ -13,7 +13,7 @@ import { motion } from 'framer-motion';
 import { RefreshCw, ArrowLeft, Mail, Wifi, WifiOff, AlertCircle } from 'lucide-react';
 
 // ─── Design Tokens ───────────────────────────────────────────────
-const LIME = '#56be89';
+const LIME = '#0FB0CE';
 const ERROR_RED = '#FF3B30';
 const ERROR_AMBER = '#FF9F0A';
 const MUTED = '#888888';
@@ -267,7 +267,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
           {onRetry && (
             <button
               onClick={onRetry}
-              className="w-full py-3.5 rounded-xl font-semibold text-sm text-[#101010] bg-[#56be89] hover:bg-[#6fcca3] active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-h-[44px]"
+              className="w-full py-3.5 rounded-xl font-semibold text-sm text-[#101010] bg-[#0FB0CE] hover:bg-[#3FC4DB] active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-h-[44px]"
             >
               <RefreshCw size={16} />
               {retryLabel}
@@ -289,7 +289,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
                 w-full py-3.5 rounded-xl font-semibold text-sm min-h-[44px] transition-all flex items-center justify-center gap-2
                 ${customAction.variant === 'secondary'
                   ? 'text-white bg-[#1A1A1A] border border-[#2A2A2A] hover:bg-[#2A2A2A] active:scale-[0.98]'
-                  : 'text-[#56be89] hover:underline'}
+                  : 'text-[#0FB0CE] hover:underline'}
               `}
             >
               {customAction.label}

@@ -53,7 +53,7 @@ export async function createGoal(
   current_amount: number = 0,
   target_date?: string,
   icon_name: string = 'Target',
-  color_code: string = '#56be89'
+  color_code: string = '#0FB0CE'
 ): Promise<Goal | null> {
   try {
     const payload = {

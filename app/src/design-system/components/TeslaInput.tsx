@@ -107,8 +107,8 @@ export const TeslaInput = forwardRef<HTMLInputElement, TeslaInputProps>(
         }
       : isFocused
       ? {
-          border: 'border-[#56be89]',
-          label: 'text-[#56be89]',
+          border: 'border-[#0FB0CE]',
+          label: 'text-[#0FB0CE]',
           icon: 'text-gray-400',
         }
       : {
@@ -147,7 +147,7 @@ export const TeslaInput = forwardRef<HTMLInputElement, TeslaInputProps>(
               ${sizeStyle.inputPadding}
               ${LeftIcon ? 'pl-10' : ''}
               ${RightIcon || isValid ? 'pr-10' : ''}
-              bg-[#171C15]
+              bg-[#0C2140]
               ${stateColors.border}
               border
               ${borderRadius.lg}

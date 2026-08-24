@@ -42,7 +42,13 @@ export type AlertMetric =
   | 'transaction_count'
   | 'late_night_count'
   | 'goal_progress'
-  | 'budget_variance';
+  | 'budget_variance'
+  /** Current wallet balance (RM-style low-balance warning) */
+  | 'balance'
+  /** Number of suspected duplicate charges (same merchant+amount ≤48h apart) */
+  | 'duplicate_count'
+  /** Active subscriptions/bills due within the next 7 days */
+  | 'bills_due_7d';
 
 // ─── Alert Configuration ───────────────────────────────────────────────────
 

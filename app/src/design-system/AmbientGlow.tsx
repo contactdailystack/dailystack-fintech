@@ -7,7 +7,7 @@
  * ambient background glow style
  *
  * Visual Language:
- *   Radial gradient: #56be89 at 8% opacity at peak
+ *   Radial gradient: #0FB0CE at 8% opacity at peak
  *   Position: absolute, full-width, bottom of container
  *   Animation: sinusoidal pulse at 60 BPM (1000ms period)
  */
@@ -17,7 +17,7 @@ import { motion } from 'motion/react';
 
 // ─── Props Interface ───────────────────────────────────────────────
 export interface AmbientGlowProps {
-  /** Primary glow color (default: #56be89) */
+  /** Primary glow color (default: #0FB0CE) */
   color?: string;
   /** Peak opacity at pulse crest (default: 0.08) */
   peakOpacity?: number;
@@ -67,7 +67,7 @@ function useAmbientPulse(active: boolean, peakOpacity: number) {
 
 // ─── AmbientGlow Component ─────────────────────────────────────────
 export const AmbientGlow = memo(function AmbientGlow({
-  color = '#56be89',
+  color = '#0FB0CE',
   peakOpacity = 0.08,
   height = 200,
   spread = '80%',

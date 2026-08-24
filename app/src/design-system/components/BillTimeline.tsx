@@ -100,13 +100,13 @@ export const BillTimeline: React.FC<BillTimelineProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-display font-bold text-gray-900 text-sm flex items-center gap-2">
-          <Clock className="w-4 h-4 text-[#56be89]" />
+          <Clock className="w-4 h-4 text-[#0FB0CE]" />
           {t.upcomingBills}
         </h3>
         {onSeeAllPress && (
           <button
             onClick={onSeeAllPress}
-            className="text-xs text-gray-500 hover:text-[#56be89] transition-colors flex items-center gap-1 cursor-pointer"
+            className="text-xs text-gray-500 hover:text-[#0FB0CE] transition-colors flex items-center gap-1 cursor-pointer"
           >
             {t.seeAll}
             <ChevronRight className="w-3 h-3" />

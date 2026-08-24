@@ -87,13 +87,13 @@ export function CoachSettings({ lang, onSelectPersona, currentPersona }: CoachSe
               onClick={() => setSelected(persona.id)}
               className={`w-full text-left rounded-2xl border-2 p-4 transition-all ${
                 isSelected
-                  ? 'border-[#56be89] bg-[#56be89]/5'
-                  : 'border-white/10 bg-[#171C15] hover:border-white/20'
+                  ? 'border-[#0FB0CE] bg-[#0FB0CE]/5'
+                  : 'border-white/10 bg-[#0C2140] hover:border-white/20'
               }`}
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                  isSelected ? 'bg-[#56be89]/10' : 'bg-white/5'
+                  isSelected ? 'bg-[#0FB0CE]/10' : 'bg-white/5'
                 }`}>
                   <Icon className={`w-5 h-5 ${isSelected ? persona.accent : 'text-white/40'}`} />
                 </div>
@@ -103,7 +103,7 @@ export function CoachSettings({ lang, onSelectPersona, currentPersona }: CoachSe
                       {persona.name[lang]}
                     </span>
                     {isSelected && (
-                      <span className="px-1.5 py-0.5 bg-[#56be89] text-[#0B0F0A] rounded text-[9px] font-black uppercase">
+                      <span className="px-1.5 py-0.5 bg-[#0FB0CE] text-[#050D1F] rounded text-[9px] font-black uppercase">
                         Active
                       </span>
                     )}
@@ -114,8 +114,8 @@ export function CoachSettings({ lang, onSelectPersona, currentPersona }: CoachSe
                   <p className="text-[11px] text-white/50 mt-2 leading-relaxed">
                     {persona.description[lang]}
                   </p>
-                  <div className={`mt-2 p-2 rounded-xl ${isSelected ? 'bg-[#0B0F0A]' : 'bg-white/5'}`}>
-                    <p className="text-[10px] text-white/40 italic font-Kanit">
+                  <div className={`mt-2 p-2 rounded-xl ${isSelected ? 'bg-[#050D1F]' : 'bg-white/5'}`}>
+                    <p className="text-[10px] text-white/40 italic font-sans">
                       &quot;{persona.sampleMessage[lang]}&quot;
                     </p>
                   </div>
@@ -131,7 +131,7 @@ export function CoachSettings({ lang, onSelectPersona, currentPersona }: CoachSe
 
       <button
         onClick={handleSave}
-        className="w-full py-3 bg-[#56be89] text-[#0B0F0A] font-black rounded-xl mt-2"
+        className="w-full py-3 bg-[#0FB0CE] text-[#050D1F] font-black rounded-xl mt-2"
       >
         {lang === 'en' ? 'Save Coach' : 'บันทึก Coach'}
       </button>

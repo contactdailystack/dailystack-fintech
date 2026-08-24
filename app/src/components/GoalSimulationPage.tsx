@@ -435,8 +435,8 @@ export function GoalSimulationPage({ profile, lang, goals, onNavigateToUpgrade, 
                   {/* Gradient Fill */}
                   <defs>
                     <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#56be89" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#56be89" stopOpacity="0" />
+                      <stop offset="0%" stopColor="#0FB0CE" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#0FB0CE" stopOpacity="0" />
                     </linearGradient>
                   </defs>
                   
@@ -449,7 +449,7 @@ export function GoalSimulationPage({ profile, lang, goals, onNavigateToUpgrade, 
                   {/* Line */}
                   <motion.path
                     d={`M${timelineData.map((d, i) => `${(i / (timelineData.length - 1)) * chartWidth},${chartHeight - (d.balance / maxValue) * chartHeight}`).join(' L')}`}
-                    stroke="#56be89"
+                    stroke="#0FB0CE"
                     strokeWidth="0.5"
                     fill="none"
                     strokeLinecap="round"
@@ -465,7 +465,7 @@ export function GoalSimulationPage({ profile, lang, goals, onNavigateToUpgrade, 
                       cx={(i * 6 / (timelineData.length - 1)) * chartWidth}
                       cy={chartHeight - (d.balance / maxValue) * chartHeight}
                       r="1"
-                      fill="#56be89"
+                      fill="#0FB0CE"
                     />
                   ))}
                 </svg>
@@ -573,7 +573,7 @@ export function GoalSimulationPage({ profile, lang, goals, onNavigateToUpgrade, 
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #56be89;
+          background: #0FB0CE;
           cursor: pointer;
           box-shadow: 0 0 10px rgba(204, 255, 0, 0.5);
         }
@@ -581,7 +581,7 @@ export function GoalSimulationPage({ profile, lang, goals, onNavigateToUpgrade, 
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #56be89;
+          background: #0FB0CE;
           cursor: pointer;
           border: none;
           box-shadow: 0 0 10px rgba(204, 255, 0, 0.5);

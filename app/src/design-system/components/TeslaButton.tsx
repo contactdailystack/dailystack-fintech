@@ -39,25 +39,25 @@ export interface TeslaButtonProps extends React.ButtonHTMLAttributes<HTMLButtonE
 // ─── Variant Styles ─────────────────────────────────────────────────
 const variantStyles = {
   primary: {
-    bg: 'bg-[#56be89]',
-    bgHover: 'hover:bg-[#6fcca3]',
+    bg: 'bg-[#0FB0CE]',
+    bgHover: 'hover:bg-[#3FC4DB]',
     text: 'text-[#101010]',
     border: 'border-transparent',
-    shadow: 'shadow-[0_0_20px_rgba(205,255,36,0.3)]',
-    shadowHover: 'hover:shadow-[0_0_30px_rgba(205,255,36,0.5)]',
+    shadow: 'shadow-[0_0_20px_rgba(15, 176, 206,0.3)]',
+    shadowHover: 'hover:shadow-[0_0_30px_rgba(15, 176, 206,0.5)]',
   },
   secondary: {
-    bg: 'bg-[rgba(205,255,36,0.15)]',
-    bgHover: 'hover:bg-[rgba(205,255,36,0.25)]',
-    text: 'text-[#56be89]',
-    border: 'border-[rgba(205,255,36,0.3)]',
+    bg: 'bg-[rgba(15, 176, 206,0.15)]',
+    bgHover: 'hover:bg-[rgba(15, 176, 206,0.25)]',
+    text: 'text-[#0FB0CE]',
+    border: 'border-[rgba(15, 176, 206,0.3)]',
     shadow: '',
-    shadowHover: 'hover:shadow-[0_0_15px_rgba(205,255,36,0.2)]',
+    shadowHover: 'hover:shadow-[0_0_15px_rgba(15, 176, 206,0.2)]',
   },
   outline: {
     bg: 'bg-transparent',
-    bgHover: 'hover:bg-[rgba(205,255,36,0.1)]',
-    text: 'text-[#56be89]',
+    bgHover: 'hover:bg-[rgba(15, 176, 206,0.1)]',
+    text: 'text-[#0FB0CE]',
     border: 'border-[#2A2A2A]',
     shadow: '',
     shadowHover: '',
@@ -72,12 +72,12 @@ const variantStyles = {
   },
   // E-Pay Pill variant - fully rounded ends
   pill: {
-    bg: 'bg-[#56be89]',
-    bgHover: 'hover:bg-[#6fcca3]',
+    bg: 'bg-[#0FB0CE]',
+    bgHover: 'hover:bg-[#3FC4DB]',
     text: 'text-[#101010]',
     border: 'border-transparent',
-    shadow: 'shadow-[0_0_20px_rgba(205,255,36,0.3)]',
-    shadowHover: 'hover:shadow-[0_0_30px_rgba(205,255,36,0.5)]',
+    shadow: 'shadow-[0_0_20px_rgba(15, 176, 206,0.3)]',
+    shadowHover: 'hover:shadow-[0_0_30px_rgba(15, 176, 206,0.5)]',
   },
 } as const;
 

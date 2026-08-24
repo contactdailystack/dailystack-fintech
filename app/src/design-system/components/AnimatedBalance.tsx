@@ -258,7 +258,7 @@ export default function AnimatedBalance({
         className={`${sizeStyles.fontSize} ${sizeStyles.fontWeight} ${sizeStyles.letterSpacing}`}
         style={{ 
           color: valueColor,
-          fontFamily: lang === 'th' ? 'Kanit, sans-serif' : 'Inter, sans-serif',
+          fontFamily: lang === 'th' ? 'Noto Sans Thai, sans-serif' : 'Inter, sans-serif',
         }}
       >
         {formattedValue}

@@ -74,15 +74,15 @@ const SuccessCircle: React.FC<{ size?: number }> = ({ size = 128 }) => (
     style={{
       width: size,
       height: size,
-      backgroundColor: '#56be89',
-      boxShadow: '0 0 60px rgba(205, 255, 36, 0.4)',
+      backgroundColor: '#0FB0CE',
+      boxShadow: '0 0 60px rgba(15, 176, 206, 0.4)',
     }}
   >
     {/* Glow effect */}
     <div
       className="absolute inset-0 rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(205,255,36,0.3) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(15, 176, 206,0.3) 0%, transparent 70%)',
       }}
     />
     
@@ -90,7 +90,7 @@ const SuccessCircle: React.FC<{ size?: number }> = ({ size = 128 }) => (
     <svg width={size * 0.5} height={size * 0.5} viewBox="0 0 24 24" fill="none">
       <motion.path
         d="M5 12l5 5L19 7"
-        stroke="#0B0F0A"
+        stroke="#050D1F"
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -107,7 +107,7 @@ const SuccessCircle: React.FC<{ size?: number }> = ({ size = 128 }) => (
         angle={i * 45 + Math.random() * 10}
         delay={0.3 + i * 0.08}
         size={14}
-        color={i % 2 === 0 ? '#FFD700' : '#56be89'}
+        color={i % 2 === 0 ? '#FFD700' : '#0FB0CE'}
       />
     ))}
   </motion.div>
@@ -208,7 +208,7 @@ const ReceiptCard: React.FC<ReceiptCardProps> = ({ data, lang }) => {
           </span>
           <span 
             className="text-xl font-bold"
-            style={{ color: '#0B0F0A' }}
+            style={{ color: '#050D1F' }}
           >
             {formatAmount(data.amount + data.fees)}
           </span>
@@ -232,7 +232,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({ onClick, lang }) => (
     onClick={onClick}
     className="px-10 py-4 rounded-full text-sm font-bold text-white transition-all active:scale-95"
     style={{ 
-      backgroundColor: '#0B0F0A',
+      backgroundColor: '#050D1F',
       boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
     }}
     whileTap={{ scale: 0.95 }}
@@ -276,7 +276,7 @@ const TransactionSuccessPage: React.FC<TransactionSuccessPageProps> = ({
     <div
       className="min-h-screen flex flex-col"
       style={{
-        background: 'linear-gradient(180deg, #0B0F0A 0%, #0B0F0A 40%, #FFFFFF 40%, #FFFFFF 100%)',
+        background: 'linear-gradient(180deg, #050D1F 0%, #050D1F 40%, #FFFFFF 40%, #FFFFFF 100%)',
         fontFamily: '"Inter", sans-serif',
       }}
     >

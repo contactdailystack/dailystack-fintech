@@ -1,6 +1,6 @@
 /**
  * ============================================================
- * DailyStack Design System — BottomNav Component v3.0
+ * DailyStack Design System ï¿½ BottomNav Component v3.0
  * ============================================================
  * Premium Floating Bottom Navigation (PicksWise Style)
  * 
@@ -8,7 +8,7 @@
  * - Apple HIG compliant (44x44pt touch targets)
  * - Premium Glassmorphism with soft blur
  * - Floating design with layered shadow
- * - Lime accent (#56be89) for active state
+ * - Lime accent (#0FB0CE) for active state
  * - Safe area aware for all iPhone models
  * - Light & Dark mode support
  * 
@@ -37,12 +37,12 @@ const NAV_TOKENS = {
     backdropBlur: 20,
     border: 'rgba(255, 255, 255, 0.08)',
     shadow: '0 4px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3)',
-    activePill: 'rgba(86, 190, 137, 0.15)',
-    activePillBorder: '#56be89',
-    activeGlow: '0 0 16px rgba(86, 190, 137, 0.3)',
-    iconActive: '#56be89',
+    activePill: 'rgba(15, 176, 206, 0.15)',
+    activePillBorder: '#0FB0CE',
+    activeGlow: '0 0 16px rgba(15, 176, 206, 0.3)',
+    iconActive: '#0FB0CE',
     iconInactive: '#6B7280',
-    labelActive: '#56be89',
+    labelActive: '#0FB0CE',
     labelInactive: '#6B7280',
   },
   
@@ -52,9 +52,9 @@ const NAV_TOKENS = {
     backdropBlur: 20,
     border: 'rgba(0, 0, 0, 0.08)',
     shadow: '0 4px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.05)',
-    activePill: 'rgba(86, 190, 137, 0.2)',
+    activePill: 'rgba(15, 176, 206, 0.2)',
     activePillBorder: '#94B800',
-    activeGlow: '0 0 16px rgba(86, 190, 137, 0.25)',
+    activeGlow: '0 0 16px rgba(15, 176, 206, 0.25)',
     iconActive: '#94B800',
     iconInactive: '#9CA3AF',
     labelActive: '#94B800',

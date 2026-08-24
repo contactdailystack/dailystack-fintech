@@ -37,7 +37,7 @@ export const GyroscopeCard = memo(function GyroscopeCard({
   style = {},
   intensity = 0.5,
   enabled = true,
-  glowColor = '#56be89',
+  glowColor = '#0FB0CE',
 }: GyroscopeCardProps) {
   const [tilt, setTilt] = useState<TiltData>({ x: 0, y: 0 });
   const [isSupported, setIsSupported] = useState(false);

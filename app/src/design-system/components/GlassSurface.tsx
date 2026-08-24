@@ -50,7 +50,7 @@ const intensityStyles = {
 const borderStyles = {
   subtle: `border border-[rgba(255,255,255,0.05)]`,
   default: `border border-[${border.DEFAULT}]`,
-  glow: `border border-[rgba(205,255,36,0.2)]`,
+  glow: `border border-[rgba(15, 176, 206,0.2)]`,
 } as const;
 
 // ─── Radius Styles ─────────────────────────────────────────────────
@@ -101,11 +101,11 @@ export const GlassSurface: React.FC<GlassSurfaceProps> = ({
           className="absolute inset-0 rounded-inherit pointer-events-none"
           style={{ borderRadius: radiusStyle }}
         >
-          <div className="absolute inset-0 border border-[rgba(205,255,36,0.2)] rounded-inherit" />
+          <div className="absolute inset-0 border border-[rgba(15, 176, 206,0.2)] rounded-inherit" />
           <div
             className="absolute inset-0 rounded-inherit"
             style={{
-              boxShadow: '0 0 20px rgba(205, 255, 36, 0.1) inset',
+              boxShadow: '0 0 20px rgba(15, 176, 206, 0.1) inset',
             }}
           />
         </div>

@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { Plus, Search, FileText, TrendingUp, CreditCard, RefreshCw, Inbox } from 'lucide-react';
 
 // ─── Design Tokens ───────────────────────────────────────────────
-const LIME = '#56be89';
+const LIME = '#0FB0CE';
 const MUTED = '#888888';
 const BG = '#1A1A1A';
 const BORDER = '#2A2A2A';
@@ -66,8 +66,8 @@ const TransactionIllustration: React.FC = () => (
     <motion.line x1="48" y1="59" x2="68" y2="59" stroke={MUTED} strokeWidth="1.5" strokeLinecap="round" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.3 }} />
     <motion.rect x="48" y="70" width="20" height="8" rx="2" fill={LIME} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.4, type: 'spring' }} />
     <motion.circle cx="90" cy="40" r="12" fill={LIME} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.5, type: 'spring' }} />
-    <motion.line x1="90" y1="35" x2="90" y2="45" stroke="#0B0F0A" strokeWidth="2" strokeLinecap="round" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} />
-    <motion.line x1="85" y1="40" x2="95" y2="40" stroke="#0B0F0A" strokeWidth="2" strokeLinecap="round" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} />
+    <motion.line x1="90" y1="35" x2="90" y2="45" stroke="#050D1F" strokeWidth="2" strokeLinecap="round" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} />
+    <motion.line x1="85" y1="40" x2="95" y2="40" stroke="#050D1F" strokeWidth="2" strokeLinecap="round" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} />
   </motion.svg>
 );
 
@@ -76,13 +76,13 @@ const SubscriptionIllustration: React.FC = () => (
     <motion.rect x="25" y="30" width="70" height="65" rx="6" fill={BG} stroke={MUTED} strokeWidth="1.5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
     <motion.rect x="25" y="30" width="70" height="20" rx="6" fill={MUTED} initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} />
     {[0, 1, 2].map(i => (
-      <motion.circle key={i} cx={45 + i * 15} cy="40" r="3" fill="#0B0F0A" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 + i * 0.1 }} />
+      <motion.circle key={i} cx={45 + i * 15} cy="40" r="3" fill="#050D1F" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 + i * 0.1 }} />
     ))}
     {[0, 1, 2].map(i => (
       <motion.rect key={i} x="35" y={55 + i * 12} width="50" height="10" rx="3" fill={BG} stroke={i === 0 ? LIME : MUTED} strokeWidth="1.5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 + i * 0.1, type: 'spring' }} />
     ))}
     <motion.circle cx="95" cy="85" r="10" fill={LIME} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5, type: 'spring' }} />
-    <motion.text x="95" y="89" textAnchor="middle" fill="#0B0F0A" fontSize="12" fontWeight="bold" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>?</motion.text>
+    <motion.text x="95" y="89" textAnchor="middle" fill="#050D1F" fontSize="12" fontWeight="bold" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>?</motion.text>
   </motion.svg>
 );
 
@@ -93,8 +93,8 @@ const CardIllustration: React.FC = () => (
     ))}
     <motion.rect x="40" y="45" width="12" height="10" rx="2" fill={LIME} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} />
     <motion.circle cx="85" cy="70" r="15" fill={LIME} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.4, type: 'spring' }} />
-    <motion.line x1="85" y1="63" x2="85" y2="77" stroke="#0B0F0A" strokeWidth="2.5" strokeLinecap="round" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.5 }} />
-    <motion.line x1="78" y1="70" x2="92" y2="70" stroke="#0B0F0A" strokeWidth="2.5" strokeLinecap="round" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.5 }} />
+    <motion.line x1="85" y1="63" x2="85" y2="77" stroke="#050D1F" strokeWidth="2.5" strokeLinecap="round" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.5 }} />
+    <motion.line x1="78" y1="70" x2="92" y2="70" stroke="#050D1F" strokeWidth="2.5" strokeLinecap="round" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.5 }} />
   </motion.svg>
 );
 
@@ -116,7 +116,7 @@ const InsightsIllustration: React.FC = () => (
       <motion.rect key={i} x={32 + i * 10} y={90 - h} width="7" height={h} fill={i === 4 ? LIME : MUTED} rx="2" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.1 + i * 0.05, originY: 1 }} />
     ))}
     <motion.circle cx="95" cy="30" r="15" fill={LIME} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.5, type: 'spring' }} />
-    <motion.path d="M95 22 L95 26 M91 28 L91 32 M99 28 L99 32 M93 35 L93 38 M97 35 L97 38" stroke="#0B0F0A" strokeWidth="2" strokeLinecap="round" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} />
+    <motion.path d="M95 22 L95 26 M91 28 L91 32 M99 28 L99 32 M93 35 L93 38 M97 35 L97 38" stroke="#050D1F" strokeWidth="2" strokeLinecap="round" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} />
   </motion.svg>
 );
 
@@ -137,7 +137,7 @@ const ErrorIllustration: React.FC = () => (
     <motion.line x1="60" y1="45" x2="60" y2="70" stroke="#F97316" strokeWidth="4" strokeLinecap="round" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.2 }} style={{ originY: 0 }} />
     <motion.circle cx="60" cy="80" r="4" fill="#F97316" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring' }} />
     <motion.circle cx="95" cy="35" r="12" fill={LIME} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.4, type: 'spring' }} />
-    <motion.path d="M95 28 L98 32 L92 32" stroke="#0B0F0A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="transparent" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} />
+    <motion.path d="M95 28 L98 32 L92 32" stroke="#050D1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="transparent" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} />
   </motion.svg>
 );
 
@@ -257,7 +257,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           {actionLabel && onAction && (
             <button
               onClick={onAction}
-              className="w-full py-3.5 rounded-xl font-semibold text-sm text-[#101010] bg-[#56be89] hover:bg-[#6fcca3] active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-h-[44px]"
+              className="w-full py-3.5 rounded-xl font-semibold text-sm text-[#101010] bg-[#0FB0CE] hover:bg-[#3FC4DB] active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-h-[44px]"
             >
               <Plus size={16} />
               {actionLabel}

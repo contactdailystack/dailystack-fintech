@@ -67,7 +67,7 @@ export interface EnhancedDonutChartProps {
 // ─── Category Colors (based on design tokens) ────────────────────────────────
 
 const categoryColors = [
-  '#56be89', // Lime - Primary
+  '#0FB0CE', // Lime - Primary
   '#FF6B6B', // Coral - Food
   '#4ECDC4', // Teal - Transport
   '#FFE66D', // Yellow - Shopping
@@ -334,7 +334,7 @@ export default function EnhancedDonutChart({
                   className="text-lg font-black"
                   style={{ 
                     color: activeSegment.color,
-                    fontFamily: lang === 'th' ? 'Kanit, sans-serif' : 'Inter, sans-serif',
+                    fontFamily: lang === 'th' ? 'Noto Sans Thai, sans-serif' : 'Inter, sans-serif',
                   }}
                 >
                   {activeSegment.amount !== undefined 
@@ -375,7 +375,7 @@ export default function EnhancedDonutChart({
                   className="text-lg font-black"
                   style={{ 
                     color: colorTokens.text.primary,
-                    fontFamily: lang === 'th' ? 'Kanit, sans-serif' : 'Inter, sans-serif',
+                    fontFamily: lang === 'th' ? 'Noto Sans Thai, sans-serif' : 'Inter, sans-serif',
                   }}
                 >
                   {total !== undefined && total !== 100

@@ -82,10 +82,10 @@ const variantStyles: Record<ActionButtonVariant, {
   disabled: string;
 }> = {
   primary: {
-    bg: 'bg-[#56be89]',
-    bgHover: 'hover:bg-[#6fcca3]',
+    bg: 'bg-[#0FB0CE]',
+    bgHover: 'hover:bg-[#3FC4DB]',
     bgActive: 'active:bg-[#B8E62B]',
-    text: 'text-[#0B0F0A]',
+    text: 'text-[#050D1F]',
     border: 'border-transparent',
     shadow: 'shadow-[0_0_20px_rgba(199,255,46,0.25)]',
     shadowHover: 'hover:shadow-[0_0_30px_rgba(199,255,46,0.4)]',
@@ -95,7 +95,7 @@ const variantStyles: Record<ActionButtonVariant, {
     bg: 'bg-[rgba(199,255,46,0.1)]',
     bgHover: 'hover:bg-[rgba(199,255,46,0.15)]',
     bgActive: 'active:bg-[rgba(199,255,46,0.2)]',
-    text: 'text-[#56be89]',
+    text: 'text-[#0FB0CE]',
     border: 'border-[rgba(199,255,46,0.3)]',
     shadow: '',
     shadowHover: 'hover:shadow-[0_0_15px_rgba(199,255,46,0.15)]',

@@ -167,7 +167,7 @@ export const RippleProjection = memo(function RippleProjection({
                 top: ripple.y,
                 transform: 'translate(-50%, -50%)',
                 border: '2px solid var(--color-lime)',
-                boxShadow: '0 0 30px rgba(86, 190, 137, 0.3)',
+                boxShadow: '0 0 30px rgba(15, 176, 206, 0.3)',
               }}
               onAnimationComplete={addRipple}
             />
@@ -182,8 +182,8 @@ export const RippleProjection = memo(function RippleProjection({
             className="relative max-w-sm w-full mx-4 p-6 rounded-3xl"
             style={{
               backgroundColor: '#1A1A1A',
-              border: '1px solid rgba(86, 190, 137, 0.2)',
-              boxShadow: '0 0 60px rgba(86, 190, 137, 0.1)',
+              border: '1px solid rgba(15, 176, 206, 0.2)',
+              boxShadow: '0 0 60px rgba(15, 176, 206, 0.1)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -191,7 +191,7 @@ export const RippleProjection = memo(function RippleProjection({
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
               style={{
                 background: 'linear-gradient(90deg, var(--color-elite), #FFA500)',
-                color: '#0B0F0A',
+                color: '#050D1F',
               }}
             >
               <Sparkles className="w-3 h-3" />
@@ -206,11 +206,11 @@ export const RippleProjection = memo(function RippleProjection({
                 transition={{ delay: 0.3, type: 'spring' }}
                 className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
                 style={{
-                  backgroundColor: 'rgba(86, 190, 137, 0.1)',
-                  border: '1px solid rgba(86, 190, 137, 0.3)',
+                  backgroundColor: 'rgba(15, 176, 206, 0.1)',
+                  border: '1px solid rgba(15, 176, 206, 0.3)',
                 }}
               >
-                <TrendingDown className="w-8 h-8" style={{ color: '#56be89' }} />
+                <TrendingDown className="w-8 h-8" style={{ color: '#0FB0CE' }} />
               </motion.div>
               
               <h2 className="text-xl font-bold text-white mb-1">
@@ -284,9 +284,9 @@ export const RippleProjection = memo(function RippleProjection({
               onClick={onClose}
               className="w-full py-3 rounded-xl text-sm font-medium"
               style={{
-                backgroundColor: 'rgba(86, 190, 137, 0.1)',
-                color: '#56be89',
-                border: '1px solid rgba(86, 190, 137, 0.2)',
+                backgroundColor: 'rgba(15, 176, 206, 0.1)',
+                color: '#0FB0CE',
+                border: '1px solid rgba(15, 176, 206, 0.2)',
               }}
             >
               {lang === 'th' ? 'เข้าใจแล้ว' : 'Got it'}

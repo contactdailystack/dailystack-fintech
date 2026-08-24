@@ -8,7 +8,7 @@
  * ============================================================
  * ============================================================
  * Design Constitution v4.1 — Color System
- * Pilo/Emerald Mint theme (#56be89 / #56be89)
+ * Pilo/Emerald Mint theme (#0FB0CE / #0FB0CE)
  * Calm Finance: Amber warnings, never red
  */
 
@@ -16,29 +16,29 @@
 
 export const BRAND = {
   /** Primary — Pilo/Emerald Mint */
-  PRIMARY: '#56be89',
+  PRIMARY: '#0FB0CE',
   /** Primary lighter */
-  LIGHT: '#6fcca3',
+  LIGHT: '#3FC4DB',
   /** Primary muted */
   MUTED: '#AFE021',
   /** Primary dark */
   DARK: '#8BC926',
   /** 10% opacity */
-  ALPHA_10: 'rgba(86, 190, 137, 0.10)',
+  ALPHA_10: 'rgba(15, 176, 206, 0.10)',
   /** 20% opacity */
-  ALPHA_20: 'rgba(86, 190, 137, 0.20)',
+  ALPHA_20: 'rgba(15, 176, 206, 0.20)',
   /** 30% opacity */
-  ALPHA_30: 'rgba(86, 190, 137, 0.30)',
+  ALPHA_30: 'rgba(15, 176, 206, 0.30)',
   /** 50% opacity */
-  ALPHA_50: 'rgba(86, 190, 137, 0.50)',
+  ALPHA_50: 'rgba(15, 176, 206, 0.50)',
 } as const;
 
 // ─── Semantic Color Scale ───────────────────────────────────────
 
 export const SEMANTIC = {
   // ── Backgrounds
-  BG_DARK: '#0B0F0A',         // SSOT: Dark Base
-  BG_CARD: '#171C15',          // SSOT: Surface
+  BG_DARK: '#050D1F',         // SSOT: Dark Base
+  BG_CARD: '#0C2140',          // SSOT: Surface
   BG_BORDER: '#2D313E',        // Sleek slate border
 
   // ── Text hierarchy
@@ -52,20 +52,20 @@ export const SEMANTIC = {
   WARNING: '#D97706',          // Amber/Muted Orange — budget drift
   WARNING_LIGHT: '#F59E0B',   // Amber light
   WARNING_SOFT: '#B45309',    // Deeper amber for danger states
-  INFO: '#3B82F6',            // Blue — neutral info
+  INFO: '#1786C2',            // Blue — neutral info
 
   // ── Emotion colors
   IMPULSE: '#F59E0B',         // Amber — impulse spend
   JOY: '#10B981',             // Emerald — joy/healthy
   STRESS: '#F59E0B',          // Amber — stress
   SOCIAL: '#8B5CF6',           // Purple — social
-  VALUE: '#56be89',            // Brand — value
-  INVESTMENT: '#3B82F6',      // Blue — investment
+  VALUE: '#0FB0CE',            // Brand — value
+  INVESTMENT: '#1786C2',      // Blue — investment
 
   // ── Gradients
-  GRADIENT_BRAND: 'linear-gradient(135deg, #56be89 0%, #10B981 100%)',
-  GRADIENT_CARD: 'linear-gradient(180deg, #171C15 0%, #0B0F0A 100%)',
-  GRADIENT_GLOW: 'radial-gradient(circle, rgba(86, 190, 137, 0.15) 0%, transparent 70%)',
+  GRADIENT_BRAND: 'linear-gradient(135deg, #0FB0CE 0%, #10B981 100%)',
+  GRADIENT_CARD: 'linear-gradient(180deg, #0C2140 0%, #050D1F 100%)',
+  GRADIENT_GLOW: 'radial-gradient(circle, rgba(15, 176, 206, 0.15) 0%, transparent 70%)',
 } as const;
 
 // ─── Accent Colors ──────────────────────────────────────────────
@@ -75,8 +75,8 @@ export const ACCENT = {
   GOLD_MUTED: '#B8860B',      // Gold dark
   PURPLE: '#8B5CF6',          // AI/pro features
   PURPLE_LIGHT: '#A78BFA',
-  BLUE: '#3B82F6',            // Info/links
-  BLUE_LIGHT: '#60A5FA',
+  BLUE: '#1786C2',            // Info/links
+  BLUE_LIGHT: '#3FA3D6',
   PINK: '#EC4899',            // Social
   INDIGO: '#6366F1',          // Secondary action
 } as const;
@@ -99,9 +99,9 @@ export const NEUTRAL = {
 
   // DailyStack custom surfaces
   OVERLAY: 'rgba(0, 0, 0, 0.75)',
-  GLASS: 'rgba(23, 28, 21, 0.85)',
-  GLASS_LIGHT: 'rgba(23, 28, 21, 0.60)',
-  GLASS_HEAVY: 'rgba(23, 28, 21, 0.40)',
+  GLASS: 'rgba(12, 33, 64, 0.85)',
+  GLASS_LIGHT: 'rgba(12, 33, 64, 0.60)',
+  GLASS_HEAVY: 'rgba(12, 33, 64, 0.40)',
 } as const;
 
 // ─── Type Definitions ──────────────────────────────────────────
@@ -162,7 +162,7 @@ export const ZAXIS = {
     zIndex: 10,
     backdropFilter: 'blur(12px) saturate(1.4)',
     background: NEUTRAL.GLASS,
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(86, 190, 137, 0.05)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(15, 176, 206, 0.05)',
     border: '1px solid rgba(255, 255, 255, 0.06)',
   },
   SECONDARY: {

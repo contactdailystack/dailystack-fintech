@@ -13,10 +13,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 // ─── Design Tokens ────────────────────────────────────────────────
-const LIME = '#56be89';
-const LIME_BG = 'rgba(205, 255, 36, 0.15)';
-const LIME_BG_HOVER = 'rgba(205, 255, 36, 0.25)';
-const LIME_BORDER = 'rgba(205, 255, 36, 0.3)';
+const LIME = '#0FB0CE';
+const LIME_BG = 'rgba(15, 176, 206, 0.15)';
+const LIME_BG_HOVER = 'rgba(15, 176, 206, 0.25)';
+const LIME_BORDER = 'rgba(15, 176, 206, 0.3)';
 
 // ─── Props ───────────────────────────────────────────────────────
 export interface BiometricButtonProps {
@@ -104,10 +104,10 @@ export const BiometricButton: React.FC<BiometricButtonProps> = ({
         inline-flex items-center justify-center gap-2
         px-4 py-3 h-11 min-h-11 min-w-[44px]
         rounded-xl font-semibold text-sm tracking-wide
-        bg-[rgba(205,255,36,0.15)] text-[#56be89]
-        border border-[rgba(205,255,36,0.3)]
-        hover:bg-[rgba(205,255,36,0.25)]
-        hover:shadow-[0_0_15px_rgba(205,255,36,0.2)]
+        bg-[rgba(15, 176, 206,0.15)] text-[#0FB0CE]
+        border border-[rgba(15, 176, 206,0.3)]
+        hover:bg-[rgba(15, 176, 206,0.25)]
+        hover:shadow-[0_0_15px_rgba(15, 176, 206,0.2)]
         transition-all duration-200
         disabled:opacity-50 disabled:cursor-not-allowed
         ${fullWidth ? 'w-full' : ''}

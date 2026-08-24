@@ -130,7 +130,7 @@ export function AlertCard({
       className={`
         relative rounded-xl border ${config.border} ${config.bg}
         backdrop-blur-sm overflow-hidden
-        ${!alert.viewed ? 'ring-1 ring-[#56be89]/20' : ''}
+        ${!alert.viewed ? 'ring-1 ring-[#0FB0CE]/20' : ''}
         ${compact ? 'p-3' : 'p-4'}
       `}
     >
@@ -150,7 +150,7 @@ export function AlertCard({
               <h3 className={`font-semibold text-sm ${config.text} flex items-center gap-2`}>
                 {alert.title}
                 {!alert.viewed && (
-                  <span className="w-2 h-2 rounded-full bg-[#56be89]" />
+                  <span className="w-2 h-2 rounded-full bg-[#0FB0CE]" />
                 )}
               </h3>
               {!compact && (
@@ -193,7 +193,7 @@ export function AlertCard({
               {onResolve && (
                 <button
                   onClick={onResolve}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#56be89]/10 hover:bg-[#56be89]/20 text-sm text-[#56be89] transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0FB0CE]/10 hover:bg-[#0FB0CE]/20 text-sm text-[#0FB0CE] transition-colors"
                 >
                   <CheckCircle className="w-4 h-4" />
                   Resolve
@@ -267,8 +267,8 @@ export function AlertFeed({ filter, limit, showActions = true }: AlertFeedProps)
   if (filteredAlerts.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="w-16 h-16 rounded-full bg-[#56be89]/10 flex items-center justify-center mx-auto mb-4">
-          <Bell className="w-8 h-8 text-[#56be89]/50" />
+        <div className="w-16 h-16 rounded-full bg-[#0FB0CE]/10 flex items-center justify-center mx-auto mb-4">
+          <Bell className="w-8 h-8 text-[#0FB0CE]/50" />
         </div>
         <h3 className="text-lg font-medium text-gray-300 mb-2">No alerts</h3>
         <p className="text-gray-500 text-sm">
@@ -312,7 +312,7 @@ export function AlertBadge({ count, max = 99 }: AlertBadgeProps) {
       className="
         inline-flex items-center justify-center
         min-w-[20px] h-5 px-1.5 rounded-full
-        bg-[#56be89] text-black text-xs font-bold
+        bg-[#0FB0CE] text-black text-xs font-bold
       "
     >
       {count > max ? `${max}+` : count}
@@ -362,8 +362,8 @@ export function AlertSummary() {
       <AlertStatsCard
         title="Active Alerts"
         value={unreadCount}
-        icon={<Bell className="w-5 h-5 text-[#56be89]" />}
-        color="bg-[#56be89]/10"
+        icon={<Bell className="w-5 h-5 text-[#0FB0CE]" />}
+        color="bg-[#0FB0CE]/10"
       />
       <AlertStatsCard
         title="This Month"
@@ -420,7 +420,7 @@ export function AlertSettingsPanel({ onClose }: AlertSettingsPanelProps) {
         {/* Header */}
         <div className="sticky top-0 bg-[#1a1a1a] border-b border-white/5 p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Settings className="w-5 h-5 text-[#56be89]" />
+            <Settings className="w-5 h-5 text-[#0FB0CE]" />
             <h2 className="text-lg font-semibold text-white">Alert Settings</h2>
           </div>
           <button
@@ -443,7 +443,7 @@ export function AlertSettingsPanel({ onClose }: AlertSettingsPanelProps) {
               onClick={() => updatePreferences({ alertsEnabled: !preferences?.alertsEnabled })}
               className={`
                 relative w-12 h-6 rounded-full transition-colors
-                ${preferences?.alertsEnabled ? 'bg-[#56be89]' : 'bg-white/20'}
+                ${preferences?.alertsEnabled ? 'bg-[#0FB0CE]' : 'bg-white/20'}
               `}
             >
               <span 
@@ -469,7 +469,7 @@ export function AlertSettingsPanel({ onClose }: AlertSettingsPanelProps) {
                 onClick={() => updatePreferences({ quietMode: !preferences?.quietMode })}
                 className={`
                   relative w-10 h-5 rounded-full transition-colors
-                  ${preferences?.quietMode ? 'bg-[#56be89]' : 'bg-white/20'}
+                  ${preferences?.quietMode ? 'bg-[#0FB0CE]' : 'bg-white/20'}
                 `}
               >
                 <span 
@@ -514,7 +514,7 @@ export function AlertSettingsPanel({ onClose }: AlertSettingsPanelProps) {
                       }}
                       className={`
                         relative w-10 h-5 rounded-full transition-colors
-                        ${enabled ? 'bg-[#56be89]' : 'bg-white/20'}
+                        ${enabled ? 'bg-[#0FB0CE]' : 'bg-white/20'}
                       `}
                     >
                       <span 

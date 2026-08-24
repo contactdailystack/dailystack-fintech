@@ -223,7 +223,7 @@ export default function MorePage({
           {activeTab !== 'menu' ? (
             <button 
               onClick={() => setActiveTab('menu')}
-              className="text-[10px] uppercase font-mono tracking-widest text-[#3B82F6] hover:underline flex items-center gap-1 cursor-pointer mb-1.5"
+              className="text-[10px] uppercase font-mono tracking-widest text-[#1786C2] hover:underline flex items-center gap-1 cursor-pointer mb-1.5"
             >
               ← {lang === 'en' ? 'Back to More Options' : 'กลับสู่รายการ'}
             </button>
@@ -248,7 +248,7 @@ export default function MorePage({
         <div className="flex items-center gap-4 bg-[#0E162B] border border-slate-900 px-4 py-2 rounded-2xl">
           <div className="text-left">
             <span className="block text-[8px] font-mono text-zinc-500 uppercase">Decision Streak</span>
-            <span className="block font-display font-black text-xs text-[#3B82F6]">12 Days Run</span>
+            <span className="block font-display font-black text-xs text-[#1786C2]">12 Days Run</span>
           </div>
           <div className="w-px h-8 bg-slate-900" />
           <div className="text-left">
@@ -271,7 +271,7 @@ export default function MorePage({
               <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400">
                 <Database className="w-5 h-5" />
               </div>
-              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#3B82F6] font-bold">SQL Relational</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#1786C2] font-bold">SQL Relational</span>
             </div>
             <div className="mt-4 text-left">
               <h3 className="text-white font-display font-bold text-sm leading-snug group-hover:text-blue-400 transition-colors">Sovereign Database</h3>
@@ -288,7 +288,7 @@ export default function MorePage({
               <div className="p-3 rounded-xl bg-violet-500/10 text-violet-450">
                 <Briefcase className="w-5 h-5" />
               </div>
-              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#3B82F6] font-bold">{workspaces.length} Spaces</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#1786C2] font-bold">{workspaces.length} Spaces</span>
             </div>
             <div className="mt-4 text-left">
               <h3 className="text-white font-display font-bold text-sm leading-snug group-hover:text-blue-400 transition-colors">Sovereign Workspaces</h3>
@@ -305,7 +305,7 @@ export default function MorePage({
               <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400">
                 <CreditCard className="w-5 h-5" />
               </div>
-              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#3B82F6] font-bold">Safe Ledger</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#1786C2] font-bold">Safe Ledger</span>
             </div>
             <div className="mt-4 text-left">
               <h3 className="text-white font-display font-bold text-sm leading-snug group-hover:text-blue-400 transition-colors">Decision Liquidity Accounts</h3>
@@ -322,7 +322,7 @@ export default function MorePage({
               <div className="p-3 rounded-xl bg-orange-500/10 text-orange-400">
                 <Tag className="w-5 h-5" />
               </div>
-              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#3B82F6] font-bold">{categories.length} Classes</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#1786C2] font-bold">{categories.length} Classes</span>
             </div>
             <div className="mt-4 text-left">
               <h3 className="text-white font-display font-bold text-sm leading-snug group-hover:text-blue-400 transition-colors">Design Class Categories</h3>
@@ -339,7 +339,7 @@ export default function MorePage({
               <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400">
                 <Award className="w-5 h-5" />
               </div>
-              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#3B82F6] font-bold">Action Landmarks</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#1786C2] font-bold">Action Landmarks</span>
             </div>
             <div className="mt-4 text-left">
               <h3 className="text-white font-display font-bold text-sm leading-snug group-hover:text-blue-400 transition-colors">Future Decision Goals</h3>
@@ -353,10 +353,10 @@ export default function MorePage({
             className="border border-slate-900 rounded-[24px] p-5 bg-[#0E162B]/80 hover:bg-[#0E162B] hover:border-blue-500/30 transition-all cursor-pointer group flex flex-col justify-between min-h-[160px]"
           >
             <div className="flex justify-between items-start">
-              <div className="p-3 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6]">
+              <div className="p-3 rounded-xl bg-[#1786C2]/10 text-[#1786C2]">
                 <Sliders className="w-5 h-5" />
               </div>
-              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#3B82F6] font-bold">Dynamic Caps</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#1786C2] font-bold">Dynamic Caps</span>
             </div>
             <div className="mt-4 text-left">
               <h3 className="text-white font-display font-bold text-sm leading-snug group-hover:text-blue-400 transition-colors">Cognitive Budgets</h3>
@@ -390,7 +390,7 @@ export default function MorePage({
               <div className="p-3 rounded-xl bg-zinc-500/10 text-zinc-400">
                 <Settings className="w-5 h-5" />
               </div>
-              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#3B82F6] font-bold">Credentials</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#1786C2] font-bold">Credentials</span>
             </div>
             <div className="mt-4 text-left">
               <h3 className="text-white font-display font-bold text-sm leading-snug group-hover:text-blue-400 transition-colors">Credentials & Preferences</h3>
@@ -445,7 +445,7 @@ export default function MorePage({
               </div>
               <button 
                 type="submit"
-                className="w-full bg-[#3B82F6] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
+                className="w-full bg-[#1786C2] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
               >
                 Create Workspace
               </button>
@@ -462,7 +462,7 @@ export default function MorePage({
             {accounts.map((acc, i) => (
               <div key={i} className="border border-slate-900 rounded-3xl p-5 bg-[#0E162B] flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#3B82F6]">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#1786C2]">
                     <CreditCard className="w-5 h-5" />
                   </div>
                   <div className="text-left">
@@ -505,7 +505,7 @@ export default function MorePage({
               </div>
               <button 
                 type="submit"
-                className="w-full bg-[#3B82F6] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
+                className="w-full bg-[#1786C2] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
               >
                 Register Account Source
               </button>
@@ -554,7 +554,7 @@ export default function MorePage({
               </div>
               <button 
                 type="submit"
-                className="w-full bg-[#3B82F6] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
+                className="w-full bg-[#1786C2] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
               >
                 Add Category Class
               </button>
@@ -577,7 +577,7 @@ export default function MorePage({
                       <h4 className="font-display font-extrabold text-sm text-white">{g.title}</h4>
                       <p className="text-[11px] text-zinc-400">{g.desc}</p>
                     </div>
-                    <span className="font-mono text-[10px] text-[#3B82F6] font-bold">{pct}% Achieved</span>
+                    <span className="font-mono text-[10px] text-[#1786C2] font-bold">{pct}% Achieved</span>
                   </div>
                   
                   {/* Progress bar */}
@@ -605,7 +605,7 @@ export default function MorePage({
                         onUpdateProfile({ balance: profile.balance - 100 });
                         triggerToast(`Redirected $100 emotional budget into: ${g.title}`);
                       }}
-                      className="text-[#3B82F6] hover:underline flex items-center gap-1 text-[10px] font-bold"
+                      className="text-[#1786C2] hover:underline flex items-center gap-1 text-[10px] font-bold"
                     >
                       Allocate +$100 Now →
                     </button>
@@ -652,7 +652,7 @@ export default function MorePage({
               </div>
               <button 
                 type="submit"
-                className="w-full bg-[#3B82F6] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
+                className="w-full bg-[#1786C2] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
               >
                 Formulate Goal Landmark
               </button>
@@ -667,7 +667,7 @@ export default function MorePage({
           <div className="col-span-1 lg:col-span-7 space-y-4">
             <div className="flex justify-between items-center mb-1">
               <h3 className="font-display font-bold text-white text-base">Active Commitments</h3>
-              <span className="font-mono text-xs text-blue-400 font-bold bg-[#3B82F6]/5 px-3 py-1 rounded-full border border-blue-500/10">
+              <span className="font-mono text-xs text-blue-400 font-bold bg-[#1786C2]/5 px-3 py-1 rounded-full border border-blue-500/10">
                 Sum: ${monthlySubscriptionTotal.toLocaleString()}/month (billing cycle adjusted)
               </span>
             </div>
@@ -722,7 +722,7 @@ export default function MorePage({
               </div>
               <button 
                 type="submit"
-                className="w-full bg-[#3B82F6] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
+                className="w-full bg-[#1786C2] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
               >
                 Register Subscription
               </button>
@@ -799,7 +799,7 @@ export default function MorePage({
               </div>
               <button 
                 type="submit"
-                className="w-full bg-[#3B82F6] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
+                className="w-full bg-[#1786C2] hover:opacity-95 text-black font-semibold font-display text-xs py-3 rounded-xl transition-all uppercase tracking-wider"
               >
                 Impose Budget Cap
               </button>
@@ -859,7 +859,7 @@ export default function MorePage({
                 </button>
                 <button 
                   type="submit"
-                  className="bg-[#3B82F6] hover:opacity-95 text-black font-semibold font-display text-[10px] px-5 py-3 rounded-xl uppercase tracking-wider"
+                  className="bg-[#1786C2] hover:opacity-95 text-black font-semibold font-display text-[10px] px-5 py-3 rounded-xl uppercase tracking-wider"
                 >
                   Commit Modifications
                 </button>
@@ -871,7 +871,7 @@ export default function MorePage({
             
             {/* Preferences / Languages */}
             <div className="border border-slate-900 rounded-[32px] p-6 bg-[#0E162B] space-y-4">
-              <h3 className="font-display font-bold text-white text-xs uppercase tracking-widest text-[#3B82F6]">Localization Parameters</h3>
+              <h3 className="font-display font-bold text-white text-xs uppercase tracking-widest text-[#1786C2]">Localization Parameters</h3>
               <div className="flex justify-between items-center">
                 <div>
                   <span className="block text-xs font-bold text-zinc-300">System Language</span>
@@ -880,13 +880,13 @@ export default function MorePage({
                 <div className="flex border border-slate-900 rounded-xl overflow-hidden bg-slate-950">
                   <button 
                     onClick={() => setLang('en')}
-                    className={`px-3 py-1.5 text-[10px] font-bold font-mono transition-all ${lang === 'en' ? 'bg-[#3B82F6] text-black' : 'text-zinc-500 bg-transparent'}`}
+                    className={`px-3 py-1.5 text-[10px] font-bold font-mono transition-all ${lang === 'en' ? 'bg-[#1786C2] text-black' : 'text-zinc-500 bg-transparent'}`}
                   >
                     EN
                   </button>
                   <button 
                     onClick={() => setLang('th')}
-                    className={`px-3 py-1.5 text-[10px] font-bold font-mono transition-all ${lang === 'th' ? 'bg-[#3B82F6] text-black' : 'text-zinc-500 bg-transparent'}`}
+                    className={`px-3 py-1.5 text-[10px] font-bold font-mono transition-all ${lang === 'th' ? 'bg-[#1786C2] text-black' : 'text-zinc-500 bg-transparent'}`}
                   >
                     TH
                   </button>
@@ -896,7 +896,7 @@ export default function MorePage({
 
             {/* Secure compliance information */}
             <div className="p-5 rounded-[24px] border border-slate-900 border-dashed text-xs font-mono space-y-2 text-left bg-[#0E162B]/40 text-zinc-500">
-              <span className="uppercase text-[9px] tracking-widest font-bold block text-[#3B82F6]">{t.secureEncryptionTitle}</span>
+              <span className="uppercase text-[9px] tracking-widest font-bold block text-[#1786C2]">{t.secureEncryptionTitle}</span>
               <p className="text-[10px] leading-relaxed">
                 {t.secureEncryptionPitch}
               </p>

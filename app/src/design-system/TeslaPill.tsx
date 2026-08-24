@@ -21,7 +21,7 @@ import { haptics } from '../services/hapticService';
 export interface TeslaPillProps {
   /** Pill label */
   children: React.ReactNode;
-  /** Pill accent color (default: #56be89) */
+  /** Pill accent color (default: #0FB0CE) */
   color?: string;
   /** Pill size variant */
   size?: 'sm' | 'md';
@@ -52,7 +52,7 @@ const SIZE_CONFIG = {
 // ─── TeslaPill Component ───────────────────────────────────────────
 export const TeslaPill = memo(function TeslaPill({
   children,
-  color = '#56be89',
+  color = '#0FB0CE',
   size = 'sm',
   onClick,
   ariaLabel,

@@ -22,7 +22,7 @@ function AuthPageWrapper({ defaultView }: AuthPageWrapperProps) {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-10 h-10 border-2 rounded-full animate-spin border-[#56be89] border-t-transparent" />
+        <div className="w-10 h-10 border-2 rounded-full animate-spin border-[#0FB0CE] border-t-transparent" />
       </div>
     }>
       <AuthPage

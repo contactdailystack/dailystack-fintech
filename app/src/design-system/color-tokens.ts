@@ -7,10 +7,10 @@
  * Do NOT use hardcoded color values from this file.
  * Replace with: background: var(--bg-page); color: var(--text-primary); etc.
  * ============================================================
- * PicksWise Brand — Soft Mint Green (#56be89)
+ * PicksWise Brand — Soft Mint Green (#0FB0CE)
  * 
  * Color Philosophy:
- * - Primary: Soft Mint Green (#56be89) — active states, primary buttons
+ * - Primary: Soft Mint Green (#0FB0CE) — active states, primary buttons
  * - Secondary: Orange (#FF5733) — accents, notifications
  * - Background: Deep Dark (#101010 / #1A1A1A) — premium, modern
  * - Border Radius: 16-24px — rounded, friendly, no sharp edges
@@ -18,31 +18,31 @@
  * - ZERO emoji in UI — use [Icon: Name] format for all visual elements
  * 
  * v3.0 Changes:
- * - CI Color changed from Lime (#56be89) to Soft Mint (#56be89)
+ * - CI Color changed from Lime (#0FB0CE) to Soft Mint (#0FB0CE)
  */
 
-// ─── Brand Colors: Soft Mint Green (#56be89) ─────────────────────────────────
+// ─── Brand Colors: Soft Mint Green (#0FB0CE) ─────────────────────────────────
 export const mint = {
   /** Primary action, CTA buttons, active states */
-  DEFAULT: '#56be89',
+  DEFAULT: '#0FB0CE',
   /** Light mint for hover states */
-  light: '#6fcca3',
+  light: '#3FC4DB',
   /** Muted mint for subtle backgrounds */
-  muted: 'rgba(86, 190, 137, 0.15)',
+  muted: 'rgba(15, 176, 206, 0.15)',
   /** Ghost mint for borders and dividers */
-  ghost: 'rgba(86, 190, 137, 0.3)',
+  ghost: 'rgba(15, 176, 206, 0.3)',
 } as const;
 
 // ─── Legacy: Lime Green (backward compatibility) ────────────────────────────
 export const lime = {
   /** Primary action, CTA buttons, active states */
-  DEFAULT: '#56be89',
+  DEFAULT: '#0FB0CE',
   /** Light lime for hover states */
-  light: '#6fcca3',
+  light: '#3FC4DB',
   /** Muted lime for subtle backgrounds */
-  muted: 'rgba(86, 190, 137, 0.15)',
+  muted: 'rgba(15, 176, 206, 0.15)',
   /** Ghost lime for borders and dividers */
-  ghost: 'rgba(86, 190, 137, 0.3)',
+  ghost: 'rgba(15, 176, 206, 0.3)',
 } as const;
 
 // ─── E-Pay Brand Colors: Orange Accent ────────────────────────────
@@ -94,9 +94,9 @@ export const border = {
   /** Subtle divider for section breaks */
   subtle: 'rgba(42, 42, 42, 0.6)',
   /** Mint accent border for active/focus */
-  accent: 'rgba(86, 190, 137, 0.4)',
+  accent: 'rgba(15, 176, 206, 0.4)',
   /** Glow border for premium elements */
-  glow: 'rgba(86, 190, 137, 0.2)',
+  glow: 'rgba(15, 176, 206, 0.2)',
 } as const;
 
 // ─── Text Colors ──────────────────────────────────────────────────
@@ -120,9 +120,9 @@ export const semantic = {
   /** Success light — subtle success backgrounds */
   successLight: 'rgba(76, 175, 80, 0.15)',
   /** Neutral — informational, waiting states */
-  neutral: '#3B82F6',
+  neutral: '#1786C2',
   /** Neutral light — subtle neutral backgrounds */
-  neutralLight: 'rgba(59, 130, 246, 0.15)',
+  neutralLight: 'rgba(23, 134, 194, 0.15)',
   /** Insights — AI insights, recommendations */
   insights: '#8B5CF6',
   /** Insights light — subtle insights backgrounds */

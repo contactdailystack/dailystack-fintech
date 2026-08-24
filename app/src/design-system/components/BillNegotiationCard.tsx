@@ -47,21 +47,21 @@ export const BillNegotiationCard: React.FC<BillNegotiationCardProps> = ({
       <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a]" />
       
       {/* Accent glow */}
-      <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#56be89]/20 rounded-full blur-3xl" />
+      <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#0FB0CE]/20 rounded-full blur-3xl" />
       
       {/* Content */}
       <div className="relative p-6">
         {/* Header row */}
         <div className="flex items-start justify-between mb-4">
           {/* Icon */}
-          <div className="w-14 h-14 rounded-2xl bg-[#56be89]/10 border border-[#56be89]/20 flex items-center justify-center">
-            <ShieldCheck className="w-7 h-7 text-[#56be89]" />
+          <div className="w-14 h-14 rounded-2xl bg-[#0FB0CE]/10 border border-[#0FB0CE]/20 flex items-center justify-center">
+            <ShieldCheck className="w-7 h-7 text-[#0FB0CE]" />
           </div>
 
           {/* Premium badge */}
           <div className="flex items-center gap-2">
             {isPremium ? (
-              <span className="px-3 py-1 rounded-full bg-[#56be89] text-black text-[10px] font-bold uppercase tracking-wider">
+              <span className="px-3 py-1 rounded-full bg-[#0FB0CE] text-black text-[10px] font-bold uppercase tracking-wider">
                 {t.premium}
               </span>
             ) : (
@@ -86,7 +86,7 @@ export const BillNegotiationCard: React.FC<BillNegotiationCardProps> = ({
         {/* CTA Button */}
         <button
           onClick={onGetStarted}
-          className="w-full bg-[#56be89] text-black font-display font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider hover:bg-[#6fcca3] active:scale-[0.98] transition-all cursor-pointer shadow-lg shadow-[#56be89]/20"
+          className="w-full bg-[#0FB0CE] text-black font-display font-bold text-sm py-3.5 rounded-xl uppercase tracking-wider hover:bg-[#3FC4DB] active:scale-[0.98] transition-all cursor-pointer shadow-lg shadow-[#0FB0CE]/20"
         >
           {t.getStarted}
         </button>

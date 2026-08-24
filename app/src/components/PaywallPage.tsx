@@ -31,7 +31,7 @@ interface PaywallPageProps {
   theme: 'dark' | 'light';
 }
 
-const NAVY = '#001C5A';
+const NAVY = '#071838';
 const POLL_INTERVAL_MS = 3000;
 
 type PaymentStage = 'form' | 'qr' | 'expired' | 'failed';
@@ -488,7 +488,7 @@ export default function PaywallPage({
             step={100}
             value={priceCents}
             onChange={(e) => handleSlider(Number(e.target.value))}
-            className="w-full accent-[#001C5A]"
+            className="w-full accent-[#071838]"
             style={{ accentColor: NAVY, height: 32 }}
             aria-label={
               lang === 'th'

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Target, TrendingUp, TrendingDown, AlertCircle, CheckCircle2,
   Plus, Edit2, Trash2, Wallet, PieChart, Calendar,
@@ -9,6 +9,20 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Transaction, UserProfile } from '../types';
 import { translations, Language } from '../data/translations';
 import { haptics } from '../services/hapticService';
+import {
+  loadBudgets, saveBudgets, subscribeBudgets,
+  monthSpendByBudgetKey, categoryToBudgetKey,
+} from '../services/budgetStore';
+import type { UserBudget } from '../services/budgetStore';
+import type { Goal } from '../services/goalService';
+
+// Icon per budget key (shared with Dashboard rings)
+const ICON_BY_KEY: Record<string, React.ReactNode> = {
+  food: <UtensilsCrossed className="w-4 h-4" />,
+  transport: <Car className="w-4 h-4" />,
+  shopping: <ShoppingBag className="w-4 h-4" />,
+  entertainment: <Film className="w-4 h-4" />,
+};
 
 interface BudgetCategory {
   id: string;
@@ -25,6 +39,8 @@ interface BudgetPageProps {
   onUpdateProfile: (p: Partial<UserProfile>) => void;
   lang: Language;
   theme: 'dark' | 'light';
+  /** Real savings goals from Supabase (goals table) — replaces demo data */
+  goals?: Goal[];
 }
 
 export default function BudgetManagementPage({
@@ -32,7 +48,8 @@ export default function BudgetManagementPage({
   profile,
   onUpdateProfile,
   lang,
-  theme
+  theme,
+  goals = [],
 }: BudgetPageProps) {
   const t = translations[lang];
   const [activeTab, setActiveTab] = useState<'overview' | 'categories' | 'goals'>('overview');
@@ -60,51 +77,97 @@ export default function BudgetManagementPage({
     setShowAddModal(true);
   };
   
-  // Save edited category
+  // Save edited category → persisted via budgetStore (#4)
   const handleSaveCategory = () => {
     if (!editingCategory) return;
-    
-    setCategories(prev => prev.map(cat => 
-      cat.id === editingCategory.id 
-        ? { ...cat, name: editName, budgetLimit: editBudgetLimit }
-        : cat
+
+    saveBudgets(budgets.map(b =>
+      b.key === editingCategory.id
+        ? { ...b, limit: editBudgetLimit,
+            nameEn: lang === 'th' ? b.nameEn : editName,
+            nameTh: lang === 'th' ? editName : b.nameTh }
+        : b
     ));
-    
+
     // Close modal
     setEditingCategory(null);
     setEditName('');
     setEditBudgetLimit(0);
   };
-  
+
   // Handle add new category
   const handleAddCategory = () => {
     if (!newCategoryName.trim() || newCategoryBudget <= 0) return;
-    
-    const newCategory: BudgetCategory = {
-      id: Date.now().toString(),
-      name: newCategoryName,
-      icon: <Wallet className="w-4 h-4" />,
-      budgetLimit: newCategoryBudget,
-      spent: 0,
+
+    const key = `custom-${Date.now()}`;
+    const nb: UserBudget = {
+      key,
+      nameEn: newCategoryName.trim(),
+      nameTh: newCategoryName.trim(),
       color: '#6B7280',
+      limit: newCategoryBudget,
     };
-    setCategories(prev => [...prev, newCategory]);
+    saveBudgets([...budgets, nb]);
     setShowAddModal(false);
     setNewCategoryName('');
     setNewCategoryBudget(0);
   };
 
+  // Delete a custom budget category (default categories can't be deleted —
+  // loadBudgets() re-seeds them; they can be edited to ฿0 instead)
+  const handleDeleteCategory = (id: string) => {
+    if (!id.startsWith('custom-')) return;
+    saveBudgets(budgets.filter(b => b.key !== id));
+  };
+
+  // ── Budgets from shared store (Dashboard rings read the same data) ──
+  const [budgets, setBudgets] = useState<UserBudget[]>(() => loadBudgets());
+  useEffect(() => subscribeBudgets(() => setBudgets(loadBudgets())), []);
+
+  // Real month-to-date spend per budget key (#4)
+  const spendMap = useMemo(() => monthSpendByBudgetKey(transactions), [transactions]);
+
   // Default budget categories with realistic Thai spending data
-  const [categories, setCategories] = useState<BudgetCategory[]>([
-    { id: '1', name: lang === 'th' ? 'อาหารและเครื่องดื่ม' : 'Food & Dining', icon: <UtensilsCrossed className="w-4 h-4" />, budgetLimit: 8000, spent: 5240, color: '#F97316' },
-    { id: '2', name: lang === 'th' ? 'การเดินทาง' : 'Transportation', icon: <Car className="w-4 h-4" />, budgetLimit: 4000, spent: 2100, color: '#3B82F6' },
-    { id: '3', name: lang === 'th' ? 'ช้อปปิ้ง' : 'Shopping', icon: <ShoppingBag className="w-4 h-4" />, budgetLimit: 6000, spent: 7820, color: '#EC4899' },
-    { id: '4', name: lang === 'th' ? 'บันเทิง' : 'Entertainment', icon: <Film className="w-4 h-4" />, budgetLimit: 3000, spent: 1850, color: '#8B5CF6' },
-    { id: '5', name: lang === 'th' ? 'บิลและสาธารณูปโภค' : 'Bills & Utilities', icon: <Zap className="w-4 h-4" />, budgetLimit: 5000, spent: 4200, color: '#10B981' },
-    { id: '6', name: lang === 'th' ? 'สุขภาพ' : 'Health', icon: <Heart className="w-4 h-4" />, budgetLimit: 2000, spent: 850, color: '#F97316' },
-    { id: '7', name: lang === 'th' ? 'การศึกษา' : 'Education', icon: <Book className="w-4 h-4" />, budgetLimit: 3000, spent: 1500, color: '#06B6D4' },
-    { id: '8', name: lang === 'th' ? 'การลงทุน' : 'Investment', icon: <TrendingUp className="w-4 h-4" />, budgetLimit: 10000, spent: 10000, color: 'var(--color-lime)' },
-  ]);
+  const categories = useMemo<BudgetCategory[]>(() =>
+    budgets.map((b) => ({
+      id: b.key,
+      name: lang === 'th' ? b.nameTh : b.nameEn,
+      icon: ICON_BY_KEY[b.key] || <Wallet className="w-4 h-4" />,
+      budgetLimit: b.limit,
+      spent: Math.round(spendMap.get(b.key) || 0),
+      color: b.color,
+    })), [budgets, spendMap, lang]);
+
+  // ── Smart suggestions (#4): avg monthly spend per budget, last 3 months ──
+  const suggestions = useMemo(() => {
+    const now = new Date();
+    const perKeyTotals = new Map<string, number>();
+    for (const t of transactions) {
+      if (t.amount >= 0) continue;
+      const d = new Date(t.date);
+      const monthsAgo =
+        (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
+      if (monthsAgo < 0 || monthsAgo > 2) continue; // last 3 months incl. current
+      const key = categoryToBudgetKey(t.category);
+      if (!key) continue;
+      perKeyTotals.set(key, (perKeyTotals.get(key) || 0) + Math.abs(t.amount));
+    }
+    return budgets
+      .map((b) => {
+        const avg = (perKeyTotals.get(b.key) || 0) / 3;
+        const suggested = Math.max(500, Math.ceil(avg / 100) * 100);
+        return { key: b.key, name: lang === 'th' ? b.nameTh : b.nameEn, suggested, current: b.limit, avg };
+      })
+      // Only suggest for categories with real spending history
+      .filter((s) => s.avg > 0 && s.suggested !== s.current);
+  }, [transactions, budgets, lang]);
+
+  const applyAllSuggestions = () => {
+    saveBudgets(budgets.map((b) => {
+      const s = suggestions.find((x) => x.key === b.key);
+      return s ? { ...b, limit: s.suggested } : b;
+    }));
+  };
 
   // Calculate totals
   const totalBudget = categories.reduce((sum, cat) => sum + cat.budgetLimit, 0);
@@ -112,15 +175,42 @@ export default function BudgetManagementPage({
   const remaining = totalBudget - totalSpent;
   const overallPercent = Math.min(100, (totalSpent / totalBudget) * 100);
 
-  // Monthly data for trend chart
-  const monthlyData = [
-    { month: lang === 'th' ? 'ม.ค.' : 'Jan', budget: 37000, spent: 32000 },
-    { month: lang === 'th' ? 'ก.พ.' : 'Feb', budget: 37000, spent: 35500 },
-    { month: lang === 'th' ? 'มี.ค.' : 'Mar', budget: 37000, spent: 28900 },
-    { month: lang === 'th' ? 'เม.ย.' : 'Apr', budget: 37000, spent: 34200 },
-    { month: lang === 'th' ? 'พ.ค.' : 'May', budget: 37000, spent: 31560 },
-    { month: lang === 'th' ? 'มิ.ย.' : 'Jun', budget: 37000, spent: 0 },
-  ];
+  // AI insight: highest budget-utilisation category with real spend this month
+  const aiInsight = useMemo(() => {
+    const withSpend = categories.filter(c => c.spent > 0 && c.budgetLimit > 0);
+    if (withSpend.length === 0) return null;
+    const top = [...withSpend].sort(
+      (a, b) => b.spent / b.budgetLimit - a.spent / a.budgetLimit
+    )[0];
+    return {
+      name: top.name,
+      pct: Math.round((top.spent / top.budgetLimit) * 100),
+      over: top.spent > top.budgetLimit,
+      overBy: top.spent - top.budgetLimit,
+    };
+  }, [categories]);
+
+  // Real 6-month trend from actual transactions (current total budget shown for reference)
+  const monthlyData = useMemo(() => {
+    const now = new Date();
+    const out: { month: string; budget: number; spent: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const spent = transactions
+        .filter(t => {
+          if (t.amount >= 0) return false;
+          const td = new Date(t.date);
+          return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear();
+        })
+        .reduce((s, t) => s + Math.abs(t.amount), 0);
+      out.push({
+        month: d.toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-US', { month: 'short' }),
+        budget: Math.round(totalBudget),
+        spent: Math.round(spent),
+      });
+    }
+    return out;
+  }, [transactions, totalBudget, lang]);
 
   // Find categories over budget
   const overBudgetCategories = categories.filter(cat => cat.spent > cat.budgetLimit);
@@ -129,13 +219,14 @@ export default function BudgetManagementPage({
     return percent >= 80 && percent < 100;
   });
 
-  // Savings goals
-  const [savingsGoals] = useState([
-    { id: '1', name: lang === 'th' ? 'กองทุนฉุกเฉิน' : 'Emergency Fund', target: 50000, current: 32500, deadline: '2026-09' },
-    { id: '2', name: lang === 'th' ? 'ทองคำ 1 บาท' : 'Gold Bar 1 Baht', target: 35000, current: 35000, deadline: '2026-06' },
-    { id: '3', name: lang === 'th' ? 'วันหยุดปลายปี' : 'Year-End Vacation', target: 25000, current: 12500, deadline: '2026-12' },
-    { id: '4', name: lang === 'th' ? 'แล็ปท็อปใหม่' : 'New Laptop', target: 45000, current: 8000, deadline: '2027-03' },
-  ]);
+  // Real savings goals come from the `goals` prop (Supabase) — no demo data
+  const savingsGoals = useMemo(() => goals.map(g => ({
+    id: g.id,
+    name: g.goal_name,
+    target: g.target_amount,
+    current: g.current_amount,
+    deadline: g.target_date ? String(g.target_date).slice(0, 7) : '—',
+  })), [goals]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('th-TH', {
@@ -244,8 +335,8 @@ export default function BudgetManagementPage({
                       {formatCurrency(totalBudget)}
                     </p>
                   </div>
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${overallPercent > 100 ? 'bg-amber-500/10' : overallPercent > 80 ? 'bg-amber-500/10' : 'bg-emerald-500/10'}`}>
-                    <span className={`text-2xl font-display font-black ${overallPercent > 100 ? 'text-amber-400' : overallPercent > 80 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${overallPercent > 100 ? 'bg-red-500/10' : overallPercent > 80 ? 'bg-amber-500/10' : 'bg-emerald-500/10'}`}>
+                    <span className={`text-2xl font-display font-black ${overallPercent > 100 ? 'text-red-400' : overallPercent > 80 ? 'text-amber-400' : 'text-emerald-400'}`}>
                       {Math.round(overallPercent)}%
                     </span>
                   </div>
@@ -259,7 +350,7 @@ export default function BudgetManagementPage({
                     transition={{ duration: 1, ease: 'easeOut' }}
                     className={`h-full rounded-full ${
                       overallPercent > 100
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600'
+                        ? 'bg-gradient-to-r from-red-500 to-red-600'
                         : overallPercent > 80
                         ? 'bg-gradient-to-r from-amber-500 to-amber-400'
                         : 'bg-gradient-to-r from-emerald-500 to-emerald-400'
@@ -272,7 +363,7 @@ export default function BudgetManagementPage({
                     {lang === 'th' ? 'ใช้ไป' : 'Spent'}: <span className="text-zinc-300">{formatCurrency(totalSpent)}</span>
                   </span>
                   <span className="text-zinc-500">
-                    {lang === 'th' ? 'คงเหลือ' : 'Left'}: <span className={remaining > 0 ? 'text-emerald-400' : 'text-amber-400'}>{formatCurrency(Math.max(0, remaining))}</span>
+                    {lang === 'th' ? 'คงเหลือ' : 'Left'}: <span className={remaining > 0 ? 'text-emerald-400' : 'text-red-400'}>{formatCurrency(Math.max(0, remaining))}</span>
                   </span>
                 </div>
               </div>
@@ -283,20 +374,22 @@ export default function BudgetManagementPage({
                   <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">
                     {lang === 'th' ? 'วันที่เหลือ' : 'Days Left'}
                   </p>
-                  <p className="text-lg font-display font-bold text-white">21</p>
+                  <p className="text-lg font-display font-bold text-white">
+                    {Math.max(0, new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() - new Date().getDate())}
+                  </p>
                 </div>
                 <div className="p-4 text-center bg-dark-card/50 border-l border-zinc-800/30">
                   <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">
                     {lang === 'th' ? 'เฉลี่ย/วัน' : 'Avg/Day'}
                   </p>
-                  <p className="text-lg font-display font-bold text-white">{formatCurrency(Math.round(totalSpent / 10))}</p>
+                  <p className="text-lg font-display font-bold text-white">{formatCurrency(Math.round(totalSpent / Math.max(1, new Date().getDate())))}</p>
                 </div>
                 <div className="p-4 text-center bg-dark-card/50 border-l border-zinc-800/30">
                   <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">
                     {lang === 'th' ? 'การคาดการณ์' : 'Projected'}
                   </p>
                   <p className={`text-lg font-display font-bold ${overallPercent > 90 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                    {formatCurrency(Math.round((totalSpent / 10) * 30))}
+                    {formatCurrency(Math.round((totalSpent / Math.max(1, new Date().getDate())) * new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()))}
                   </p>
                 </div>
               </div>
@@ -306,19 +399,19 @@ export default function BudgetManagementPage({
             {(overBudgetCategories.length > 0 || nearLimitCategories.length > 0) && (
               <div className="space-y-3" id="budget-alerts-section">
                 {overBudgetCategories.map(cat => (
-                  <div key={cat.id} className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                      <AlertCircle className="w-5 h-5 text-amber-400" />
+                  <div key={cat.id} className="flex items-center gap-3 p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                      <AlertCircle className="w-5 h-5 text-red-400" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-amber-400">
+                      <p className="text-sm font-semibold text-red-400">
                         {lang === 'th' ? 'เกินงบ' : 'Over Budget'}
                       </p>
                       <p className="text-xs text-zinc-400">
                         {cat.name} {lang === 'th' ? 'ใช้ไป' : 'spent'} {formatCurrency(cat.spent)} / {formatCurrency(cat.budgetLimit)}
                       </p>
                     </div>
-                    <span className="text-sm font-mono font-bold text-amber-400">
+                    <span className="text-sm font-mono font-bold text-red-400">
                       +{formatCurrency(cat.spent - cat.budgetLimit)}
                     </span>
                   </div>
@@ -393,28 +486,76 @@ export default function BudgetManagementPage({
             </div>
 
             {/* AI Recommendation Card */}
-            <div className={`rounded-2xl border ${theme === 'dark' ? 'bg-gradient-to-br from-[#1A1D26] to-[#131416] border-zinc-800/50' : 'bg-white border-zinc-200'}`} id="budget-ai-card">
-              <div className="p-5">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-5 h-5 text-brand" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-mono text-brand uppercase tracking-widest mb-1">
-                      AI {lang === 'th' ? 'คำแนะนำ' : 'Recommendation'}
-                    </p>
-                    <p className={`text-sm ${theme === 'dark' ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                      {lang === 'th'
-                        ? 'คุณใช้จ่ายในหมวดช้อปปิ้งเกินงบ 30% แนะนำให้ตั้งกฎ "หยุดชะลอ" 7 วันก่อนซื้อของที่ไม่จำเป็น'
-                        : 'You\'ve overspent on Shopping by 30%. Consider setting a 7-day "cooling off" rule before non-essential purchases.'}
-                    </p>
-                    <button className="mt-3 px-4 py-2 rounded-lg bg-brand/10 text-brand text-xs font-semibold hover:bg-brand/20 transition-colors">
-                      {lang === 'th' ? 'ตั้งกฎคูลดาวน์' : 'Set Cooling Rule'}
+            {/* ── Smart Budget Suggestions (#4) — based on real 3-month averages ── */}
+            {suggestions.length > 0 && (
+              <div className={`rounded-2xl border ${theme === 'dark' ? 'bg-gradient-to-br from-[#1A1D26] to-[#131416] border-zinc-800/50' : 'bg-white border-zinc-200'}`} id="budget-suggest-card">
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-brand" />
+                      <p className="text-[10px] font-mono text-brand uppercase tracking-widest">
+                        {lang === 'th' ? 'งบที่แนะนำจากการใช้จ่ายจริง' : 'Suggested budgets'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => { haptics.fire('SELECT'); applyAllSuggestions(); }}
+                      className="px-3 py-1.5 rounded-lg bg-brand/10 text-brand text-xs font-semibold hover:bg-brand/20 transition-colors"
+                    >
+                      {lang === 'th' ? 'ใช้ทั้งหมด' : 'Apply all'}
                     </button>
+                  </div>
+                  <div className="space-y-2">
+                    {suggestions.map((s) => (
+                      <div key={s.key} className="flex items-center justify-between text-sm">
+                        <span className={theme === 'dark' ? 'text-zinc-300' : 'text-zinc-700'}>{s.name}</span>
+                        <span className="font-mono text-xs">
+                          <span className={theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}>
+                            {formatCurrency(s.current)}
+                          </span>
+                          <span className="mx-1.5">→</span>
+                          <span className="text-brand font-semibold">{formatCurrency(s.suggested)}</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className={`mt-3 text-[10px] ${theme === 'dark' ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {lang === 'th'
+                      ? 'คำนวณจากค่าเฉลี่ยการใช้จ่าย 3 เดือนล่าสุด ปัดเป็นร้อย'
+                      : 'Based on your average spend over the last 3 months, rounded to ฿100.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* AI Recommendation Card — real data: highest-utilisation category this month */}
+            {aiInsight && (
+              <div className={`rounded-2xl border ${theme === 'dark' ? 'bg-gradient-to-br from-[#1A1D26] to-[#131416] border-zinc-800/50' : 'bg-white border-zinc-200'}`} id="budget-ai-card">
+                <div className="p-5">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${aiInsight.over ? 'bg-red-500/10' : 'bg-brand/10'}`}>
+                      <Sparkles className={`w-5 h-5 ${aiInsight.over ? 'text-red-400' : 'text-brand'}`} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-mono text-brand uppercase tracking-widest mb-1">
+                        AI {lang === 'th' ? 'คำแนะนำ' : 'Recommendation'}
+                      </p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                        {aiInsight.over
+                          ? lang === 'th'
+                            ? `คุณใช้จ่ายหมวด${aiInsight.name}เกินงบแล้ว ${formatCurrency(aiInsight.overBy)} (${aiInsight.pct}% ของงบ) ลองตั้งกฎ "หยุดชะลอ" 7 วันก่อนซื้อของที่ไม่จำเป็น`
+                            : `You've exceeded your ${aiInsight.name} budget by ${formatCurrency(aiInsight.overBy)} (${aiInsight.pct}%). Consider a 7-day "cooling off" rule before non-essential purchases.`
+                          : lang === 'th'
+                            ? `หมวด${aiInsight.name}ใช้ไปแล้ว ${aiInsight.pct}% ของงบเดือนนี้ เฝ้าระวังการใช้จ่ายส่วนนี้ต่ออีก`
+                            : `${aiInsight.name} is at ${aiInsight.pct}% of its monthly budget. Keep an eye on this category.`}
+                      </p>
+                      <a href="/profile" className="inline-block mt-3 px-4 py-2 rounded-lg bg-brand/10 text-brand text-xs font-semibold hover:bg-brand/20 transition-colors">
+                        {lang === 'th' ? 'ตั้งกฎการใช้จ่าย' : 'Set Spending Rule'}
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </motion.div>
         )}
 
@@ -457,8 +598,8 @@ export default function BudgetManagementPage({
                         </p>
                       </div>
                       <div className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold ${
-                        isOver 
-                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                        isOver
+                          ? 'bg-red-500/10 text-red-400 border border-red-500/30'
                           : isNear
                           ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
                           : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
@@ -466,15 +607,15 @@ export default function BudgetManagementPage({
                         {Math.round(percent)}%
                       </div>
                     </div>
-                    
+
                     <div className="relative h-2.5 bg-zinc-800/50 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min(100, percent)}%` }}
                         transition={{ duration: 0.8, delay: idx * 0.1 }}
                         className={`h-full rounded-full ${
-                          isOver 
-                            ? 'bg-gradient-to-r from-amber-500 to-amber-600'
+                          isOver
+                            ? 'bg-gradient-to-r from-red-500 to-red-600'
                             : isNear
                             ? 'bg-gradient-to-r from-amber-500 to-amber-400'
                             : 'bg-gradient-to-r from-emerald-500 to-emerald-400'
@@ -490,7 +631,16 @@ export default function BudgetManagementPage({
                         }
                       </span>
                       <div className="flex gap-2">
-                        <button 
+                        {cat.id.startsWith('custom-') && (
+                          <button
+                            onClick={() => handleDeleteCategory(cat.id)}
+                            aria-label={lang === 'th' ? 'ลบหมวดหมู่' : 'Delete category'}
+                            className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors text-zinc-500 hover:text-red-400"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button
                           onClick={() => handleEditCategory(cat)}
                           className="p-1.5 rounded-lg hover:bg-zinc-800/50 transition-colors text-zinc-500 hover:text-white"
                         >
@@ -559,6 +709,19 @@ export default function BudgetManagementPage({
                 </div>
               </div>
             </div>
+
+            {/* Empty state → Goals page */}
+            {savingsGoals.length === 0 && (
+              <a href="/simulation" className="block rounded-2xl border border-dashed border-zinc-700 p-6 text-center hover:border-emerald-400/40 transition-colors">
+                <Target className="w-8 h-8 mx-auto mb-2 text-zinc-500" />
+                <p className="text-sm font-semibold text-white">
+                  {lang === 'th' ? 'ยังไม่มีเป้าหมายออมเงิน' : 'No savings goals yet'}
+                </p>
+                <p className="text-xs text-zinc-500 mt-1">
+                  {lang === 'th' ? 'แตะเพื่อสร้างเป้าหมายแรกของคุณ' : 'Tap to create your first goal'}
+                </p>
+              </a>
+            )}
 
             {/* Individual Goals */}
             {savingsGoals.map((goal, idx) => {

@@ -16,7 +16,7 @@ interface AlertsPageWrapperProps {
 
 export default function AlertsPageWrapper({ onBack, lang }: AlertsPageWrapperProps) {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0B0F0A' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#050D1F' }}>
       {/* Header */}
       <div className="flex items-center px-4 pt-12 pb-4">
         <button
@@ -28,7 +28,7 @@ export default function AlertsPageWrapper({ onBack, lang }: AlertsPageWrapperPro
         </button>
         <h1 
           className="flex-1 text-center text-lg font-bold text-white mr-10"
-          style={{ fontFamily: lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif' }}
+          style={{ fontFamily: lang === 'th' ? '"Noto Sans Thai", sans-serif' : '"Inter", sans-serif' }}
         >
           {lang === 'th' ? 'การแจ้งเตือน' : 'Notifications'}
         </h1>

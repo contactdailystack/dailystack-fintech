@@ -41,7 +41,7 @@ export const ChartTabs = memo(function ChartTabs({
       <motion.div
         className="absolute h-[calc(100%-8px)] rounded-full"
         style={{
-          backgroundColor: '#56be89',
+          backgroundColor: '#0FB0CE',
           width: `${100 / tabs.length}%`,
           left: 4,
         }}

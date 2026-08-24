@@ -36,16 +36,16 @@ export interface TeslaPillProps {
 const variantStyles = {
   // E-Pay: lime is the primary variant
   lime: {
-    bg: 'bg-[rgba(205,255,36,0.15)]',
-    border: 'border-[rgba(205,255,36,0.3)]',
-    text: 'text-[#56be89]',
-    dot: '#56be89',
+    bg: 'bg-[rgba(15, 176, 206,0.15)]',
+    border: 'border-[rgba(15, 176, 206,0.3)]',
+    text: 'text-[#0FB0CE]',
+    dot: '#0FB0CE',
   },
   mint: {
-    bg: 'bg-[rgba(205,255,36,0.15)]',
-    border: 'border-[rgba(205,255,36,0.3)]',
-    text: 'text-[#56be89]',
-    dot: '#56be89',
+    bg: 'bg-[rgba(15, 176, 206,0.15)]',
+    border: 'border-[rgba(15, 176, 206,0.3)]',
+    text: 'text-[#0FB0CE]',
+    dot: '#0FB0CE',
   },
   cyan: {
     bg: 'bg-[rgba(2,132,199,0.15)]',
@@ -72,10 +72,10 @@ const variantStyles = {
     dot: '#8B5CF6',
   },
   neutral: {
-    bg: 'bg-[rgba(59,130,246,0.15)]',
-    border: 'border-[rgba(59,130,246,0.3)]',
-    text: 'text-[#3B82F6]',
-    dot: '#3B82F6',
+    bg: 'bg-[rgba(23, 134, 194,0.15)]',
+    border: 'border-[rgba(23, 134, 194,0.3)]',
+    text: 'text-[#1786C2]',
+    dot: '#1786C2',
   },
   // E-Pay: orange accent variant
   orange: {
@@ -190,7 +190,7 @@ export interface TeslaStatusDotProps {
 
 const statusDotColors = {
   online: '#4CAF50',
-  syncing: '#3B82F6',
+  syncing: '#1786C2',
   offline: '#6B7280',
   warning: '#F97316',
 };

@@ -65,11 +65,11 @@ export interface TransactionCardProps {
 const emotionColors: Record<EmotionType, { bg: string; text: string; icon: string }> = {
   // SSOT v4.3: Absolute Emoji Ban — use [Icon: Name] format or SVG
   joy: { bg: 'rgba(16, 185, 129, 0.15)', text: '#10B981', icon: 'Sparkles' },
-  value: { bg: 'rgba(86, 190, 137, 0.15)', text: '#56be89', icon: 'Star' },
+  value: { bg: 'rgba(15, 176, 206, 0.15)', text: '#0FB0CE', icon: 'Star' },
   stress: { bg: 'rgba(245, 158, 11, 0.15)', text: '#F59E0B', icon: 'AlertTriangle' },
   impulse: { bg: 'rgba(249, 115, 22, 0.15)', text: '#F97316', icon: 'Zap' },
   social: { bg: 'rgba(139, 92, 246, 0.15)', text: '#8B5CF6', icon: 'Users' },
-  investment: { bg: 'rgba(59, 130, 246, 0.15)', text: '#3B82F6', icon: 'TrendingUp' },
+  investment: { bg: 'rgba(23, 134, 194, 0.15)', text: '#1786C2', icon: 'TrendingUp' },
   neutral: { bg: 'rgba(255, 255, 255, 0.05)', text: '#888888', icon: 'Minus' },
 };
 
@@ -144,7 +144,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
     time,
     status = 'completed',
     icon: Icon,
-    iconColor = '#56be89',
+    iconColor = '#0FB0CE',
     emotion = 'neutral',
     note,
   } = transaction;

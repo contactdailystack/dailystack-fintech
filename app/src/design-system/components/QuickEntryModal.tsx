@@ -40,7 +40,7 @@ export interface QuickEntryData {
 // ─── Default Categories ─────────────────────────────────────────────
 export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'food', name: 'Food & Dining', icon: 'UtensilsCrossed', color: '#F97316' },
-  { id: 'transport', name: 'Transport', icon: 'Car', color: '#3B82F6' },
+  { id: 'transport', name: 'Transport', icon: 'Car', color: '#1786C2' },
   { id: 'shopping', name: 'Shopping', icon: 'ShoppingBag', color: '#EC4899' },
   { id: 'entertainment', name: 'Entertainment', icon: 'Film', color: '#8B5CF6' },
   { id: 'bills', name: 'Bills & Utilities', icon: 'Zap', color: '#F59E0B' },
@@ -52,7 +52,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
 // ─── Emotions ──────────────────────────────────────────────────────
 export const EMOTIONS = [
   { id: 'joy', label: 'Joy', color: '#10B981' },
-  { id: 'value', label: 'Value', color: '#56be89' },
+  { id: 'value', label: 'Value', color: '#0FB0CE' },
   { id: 'neutral', label: 'Neutral', color: '#888888' },
   { id: 'impulse', label: 'Impulse', color: '#F97316' },
   { id: 'stress', label: 'Stress', color: '#F59E0B' },
@@ -342,7 +342,7 @@ export const QuickEntryModal: React.FC<QuickEntryModalProps> = ({
                       bg-[#1A1A1A] border border-[#2A2A2A]
                       rounded-xl
                       placeholder:text-[#666666]
-                      focus:outline-none focus:border-[#56be89]
+                      focus:outline-none focus:border-[#0FB0CE]
                       tabular-nums
                     `}
                     style={{ fontVariantNumeric: 'tabular-nums' }}
@@ -447,7 +447,7 @@ export const QuickEntryModal: React.FC<QuickEntryModalProps> = ({
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Add a note (optional)"
-                  className="w-full px-4 py-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl text-white placeholder:text-[#666666] focus:outline-none focus:border-[#56be89]"
+                  className="w-full px-4 py-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl text-white placeholder:text-[#666666] focus:outline-none focus:border-[#0FB0CE]"
                 />
               </div>
 
@@ -460,7 +460,7 @@ export const QuickEntryModal: React.FC<QuickEntryModalProps> = ({
                     w-full py-4 rounded-xl font-semibold text-[#101010]
                     transition-all
                     ${amount && parseFloat(amount) > 0
-                      ? 'bg-[#56be89] hover:bg-[#6fcca3] active:scale-[0.98]'
+                      ? 'bg-[#0FB0CE] hover:bg-[#3FC4DB] active:scale-[0.98]'
                       : 'bg-[#2A2A2A] text-[#666666] cursor-not-allowed'}
                   `}
                 >

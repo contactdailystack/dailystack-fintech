@@ -3,7 +3,7 @@
  * DailyStack — Typography Scale v1.0
  * ============================================================
  * Design Constitution v4.1 — Typography System
- * Fonts: Space Grotesk (display/UI), Kanit (Thai body), JetBrains Mono (code)
+ * Fonts: Inter (display/UI), Noto Sans Thai (Thai body), JetBrains Mono (code)
  */
 
 // ─── Type Scale ─────────────────────────────────────────────────
@@ -72,7 +72,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.BLACK,
     lineHeight: LINE_HEIGHT.TIGHT,
     letterSpacing: '-0.02em',
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
   },
 
   // ── H1 — Page titles
@@ -81,7 +81,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.EXTRABOLD,
     lineHeight: LINE_HEIGHT.TIGHT,
     letterSpacing: '-0.015em',
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
   },
 
   // ── H2 — Section headers
@@ -90,7 +90,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.EXTRABOLD,
     lineHeight: LINE_HEIGHT.TIGHT,
     letterSpacing: '-0.01em',
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
   },
 
   // ── H3 — Card titles
@@ -99,7 +99,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.BOLD,
     lineHeight: LINE_HEIGHT.SNUG,
     letterSpacing: '-0.005em',
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
   },
 
   // ── Body Large — Lead text
@@ -108,7 +108,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.NORMAL,
     lineHeight: LINE_HEIGHT.RELAXED,
     letterSpacing: LETTER_SPACING.NORMAL,
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
   },
 
   // ── Body — Default body text
@@ -117,7 +117,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.NORMAL,
     lineHeight: LINE_HEIGHT.NORMAL,
     letterSpacing: LETTER_SPACING.NORMAL,
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
   },
 
   // ── Body Small — Secondary content
@@ -126,7 +126,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.NORMAL,
     lineHeight: LINE_HEIGHT.NORMAL,
     letterSpacing: LETTER_SPACING.NORMAL,
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
   },
 
   // ── Caption — Labels, timestamps
@@ -135,7 +135,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.MEDIUM,
     lineHeight: LINE_HEIGHT.NORMAL,
     letterSpacing: LETTER_SPACING.WIDE,
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
   },
 
   // ── Micro — Legal, badges
@@ -144,7 +144,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.BOLD,
     lineHeight: LINE_HEIGHT.NORMAL,
     letterSpacing: LETTER_SPACING.WIDEST,
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
     textTransform: 'uppercase',
   },
 
@@ -154,7 +154,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.MEDIUM,
     lineHeight: LINE_HEIGHT.NORMAL,
     letterSpacing: LETTER_SPACING.NORMAL,
-    fontFamily: '"JetBrains Mono", "Kanit", monospace',
+    fontFamily: '"JetBrains Mono", "Noto Sans Thai", monospace',
   },
 
   // ── Mono Small — Compact data
@@ -163,7 +163,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.MEDIUM,
     lineHeight: LINE_HEIGHT.NORMAL,
     letterSpacing: LETTER_SPACING.WIDE,
-    fontFamily: '"JetBrains Mono", "Kanit", monospace',
+    fontFamily: '"JetBrains Mono", "Noto Sans Thai", monospace',
   },
 
   // ── Button — CTA labels
@@ -172,7 +172,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.BOLD,
     lineHeight: LINE_HEIGHT.NORMAL,
     letterSpacing: LETTER_SPACING.WIDER,
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
     textTransform: 'uppercase',
   },
 
@@ -182,7 +182,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.BOLD,
     lineHeight: LINE_HEIGHT.NORMAL,
     letterSpacing: LETTER_SPACING.WIDEST,
-    fontFamily: '"Inter", "Kanit", sans-serif',
+    fontFamily: '"Inter", "Noto Sans Thai", sans-serif',
     textTransform: 'uppercase',
   },
 } as const;
@@ -203,9 +203,9 @@ export type TypographyStyle = {
 // ─── CSS Custom Properties Export ───────────────────────────────
 
 export const TYPOGRAPHY_CSS_PROPERTIES = `
-  --font-display: "Inter", "Kanit", sans-serif;
-  --font-sans: "Inter", "Kanit", sans-serif;
-  --font-mono: "JetBrains Mono", "Kanit", monospace;
+  --font-display: "Inter", "Noto Sans Thai", sans-serif;
+  --font-sans: "Inter", "Noto Sans Thai", sans-serif;
+  --font-mono: "JetBrains Mono", "Noto Sans Thai", monospace;
 
   --text-2xs: ${FONT_SIZE['2xs']};
   --text-xs: ${FONT_SIZE.xs};

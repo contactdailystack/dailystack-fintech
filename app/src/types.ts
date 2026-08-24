@@ -19,6 +19,11 @@ export interface Transaction {
   // Recurring detection flag
   isRecurring?: boolean;
 
+  // Rocket Money parity: notes / ignore / split (#6a, #6b, #6d)
+  note?: string;
+  isIgnored?: boolean;
+  splitOf?: boolean;
+
   // Dynamic user field custom fields mapping
   customFields?: Record<string, string>;
 }

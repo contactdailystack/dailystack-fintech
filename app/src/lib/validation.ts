@@ -75,7 +75,7 @@ export const BudgetSchema = z.object({
 export const BudgetCategorySchema = z.object({
   category_name: z.string().min(1).max(50),
   monthly_limit: z.number().positive(),
-  color_code: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#56be89'),
+  color_code: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#0FB0CE'),
   icon_name: z.string().max(50).default('ShoppingCart'),
   sort_order: z.number().int().min(0).default(0),
 });
@@ -87,7 +87,7 @@ export const GoalCreateSchema = z.object({
   current_amount: z.number().min(0).default(0),
   target_date: z.string().datetime().optional(),
   icon_name: z.string().max(50).default('Target'),
-  color_code: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#56be89'),
+  color_code: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#0FB0CE'),
 });
 
 export const GoalUpdateSchema = z.object({
@@ -176,6 +176,7 @@ export const SaveTransactionInputSchema = z.object({
   location: z.string().max(100).optional(),
   timeOfDay: z.string().max(20).optional(),
   dayOfWeek: z.string().max(20).optional(),
+  note: z.string().max(500).optional(),
 });
 
 export const SubscriptionInputSchema = z.object({
@@ -192,6 +193,7 @@ export const SubscriptionInputSchema = z.object({
   skipDates: z.array(z.number().int().min(1).max(31)).max(62).optional(),
   priceChange: finiteNumber.optional(),
   isGhost: z.boolean().optional(),
+  trialEndDate: dateString.optional(),
 });
 
 export const SubscriptionWithIdSchema = SubscriptionInputSchema.extend({

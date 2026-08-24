@@ -5,8 +5,8 @@
  * The Tesla of Personal Finance — Dual Language Typography
  * 
  * Font Philosophy:
- * - Space Grotesk: English + Numbers (tech, modern, precise)
- * - Kanit: Thai language (readable, warm, not rigid)
+ * - Inter: English + Numbers (tech, modern, precise)
+ * - Noto Sans Thai: Thai language (readable, warm, not rigid)
  * - Tabular Figures: All financial numbers use tabular figures for alignment
  */
 
@@ -14,8 +14,8 @@
 export const fontFamily = {
   /** Primary sans-serif — Inter for EN + Numbers */
   primary: '"Inter", sans-serif',
-  /** Secondary sans-serif — Kanit for TH text */
-  secondary: '"Kanit", sans-serif',
+  /** Secondary sans-serif — Noto Sans Thai for TH text */
+  secondary: '"Noto Sans Thai", sans-serif',
   /** Monospace — JetBrains Mono for technical strings only */
   mono: '"JetBrains Mono", "Inter", monospace',
   /** Fallback stack */

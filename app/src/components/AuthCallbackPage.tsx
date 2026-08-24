@@ -67,22 +67,22 @@ export default function AuthCallbackPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center"
-      style={{ backgroundColor: '#56be89' }}
+      style={{ backgroundColor: '#0FB0CE' }}
     >
       <div className="text-center px-6 max-w-sm">
         {/* Logo */}
         <div
           className="w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center"
           style={{
-            backgroundColor: '#0B0F0A',
+            backgroundColor: '#050D1F',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
           }}
         >
           <span
             className="text-2xl font-bold"
-            style={{ color: '#56be89' }}
+            style={{ color: '#0FB0CE' }}
           >
-            D
+            P
           </span>
         </div>
 
@@ -95,7 +95,7 @@ export default function AuthCallbackPage() {
             <div
               className="h-full rounded-full transition-all duration-100"
               style={{
-                backgroundColor: '#0B0F0A',
+                backgroundColor: '#050D1F',
                 width: `${progress}%`,
               }}
             />
@@ -109,12 +109,12 @@ export default function AuthCallbackPage() {
               className={`w-8 h-8 border-2 mx-auto mb-4 rounded-full ${reduceMotion ? '' : 'animate-spin'}`}
               style={{
                 borderColor: 'rgba(11, 15, 10, 0.3)',
-                borderTopColor: '#0B0F0A',
+                borderTopColor: '#050D1F',
               }}
             />
             <p
               className="text-sm font-medium"
-              style={{ color: '#0B0F0A', fontFamily: '"Inter", sans-serif' }}
+              style={{ color: '#050D1F', fontFamily: '"Inter", sans-serif' }}
             >
               Verifying... {Math.round(progress)}%
             </p>
@@ -123,7 +123,7 @@ export default function AuthCallbackPage() {
           <>
             <p
               className="text-sm font-semibold mb-3"
-              style={{ color: '#0B0F0A', fontFamily: '"Inter", sans-serif' }}
+              style={{ color: '#050D1F', fontFamily: '"Inter", sans-serif' }}
             >
               Verification failed
             </p>
@@ -136,7 +136,7 @@ export default function AuthCallbackPage() {
             {/* P3-04: Retry button on failed state */}
             <button
               type="button"
-              className="w-full mb-3 bg-transparent border border-[#0B0F0A] text-[#0B0F0A] font-bold py-3 rounded-full transition active:scale-[0.99]"
+              className="w-full mb-3 bg-transparent border border-[#050D1F] text-[#050D1F] font-bold py-3 rounded-full transition active:scale-[0.99]"
               onClick={handleRetry}
               style={{ fontFamily: '"Inter", sans-serif' }}
             >
@@ -144,7 +144,7 @@ export default function AuthCallbackPage() {
             </button>
             <button
               type="button"
-              className="w-full bg-[#0B0F0A] text-[#56be89] font-bold py-3 rounded-full transition active:scale-[0.99]"
+              className="w-full bg-[#050D1F] text-[#0FB0CE] font-bold py-3 rounded-full transition active:scale-[0.99]"
               onClick={() => navigate('/auth')}
               style={{ fontFamily: '"Inter", sans-serif' }}
             >

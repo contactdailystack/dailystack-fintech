@@ -5,7 +5,7 @@
  * E-Pay style virtual credit card display
  * 
  * Design Specs:
- * - Gradient lime green background (#56be89)
+ * - Gradient lime green background (#0FB0CE)
  * - VISA logo in top right
  * - Cardholder name and masked number
  * - Balance display
@@ -36,7 +36,7 @@ export interface VirtualCardProps {
 // Color variants
 const variantStyles = {
   lime: {
-    gradient: 'linear-gradient(135deg, #56be89 0%, #B8E620 50%, #A3D91A 100%)',
+    gradient: 'linear-gradient(135deg, #0FB0CE 0%, #B8E620 50%, #A3D91A 100%)',
     textColor: '#1A1A1A',
     accentColor: '#0A0A0A',
   },
@@ -139,7 +139,7 @@ export const VirtualCard: React.FC<VirtualCardProps> = ({
       `}
       style={{
         background: styles.gradient,
-        boxShadow: '0 8px 32px rgba(205, 255, 36, 0.25), 0 4px 16px rgba(0, 0, 0, 0.2)',
+        boxShadow: '0 8px 32px rgba(15, 176, 206, 0.25), 0 4px 16px rgba(0, 0, 0, 0.2)',
       }}
     >
       {/* Background Pattern - Subtle dots */}

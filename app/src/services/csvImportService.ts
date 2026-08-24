@@ -20,6 +20,7 @@
 import { supabase } from '../supabaseClient';
 import { MERCHANT_DATABASE, CATEGORY_META } from './merchantDatabase';
 import type { Subscription } from './subscriptionService';
+import { matchRules, loadRules } from './ruleEngine';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -304,9 +305,11 @@ function parseCSVFallback(lines: string[]): ParsedTransaction[] {
 /**
  * Normalize parsed transactions → subscription candidates.
  * Uses merchant database for auto-fill and frequency detection.
+ * User-defined rules (#6c) take priority over auto-categorization.
  */
 export function normalizeTransactions(
-  transactions: ParsedTransaction[]
+  transactions: ParsedTransaction[],
+  rules?: { pattern: string; category: string }[]
 ): SubscriptionCandidate[] {
   const candidates: SubscriptionCandidate[] = [];
 
@@ -316,6 +319,9 @@ export function normalizeTransactions(
     const absAmount = Math.abs(tx.amount);
     const merchant = matchMerchant(tx.description);
     const autoCat = autoCategoryFromText(tx.description);
+
+    // User rule match wins over merchant db / heuristics
+    const matchedRule = rules ? matchRules(rules, tx.description) : null;
 
     // Detect billing cycle from amount consistency
     const cycle = detectBillingCycle(tx, absAmount);
@@ -331,11 +337,11 @@ export function normalizeTransactions(
       amount: absAmount,
       billingCycle: cycle,
       dueDate,
-      category: merchant?.category || autoCat,
+      category: matchedRule?.category || merchant?.category || autoCat,
       color: merchant?.color || (CATEGORY_META[autoCat]?.color || CATEGORY_META.other.color),
-      confidence: merchant ? 0.9 : (autoCat !== 'other' ? 0.6 : 0.3),
+      confidence: matchedRule ? 1 : merchant ? 0.9 : (autoCat !== 'other' ? 0.6 : 0.3),
       sourceTransaction: tx,
-      autoCategory: !!merchant,
+      autoCategory: !!merchant || !!matchedRule,
     };
 
     candidates.push(candidate);
@@ -687,7 +693,8 @@ export async function runImportPipeline(
   }
 
   // Step 3: Normalize
-  const candidates = normalizeTransactions(transactions);
+  const rules = await loadRules();
+  const candidates = normalizeTransactions(transactions, rules);
 
   // Step 4: Detect recurring
   const recurring = detectRecurringPayments(candidates);

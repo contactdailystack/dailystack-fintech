@@ -25,7 +25,7 @@ import {
   initializeAlertPreferences,
   getAlertStats,
 } from './alertService';
-import { AlertGenerator } from './alertEngine';
+import { AlertGenerator, AlertRuntimeContext } from './alertEngine';
 import { notifyAlert } from './alertNotifications';
 
 // ─── Context Types ────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ interface AlertsContextValue {
   toggleRule: (ruleId: string, enabled: boolean) => Promise<void>;
   
   // Evaluation
-  evaluateAlerts: (transactions: Transaction[]) => Promise<void>;
+  evaluateAlerts: (transactions: Transaction[], runtime?: AlertRuntimeContext) => Promise<void>;
   
   // Preferences
   updatePreferences: (prefs: Partial<AlertPreferences>) => Promise<void>;
@@ -207,19 +207,35 @@ export function AlertsProvider({ children }: AlertsProviderProps) {
   }, []);
 
   // Evaluate transactions and create alerts
-  const evaluateAlerts = useCallback(async (transactions: Transaction[]) => {
+  const evaluateAlerts = useCallback(async (transactions: Transaction[], runtime: AlertRuntimeContext = {}) => {
     if (!preferences || !transactions.length) return;
 
     const { data: { user } } = await import('../../supabaseClient').then(m => m.supabase.auth.getUser());
     if (!user) return;
 
-    // Use alert generator to evaluate rules
-    const generator = new AlertGenerator(transactions);
+    // Use alert generator to evaluate rules (runtime ctx enables balance/bills metrics)
+    const generator = new AlertGenerator(transactions, 30, runtime);
     const currentMetrics = generator.calculateMetrics();
+
+    // Cooldown dedupe: skip a rule if it already produced an alert recently
+    const now = Date.now();
+    const lastTriggeredByRule = new Map<string, number>();
+    for (const a of alerts) {
+      if (a.ruleId && a.createdAt) {
+        const t = new Date(a.createdAt).getTime();
+        if (!lastTriggeredByRule.has(a.ruleId) || t > lastTriggeredByRule.get(a.ruleId)!) {
+          lastTriggeredByRule.set(a.ruleId, t);
+        }
+      }
+    }
 
     // Evaluate each enabled rule
     for (const rule of rules) {
       if (!rule.enabled) continue;
+
+      // Respect cooldownMinutes against this user's recent alert history
+      const lastTriggered = lastTriggeredByRule.get(rule.id);
+      if (lastTriggered && now - lastTriggered < rule.cooldownMinutes * 60 * 1000) continue;
 
       const result = generator.evaluateRule(rule, {
         userId: user.id,
@@ -266,7 +282,7 @@ export function AlertsProvider({ children }: AlertsProviderProps) {
         }
       }
     }
-  }, [preferences, rules]);
+  }, [preferences, rules, alerts]);
 
   // Query alerts
   const queryAlerts = useCallback(async (query: AlertFeedQuery) => {

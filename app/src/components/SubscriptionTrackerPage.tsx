@@ -3,7 +3,7 @@
  * DailyStack — SubscriptionTrackerPage (Subscription Shadow) v4.0
  * ============================================================
  * Redesigned to Light Mode (Flat White) matching Net Worth:
- * - Lime accent (#56be89) — matches Home/Net Worth
+ * - Lime accent (#0FB0CE) — matches Home/Net Worth
  * - Flat white header (#FFFFFF) — matches Home/Net Worth
  * - Light hero card (#F5F5F5) — matches Home/Net Worth
  * - Full-bleed content padding — matches Home/Net Worth
@@ -41,6 +41,7 @@ import {
   Pencil,
   Trash2,
   EyeOff as HideIcon,
+  RotateCcw,
   Bell,
   TrendingUp,
   TrendingDown,
@@ -62,6 +63,7 @@ import {
   addSubscription,
   updateSubscription,
   deleteSubscription,
+  toggleSubscriptionActive,
 } from '../services/subscriptionService';
 import { EmptyState } from '../design-system/components/EmptyState';
 
@@ -84,35 +86,24 @@ interface Subscription {
   icon?: string;
   isActive: boolean;
   lastPaidDate?: string;
+  /** ISO date the row was created (from DB) — ghost heuristic baseline */
+  createdAt?: string;
   paidDates?: number[];
   skipDates?: number[];
   priceChange?: number; // % change from last billing
   isGhost?: boolean; // unused subscription
+  trialEndDate?: string; // free-trial tracking (#3)
 }
 
 interface SubscriptionTrackerPageProps {
   lang: Language;
   theme?: 'dark' | 'light';
-  currentBalance?: number;
+  /** Day of month salary arrives (1–31) from profile — enables the "before payday" window */
+  paydayDay?: number;
   onNavigateToUpgrade?: () => void;
   onNavigateToCalendar?: () => void;
   onNavigateToNotifications?: () => void;
 }
-
-// ─── Mock Data (Thai/International services) ─────────────────────────────────
-const MOCK_SUBSCRIPTIONS: Subscription[] = [
-  // Subscriptions
-  { id: '1',  name: 'Netflix',        amount: 1199,  dueDate: 11, category: 'entertainment', billingCycle: 'monthly', color: '#E50914', isActive: true },
-  { id: '2',  name: 'Spotify',        amount: 99,    dueDate: 6,  category: 'entertainment', billingCycle: 'monthly', color: '#1DB954', isActive: true },
-  { id: '3',  name: 'YouTube Premium', amount: 199,  dueDate: 13, category: 'entertainment', billingCycle: 'monthly', color: '#FF0000', isActive: true },
-  { id: '4',  name: 'Disney+',        amount: 299,   dueDate: 16, category: 'entertainment', billingCycle: 'monthly', color: '#113CCF', isActive: true },
-  { id: '5',  name: 'Arcadia',        amount: 59,    dueDate: 7,  category: 'entertainment', billingCycle: 'monthly', isActive: true, isGhost: true },
-  // Bills & Utilities
-  { id: '6',  name: 'Rent',           amount: 12000, dueDate: 15, category: 'bills',        billingCycle: 'monthly', color: '#8B5CF6', isActive: true },
-  { id: '7',  name: 'Internet',       amount: 599,   dueDate: 8,  category: 'bills',        billingCycle: 'monthly', color: '#3B82F6', isActive: true },
-  { id: '8',  name: 'Phone Plan',     amount: 499,   dueDate: 20, category: 'bills',        billingCycle: 'monthly', color: '#F97316', isActive: true },
-  { id: '9',  name: 'Geico',          amount: 245,   dueDate: 22, category: 'bills',        billingCycle: 'monthly', color: '#5BC0EB', isActive: true, priceChange: 12 },
-];
 
 // ─── Utility Functions ───────────────────────────────────────────────────────
 
@@ -172,7 +163,7 @@ const getLogoLetter = (sub: Subscription): string => {
   return name[0].toUpperCase();
 };
 
-const getDaysUntilDue = (dueDate: number, currentDay: number, daysInMonth: number): {
+const getDaysUntilDue = (dueDate: number, currentDay: number, daysInMonth: number, lang?: Language): {
   days: number;
   text: string;
   isToday: boolean;
@@ -185,10 +176,11 @@ const getDaysUntilDue = (dueDate: number, currentDay: number, daysInMonth: numbe
   const isSoon = daysUntil <= 3;
   let text: string;
   let urgencyLevel: 'today' | 'soon' | 'normal' | 'later';
-  if (isToday) { text = 'today'; urgencyLevel = 'today'; }
-  else if (daysUntil === 1) { text = 'tomorrow'; urgencyLevel = 'soon'; }
-  else if (daysUntil <= 7) { text = `in ${daysUntil} days`; urgencyLevel = 'soon'; }
-  else { text = `in ${daysUntil} days`; urgencyLevel = daysUntil <= 14 ? 'normal' : 'later'; }
+  const th = lang === 'th';
+  if (isToday) { text = th ? 'วันนี้' : 'today'; urgencyLevel = 'today'; }
+  else if (daysUntil === 1) { text = th ? 'พรุ่งนี้' : 'tomorrow'; urgencyLevel = 'soon'; }
+  else if (daysUntil <= 7) { text = th ? `อีก ${daysUntil} วัน` : `in ${daysUntil} days`; urgencyLevel = 'soon'; }
+  else { text = th ? `อีก ${daysUntil} วัน` : `in ${daysUntil} days`; urgencyLevel = daysUntil <= 14 ? 'normal' : 'later'; }
   return { days: daysUntil, text, isToday, isSoon, urgencyLevel };
 };
 
@@ -239,11 +231,6 @@ const getBillingCycleLabel = (cycle: BillingCycle, lang: Language): string => {
     case 'monthly':
     default: return lang === 'th' ? 'รายเดือน' : 'Monthly';
   }
-};
-
-const getSafeToSpend = (currentBalance: number, upcomingBills: Subscription[]): number => {
-  const totalBills = upcomingBills.reduce((sum, sub) => sum + sub.amount, 0);
-  return Math.max(0, currentBalance - totalBills);
 };
 
 // ─── Pull-to-Refresh Hook (Net Worth pattern) ────────────────────────────────
@@ -314,14 +301,14 @@ const AIInsightsCard: React.FC<AIInsightsCardProps> = ({ ghostCount, potentialSa
       animate={{ opacity: 1, y: 0 }}
       className="rounded-[16px] px-5 py-4"
       style={{
-        backgroundColor: 'rgba(86, 190, 137, 0.1)',
-        border: '1px solid rgba(86, 190, 137, 0.3)',
+        backgroundColor: 'rgba(15, 176, 206, 0.1)',
+        border: '1px solid rgba(15, 176, 206, 0.3)',
       }}
     >
       <div className="flex items-start gap-3">
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: 'rgba(86, 190, 137, 0.2)' }}
+          style={{ backgroundColor: 'rgba(15, 176, 206, 0.2)' }}
         >
           <Ghost className="w-5 h-5" style={{ color: dsColors.accent }} />
         </div>
@@ -404,6 +391,7 @@ interface HeroCardProps {
   totalYearly: number;
   totalSubs: number;
   totalBills: number;
+  activeCount: number;
   showAmount: boolean;
   lang: Language;
   dsColors: typeof pageTokens.colors;
@@ -413,7 +401,7 @@ interface HeroCardProps {
 }
 
 const HeroCard: React.FC<HeroCardProps> = ({
-  totalMonthly, totalYearly, totalSubs, totalBills, showAmount, lang, dsColors, dsTypography, onPrivacyToggle, onSeeAllClick,
+  totalMonthly, totalYearly, totalSubs, totalBills, activeCount, showAmount, lang, dsColors, dsTypography, onPrivacyToggle, onSeeAllClick,
 }) => (
   <div
     className="rounded-[24px] p-5 -mx-2"
@@ -457,7 +445,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
     <div className="flex items-center gap-2 mb-3">
       <div
         className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1.5 rounded-full"
-        style={{ backgroundColor: 'rgba(86, 190, 137, 0.15)' }}
+        style={{ backgroundColor: 'rgba(15, 176, 206, 0.15)' }}
       >
         <TrendingDown className="w-3.5 h-3.5" style={{ color: dsColors.accent }} />
         <span className="text-[12px] font-semibold" style={{ color: dsColors.accent }}>
@@ -468,7 +456,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
         className="text-[11px] font-medium"
         style={{ color: dsColors.textMuted }}
       >
-        {totalSubs + totalBills} {lang === 'th' ? 'รายการ' : 'active'}
+        {activeCount} {lang === 'th' ? 'รายการ' : 'active'}
       </span>
     </div>
 
@@ -519,11 +507,20 @@ interface SubscriptionItemProps {
 const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
   subscription, currentDay, daysInMonth, lang, onMenuOpen,
 }) => {
-  const daysInfo = getDaysUntilDue(subscription.dueDate, currentDay, daysInMonth);
+  const daysInfo = getDaysUntilDue(subscription.dueDate, currentDay, daysInMonth, lang);
   const brandColor = getBrandColor(subscription);
   const logoLetter = getLogoLetter(subscription);
   const isGhost = subscription.isGhost;
   const priceHiked = subscription.priceChange && subscription.priceChange > 0;
+  // ── Free-trial badge (#3): days remaining, urgent when ≤ 3 days ──
+  const trialDaysLeft = (() => {
+    if (!subscription.trialEndDate) return null;
+    const end = new Date(subscription.trialEndDate);
+    if (isNaN(end.getTime())) return null;
+    const diff = Math.ceil((end.getTime() - Date.now()) / 86400000);
+    return diff >= 0 ? diff : null; // expired trials stop showing
+  })();
+  const trialUrgent = trialDaysLeft !== null && trialDaysLeft <= 3;
 
   return (
     <motion.button
@@ -572,6 +569,19 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
             >
               <TrendingUp className="w-2.5 h-2.5" />
               {subscription.priceChange}%
+            </span>
+          )}
+          {trialDaysLeft !== null && (
+            <span
+              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold shrink-0"
+              style={{
+                backgroundColor: trialUrgent ? 'rgba(239, 68, 68, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                color: trialUrgent ? dsColors.negative : '#D97706',
+              }}
+            >
+              {trialUrgent
+                ? (lang === 'th' ? `หมดทดลอง ${trialDaysLeft} วัน` : `Trial ends in ${trialDaysLeft}d`)
+                : (lang === 'th' ? `ทดลองใช้อีก ${trialDaysLeft} วัน` : `Trial · ${trialDaysLeft}d left`)}
             </span>
           )}
         </div>
@@ -648,7 +658,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({ sortBy, onSortChange, lang 
                 onClick={() => { haptics.fire('SELECT'); onSortChange(option.id); setIsOpen(false); }}
                 className="w-full px-4 py-2 text-left text-[14px] font-medium transition-colors"
                 style={{
-                  backgroundColor: sortBy === option.id ? 'rgba(86, 190, 137, 0.15)' : 'transparent',
+                  backgroundColor: sortBy === option.id ? 'rgba(15, 176, 206, 0.15)' : 'transparent',
                   color: sortBy === option.id ? dsColors.accent : dsColors.text,
                 }}
               >
@@ -667,11 +677,29 @@ interface AllTabItemProps {
   subscription: Subscription;
   lang: Language;
   onMenuOpen: (sub: Subscription) => void;
+  showAmount?: boolean;
 }
 
-const AllTabItem: React.FC<AllTabItemProps> = ({ subscription, lang, onMenuOpen }) => {
+// Annualized price (RM parity): weekly×52 · monthly×12 · yearly as-is
+const getAnnualAmount = (sub: Subscription): number => {
+  if (sub.billingCycle === 'weekly') return sub.amount * 52;
+  if (sub.billingCycle === 'monthly') return sub.amount * 12;
+  return sub.amount;
+};
+
+const AllTabItem: React.FC<AllTabItemProps> = ({ subscription, lang, onMenuOpen, showAmount = true }) => {
   const brandColor = getBrandColor(subscription);
   const logoLetter = getLogoLetter(subscription);
+  // Same badges as the Upcoming tab (P1-8)
+  const priceHiked = subscription.priceChange && subscription.priceChange > 0;
+  const trialDaysLeft = (() => {
+    if (!subscription.trialEndDate) return null;
+    const end = new Date(subscription.trialEndDate);
+    if (isNaN(end.getTime())) return null;
+    const diff = Math.ceil((end.getTime() - Date.now()) / 86400000);
+    return diff >= 0 ? diff : null; // expired trials stop showing
+  })();
+  const trialUrgent = trialDaysLeft !== null && trialDaysLeft <= 3;
 
   return (
     <motion.button
@@ -695,25 +723,57 @@ const AllTabItem: React.FC<AllTabItemProps> = ({ subscription, lang, onMenuOpen 
         <span style={{ fontFamily: dsTypography.fontEN }}>{logoLetter}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <h3
-          className="text-[15px] font-semibold truncate"
-          style={{ color: dsColors.text, ...getFontStyle(lang) }}
-        >
-          {subscription.name}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3
+            className="text-[15px] font-semibold truncate"
+            style={{ color: dsColors.text, ...getFontStyle(lang) }}
+          >
+            {subscription.name}
+          </h3>
+          {priceHiked && subscription.isActive && (
+            <span
+              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold shrink-0"
+              style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: dsColors.negative }}
+            >
+              <TrendingUp className="w-2.5 h-2.5" />
+              {subscription.priceChange}%
+            </span>
+          )}
+          {trialDaysLeft !== null && subscription.isActive && (
+            <span
+              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold shrink-0"
+              style={{
+                backgroundColor: trialUrgent ? 'rgba(239, 68, 68, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                color: trialUrgent ? dsColors.negative : '#D97706',
+                fontFamily: dsTypography.fontMono,
+              }}
+            >
+              {lang === 'th'
+                ? `ทดลองใช้อีก ${trialDaysLeft} วัน`
+                : trialUrgent ? `${trialDaysLeft}d left` : `${trialDaysLeft} days left`}
+            </span>
+          )}
+        </div>
         <p className="text-[12px] mt-0.5" style={{ color: dsColors.textMuted }}>
           {getBillingCycleLabel(subscription.billingCycle, lang)}
         </p>
       </div>
-      <span
-        className="text-[15px] font-bold shrink-0"
-        style={{
-          color: subscription.isActive ? dsColors.text : dsColors.textMuted,
-          fontFamily: dsTypography.fontMono,
-        }}
-      >
-        {formatCurrency(subscription.amount, lang)}
-      </span>
+      <div className="text-right shrink-0">
+        <span
+          className="text-[15px] font-bold"
+          style={{
+            color: subscription.isActive ? dsColors.text : dsColors.textMuted,
+            fontFamily: dsTypography.fontMono,
+          }}
+        >
+          {formatCurrency(subscription.amount, lang)}
+        </span>
+        {subscription.billingCycle !== 'yearly' && (
+          <p className="text-[10px] font-mono mt-0.5" style={{ color: dsColors.textMuted }}>
+            ≈ {showAmount ? formatCurrency(getAnnualAmount(subscription), lang) : '••••'}/{lang === 'th' ? 'ปี' : 'yr'}
+          </p>
+        )}
+      </div>
       <button
         onClick={(e) => { e.stopPropagation(); haptics.fire('SELECT'); onMenuOpen(subscription); }}
         className="w-11 h-11 -mr-2 rounded-full flex items-center justify-center transition-colors active:bg-gray-200"
@@ -857,7 +917,7 @@ const FullCalendarView: React.FC<FullCalendarViewProps> = ({
                   ${hasSubs ? 'cursor-pointer active:scale-95' : 'cursor-default'}
                 `}
                 style={{
-                  backgroundColor: isToday ? 'rgba(86, 190, 137, 0.15)' : 'transparent',
+                  backgroundColor: isToday ? 'rgba(15, 176, 206, 0.15)' : 'transparent',
                   opacity: isPast ? 0.45 : 1,
                 }}
               >
@@ -983,6 +1043,9 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const [category, setCategory] = useState(subscription?.category || 'other');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(subscription?.billingCycle || 'monthly');
   const [isActive, setIsActive] = useState(subscription?.isActive ?? true);
+  // ── Free-trial tracking (#3) ──
+  const [hasTrial, setHasTrial] = useState(!!subscription?.trialEndDate);
+  const [trialEndDate, setTrialEndDate] = useState(subscription?.trialEndDate || '');
   // ── Merchant search state ──
   const [showMerchantPicker, setShowMerchantPicker] = useState(false);
   const [merchantSearch, setMerchantSearch] = useState('');
@@ -997,10 +1060,13 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       setCategory(subscription.category);
       setBillingCycle(subscription.billingCycle);
       setIsActive(subscription.isActive);
+      setHasTrial(!!subscription.trialEndDate);
+      setTrialEndDate(subscription.trialEndDate || '');
       setShowMerchantPicker(false);
       setMerchantSearch('');
     } else {
       setName(''); setAmount(''); setDueDate('1'); setCategory('other'); setBillingCycle('monthly'); setIsActive(true);
+      setHasTrial(false); setTrialEndDate('');
       setShowMerchantPicker(false); setMerchantSearch('');
     }
   }, [subscription, isOpen]);
@@ -1047,8 +1113,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       dueDate: parseInt(dueDate),
       category,
       billingCycle,
-      color: (CATEGORY_META[category]?.color) || dsColors.category.other,
+      // Preserve the merchant's brand color on edit — only default it for new subs
+      color: (mode === 'edit' && subscription?.color) || CATEGORY_META[category]?.color || dsColors.category.other,
       isActive,
+      trialEndDate: hasTrial && trialEndDate ? trialEndDate : undefined,
     };
     if (mode === 'edit' && subscription) onSave({ ...subscription, ...subData });
     else onSave(subData);
@@ -1098,7 +1166,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               onClick={() => setShowMerchantPicker(true)}
               className="w-full mb-3 flex items-center gap-2 px-4 py-3 rounded-xl text-[14px] font-medium transition-all active:scale-[0.98]"
               style={{
-                backgroundColor: 'rgba(86, 190, 137, 0.08)',
+                backgroundColor: 'rgba(15, 176, 206, 0.08)',
                 border: `1.5px dashed ${dsColors.accent}`,
                 color: dsColors.accent,
               }}
@@ -1310,6 +1378,43 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               </div>
             </div>
 
+            {/* ── Free Trial (#3) ── */}
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-medium" style={{ color: dsColors.text }}>
+                  {lang === 'th' ? 'ช่วงทดลองใช้ฟรี' : 'Free Trial'}
+                </span>
+                <button
+                  onClick={() => {
+                    setHasTrial(!hasTrial);
+                    if (hasTrial) setTrialEndDate('');
+                  }}
+                  className="w-12 h-7 rounded-full transition-all relative"
+                  style={{ backgroundColor: hasTrial ? dsColors.accent : 'rgba(128,128,128,0.2)' }}
+                  aria-pressed={hasTrial}
+                >
+                  <div
+                    className="absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all"
+                    style={{ left: hasTrial ? 'calc(100% - 24px)' : '4px' }}
+                  />
+                </button>
+              </div>
+              {hasTrial && (
+                <input
+                  type="date"
+                  value={trialEndDate}
+                  onChange={(e) => setTrialEndDate(e.target.value)}
+                  className="w-full mt-2 px-3 py-2.5 rounded-xl text-[14px] outline-none"
+                  style={{
+                    backgroundColor: '#F5F5F5',
+                    color: dsColors.text,
+                    fontFamily: dsTypography.fontMono,
+                  }}
+                  aria-label={lang === 'th' ? 'วันสิ้นสุดทดลองใช้' : 'Trial end date'}
+                />
+              )}
+            </div>
+
             {/* ── Active Toggle ── */}
             <div className="flex items-center justify-between">
               <span className="text-[13px] font-medium" style={{ color: dsColors.text }}>
@@ -1359,19 +1464,24 @@ interface ActionsMenuProps {
   onSkip: (sub: Subscription) => void;
   onEdit: (sub: Subscription) => void;
   onDelete: (id: string) => void;
-  onHide: (sub: Subscription) => void;
+  onToggleActive: (sub: Subscription) => void;
 }
 
 const ActionsMenu: React.FC<ActionsMenuProps> = ({
-  isOpen, subscription, onClose, lang, onMarkPaid, onSkip, onEdit, onDelete, onHide,
+  isOpen, subscription, onClose, lang, onMarkPaid, onSkip, onEdit, onDelete, onToggleActive,
 }) => {
   if (!isOpen || !subscription) return null;
   const brandColor = getBrandColor(subscription);
+  const isInactive = !subscription.isActive;
 
-  const actions = [
+  const actions = isInactive ? [
+    { label: lang === 'th' ? 'เปิดใช้งานอีกครั้ง' : 'Reactivate', icon: RotateCcw, onClick: () => { haptics.fire('SELECT'); onToggleActive(subscription); onClose(); }, color: dsColors.success },
+    { label: lang === 'th' ? 'แก้ไข' : 'Edit', icon: Pencil, onClick: () => { haptics.fire('SELECT'); onEdit(subscription); onClose(); }, color: dsColors.accent },
+    { label: lang === 'th' ? 'ลบ' : 'Delete', icon: Trash2, onClick: () => { haptics.fire('THUD'); onDelete(subscription.id); onClose(); }, color: dsColors.negative, danger: true },
+  ] : [
     { label: lang === 'th' ? 'ทำเครื่องหมายว่าจ่ายแล้ว' : 'Mark as Paid', icon: Check, onClick: () => { haptics.fire('SELECT'); onMarkPaid(subscription); onClose(); }, color: dsColors.success },
     { label: lang === 'th' ? 'ข้ามเดือนนี้' : 'Skip this month', icon: SkipForward, onClick: () => { haptics.fire('SELECT'); onSkip(subscription); onClose(); }, color: dsColors.warning },
-    { label: lang === 'th' ? 'ซ่อนรายการนี้' : 'Hide for now', icon: HideIcon, onClick: () => { haptics.fire('SELECT'); onHide(subscription); onClose(); }, color: dsColors.textMuted },
+    { label: lang === 'th' ? 'ยกเลิกรายการนี้' : 'Cancel subscription', icon: HideIcon, onClick: () => { haptics.fire('THUD'); onToggleActive(subscription); onClose(); }, color: dsColors.textMuted },
     { label: lang === 'th' ? 'แก้ไข' : 'Edit', icon: Pencil, onClick: () => { haptics.fire('SELECT'); onEdit(subscription); onClose(); }, color: dsColors.accent },
     { label: lang === 'th' ? 'ลบ' : 'Delete', icon: Trash2, onClick: () => { haptics.fire('THUD'); onDelete(subscription.id); onClose(); }, color: dsColors.negative, danger: true },
   ];
@@ -1436,13 +1546,16 @@ const ActionsMenu: React.FC<ActionsMenuProps> = ({
 // ─── Main Page Component ────────────────────────────────────────────────────
 export default function SubscriptionTrackerPage({
   lang = 'en',
-  currentBalance = 15000,
+  paydayDay: paydayDayProp,
   onNavigateToNotifications,
 }: SubscriptionTrackerPageProps) {
   // State
   const [activeTab, setActiveTab] = useState<TabType>('upcoming');
-  const [paydayEnabled, setPaydayEnabled] = useState(false);
-  const [paydayDay, setPaydayDay] = useState(25);
+  // Upcoming window: next 7 days, or everything due before payday (P2 — wired to profile.paydayDay)
+  const [windowMode, setWindowMode] = useState<'7d' | 'payday'>('7d');
+  const paydayEnabled = windowMode === 'payday';
+  const paydayDay = paydayDayProp && paydayDayProp >= 1 && paydayDayProp <= 31 ? paydayDayProp : 25;
+  const hasPaydayInfo = !!paydayDayProp;
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -1486,18 +1599,14 @@ export default function SubscriptionTrackerPage({
       setLoadError(null);
       try {
         const data = await loadSubscriptions();
-        if (data.length > 0) {
-          setSubscriptions(data);
-        } else {
-          // Fallback to demo data for unauthenticated / empty DB state
-          setSubscriptions(MOCK_SUBSCRIPTIONS);
-        }
+        // Honest empty state — never show demo charges to signed-in users
+        setSubscriptions(data);
       } catch (err) {
         console.error('[SubscriptionTracker] Load failed:', err);
         setLoadError(lang === 'th'
           ? 'โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่'
           : 'Failed to load. Please try again.');
-        setSubscriptions(MOCK_SUBSCRIPTIONS); // graceful fallback
+        setSubscriptions([]);
       } finally {
         setIsLoading(false);
       }
@@ -1530,16 +1639,23 @@ export default function SubscriptionTrackerPage({
   }, [visibleSubscriptions]);
 
   // AI Insights data — P2-4: Real Ghost Hunter detection
-  // A subscription is a "ghost" if it's active but hasn't been paid in 60+ days
+  // A subscription is a "ghost" if it's active but hasn't been confirmed paid in 60+ days.
+  // Subs added <60 days ago are never ghosts (not enough history to judge).
   const GHOST_THRESHOLD_DAYS = 60;
+  const DAY_MS = 1000 * 60 * 60 * 24;
   const isGhostSubscription = (s: typeof visibleSubscriptions[0]): boolean => {
+    if (!s.isActive) return false;
     // Use explicit flag if set
     if (s.isGhost) return true;
-    // Active but no payment record
-    if (!s.lastPaidDate) return s.isActive;
-    // Active but last payment was over 60 days ago
-    const daysSincePaid = (Date.now() - new Date(s.lastPaidDate).getTime()) / (1000 * 60 * 60 * 24);
-    return s.isActive && daysSincePaid > GHOST_THRESHOLD_DAYS;
+    // Confirmed a payment before: ghost if that payment is stale
+    if (s.lastPaidDate) {
+      return (Date.now() - new Date(s.lastPaidDate).getTime()) / DAY_MS > GHOST_THRESHOLD_DAYS;
+    }
+    // Never confirmed a payment: only a ghost if tracked for 60+ days
+    if (s.createdAt) {
+      return (Date.now() - new Date(s.createdAt).getTime()) / DAY_MS > GHOST_THRESHOLD_DAYS;
+    }
+    return false;
   };
   const ghostSubs = visibleSubscriptions.filter(isGhostSubscription);
   const ghostCount = ghostSubs.length;
@@ -1574,21 +1690,45 @@ export default function SubscriptionTrackerPage({
     }
   }, [visibleSubscriptions, sortBy]);
 
+  // Active rows drive the groups; cancelled ones get their own section (P1-5)
+  const activeSubscriptions = useMemo(() => allSubscriptions.filter(s => s.isActive), [allSubscriptions]);
+  const inactiveSubscriptions = useMemo(() => allSubscriptions.filter(s => !s.isActive), [allSubscriptions]);
+
   const groupedSubscriptions = useMemo(() => {
     const groups: Record<string, Subscription[]> = { subscriptions: [], bills: [] };
-    allSubscriptions.forEach(sub => {
+    activeSubscriptions.forEach(sub => {
       if (sub.category === 'bills') groups.bills.push(sub);
       else groups.subscriptions.push(sub);
     });
     return groups;
-  }, [allSubscriptions]);
+  }, [activeSubscriptions]);
 
   const getYearlyTotal = (subs: Subscription[]) => subs.reduce((sum, sub) => sum + getAnnualizedAmount(sub), 0);
 
   // Handlers
-  const handleMarkPaid = useCallback((sub: Subscription) => { console.log('Mark paid:', sub.name); }, []);
+  // Mark-as-Paid: persists lastPaidDate (stored in DB `notes` column) and
+  // rolls next billing forward via the service's dueDate→next_billing_date logic.
+  const handleMarkPaid = useCallback(async (sub: Subscription) => {
+    const today = new Date().toISOString().split('T')[0];
+    const updated: Subscription = { ...sub, lastPaidDate: today };
+    try {
+      const saved = await updateSubscription(updated);
+      if (!saved) {
+        setLoadError(lang === 'th' ? 'บันทึกการชำระเงินไม่สำเร็จ' : 'Failed to record payment');
+        return;
+      }
+      setSubscriptions(prev => prev.map(s => s.id === sub.id ? { ...updated, color: sub.color } : s));
+    } catch {
+      setLoadError(lang === 'th' ? 'บันทึกการชำระเงินไม่สำเร็จ' : 'Failed to record payment');
+    }
+  }, [lang]);
   const handleSkip = useCallback((sub: Subscription) => { console.log('Skip month for:', sub.name); }, []);
   const handleHide = useCallback((sub: Subscription) => { setHiddenIds(prev => new Set([...prev, sub.id])); }, []);
+  const handleToggleActive = useCallback(async (sub: Subscription) => {
+    const next = !sub.isActive;
+    const ok = await toggleSubscriptionActive(sub.id, next);
+    if (ok) setSubscriptions(prev => prev.map(s => (s.id === sub.id ? { ...s, isActive: next } : s)));
+  }, []);
   const handleDelete = useCallback(async (id: string) => {
     await deleteSubscription(id);
     setSubscriptions(prev => prev.filter(s => s.id !== id));
@@ -1659,7 +1799,7 @@ export default function SubscriptionTrackerPage({
           onSkip={handleSkip}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onHide={handleHide}
+          onToggleActive={handleToggleActive}
         />
       </>
     );
@@ -1786,12 +1926,41 @@ export default function SubscriptionTrackerPage({
       <div className="space-y-4 mt-3">
         {activeTab === 'upcoming' && (
           <>
+            {/* Window toggle: next 7 days vs before payday (P2) */}
+            {hasPaydayInfo && (
+              <div className="flex justify-center">
+                <div className="inline-flex rounded-full p-0.5" style={{ backgroundColor: dsColors.surface }} role="group"
+                  aria-label={lang === 'th' ? 'ช่วงเวลาที่แสดง' : 'Billing window'}>
+                  {([
+                    { id: '7d' as const, label: lang === 'th' ? '7 วันข้างหน้า' : 'Next 7 days' },
+                    { id: 'payday' as const, label: lang === 'th' ? `ก่อนวันที่ ${paydayDay}` : `Before day ${paydayDay}` },
+                  ]).map(opt => (
+                    <button
+                      key={opt.id}
+                      onClick={() => { haptics.fire('SELECT'); setWindowMode(opt.id); setSelectedDate(null); }}
+                      className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all"
+                      style={{
+                        backgroundColor: windowMode === opt.id ? '#FFFFFF' : 'transparent',
+                        color: windowMode === opt.id ? dsColors.text : dsColors.textMuted,
+                        boxShadow: windowMode === opt.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                        ...getFontStyle(lang),
+                      }}
+                      aria-pressed={windowMode === opt.id}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Hero Card (Flat White Light Mode) */}
             <HeroCard
               totalMonthly={totals.totalMonthly}
               totalYearly={totals.totalYearly}
               totalSubs={totals.subTotal}
               totalBills={totals.billTotal}
+              activeCount={totals.subCount + totals.billCount}
               showAmount={showAmount}
               lang={lang}
               dsColors={dsColors}
@@ -1821,7 +1990,7 @@ export default function SubscriptionTrackerPage({
 
             {/* Selected Date Info */}
             {selectedDate && (
-              <div className="px-4 py-3 rounded-xl" style={{ backgroundColor: 'rgba(86, 190, 137, 0.1)' }}>
+              <div className="px-4 py-3 rounded-xl" style={{ backgroundColor: 'rgba(15, 176, 206, 0.1)' }}>
                 <p className="text-[13px] font-medium" style={{ color: '#111827' }}>
                   {lang === 'th' ? 'รายการวันที่' : 'Items on day'} {selectedDate}
                 </p>
@@ -1897,6 +2066,24 @@ export default function SubscriptionTrackerPage({
                     </div>
                   </div>
                 )}
+
+                {inactiveSubscriptions.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-3 px-1">
+                      <h3 className="text-[12px] font-bold uppercase tracking-wider" style={{ color: dsColors.textMuted }}>
+                        {inactiveSubscriptions.length} {lang === 'th' ? 'ยกเลิกแล้ว' : 'CANCELLED'}
+                      </h3>
+                      <span className="text-[12px] font-medium" style={{ color: dsColors.textMuted }}>
+                        {lang === 'th' ? 'ไม่นับในยอดรวม' : 'excluded from totals'}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      {inactiveSubscriptions.map((sub) => (
+                        <AllTabItem key={sub.id} subscription={sub} lang={lang} onMenuOpen={(s) => { setMenuSubscription(s); setShowMenu(true); }} />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <SubscriptionEmptyState lang={lang} />
@@ -1923,7 +2110,7 @@ export default function SubscriptionTrackerPage({
         onSkip={handleSkip}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onHide={handleHide}
+        onToggleActive={handleToggleActive}
       />
 
       {/* CSV Import Modal */}

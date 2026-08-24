@@ -7,7 +7,7 @@
  * Key Changes from v4.0:
  * - Dark Hero Card (bg-black rounded-[32px])
  * - Flat Header (no gradient)
- * - Lime Chart (#56be89) matching DashboardPage
+ * - Lime Chart (#0FB0CE) matching DashboardPage
  * - Pill Style Account Items (rounded-full)
  * - Surface-based UI components
  * - pageTokens as single source of truth
@@ -821,14 +821,14 @@ const AIInsightsCard = ({
       animate={{ opacity: 1, y: 0 }}
       className="border rounded-[16px] px-6 py-4 -mx-2 md:mx-0"
       style={{ 
-        backgroundColor: 'rgba(86, 190, 137, 0.08)',
-        borderColor: 'rgba(86, 190, 137, 0.2)',
+        backgroundColor: 'rgba(15, 176, 206, 0.08)',
+        borderColor: 'rgba(15, 176, 206, 0.2)',
       }}
     >
       <div className="flex items-start gap-3">
         <div 
           className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: 'rgba(86, 190, 137, 0.15)' }}
+          style={{ backgroundColor: 'rgba(15, 176, 206, 0.15)' }}
         >
           <Sparkles className="w-5 h-5" style={{ color: dsColors.accent }} />
         </div>
@@ -875,10 +875,10 @@ const AssetAllocationChart = ({
 
   // Colors for each category
   const categoryColors: Record<string, string> = {
-    cash: '#56be89',
+    cash: '#0FB0CE',
     checking: '#A3A3A3',
     savings: '#4ADE80',
-    investment: '#60A5FA',
+    investment: '#3FA3D6',
     crypto: '#F59E0B',
     property: '#A78BFA',
     vehicle: '#F472B6',
@@ -1321,7 +1321,7 @@ export default function NetWorthPage({ lang }: NetWorthPageProps) {
                 <motion.div 
                   layoutId="activeTab"
                   className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
-                  style={{ backgroundColor: '#56be89' }}
+                  style={{ backgroundColor: '#0FB0CE' }}
                 />
               )}
             </button>
@@ -1379,7 +1379,7 @@ export default function NetWorthPage({ lang }: NetWorthPageProps) {
                     {showAmount ? (
                       <Eye className="w-4 h-4" style={{ color: '#71717A' }} />
                     ) : (
-                      <EyeOff className="w-4 h-4" style={{ color: '#56be89' }} />
+                      <EyeOff className="w-4 h-4" style={{ color: '#0FB0CE' }} />
                     )}
                   </button>
                   
@@ -1521,14 +1521,14 @@ export default function NetWorthPage({ lang }: NetWorthPageProps) {
                     <defs>
                       {/* Gradient fill below line — neon green fade to transparent */}
                       <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#56be89" stopOpacity="0.4" />
-                        <stop offset="40%" stopColor="#56be89" stopOpacity="0.15" />
-                        <stop offset="100%" stopColor="#56be89" stopOpacity="0" />
+                        <stop offset="0%" stopColor="#0FB0CE" stopOpacity="0.4" />
+                        <stop offset="40%" stopColor="#0FB0CE" stopOpacity="0.15" />
+                        <stop offset="100%" stopColor="#0FB0CE" stopOpacity="0" />
                       </linearGradient>
                       {/* Gradient stroke — bright neon green from left to right */}
                       <linearGradient id="strokeGrad" x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%" stopColor="#7DD300" />
-                        <stop offset="35%" stopColor="#56be89" />
+                        <stop offset="35%" stopColor="#0FB0CE" />
                         <stop offset="65%" stopColor="#E8FF5A" />
                         <stop offset="100%" stopColor="#7DD300" />
                       </linearGradient>
@@ -1594,7 +1594,7 @@ export default function NetWorthPage({ lang }: NetWorthPageProps) {
                             return `${i === 0 ? 'M' : 'L'}${x},${y}`;
                           }).join(' ')}
                           fill="none"
-                          stroke="#56be89"
+                          stroke="#0FB0CE"
                           strokeWidth="6"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -1611,7 +1611,7 @@ export default function NetWorthPage({ lang }: NetWorthPageProps) {
                             return `${i === 0 ? 'M' : 'L'}${x},${y}`;
                           }).join(' ')}
                           fill="none"
-                          stroke="#56be89"
+                          stroke="#0FB0CE"
                           strokeWidth="3"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -1704,7 +1704,7 @@ export default function NetWorthPage({ lang }: NetWorthPageProps) {
                                 return 70 - ((snapshots[snapshots.length - 1].net_worth - minVal) / range) * 50;
                               })()} 
                               r="7" 
-                              fill="#56be89"
+                              fill="#0FB0CE"
                               fillOpacity="0.2"
                               filter="url(#dotGlow)"
                             />
@@ -1734,7 +1734,7 @@ export default function NetWorthPage({ lang }: NetWorthPageProps) {
                         <path
                           d="M0,60 L64,50 L128,45 L192,55 L256,35 L320,20"
                           fill="none"
-                          stroke="#56be89"
+                          stroke="#0FB0CE"
                           strokeWidth="6"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -1744,7 +1744,7 @@ export default function NetWorthPage({ lang }: NetWorthPageProps) {
                         <path
                           d="M0,60 L64,50 L128,45 L192,55 L256,35 L320,20"
                           fill="none"
-                          stroke="#56be89"
+                          stroke="#0FB0CE"
                           strokeWidth="3"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -1761,7 +1761,7 @@ export default function NetWorthPage({ lang }: NetWorthPageProps) {
                           filter="url(#lineGlow)"
                         />
                         {/* Outer glow ring on dot */}
-                        <circle cx="320" cy="20" r="7" fill="#56be89" fillOpacity="0.2" filter="url(#dotGlow)" />
+                        <circle cx="320" cy="20" r="7" fill="#0FB0CE" fillOpacity="0.2" filter="url(#dotGlow)" />
                         {/* Inner bright dot */}
                         <circle cx="320" cy="20" r="2.5" fill="#FFFFFF" />
                       </>

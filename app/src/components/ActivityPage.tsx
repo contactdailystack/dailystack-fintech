@@ -33,14 +33,19 @@ import {
   MapPin, Flag, Briefcase, Shield, Lightbulb, Brain, UtensilsCrossed, Laptop, Car, Wine, Dumbbell,
   ShoppingBag, Heart, TrendingUp, Home, Receipt, Zap, RefreshCw, Filter, ArrowUpDown,
   TrendingDown, Eye, EyeOff, MoreVertical, ChevronRight, ArrowLeft, Trash2, Pencil, Check,
-  Download, Camera, Image as ImageIcon, Split, Hash,
+  Download, Camera, Image as ImageIcon, Split, Hash, StickyNote,
 } from 'lucide-react';
 import { Transaction, UserProfile } from '../types';
 import { Language } from '../data/translations';
 import { pageTokens } from '../design-system/page-tokens';
 import { EmptyState } from '../design-system/components/EmptyState';
 import { haptics } from '../services/hapticService';
-import { saveTransaction } from '../services/transactionService';
+import {
+  saveTransaction, updateTransactionNote, setTransactionIgnored,
+  setTransactionSplit, loadIgnoredTransactions, updateTransactionCore,
+} from '../services/transactionService';
+import { loadRules, matchRules } from '../services/ruleEngine';
+import type { TxRule } from '../services/ruleEngine';
 
 // ─── Design Tokens (Single Source of Truth) ───────────────────────────────
 const dsColors = pageTokens.colors;
@@ -80,7 +85,7 @@ interface CategoryFilter {
 const CATEGORY_FILTERS: CategoryFilter[] = [
   { id: 'all',          labelEn: 'All',          labelTh: 'ทั้งหมด',         icon: Sparkles,      color: '#666666' },
   { id: 'Food',         labelEn: 'Food',         labelTh: 'อาหาร',          icon: UtensilsCrossed, color: '#F97316' },
-  { id: 'Transportation', labelEn: 'Transport',  labelTh: 'เดินทาง',         icon: Car,            color: '#3B82F6' },
+  { id: 'Transportation', labelEn: 'Transport',  labelTh: 'เดินทาง',         icon: Car,            color: '#1786C2' },
   { id: 'Bills',        labelEn: 'Bills',        labelTh: 'บิล',            icon: Receipt,        color: '#EF4444' },
   { id: 'Shopping',     labelEn: 'Shopping',     labelTh: 'ช้อปปิ้ง',       icon: ShoppingBag,    color: '#EC4899' },
   { id: 'Health',       labelEn: 'Health',       labelTh: 'สุขภาพ',         icon: Heart,          color: '#22C55E' },
@@ -189,8 +194,7 @@ const formatRelativeDate = (dateStr: string, lang: Language): string => {
 };
 
 const formatCurrency = (amount: number, lang: Language): string => {
-  if (lang === 'th') return `฿${Math.abs(amount).toLocaleString('th-TH')}`;
-  return `$${(Math.abs(amount) / 100).toFixed(2)}`;
+  return `฿${Math.abs(amount).toLocaleString(lang === 'th' ? 'th-TH' : 'en-US')}`;
 };
 
 // ─── AI Pattern Detection (Thai merchants) ─────────────────────────────────
@@ -292,14 +296,14 @@ const SmartInsightsCard: React.FC<SmartInsightsCardProps> = ({ transactions, rec
       animate={{ opacity: 1, y: 0 }}
       className="rounded-[16px] px-4 py-3"
       style={{
-        backgroundColor: 'rgba(86, 190, 137, 0.08)',
-        border: '1px solid rgba(86, 190, 137, 0.2)',
+        backgroundColor: 'rgba(15, 176, 206, 0.08)',
+        border: '1px solid rgba(15, 176, 206, 0.2)',
       }}
     >
       <div className="flex items-start gap-3">
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: 'rgba(86, 190, 137, 0.15)' }}
+          style={{ backgroundColor: 'rgba(15, 176, 206, 0.15)' }}
         >
           <Sparkles className="w-4 h-4" style={{ color: dsColors.accent }} />
         </div>
@@ -360,8 +364,8 @@ const TransactionRow: React.FC<TransactionRowProps> = ({
       // Pill Card spec — matches "Complete Setup"
       className="w-full flex items-center gap-3 rounded-full px-5 py-3 active:scale-[0.98] transition-all text-left relative"
       style={{
-        backgroundColor: isSelected ? 'rgba(86, 190, 137, 0.15)' : dsColors.surface,
-        border: isSelected ? '1px solid rgba(86, 190, 137, 0.4)' : '1px solid transparent',
+        backgroundColor: isSelected ? 'rgba(15, 176, 206, 0.15)' : dsColors.surface,
+        border: isSelected ? '1px solid rgba(15, 176, 206, 0.4)' : '1px solid transparent',
       }}
     >
       {/* Bulk checkbox / Icon */}
@@ -493,7 +497,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({ sortBy, onChange, lang }) =
                 onClick={() => { haptics.fire('SELECT'); onChange(opt.id); setIsOpen(false); }}
                 className="w-full px-4 py-2 text-left text-[13px] font-medium transition-colors"
                 style={{
-                  backgroundColor: sortBy === opt.id ? 'rgba(86, 190, 137, 0.15)' : 'transparent',
+                  backgroundColor: sortBy === opt.id ? 'rgba(15, 176, 206, 0.15)' : 'transparent',
                   color: sortBy === opt.id ? dsColors.accent : dsColors.text,
                 }}
               >
@@ -512,18 +516,46 @@ interface TransactionDetailDrawerProps {
   tx: Transaction | null;
   isRecurring: boolean;
   isOpen: boolean;
+  /** true when this tx is the SOURCE of an active split (a `${tx.id}-split` row exists) */
+  isSplitSource?: boolean;
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onSaveNote: (id: string, note: string) => void;
+  onToggleIgnore: (tx: Transaction) => void;
+  onSplit: (id: string, splitCategory: string, splitAmount: number) => void;
+  onUndoSplit: (id: string) => void;
   showAmount: boolean;
   lang: Language;
 }
 
 const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = ({
-  tx, isRecurring, isOpen, onClose, onEdit, onDelete, showAmount, lang,
+  tx, isRecurring, isOpen, isSplitSource, onClose, onEdit, onDelete,
+  onSaveNote, onToggleIgnore, onSplit, onUndoSplit, showAmount, lang,
 }) => {
+  // Note / split drafts (#6) — hooks before early return
+  const [noteDraft, setNoteDraft] = useState('');
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [splitCat, setSplitCat] = useState(CATEGORIES[0]?.id || 'Food');
+  const [splitAmt, setSplitAmt] = useState('');
+
+  useEffect(() => {
+    if (isOpen && tx) {
+      setNoteDraft(tx.note || '');
+      setSplitOpen(false);
+      setSplitAmt('');
+      setSplitCat(CATEGORIES[0]?.id || 'Food');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, tx?.id]);
+
   if (!isOpen || !tx) return null;
   const isOutbound = tx.amount < 0;
+  const absAmount = Math.abs(tx.amount);
+  const splitAmountNum = parseFloat(splitAmt);
+  // Synthetic rows (`${id}-split`) exist only client-side — DB mutations
+  // must target the primary row, so mutating controls are hidden here.
+  const isSynthetic = !!tx.splitOf;
 
   return (
     <AnimatePresence>
@@ -581,6 +613,146 @@ const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = ({
             {tx.workspace && <DetailRow label={lang === 'th' ? 'พื้นที่' : 'Workspace'} value={tx.workspace} lang={lang} />}
           </div>
 
+          {/* ── Synthetic split row notice ── */}
+          {isSynthetic && (
+            <div className="mb-4 p-3 rounded-xl flex items-center gap-2"
+              style={{ backgroundColor: 'rgba(23, 134, 194, 0.1)' }}>
+              <Split className="w-4 h-4 shrink-0" style={{ color: '#1786C2' }} />
+              <p className="text-[12px]" style={{ color: dsColors.text }}>
+                {lang === 'th'
+                  ? 'ส่วนที่แยกออกจากรายการหลัก — แก้ไข/ซ่อน/โน้ต ที่รายการหลักเท่านั้น'
+                  : 'Split-off portion — edit, hide or add notes on the main transaction only.'}
+              </p>
+            </div>
+          )}
+
+          {/* ── Note (#6a) ── */}
+          <div className="mb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: dsColors.textMuted }}>
+              {lang === 'th' ? 'โน้ต' : 'Note'}
+            </p>
+            {isSynthetic ? (
+              noteDraft ? (
+                <p className="px-3 py-2.5 rounded-xl text-[13px]" style={{ backgroundColor: dsColors.surface, color: dsColors.text }}>
+                  {noteDraft}
+                </p>
+              ) : null
+            ) : (
+              <>
+                <textarea
+                  value={noteDraft}
+                  onChange={(e) => setNoteDraft(e.target.value)}
+                  maxLength={500}
+                  rows={2}
+                  placeholder={lang === 'th' ? 'เพิ่มโน้ต...' : 'Add a note...'}
+                  className="w-full px-3 py-2.5 rounded-xl text-[13px] outline-none resize-none"
+                  style={{ backgroundColor: dsColors.surface, color: dsColors.text }}
+                />
+                <button
+                  onClick={() => { haptics.fire('SELECT'); onSaveNote(tx.id, noteDraft.trim()); }}
+                  className="mt-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all active:scale-95"
+                  style={{ backgroundColor: dsColors.accent, color: '#0A0A0A' }}
+                >
+                  {lang === 'th' ? 'บันทึกโน้ต' : 'Save note'}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* ── Ignore (#6b) — hidden on synthetic rows ── */}
+          {!isSynthetic && (
+          <div className="mb-4 flex items-center justify-between px-3 py-2.5 rounded-xl"
+            style={{ backgroundColor: dsColors.surface }}>
+            <span className="text-[12px] font-medium" style={{ color: dsColors.textMuted }}>
+              {lang === 'th' ? 'ซ่อนจากสถิติ' : 'Exclude from stats'}
+            </span>
+            <button
+              onClick={() => { haptics.fire('SELECT'); onToggleIgnore(tx); }}
+              className="w-11 h-7 rounded-full relative transition-all"
+              style={{ backgroundColor: tx.isIgnored ? dsColors.accent : 'rgba(128,128,128,0.25)' }}
+              aria-pressed={!!tx.isIgnored}
+            >
+              <span
+                className="absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all"
+                style={{ left: tx.isIgnored ? 22 : 4 }}
+              />
+            </button>
+          </div>
+          )}
+
+          {/* ── Split (#6b) — hidden on synthetic rows ── */}
+          {!isSynthetic && (
+          <div className="mb-4">
+            <button
+              onClick={() => setSplitOpen(!splitOpen)}
+              className="flex items-center gap-2 text-[12px] font-semibold mb-2 min-h-[32px]"
+              style={{ color: dsColors.textMuted }}
+            >
+              <Split className="w-3.5 h-3.5" />
+              {lang === 'th' ? 'แยกยอดข้ามหมวด' : 'Split across categories'}
+              {isSplitSource && (
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
+                  style={{ backgroundColor: 'rgba(15, 176, 206,0.15)', color: '#16A34A' }}>
+                  ✓
+                </span>
+              )}
+            </button>
+            {splitOpen && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                className="p-3 rounded-xl space-y-2 overflow-hidden" style={{ backgroundColor: dsColors.surface }}>
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    value={splitCat}
+                    onChange={(e) => setSplitCat(e.target.value)}
+                    className="px-2 py-2 rounded-lg text-[12px] outline-none"
+                    style={{ backgroundColor: dsColors.background, color: dsColors.text }}
+                  >
+                    {CATEGORIES.map(c => (
+                      <option key={c.id} value={c.id}>{lang === 'th' ? c.labelTh : c.labelEn}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="number" step="0.01" min="0" max={absAmount}
+                    value={splitAmt}
+                    onChange={(e) => setSplitAmt(e.target.value)}
+                    placeholder={lang === 'th' ? 'จำนวนเงิน' : 'Amount'}
+                    className="px-2 py-2 rounded-lg text-[12px] outline-none"
+                    style={{ backgroundColor: dsColors.background, color: dsColors.text, fontFamily: dsTypography.fontMono }}
+                  />
+                </div>
+                <p className="text-[10px]" style={{ color: dsColors.textMuted }}>
+                  {lang === 'th'
+                    ? `ยอดรวม ${formatCurrency(absAmount, lang)} · ส่วนที่เหลืออยู่ใน ${tx.category}`
+                    : `Total ${formatCurrency(absAmount, lang)} · remainder stays in ${tx.category}`}
+                </p>
+                <button
+                  disabled={isNaN(splitAmountNum) || splitAmountNum <= 0 || splitAmountNum >= absAmount}
+                  onClick={() => {
+                    haptics.fire('SELECT');
+                    onSplit(tx.id, splitCat, splitAmountNum);
+                    setSplitOpen(false);
+                    setSplitAmt('');
+                  }}
+                  className="w-full py-2 rounded-lg text-[12px] font-bold transition-all active:scale-95 disabled:opacity-40"
+                  style={{ backgroundColor: dsColors.accent, color: '#0A0A0A' }}
+                >
+                  {lang === 'th' ? 'แยกยอด' : 'Apply split'}
+                </button>
+              </motion.div>
+            )}
+            {/* Undo an existing split */}
+            {isSplitSource && !splitOpen && (
+              <button
+                onClick={() => { haptics.fire('THUD'); onUndoSplit(tx.id); }}
+                className="text-[11px] font-semibold underline min-h-[28px]"
+                style={{ color: '#1786C2' }}
+              >
+                {lang === 'th' ? 'ยกเลิกการแยกยอด' : 'Undo split'}
+              </button>
+            )}
+          </div>
+          )}
+
           {/* Tags */}
           {tx.tags && tx.tags.length > 0 && (
             <div className="mb-5">
@@ -609,9 +781,11 @@ const TransactionDetailDrawer: React.FC<TransactionDetailDrawerProps> = ({
               {lang === 'th' ? 'แก้ไข' : 'Edit'}
             </button>
             <button
-              onClick={() => { haptics.fire('THUD'); onDelete(); }}
-              className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95"
+              onClick={() => { if (!isSynthetic) { haptics.fire('THUD'); onDelete(); } }}
+              disabled={isSynthetic}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-40"
               style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' }}
+              title={isSynthetic ? (lang === 'th' ? 'แก้ไขที่รายการหลักเท่านั้น' : 'Edit the main transaction instead') : undefined}
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -655,6 +829,8 @@ export default function ActivityPage({
   const [isBulkMode, setIsBulkMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showAddForm, setShowAddForm] = useState(false);
+  /** When set, the add form acts as an EDIT form for this transaction (P0-4). */
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [lastSyncAt] = useState<Date | null>(new Date());
 
   // Form state
@@ -663,6 +839,23 @@ export default function ActivityPage({
   const [amount, setAmount] = useState('');
   const [workspace, setWorkspace] = useState('Personal');
   const [formError, setFormError] = useState('');
+  const [noteInput, setNoteInput] = useState('');
+
+  // ── #6: ignored-transaction view + user rules ──
+  const [showHidden, setShowHidden] = useState(false);
+  const [hiddenTxs, setHiddenTxs] = useState<Transaction[]>([]);
+  const [rules, setRules] = useState<TxRule[]>([]);
+  const [ruleSuggestion, setRuleSuggestion] = useState<{ pattern: string; category: string } | null>(null);
+
+  useEffect(() => { loadRules().then(setRules); }, []);
+
+  const handleToggleHiddenView = () => {
+    haptics.fire('SELECT');
+    if (!showHidden) {
+      loadIgnoredTransactions().then(setHiddenTxs).catch(() => setHiddenTxs([]));
+    }
+    setShowHidden(!showHidden);
+  };
 
   // ─── AI Pattern Detection ───────────────────────────────────────────────
   const aiPreset = useMemo(() => detectAIPreset(merchant), [merchant]);
@@ -678,15 +871,22 @@ export default function ActivityPage({
   const recurringIds = useMemo(() => detectRecurringIds(transactions), [transactions]);
   const recurringCount = recurringIds.size;
 
+  // Ignored transactions are excluded from the main list (#6b)
+  const visibleTransactions = useMemo(
+    () => transactions.filter(tx => !tx.isIgnored),
+    [transactions]
+  );
+
   // Filtered + sorted transactions
   const filteredTransactions = useMemo(() => {
-    let result = transactions;
+    let result = showHidden ? hiddenTxs : visibleTransactions;
     // Search
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       result = result.filter(tx =>
         tx.merchant.toLowerCase().includes(q) ||
         tx.category.toLowerCase().includes(q) ||
+        (tx.note && tx.note.toLowerCase().includes(q)) ||
         (tx.tags && tx.tags.some(t => t.toLowerCase().includes(q)))
       );
     }
@@ -706,7 +906,7 @@ export default function ActivityPage({
       }
     });
     return result;
-  }, [transactions, searchTerm, activeCategory, sortBy]);
+  }, [showHidden, hiddenTxs, visibleTransactions, searchTerm, activeCategory, sortBy]);
 
   // Date-grouped
   const dateGroups = useMemo(() => groupTransactionsByDate(filteredTransactions), [filteredTransactions]);
@@ -725,6 +925,7 @@ export default function ActivityPage({
   // ─── Handlers ───────────────────────────────────────────────────────────
   const handleTxClick = (tx: Transaction) => {
     if (isBulkMode) {
+      if (tx.splitOf) return; // synthetic rows can't be bulk-mutated
       const newSet = new Set(selectedIds);
       if (newSet.has(tx.id)) newSet.delete(tx.id); else newSet.add(tx.id);
       setSelectedIds(newSet);
@@ -736,7 +937,7 @@ export default function ActivityPage({
   };
 
   const handleTxLongPress = (tx: Transaction) => {
-    if (!isBulkMode) {
+    if (!isBulkMode && !tx.splitOf) {
       setIsBulkMode(true);
       setSelectedIds(new Set([tx.id]));
     }
@@ -761,7 +962,7 @@ export default function ActivityPage({
     handleExitBulk();
   };
 
-  const handleAddNewTx = (e: React.FormEvent) => {
+  const handleAddNewTx = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
     const parsedAmount = parseFloat(amount);
@@ -773,8 +974,29 @@ export default function ActivityPage({
       setFormError(lang === 'en' ? 'Enter a valid amount.' : 'กรุณาระบุจำนวนเงิน');
       return;
     }
-    if (parsedAmount > profile.balance) {
+    if (!editingTx && parsedAmount > profile.balance) {
       setFormError(lang === 'en' ? 'Insufficient balance.' : 'ยอดเงินไม่เพียงพอ');
+      return;
+    }
+
+    // ── Edit mode: persist core-field changes, never create a duplicate ──
+    if (editingTx) {
+      const ok = await updateTransactionCore(editingTx.id, {
+        amount: -parsedAmount,
+        description: merchant.trim(),
+        category,
+      });
+      if (ok && (noteInput.trim() || editingTx.note) && noteInput.trim() !== (editingTx.note || '')) {
+        await updateTransactionNote(editingTx.id, noteInput.trim());
+      }
+      onUpdateTransaction?.(editingTx.id, {
+        merchant: merchant.trim(),
+        amount: -parsedAmount,
+        category,
+        ...(noteInput.trim() !== (editingTx.note || '') ? { note: noteInput.trim() || undefined } : {}),
+      } as Transaction);
+      haptics.fire(ok ? 'LOCK_CONFIRM' : 'ERROR_REJECT');
+      resetAddForm();
       return;
     }
 
@@ -786,6 +1008,7 @@ export default function ActivityPage({
       date: new Date().toISOString().split('T')[0],
       status: 'completed',
       workspace,
+      note: noteInput.trim() || undefined,
       timeOfDay: new Date().getHours() >= 21 ? 'Midnight' : (new Date().getHours() >= 17 ? 'Evening' : 'Afternoon'),
       dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()],
     };
@@ -793,32 +1016,85 @@ export default function ActivityPage({
 
     saveTransaction({
       amount: -parsedAmount, description: merchant.trim(), category, workspace,
+      note: noteInput.trim() || undefined,
     });
 
     onUpdateProfile({ balance: profile.balance - parsedAmount });
 
     // Reset
-    setMerchant(''); setAmount(''); setShowAddForm(false);
+    resetAddForm();
+  };
+
+  /** Clear the add/edit form state. */
+  const resetAddForm = () => {
+    setMerchant(''); setAmount(''); setNoteInput(''); setShowAddForm(false); setEditingTx(null);
   };
 
   // ─── Export CSV ──────────────────────────────────────────────────────────
+  // ─── #6 Handlers: note / ignore / split ──────────────────────────────────
+  const handleSaveNote = async (id: string, note: string) => {
+    await updateTransactionNote(id, note);
+    onUpdateTransaction?.(id, { note });
+  };
+
+  const handleToggleIgnore = async (tx: Transaction) => {
+    const next = !tx.isIgnored;
+    await setTransactionIgnored(tx.id, next);
+    onUpdateTransaction?.(tx.id, { isIgnored: next });
+    if (showHidden && next === false) {
+      setHiddenTxs(prev => prev.filter(t => t.id !== tx.id));
+    }
+    setIsDetailOpen(false);
+  };
+
+  const handleSplitTx = async (id: string, splitCategory: string, splitAmount: number) => {
+    await setTransactionSplit(id, splitCategory, splitAmount);
+    const source = transactions.find(t => t.id === id);
+    if (source) {
+      const moved = Math.abs(splitAmount);
+      const sign = source.amount < 0 ? -1 : 1;
+      onUpdateTransaction?.(id, { amount: sign * (Math.abs(source.amount) - moved) } as Transaction);
+      onAddTransaction?.({
+        ...source,
+        id: `${id}-split`,
+        category: splitCategory,
+        amount: sign * moved,
+        splitOf: true,
+      } as Transaction);
+    }
+  };
+
+  const handleUndoSplit = async (id: string) => {
+    const synth = transactions.find(t => t.id === `${id}-split`);
+    const source = transactions.find(t => t.id === id);
+    if (!synth || !source) return;
+    haptics.fire('SELECT');
+    const ok = await setTransactionSplit(id, null, null);
+    if (!ok) return;
+    const sign = source.amount < 0 ? -1 : 1;
+    onUpdateTransaction?.(id, { amount: sign * (Math.abs(source.amount) + Math.abs(synth.amount)) } as Transaction);
+    onDeleteTransaction?.(synth.id);
+    setIsDetailOpen(false);
+  };
+
   const handleExportCSV = () => {
     haptics.fire('SELECT');
-    const headers = ['Date', 'Merchant', 'Category', 'Amount', 'Workspace', 'Recurring'];
-    const rows = transactions.map(tx => [
+    const headers = ['Date', 'Merchant', 'Category', 'Amount', 'Workspace', 'Recurring', 'Note'];
+    const rows = visibleTransactions.map(tx => [
       tx.date,
       `"${tx.merchant.replace(/"/g, '""')}"`,
       tx.category,
       tx.amount.toString(),
       tx.workspace || '',
       recurringIds.has(tx.id) ? 'Yes' : 'No',
+      `"${(tx.note || '').replace(/"/g, '""')}"`,
     ].join(','));
     const csv = [headers.join(','), ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `dailystack-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `pickswise-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -873,6 +1149,14 @@ export default function ActivityPage({
               {showAmount ? <Eye className="w-5 h-5" style={{ color: dsColors.text }} /> : <EyeOff className="w-5 h-5" style={{ color: dsColors.accent }} />}
             </button>
             <button
+              onClick={handleToggleHiddenView}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-transform active:scale-95 relative"
+              style={{ backgroundColor: showHidden ? dsColors.accent : dsColors.surface }}
+              aria-label={showHidden ? (lang === 'th' ? 'ดูรายการปกติ' : 'Show active') : (lang === 'th' ? 'รายการที่ซ่อน' : 'Hidden transactions')}
+            >
+              <EyeOff className="w-5 h-5" style={{ color: showHidden ? '#0A0A0A' : dsColors.text }} />
+            </button>
+            <button
               onClick={handleExportCSV}
               className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-transform active:scale-95"
               style={{ backgroundColor: dsColors.surface }}
@@ -904,7 +1188,7 @@ export default function ActivityPage({
         >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(86, 190, 137, 0.15)' }}>
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(15, 176, 206, 0.15)' }}>
                 <Shield className="w-5 h-5" style={{ color: dsColors.accent }} />
               </div>
               <div>
@@ -1053,13 +1337,28 @@ export default function ActivityPage({
         isRecurring={selectedTx ? recurringIds.has(selectedTx.id) : false}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        onEdit={() => { setShowAddForm(true); setIsDetailOpen(false); }}
+        onEdit={() => {
+          if (selectedTx && !selectedTx.splitOf) {
+            setEditingTx(selectedTx);
+            setMerchant(selectedTx.merchant);
+            setAmount(String(Math.abs(selectedTx.amount)));
+            setCategory(selectedTx.category);
+            setNoteInput(selectedTx.note || '');
+            setShowAddForm(true);
+          }
+          setIsDetailOpen(false);
+        }}
         onDelete={() => {
           if (selectedTx && onDeleteTransaction) {
             onDeleteTransaction(selectedTx.id);
             setIsDetailOpen(false);
           }
         }}
+        onSaveNote={handleSaveNote}
+        onToggleIgnore={handleToggleIgnore}
+        onSplit={handleSplitTx}
+        onUndoSplit={handleUndoSplit}
+        isSplitSource={!!selectedTx && transactions.some(t => t.id === `${selectedTx.id}-split`)}
         showAmount={showAmount}
         lang={lang}
       />
@@ -1073,7 +1372,7 @@ export default function ActivityPage({
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end justify-center"
           >
-            <div className="absolute inset-0 bg-black/50" onClick={() => setShowAddForm(false)} />
+            <div className="absolute inset-0 bg-black/50" onClick={resetAddForm} />
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
@@ -1086,9 +1385,11 @@ export default function ActivityPage({
               </div>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-[17px] font-bold" style={{ color: dsColors.text }}>
-                  {lang === 'th' ? 'บันทึกรายการ' : 'Add Transaction'}
+                  {editingTx
+                    ? (lang === 'th' ? 'แก้ไขรายการ' : 'Edit Transaction')
+                    : (lang === 'th' ? 'บันทึกรายการ' : 'Add Transaction')}
                 </h2>
-                <button onClick={() => setShowAddForm(false)} className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                <button onClick={resetAddForm} className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
                   <X className="w-5 h-5" style={{ color: dsColors.textMuted }} />
                 </button>
               </div>
@@ -1101,17 +1402,45 @@ export default function ActivityPage({
                   <input
                     type="text"
                     value={merchant}
-                    onChange={(e) => setMerchant(e.target.value)}
+                    onChange={(e) => { setMerchant(e.target.value); setRuleSuggestion(null); }}
+                    onBlur={() => {
+                      if (!merchant.trim()) return;
+                      const match = matchRules(rules, merchant);
+                      if (match && match.category !== category) setRuleSuggestion(match);
+                    }}
                     placeholder="Starbucks, Netflix, Grab..."
                     className="w-full px-4 py-3 rounded-2xl text-[14px] outline-none"
                     style={{ backgroundColor: dsColors.surface, color: dsColors.text, border: '1px solid transparent', fontFamily: getFontStyle(lang).fontFamily }}
                   />
+                  {/* ── Rule suggestion (#6c) ── */}
+                  {ruleSuggestion && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+                      className="mt-2 p-2.5 rounded-xl flex items-center gap-2"
+                      style={{ backgroundColor: 'rgba(23, 134, 194, 0.12)' }}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 shrink-0" style={{ color: '#1786C2' }} />
+                      <p className="text-[11px] flex-1" style={{ color: dsColors.text }}>
+                        {lang === 'th' ? 'กฎของคุณ' : 'Your rule'} “{ruleSuggestion.pattern}” → {ruleSuggestion.category}
+                      </p>
+                      <button
+                        onClick={() => { haptics.fire('SELECT'); setCategory(ruleSuggestion.category); setRuleSuggestion(null); }}
+                        className="px-2 py-1 rounded-md text-[10px] font-bold"
+                        style={{ backgroundColor: '#1786C2', color: '#FFFFFF' }}
+                      >
+                        {lang === 'th' ? 'ใช้' : 'Apply'}
+                      </button>
+                      <button onClick={() => setRuleSuggestion(null)} aria-label="Dismiss">
+                        <X className="w-3.5 h-3.5" style={{ color: dsColors.textMuted }} />
+                      </button>
+                    </motion.div>
+                  )}
                   {aiPreset && (
                     <motion.div
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="mt-2 p-2.5 rounded-xl flex items-center gap-2"
-                      style={{ backgroundColor: 'rgba(86, 190, 137, 0.1)' }}
+                      style={{ backgroundColor: 'rgba(15, 176, 206, 0.1)' }}
                     >
                       <Sparkles className="w-3.5 h-3.5 shrink-0" style={{ color: dsColors.accent }} />
                       <p className="text-[11px] flex-1" style={{ color: dsColors.text }}>
@@ -1153,6 +1482,22 @@ export default function ActivityPage({
                   </div>
                 </div>
 
+                {/* ── Note (#6a) ── */}
+                <div>
+                  <label className="block text-[12px] font-medium mb-1.5" style={{ color: dsColors.textMuted }}>
+                    {lang === 'th' ? 'โน้ต (ไม่บังคับ)' : 'Note (optional)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={noteInput}
+                    onChange={(e) => setNoteInput(e.target.value)}
+                    maxLength={500}
+                    placeholder={lang === 'th' ? 'เช่น กาแฟกับทีม' : 'e.g. team coffee'}
+                    className="w-full px-4 py-3 rounded-2xl text-[14px] outline-none"
+                    style={{ backgroundColor: dsColors.surface, color: dsColors.text, fontFamily: getFontStyle(lang).fontFamily }}
+                  />
+                </div>
+
                 {formError && (
                   <div className="p-3 rounded-2xl text-[12px] font-medium" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' }}>
                     {formError}
@@ -1164,7 +1509,9 @@ export default function ActivityPage({
                   className="w-full py-4 rounded-2xl text-[15px] font-bold transition-all active:scale-95"
                   style={{ backgroundColor: dsColors.accent, color: '#0A0A0A' }}
                 >
-                  {lang === 'th' ? 'บันทึกรายการ' : 'Save Transaction'}
+                  {editingTx
+                    ? (lang === 'th' ? 'บันทึกการแก้ไข' : 'Save Changes')
+                    : (lang === 'th' ? 'บันทึกรายการ' : 'Save Transaction')}
                 </button>
               </form>
             </motion.div>

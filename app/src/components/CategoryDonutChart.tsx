@@ -130,7 +130,7 @@ export const CategoryDonutChart = memo(function CategoryDonutChart({
           {centerText && (
             <span
               className="text-xl font-bold"
-              style={{ fontFamily: '"Inter", sans-serif', color: '#56be89', textShadow: '0 0 12px rgba(199,255,46,0.4)' }}
+              style={{ fontFamily: '"Inter", sans-serif', color: '#0FB0CE', textShadow: '0 0 12px rgba(199,255,46,0.4)' }}
             >
               {centerText}
             </span>

@@ -1,50 +1,57 @@
 {
-  "name": "DailyStack",
-  "short_name": "DailyStack",
-  "description": "Personal Finance & Subscription Management Assistant",
-  "start_url": "/",
+  "id": "/",
+  "name": "PicksWise — Smart Money Tracker",
+  "short_name": "PicksWise",
+  "description": "Track subscriptions, spending and budgets. Personal finance assistant for Thailand.",
+  "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#0B0F0A",
-  "theme_color": "#0B0F0A",
+  "background_color": "#071838",
+  "theme_color": "#071838",
   "orientation": "portrait",
   "scope": "/",
-  "lang": "en",
+  "lang": "th",
+  "dir": "ltr",
   "categories": ["finance", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "screenshots": [],
   "shortcuts": [
     {
       "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "View your Money Pulse dashboard",
-      "url": "/?tab=dashboard",
+      "short_name": "Pulse",
+      "description": "View your money pulse dashboard",
+      "url": "/dashboard?tab=overview",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Subscriptions",
-      "short_name": "Subscriptions",
-      "description": "View your subscriptions",
-      "url": "/?tab=subscriptions",
+      "short_name": "Subs",
+      "description": "Manage your subscriptions",
+      "url": "/subscriptions",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Goals",
-      "short_name": "Goals",
-      "description": "Track your financial goals",
-      "url": "/?tab=goals",
+      "name": "Activity",
+      "short_name": "Activity",
+      "description": "Browse your transactions",
+      "url": "/activity",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]

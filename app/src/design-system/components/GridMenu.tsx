@@ -74,8 +74,8 @@ export const GridMenu: React.FC<GridMenuProps> = ({
             p-3 rounded-2xl
             bg-[#1A1A1A] border border-[#2A2A2A]
             transition-all duration-200
-            hover:bg-[#202020] hover:border-[rgba(205,255,36,0.2)]
-            active:bg-[rgba(205,255,36,0.1)]
+            hover:bg-[#202020] hover:border-[rgba(15, 176, 206,0.2)]
+            active:bg-[rgba(15, 176, 206,0.1)]
             min-h-[80px]
           "
         >
@@ -84,13 +84,13 @@ export const GridMenu: React.FC<GridMenuProps> = ({
             className="
               relative w-12 h-12 rounded-xl
               flex items-center justify-center
-              bg-[rgba(205,255,36,0.1)]
+              bg-[rgba(15, 176, 206,0.1)]
               mb-2
             "
           >
             <item.icon
               className="w-6 h-6"
-              style={{ color: item.color || '#56be89' }}
+              style={{ color: item.color || '#0FB0CE' }}
             />
             
             {/* Badge */}

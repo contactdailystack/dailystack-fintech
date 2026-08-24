@@ -128,7 +128,7 @@ export default function BottomNavBar({
                 style={{
                   color: isActive ? theme.active : theme.inactive,
                   fontFamily:
-                    lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif',
+                    lang === 'th' ? '"Noto Sans Thai", sans-serif' : '"Inter", sans-serif',
                 }}
               >
                 {label}

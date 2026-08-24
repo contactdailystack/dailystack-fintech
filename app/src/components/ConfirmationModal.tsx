@@ -234,7 +234,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               <div className="px-4 pb-4 space-y-3">
                 <button
                   onClick={handleConfirm}
-                  className="w-full py-4 rounded-xl font-semibold text-[#101010] bg-[#56be89] hover:bg-[#6fcca3] active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-h-[48px]"
+                  className="w-full py-4 rounded-xl font-semibold text-[#101010] bg-[#0FB0CE] hover:bg-[#3FC4DB] active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-h-[48px]"
                 >
                   <Check size={20} />
                   {confirmLabel}

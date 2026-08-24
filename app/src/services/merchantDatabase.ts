@@ -72,7 +72,7 @@ export const MERCHANT_DATABASE: MerchantTemplate[] = [
   // ── Bills / Utilities ──────────────────────────────────────────────────
   { name: 'Rent', nameTh: 'ค่าเช่า', category: 'bills', billingCycle: 'monthly', approximateAmount: 12000, color: '#8B5CF6', logo: 'R' },
   { name: 'Electricity Bill', nameTh: 'ค่าไฟฟ้า', category: 'bills', billingCycle: 'monthly', approximateAmount: 1500, color: '#F59E0B', logo: 'E' },
-  { name: 'Water Bill', nameTh: 'ค่าน้ำประปา', category: 'bills', billingCycle: 'monthly', approximateAmount: 300, color: '#3B82F6', logo: 'W' },
+  { name: 'Water Bill', nameTh: 'ค่าน้ำประปา', category: 'bills', billingCycle: 'monthly', approximateAmount: 300, color: '#1786C2', logo: 'W' },
 ];
 
 // ─── Category Metadata ────────────────────────────────────────────────────────

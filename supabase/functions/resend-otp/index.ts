@@ -62,15 +62,15 @@ function buildEmailHtml(otpCode: string): string {
   <title>Email Verification</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body style="margin:0;padding:0;background:#1c232a;font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+<body style="margin:0;padding:0;background:#1c232a;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#1c232a;">
     <tr>
       <td align="center" style="padding:60px 16px;">
         <table width="560" cellpadding="0" cellspacing="0" style="background:#0d1117;border-radius:12px;overflow:hidden;">
           <tr>
-            <td style="padding:32px 40px 24px;border-top:4px solid #56be89;">
+            <td style="padding:32px 40px 24px;border-top:4px solid #0FB0CE;">
               <p style="margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:2px;">
-                <span style="color:#ffffff;">DAILY</span><span style="color:#56be89;">STACK</span>
+                <span style="color:#ffffff;">DAILY</span><span style="color:#0FB0CE;">STACK</span>
               </p>
               <p style="margin:0;font-size:13px;font-weight:500;color:#6e7681;">Email Verification</p>
             </td>
@@ -87,7 +87,7 @@ function buildEmailHtml(otpCode: string): string {
                     <p style="margin:0 0 6px;font-size:11px;font-weight:600;color:#6e7681;text-transform:uppercase;letter-spacing:1px;">
                       Verification code
                     </p>
-                    <p style="margin:0;font-size:34px;font-weight:700;color:#56be89;letter-spacing:10px;font-family:'Space Grotesk',Menlo,Monaco,'Courier New',monospace;">
+                    <p style="margin:0;font-size:34px;font-weight:700;color:#0FB0CE;letter-spacing:10px;font-family:'Inter',Menlo,Monaco,'Courier New',monospace;">
                       ${otpCode}
                     </p>
                   </td>

@@ -98,7 +98,7 @@ const ZenBlurOverlay = React.memo(function ZenBlurOverlay() {
           style={{
             width: r * 2,
             height: r * 2,
-            borderColor: 'rgba(205, 255, 36, 0.10)',
+            borderColor: 'rgba(15, 176, 206, 0.10)',
             borderWidth: 1,
           }}
           animate={{
@@ -130,7 +130,7 @@ const cardStyles = {
     default: 'bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl',
     elevated: 'bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl shadow-lg',
     glass: 'bg-[rgba(26,26,26,0.95)] border border-[rgba(255,255,255,0.08)] backdrop-blur-xl rounded-2xl',
-    glow: 'bg-[#1A1A1A] border border-[rgba(205,255,36,0.3)] shadow-[0_0_30px_rgba(205,255,36,0.2)] rounded-2xl',
+    glow: 'bg-[#1A1A1A] border border-[rgba(15, 176, 206,0.3)] shadow-[0_0_30px_rgba(15, 176, 206,0.2)] rounded-2xl',
   },
   
   padding: {
@@ -166,7 +166,7 @@ export const TeslaCard = forwardRef<HTMLDivElement, TeslaCardProps>(
     // Determine glow style dynamically at 60Hz
     const glowStyle = activePulse
       ? {
-          boxShadow: `0 0 ${30 * pulseOpacity}px ${glowColor || `rgba(205, 255, 36, ${pulseOpacity})`}`,
+          boxShadow: `0 0 ${30 * pulseOpacity}px ${glowColor || `rgba(15, 176, 206, ${pulseOpacity})`}`,
         }
       : {};
 
@@ -199,7 +199,7 @@ export const TeslaCard = forwardRef<HTMLDivElement, TeslaCardProps>(
           <div
             className="absolute inset-0 rounded-2xl pointer-events-none opacity-30"
             style={{
-              background: `radial-gradient(ellipse at center, ${glowColor || 'rgba(205, 255, 36, 0.15)'} 0%, transparent 70%)`,
+              background: `radial-gradient(ellipse at center, ${glowColor || 'rgba(15, 176, 206, 0.15)'} 0%, transparent 70%)`,
             }}
           />
         )}

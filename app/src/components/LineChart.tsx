@@ -1,6 +1,6 @@
 /**
  * LineChart.tsx — E-Pay Analytics Style
- * Dark mode line chart with lime green (#56be89) line and gradient fill
+ * Dark mode line chart with lime green (#0FB0CE) line and gradient fill
  */
 
 import { memo, useMemo, useEffect, useRef } from 'react';
@@ -26,9 +26,9 @@ interface LineChartProps {
 export const LineChart = memo(function LineChart({
   data,
   height = 180,
-  lineColor = '#56be89',
-  gradientFrom = 'rgba(205, 255, 36, 0.3)',
-  gradientTo = 'rgba(205, 255, 36, 0)',
+  lineColor = '#0FB0CE',
+  gradientFrom = 'rgba(15, 176, 206, 0.3)',
+  gradientTo = 'rgba(15, 176, 206, 0)',
   showDataPoints = true,
   showValue = false,
 }: LineChartProps) {

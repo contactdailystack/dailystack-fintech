@@ -1,6 +1,6 @@
 /**
  * alertNotifications.ts — Behavioral Alerts Notification System
- * DailyStack FinTech — Multi-channel Notifications
+ * PicksWise — Multi-channel Notifications
  */
 
 import { 
@@ -127,13 +127,13 @@ const NOTIFICATION_TEMPLATES = {
     badge: 'notification',
   },
   push: {
-    title: (alert: BehavioralAlert) => `[DailyStack] ${alert.title}`,
+    title: (alert: BehavioralAlert) => `[PicksWise] ${alert.title}`,
     body: (alert: BehavioralAlert) => alert.message,
     icon: '/icons/notification-icon.png',
     badge: '/icons/badge-icon.png',
   },
   email: {
-    subject: (alert: BehavioralAlert) => `DailyStack Alert: ${alert.title}`,
+    subject: (alert: BehavioralAlert) => `PicksWise Alert: ${alert.title}`,
     body: (alert: BehavioralAlert) => `
       <h2>${alert.title}</h2>
       <p>${alert.message}</p>
@@ -146,15 +146,15 @@ const NOTIFICATION_TEMPLATES = {
         </ul>
       ` : ''}
       <p>
-        <a href="https://dailystack.app/alerts/${alert.id}">
-          View Details in DailyStack
+        <a href="https://pickswise.app/alerts/${alert.id}">
+          View Details in PicksWise
         </a>
       </p>
     `,
   },
   sms: {
     body: (alert: BehavioralAlert) => 
-      `[DailyStack] ${alert.title}: ${alert.message.substring(0, 80)}...`,
+      `[PicksWise] ${alert.title}: ${alert.message.substring(0, 80)}...`,
   },
 };
 
@@ -181,16 +181,16 @@ class InAppNotificationSender implements NotificationSender {
       if ('Notification' in window) {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-          new Notification(notification.title || 'DailyStack', {
+          new Notification(notification.title || 'PicksWise', {
             body: notification.body,
             icon: '/icons/logo.png',
-            tag: 'dailystack-alert',
+            tag: 'pickswise-alert',
           });
         }
       }
 
       // Also dispatch custom event for in-app toast system
-      window.dispatchEvent(new CustomEvent('dailystack:alert', {
+      window.dispatchEvent(new CustomEvent('pickswise:alert', {
         detail: {
           id: Date.now().toString(),
           title: notification.title,
@@ -489,7 +489,7 @@ export class AlertNotificationService {
     const templates = NOTIFICATION_TEMPLATES.email;
     
     const subject = type === 'daily' 
-      ? 'Your DailyStack Daily Summary'
+      ? 'Your PicksWise Weekly Summary'
       : 'Your Hourly Alert Summary';
 
     const alertList = alerts.map(alert => {
@@ -509,8 +509,8 @@ export class AlertNotificationService {
 
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(135deg, #56be89 0%, #56be89 100%); padding: 24px; text-align: center;">
-          <h1 style="margin: 0; color: #000; font-size: 24px;">DailyStack</h1>
+        <div style="background: linear-gradient(135deg, #0FB0CE 0%, #0FB0CE 100%); padding: 24px; text-align: center;">
+          <h1 style="margin: 0; color: #000; font-size: 24px;">PicksWise</h1>
           <p style="margin: 8px 0 0; color: #333; font-size: 14px;">
             ${type === 'daily' ? 'Your' : 'Recent'} Alert ${type === 'daily' ? 'Summary' : 'Digest'}
           </p>
@@ -527,8 +527,8 @@ export class AlertNotificationService {
           </ul>
           
           <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #eee;">
-            <a href="https://dailystack.app/alerts" 
-               style="display: inline-block; padding: 12px 24px; background: #000; color: #56be89; text-decoration: none; border-radius: 8px;">
+            <a href="https://pickswise.app/alerts" 
+               style="display: inline-block; padding: 12px 24px; background: #000; color: #0FB0CE; text-decoration: none; border-radius: 8px;">
               View All Alerts
             </a>
           </div>
@@ -536,8 +536,8 @@ export class AlertNotificationService {
         
         <div style="padding: 16px 24px; background: #f5f5f5; text-align: center; font-size: 12px; color: #999;">
           <p style="margin: 0;">
-            You're receiving this because you have ${type} digest enabled in DailyStack.<br/>
-            <a href="https://dailystack.app/settings/alerts" style="color: #666;">
+            You're receiving this because you have ${type} digest enabled in PicksWise.<br/>
+            <a href="https://pickswise.app/settings/alerts" style="color: #666;">
               Manage your notification preferences
             </a>
           </p>

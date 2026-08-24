@@ -218,7 +218,7 @@ export function useObsidianGlass(
         0 ${4 + transform.shadowIntensity * GYRO.MAX_SHADOW * 0.5}px
         ${12 + transform.shadowIntensity * GYRO.MAX_SHADOW}px
         rgba(0, 0, 0, ${0.4 + transform.shadowIntensity * 0.4}),
-        0 0 ${20 + transform.shadowIntensity * 30}px rgba(86, 190, 137, ${transform.glowOpacity}),
+        0 0 ${20 + transform.shadowIntensity * 30}px rgba(15, 176, 206, ${transform.glowOpacity}),
         inset 0 1px 0 rgba(255, 255, 255, ${0.05 + transform.glowOpacity * 0.3})
       `
       : '0 8px 32px rgba(0, 0, 0, 0.4)',
@@ -231,7 +231,7 @@ export function useObsidianGlass(
           ${135 + transform.gradientShift * 30}deg,
           rgba(255, 255, 255, ${0.03 + transform.glowOpacity * 0.1}) 0%,
           transparent ${40 + Math.abs(transform.gradientShift) * 20}%,
-          rgba(86, 190, 137, ${transform.glowOpacity * 0.15}) 100%
+          rgba(15, 176, 206, ${transform.glowOpacity * 0.15}) 100%
         )`
       : undefined,
   };

@@ -243,7 +243,7 @@ export const seedDefaultAccounts = async (): Promise<boolean> => {
         current_balance: 50000,
         currency: 'THB',
         icon: 'building-2',
-        color: '#3B82F6',
+        color: '#1786C2',
         is_manual: true,
         is_active: true,
       },

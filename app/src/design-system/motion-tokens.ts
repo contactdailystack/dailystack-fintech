@@ -159,9 +159,9 @@ export const keyframes = {
   slideSuccess: {
     name: 'slideSuccessGlow',
     frames: {
-      '0%': { boxShadow: '0 0 0 rgba(86, 190, 137, 0)' },
-      '50%': { boxShadow: '0 0 60px rgba(86, 190, 137, 0.6), 0 0 120px rgba(86, 190, 137, 0.3)' },
-      '100%': { boxShadow: '0 0 30px rgba(86, 190, 137, 0.3)' },
+      '0%': { boxShadow: '0 0 0 rgba(15, 176, 206, 0)' },
+      '50%': { boxShadow: '0 0 60px rgba(15, 176, 206, 0.6), 0 0 120px rgba(15, 176, 206, 0.3)' },
+      '100%': { boxShadow: '0 0 30px rgba(15, 176, 206, 0.3)' },
     },
     timing: duration.slower,
     easing: spring.TIGHT,

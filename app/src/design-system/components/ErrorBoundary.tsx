@@ -105,7 +105,7 @@ const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
       <div className="flex gap-3">
         <button
           onClick={resetError}
-          className="px-4 py-2 bg-[#56be89] text-[#0B0F0A] font-semibold rounded-xl hover:bg-[#6fcca3] active:scale-[0.98] transition-all"
+          className="px-4 py-2 bg-[#0FB0CE] text-[#050D1F] font-semibold rounded-xl hover:bg-[#3FC4DB] active:scale-[0.98] transition-all"
         >
           Try Again
         </button>
@@ -122,7 +122,7 @@ const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
         If this keeps happening,{' '}
         <a 
           href="mailto:support@dailystack.app" 
-          className="text-[#56be89] hover:underline"
+          className="text-[#0FB0CE] hover:underline"
         >
           contact support
         </a>
@@ -185,7 +185,7 @@ export const TeslaErrorCard: React.FC<TeslaErrorCardProps> = ({
         {onRetry && (
           <button
             onClick={onRetry}
-            className="px-3 py-1.5 text-xs font-medium text-[#56be89] hover:bg-[rgba(199,255,46,0.1)] rounded-lg transition-colors"
+            className="px-3 py-1.5 text-xs font-medium text-[#0FB0CE] hover:bg-[rgba(199,255,46,0.1)] rounded-lg transition-colors"
           >
             Retry
           </button>

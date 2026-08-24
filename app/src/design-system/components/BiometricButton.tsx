@@ -119,11 +119,11 @@ export const BiometricButton: React.FC<BiometricButtonProps> = ({
       onClick={handlePress}
       className={`
         inline-flex items-center justify-center gap-2
-        bg-[rgba(205,255,36,0.15)]
-        hover:bg-[rgba(205,255,36,0.25)]
-        text-[#56be89]
-        border border-[rgba(205,255,36,0.3)]
-        hover:shadow-[0_0_15px_rgba(205,255,36,0.2)]
+        bg-[rgba(15, 176, 206,0.15)]
+        hover:bg-[rgba(15, 176, 206,0.25)]
+        text-[#0FB0CE]
+        border border-[rgba(15, 176, 206,0.3)]
+        hover:shadow-[0_0_15px_rgba(15, 176, 206,0.2)]
         px-4 py-3
         text-sm
         h-11

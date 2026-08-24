@@ -57,7 +57,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
     date,
     status = 'completed',
     icon: Icon,
-    iconColor = '#56be89',
+    iconColor = '#0FB0CE',
   } = transaction;
 
   const isExpense = amount < 0;
@@ -82,7 +82,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
           ${isPending ? 'opacity-60' : ''}
           ${isFailed ? 'opacity-50' : ''}
           transition-colors duration-200
-          hover:bg-[rgba(205,255,36,0.03)]
+          hover:bg-[rgba(15, 176, 206,0.03)]
           ${className}
         `}
       >

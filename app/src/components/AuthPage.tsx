@@ -1,6 +1,6 @@
 /**
  * ============================================================
- * DailyStack � Auth Page v5.1
+ * PicksWise — Auth Page v5.1
  * ============================================================
  * New Design (2026-06-15)
  * Based on dailystack_auth_screens.html
@@ -65,7 +65,7 @@ const tokens = {
   // Typography
   fontSize: { xs: '11px', sm: '13px', base: '14px', lg: '16px', xl: '24px' },
   fontEN: '"Inter", sans-serif',
-  fontTH: '"Kanit", sans-serif',
+  fontTH: '"Noto Sans Thai", sans-serif',
 };
 
 // ============================================================
@@ -389,15 +389,15 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
   // Validation
   const getFieldError = (field: 'email' | 'password' | 'name', value?: string) => {
     if (field === 'email') {
-      if (!value) return lang === 'th' ? '??????????????' : 'Please enter your email';
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return lang === 'th' ? '?????????????????????' : 'Invalid email format';
+      if (!value) return lang === 'th' ? 'กรุณากรอกอีเมล' : 'Please enter your email';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return lang === 'th' ? 'รูปแบบอีเมลไม่ถูกต้อง' : 'Invalid email format';
     }
     if (field === 'password') {
-      if (!value) return lang === 'th' ? '?????????????????' : 'Please enter your password';
-      if (authView === 'register' && value.length < 8) return lang === 'th' ? '??????????????????????? 8 ????????' : 'Password must be at least 8 characters';
+      if (!value) return lang === 'th' ? 'กรุณากรอกรหัสผ่าน' : 'Please enter your password';
+      if (authView === 'register' && value.length < 8) return lang === 'th' ? 'รหัสผ่านต้องมีความยาว 8 ตัวอักษรขึ้นไป' : 'Password must be at least 8 characters';
     }
     if (field === 'name') {
-      if (!value) return lang === 'th' ? '?????????????-???????' : 'Please enter your full name';
+      if (!value) return lang === 'th' ? 'กรุณากรอกชื่อ-นามสกุล' : 'Please enter your full name';
     }
     return null;
   };
@@ -428,7 +428,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
         if (result.success) {
           navigateToDashboard();
         } else {
-          setError(result.error || (lang === 'th' ? '?????????????? ????????????' : 'Something went wrong. Please try again.'));
+          setError(result.error || (lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' : 'Something went wrong. Please try again.'));
           haptics.fire('ERROR_REJECT');
         }
       } else {
@@ -437,11 +437,11 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
           navigateToDashboard();
         } else {
           if (result.error?.toLowerCase().includes('password')) {
-            setError(lang === 'th' ? '?????????????????? ????????????' : 'Incorrect password. Please try again.');
+            setError(lang === 'th' ? 'รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง' : 'Incorrect password. Please try again.');
           } else if (result.error?.toLowerCase().includes('email')) {
-            setError(lang === 'th' ? '??????????????????? ????????????????' : 'Email not found. Please sign up.');
+            setError(lang === 'th' ? 'ไม่พบอีเมลนี้ในระบบ กรุณาสมัครสมาชิก' : 'Email not found. Please sign up.');
           } else {
-            setError(result.error || (lang === 'th' ? '?????????????? ????????????' : 'Something went wrong. Please try again.'));
+            setError(result.error || (lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' : 'Something went wrong. Please try again.'));
           }
           haptics.fire('ERROR_REJECT');
         }
@@ -494,7 +494,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
     e.preventDefault();
     haptics.fire('SELECT');
     if (!email) {
-      setError(lang === 'th' ? '??????????????' : 'Please enter your email address.');
+      setError(lang === 'th' ? 'กรุณากรอกอีเมลของคุณ' : 'Please enter your email address.');
       return;
     }
     setLoading(true);
@@ -575,7 +575,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
             >
               {label(
                 <>Decide your wealth with <span style={{ color: 'rgba(11, 11, 11, 0.5)' }}>absolute</span><br />intelligence.</>,
-                <>????????????????????????<br />???????????????<span style={{ color: 'rgba(11, 11, 11, 0.5)' }}> � ?????????????</span></>
+                <>ตัดสินใจเรื่องเงินของคุณ<br />ด้วย<span style={{ color: 'rgba(11, 11, 11, 0.5)' }}>สติปัญญา</span>ที่แม่นยำ</>
               )}
             </h1>
           </div>
@@ -670,13 +670,13 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                     style={{ color: tokens.dark, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
                     onClick={() => { haptics.fire('SELECT'); setAuthView('forgot'); setError(null); }}
                   >
-                    {label('Forgot Password?', '????????????')}
+                    {label('Forgot Password?', 'ลืมรหัสผ่าน?')}
                   </button>
                 </div>
 
                 {/* Submit Button */}
                 <PrimaryButton type="submit" loading={loading} reduceMotion={reduceMotion}>
-                  {label('Sign In ', '??????????? ')}<ArrowRight size={16} style={{ display: 'inline' }} />
+                  {label('Sign In ', 'เข้าสู่ระบบ ')}<ArrowRight size={16} style={{ display: 'inline' }} />
                 </PrimaryButton>
 
                 {/* Divider */}
@@ -688,7 +688,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
 
                 {/* Google Login */}
                 <SecondaryButton onClick={handleSocialLogin} loading={socialLoading === 'google'} icon={<GoogleIcon />}>
-                  {label('Continue with Google', '??????????????? Google')}
+                  {label('Continue with Google', 'ดำเนินการต่อด้วย Google')}
                 </SecondaryButton>
 
                 {/* Switch to Register */}
@@ -696,9 +696,9 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                   className="text-center mt-4"
                   style={{ fontSize: tokens.fontSize.sm, color: tokens.grayText, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
                 >
-                  {label("Don't have an account? ", '?????????????? ')}
+                  {label("Don't have an account? ", 'ยังไม่มีบัญชี? ')}
                   <button type="button" onClick={handleSwitchToRegister} className="font-bold underline underline-offset-2" style={{ color: tokens.dark }}>
-                    {label('Sign Up', '???????????')}
+                    {label('Sign Up', 'สมัครสมาชิก')}
                   </button>
                 </p>
               </form>
@@ -739,7 +739,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                 fontFamily: '"Inter", sans-serif',
               }}
             >
-              {label('Reset your\npassword', '??????\n??????????????')}
+              {label('Reset your\npassword', 'รีเซ็ต\nรหัสผ่านของคุณ')}
             </h1>
             <p
               className="mt-3"
@@ -751,8 +751,8 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
               }}
             >
               {forgotSent
-                ? label('Check your email for a reset link.', '???????????????????????????????')
-                : label("Enter your email and we'll send you a reset link.", '???????????????????????????????????')}
+                ? label('Check your email for a reset link.', 'ตรวจสอบอีเมลของคุณเพื่อกดลิงก์รีเซ็ตรหัสผ่าน')
+                : label("Enter your email and we'll send you a reset link.", 'กรอกอีเมลของคุณ เราจะส่งลิงก์รีเซ็ตรหัสผ่านให้')}
             </p>
           </div>
 
@@ -774,7 +774,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                     className="font-bold text-lg mb-2"
                     style={{ color: tokens.dark, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
                   >
-                    {label('Email Sent!', '????????????!')}
+                    {label('Email Sent!', 'ส่งอีเมลแล้ว!')}
                   </h2>
                   <p
                     className="text-sm mb-6"
@@ -782,11 +782,11 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                   >
                     {label(
                       <>If an account exists for <strong>{email}</strong>, you will receive a password reset link shortly.</>,
-                      <>???????? <strong>{email}</strong> ???????????? ??????????????????????????????????? ???</>
+                      <>หากมีบัญชีของ <strong>{email}</strong> อยู่ในระบบ คุณจะได้รับลิงก์รีเซ็ตรหัสผ่านทางอีเมลโดยเร็วที่สุด</>
                     )}
                   </p>
                   <PrimaryButton onClick={handleBackToLogin} reduceMotion={reduceMotion}>
-                    {label('Back to Login', '??????????????????')}
+                    {label('Back to Login', 'กลับไปหน้าเข้าสู่ระบบ')}
                   </PrimaryButton>
                 </div>
               ) : (
@@ -815,7 +815,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                    placeholder={String(label('you@example.com', '???@????????.com'))}
+                    placeholder={String(label('you@example.com', 'อีเมล@บริษัท.com'))}
                       autoComplete="email"
                       id="forgot-email"
                       icon={<Mail size={18} />}
@@ -842,7 +842,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
 
                   {/* Submit Button */}
                   <PrimaryButton type="submit" loading={loading} reduceMotion={reduceMotion}>
-                    {label('Send Reset Link', '??????????????')}
+                    {label('Send Reset Link', 'ส่งลิงก์รีเซ็ตรหัสผ่าน')}
                   </PrimaryButton>
 
                   <p className="text-center -mt-1">
@@ -852,7 +852,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                       className="font-bold underline underline-offset-2"
                       style={{ color: tokens.dark, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
                     >
-                      {label('Back to Login', '??????????????????')}
+                      {label('Back to Login', 'กลับไปหน้าเข้าสู่ระบบ')}
                     </button>
                   </p>
                 </form>
@@ -893,7 +893,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
             >
               {label(
                 <>Decide your wealth with <span style={{ color: 'rgba(255,255,255,0.5)' }}>absolute</span><br />intelligence.</>,
-                <>????????????????????????<br />???????????????<span style={{ color: 'rgba(255,255,255,0.5)' }}> � ?????????????</span></>
+                <>ตัดสินใจเรื่องเงินของคุณ<br />ด้วย<span style={{ color: 'rgba(255,255,255,0.5)' }}>สติปัญญา</span>ที่แม่นยำ</>
               )}
             </h1>
 
@@ -906,7 +906,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                 fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
               }}
             >
-              {label('One purchase. Lifetime access.', '?????????????? ???????????????')}
+              {label('One purchase. Lifetime access.', 'จ่ายครั้งเดียว เข้าถึงตลอดชีพ')}
             </p>
           </div>
 
@@ -935,7 +935,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                       fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
                     }}
                   >
-                    {label('Full Name', '????-???????')}
+                    {label('Full Name', 'ชื่อ-นามสกุล')}
                   </label>
                   <InputField
                     type="text"
@@ -989,7 +989,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                       fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
                     }}
                   >
-                    {label('Password', '????????')}
+                    {label('Password', 'รหัสผ่าน')}
                   </label>
                   <InputField
                     type="password"
@@ -1022,7 +1022,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
 
                 {/* Submit Button */}
                 <PrimaryButton type="submit" loading={loading} variant="lime" reduceMotion={reduceMotion}>
-                  {label('Create Account ', '?????????? ')}<ArrowRight size={16} style={{ display: 'inline' }} />
+                  {label('Create Account ', 'สร้างบัญชี ')}<ArrowRight size={16} style={{ display: 'inline' }} />
                 </PrimaryButton>
 
                 {/* Terms */}
@@ -1032,14 +1032,14 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                 >
                   {label(
                     <>By signing up, you agree to our<br /><span className="font-bold" style={{ color: tokens.dark }}>Privacy Policy</span> and <span className="font-bold" style={{ color: tokens.dark }}>Terms of Service</span></>,
-                    <>???????????????? ??????????<br /><span className="font-bold" style={{ color: tokens.dark }}>?????????????????????</span> ??? <span className="font-bold" style={{ color: tokens.dark }}>?????????????????</span></>
+                    <>การสมัครสมาชิกถือว่าคุณยอมรับ<br /><span className="font-bold" style={{ color: tokens.dark }}>นโยบายความเป็นส่วนตัว</span> และ <span className="font-bold" style={{ color: tokens.dark }}>ข้อกำหนดการใช้งาน</span></>
                   )}
                 </p>
 
                 {/* Divider */}
                 <div className="flex items-center gap-3 my-4">
                   <div className="flex-1 h-px" style={{ backgroundColor: '#E8E8E4' }} />
-                  <span style={{ fontSize: '12px', color: tokens.grayText, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}>{label('Already have an account?', '????????????????')}</span>
+                  <span style={{ fontSize: '12px', color: tokens.grayText, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}>{label('Already have an account?', 'มีบัญชีอยู่แล้ว?')}</span>
                   <div className="flex-1 h-px" style={{ backgroundColor: '#E8E8E4' }} />
                 </div>
 
@@ -1051,7 +1051,7 @@ export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'l
                     className="font-bold underline underline-offset-2"
                     style={{ color: tokens.dark, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
                   >
-                    {label('Sign In', '???????????')}
+                    {label('Sign In', 'เข้าสู่ระบบ')}
                   </button>
                 </p>
               </form>

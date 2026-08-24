@@ -62,9 +62,9 @@ const ShimmerOverlay: React.FC<{ isReducedMotion: boolean }> = ({ isReducedMotio
         background: `linear-gradient(
           90deg,
           transparent 0%,
-          rgba(86, 190, 137, 0.06) 20%,
-          rgba(86, 190, 137, 0.12) 50%,
-          rgba(86, 190, 137, 0.06) 80%,
+          rgba(15, 176, 206, 0.06) 20%,
+          rgba(15, 176, 206, 0.12) 50%,
+          rgba(15, 176, 206, 0.06) 80%,
           transparent 100%
         )`,
         width: '60%',

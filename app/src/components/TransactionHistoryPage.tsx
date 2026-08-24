@@ -101,8 +101,8 @@ const FilterDropdown: React.FC<{
                 }}
                 className="w-full px-4 py-2 text-left text-sm transition-colors"
                 style={{
-                  backgroundColor: value === option ? 'rgba(205, 255, 36, 0.1)' : 'transparent',
-                  color: value === option ? '#56be89' : '#FFFFFF',
+                  backgroundColor: value === option ? 'rgba(15, 176, 206, 0.1)' : 'transparent',
+                  color: value === option ? '#0FB0CE' : '#FFFFFF',
                 }}
                 onMouseEnter={(e) => {
                   if (value !== option) {
@@ -161,15 +161,15 @@ const TransactionItemComponent: React.FC<TransactionItemComponentProps> = ({
   const iconBgColor = isIncome 
     ? 'rgba(76, 175, 80, 0.15)' 
     : isExpense 
-      ? 'rgba(205, 255, 36, 0.15)' 
-      : 'rgba(59, 130, 246, 0.15)';
-  const iconColor = isIncome ? '#4CAF50' : '#56be89';
+      ? 'rgba(15, 176, 206, 0.15)' 
+      : 'rgba(23, 134, 194, 0.15)';
+  const iconColor = isIncome ? '#4CAF50' : '#0FB0CE';
 
   return (
     <motion.button
       onClick={onClick}
       whileTap={{ scale: 0.98 }}
-      className="w-full flex items-center gap-3 px-4 py-4 transition-colors hover:bg-[rgba(205,255,36,0.03)]"
+      className="w-full flex items-center gap-3 px-4 py-4 transition-colors hover:bg-[rgba(15, 176, 206,0.03)]"
       style={{ backgroundColor: 'transparent' }}
     >
       {/* Merchant Icon */}
@@ -322,12 +322,12 @@ export default function TransactionHistoryPage({
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: '#0B0F0A', fontFamily: '"Inter", sans-serif' }}
+      style={{ backgroundColor: '#050D1F', fontFamily: '"Inter", sans-serif' }}
     >
       {/* Header */}
       <header 
         className="sticky top-0 z-30 px-4 py-4 flex items-center justify-between"
-        style={{ backgroundColor: '#0B0F0A', borderBottom: '1px solid #1F2328' }}
+        style={{ backgroundColor: '#050D1F', borderBottom: '1px solid #1F2328' }}
       >
         {/* Left - Back button */}
         <button
@@ -416,7 +416,7 @@ export const TransactionSuccessScreen: React.FC<TransactionSuccessScreenProps> =
     <div
       className="min-h-screen flex flex-col"
       style={{ 
-        backgroundColor: '#0B0F0A', 
+        backgroundColor: '#050D1F', 
         fontFamily: '"Inter", sans-serif' 
       }}
     >
@@ -424,7 +424,7 @@ export const TransactionSuccessScreen: React.FC<TransactionSuccessScreenProps> =
       <div 
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(180deg, #0B0F0A 0%, #141414 50%, #1A1A1A 100%)',
+          background: 'linear-gradient(180deg, #050D1F 0%, #141414 50%, #1A1A1A 100%)',
         }}
       />
 
@@ -436,13 +436,13 @@ export const TransactionSuccessScreen: React.FC<TransactionSuccessScreenProps> =
             {/* Lime circle */}
             <div
               className="w-32 h-32 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: '#56be89' }}
+              style={{ backgroundColor: '#0FB0CE' }}
             >
               {/* Checkmark */}
               <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
                 <motion.path
                   d="M5 12l5 5L19 7"
-                  stroke="#0B0F0A"
+                  stroke="#050D1F"
                   strokeWidth="3"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -549,7 +549,7 @@ export const TransactionSuccessScreen: React.FC<TransactionSuccessScreenProps> =
             {/* Total */}
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-white">Total</span>
-              <span className="text-lg font-bold" style={{ color: '#56be89' }}>
+              <span className="text-lg font-bold" style={{ color: '#0FB0CE' }}>
                 $1,309.00
               </span>
             </div>

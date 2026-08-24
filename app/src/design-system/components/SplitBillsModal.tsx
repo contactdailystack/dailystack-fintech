@@ -228,10 +228,10 @@ export const SplitBillsModal: React.FC<SplitBillsModalProps> = ({
                   </div>
 
                   {/* Your Share */}
-                  <div className="bg-[#56be89]/10 rounded-2xl p-4 border border-[#56be89]/20">
+                  <div className="bg-[#0FB0CE]/10 rounded-2xl p-4 border border-[#0FB0CE]/20">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-[#56be89] flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-[#0FB0CE] flex items-center justify-center">
                           <span className="text-xs font-bold text-black">Y</span>
                         </div>
                         <span className="text-sm font-medium text-gray-700">{t.you}</span>
@@ -257,7 +257,7 @@ export const SplitBillsModal: React.FC<SplitBillsModalProps> = ({
                               setFriends(newFriends);
                             }}
                             placeholder={t.emailPlaceholder}
-                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#56be89] focus:ring-2 focus:ring-[#56be89]/20 transition-all"
+                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#0FB0CE] focus:ring-2 focus:ring-[#0FB0CE]/20 transition-all"
                           />
                         </div>
                         
@@ -273,7 +273,7 @@ export const SplitBillsModal: React.FC<SplitBillsModalProps> = ({
                                 setCustomAmounts(newAmounts);
                               }}
                               placeholder="0.00"
-                              className="w-full pl-7 pr-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#56be89] focus:ring-2 focus:ring-[#56be89]/20 transition-all"
+                              className="w-full pl-7 pr-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#0FB0CE] focus:ring-2 focus:ring-[#0FB0CE]/20 transition-all"
                             />
                           </div>
                         )}
@@ -292,7 +292,7 @@ export const SplitBillsModal: React.FC<SplitBillsModalProps> = ({
                     {/* Add Another */}
                     <button
                       onClick={addFriend}
-                      className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#56be89] transition-colors cursor-pointer"
+                      className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#0FB0CE] transition-colors cursor-pointer"
                     >
                       <UserPlus className="w-4 h-4" />
                       {t.addAnother}
@@ -319,7 +319,7 @@ export const SplitBillsModal: React.FC<SplitBillsModalProps> = ({
                   <button
                     onClick={handleSend}
                     disabled={sending || !isValidSplit || !friends.some(f => f.trim())}
-                    className="w-full py-4 rounded-2xl bg-[#56be89] text-black font-display font-bold text-sm uppercase tracking-wider hover:bg-[#6fcca3] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-4 rounded-2xl bg-[#0FB0CE] text-black font-display font-bold text-sm uppercase tracking-wider hover:bg-[#3FC4DB] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {sending ? (
                       <>

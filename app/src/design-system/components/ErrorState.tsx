@@ -19,13 +19,13 @@ import { ActionButton } from './ActionButton';
 import { motionTokens, toSeconds, easing } from '../motion-tokens';
 
 // ─── Design Tokens ──────────────────────────────────────────────────
-const ACCENT = '#56be89';
+const ACCENT = '#0FB0CE';
 const ERROR_RED = '#F87171';
 const ERROR_AMBER = '#F59E0B';
 const ERROR_ORANGE = '#F97316';
 const MUTED = '#888888';
 const BACKGROUND = '#1A1A1A';
-const SURFACE = '#0B0F0A';
+const SURFACE = '#050D1F';
 
 // ─── Error Type Categories ──────────────────────────────────────────
 export type ErrorCategory = 

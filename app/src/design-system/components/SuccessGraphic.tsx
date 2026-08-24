@@ -143,7 +143,7 @@ const SuccessGraphic: React.FC<SuccessGraphicProps> = ({
         transition={{ duration: 0.3 }}
         className="absolute inset-0 rounded-full"
         style={{
-          background: 'radial-gradient(circle, rgba(205,255,36,0.3) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(15, 176, 206,0.3) 0%, transparent 70%)',
         }}
       />
 
@@ -179,7 +179,7 @@ const SuccessGraphic: React.FC<SuccessGraphicProps> = ({
                 angle={(i * 360) / starCount + (Math.random() * 20 - 10)}
                 delay={0.3 + i * 0.05}
                 size={config.star}
-                color={i % 3 === 0 ? '#56be89' : '#4CAF50'}
+                color={i % 3 === 0 ? '#0FB0CE' : '#4CAF50'}
               />
             ))}
           </div>
@@ -246,8 +246,8 @@ export const SuccessCard: React.FC<SuccessCardProps> = ({
           className={`
             flex flex-col items-center justify-center
             p-8 rounded-3xl
-            bg-[#1A1A1A] border border-[rgba(205,255,36,0.3)]
-            shadow-[0_0_40px_rgba(205,255,36,0.1)]
+            bg-[#1A1A1A] border border-[rgba(15, 176, 206,0.3)]
+            shadow-[0_0_40px_rgba(15, 176, 206,0.1)]
             ${className}
           `}
         >

@@ -316,7 +316,7 @@ import { hapticTokens } from './haptic-tokens';
  * 
  * import { ds } from './design-system';
  * 
- * ds.colors.mint.DEFAULT  // #56be89
+ * ds.colors.mint.DEFAULT  // #0FB0CE
  * ds.typography.netWorth  // Net Worth style
  * ds.motion.spring.TIGHT  // cubic-bezier(0.16, 1, 0.3, 1)
  */

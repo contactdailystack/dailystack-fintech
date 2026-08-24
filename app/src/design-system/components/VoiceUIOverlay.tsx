@@ -84,7 +84,7 @@ export default function VoiceUIOverlay({
           ctx.lineTo(x, y);
         }
         
-        ctx.strokeStyle = `rgba(86, 190, 137, ${opacity})`;
+        ctx.strokeStyle = `rgba(15, 176, 206, ${opacity})`;
         ctx.lineWidth = 2;
         ctx.stroke();
       }
@@ -175,7 +175,7 @@ export default function VoiceUIOverlay({
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute inset-0 rounded-full"
                 style={{
-                  boxShadow: '0 0 60px rgba(86, 190, 137, 0.2)',
+                  boxShadow: '0 0 60px rgba(15, 176, 206, 0.2)',
                 }}
               />
 
@@ -192,8 +192,8 @@ export default function VoiceUIOverlay({
                 onClick={handleSimulateTranscript}
                 className="absolute inset-0 m-auto w-20 h-20 rounded-full flex items-center justify-center"
                 style={{
-                  backgroundColor: '#56be89',
-                  boxShadow: '0 0 40px rgba(86, 190, 137, 0.4)',
+                  backgroundColor: '#0FB0CE',
+                  boxShadow: '0 0 40px rgba(15, 176, 206, 0.4)',
                 }}
               >
                 <Mic className="w-10 h-10 text-black" />
@@ -214,7 +214,7 @@ export default function VoiceUIOverlay({
                   }}
                   className="absolute inset-0 rounded-full border-2"
                   style={{
-                    borderColor: `rgba(86, 190, 137, ${0.3 - i * 0.08})`,
+                    borderColor: `rgba(15, 176, 206, ${0.3 - i * 0.08})`,
                     transformOrigin: 'center',
                   }}
                 />

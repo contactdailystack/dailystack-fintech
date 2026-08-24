@@ -13,6 +13,7 @@ import {
   Transaction
 } from './alertTypes';
 import { Transaction as TransactionType } from '../../types';
+import { loadBudgets, monthSpendByBudgetKey } from '../budgetStore';
 
 // ─── Metric Calculator ───────────────────────────────────────────────────
 
@@ -21,12 +22,31 @@ interface MetricResult {
   breakdown?: Record<string, number>;
 }
 
+/** Minimal subscription shape the engine needs (mirrors SubscriptionTrackerPage) */
+export interface AlertRuntimeSub {
+  id: string;
+  name: string;
+  amount: number;
+  dueDate: number; // day of month
+}
+
+/** Runtime data the engine cannot derive from transactions alone */
+export interface AlertRuntimeContext {
+  /** Current wallet balance — enables low-balance alerts */
+  balance?: number;
+  /** Active subscriptions — enables bill-due-soon reminders */
+  subscriptions?: AlertRuntimeSub[];
+}
+
 class MetricCalculator {
   private transactions: TransactionType[];
   private dateRange: { start: Date; end: Date };
+  /** Runtime context injected by the caller (balance, subscriptions) */
+  private ctx: AlertRuntimeContext;
 
-  constructor(transactions: TransactionType[], days: number = 30) {
+  constructor(transactions: TransactionType[], days: number = 30, ctx: AlertRuntimeContext = {}) {
     this.transactions = transactions;
+    this.ctx = ctx;
     const end = new Date();
     const start = new Date();
     start.setDate(start.getDate() - days);
@@ -54,6 +74,28 @@ class MetricCalculator {
         .reduce((sum, tx) => sum + tx.amount, 0)
     );
     return { value: total };
+  }
+
+  /**
+   * Max over-budget percentage across budget categories this month (P1-7).
+   * 0 when every category is within its limit.
+   */
+  calculateBudgetVariance(): MetricResult {
+    try {
+      const budgets = loadBudgets();
+      if (budgets.length === 0) return { value: 0 };
+      const spend = monthSpendByBudgetKey(this.transactions);
+      let worst = 0;
+      for (const b of budgets) {
+        if (b.limit <= 0) continue;
+        const spent = spend.get(b.key) || 0;
+        const pct = (spent / b.limit) * 100;
+        if (pct > worst) worst = pct;
+      }
+      return { value: Math.round(worst) };
+    } catch {
+      return { value: 0 };
+    }
   }
 
   /**
@@ -98,6 +140,60 @@ class MetricCalculator {
   }
 
   /**
+   * Current wallet balance (injected via runtime context).
+   * Undefined balance → -1 so `lt threshold` rules never fire on missing data.
+   */
+  calculateBalance(): MetricResult {
+    return { value: typeof this.ctx.balance === 'number' ? this.ctx.balance : -1 };
+  }
+
+  /**
+   * Suspected duplicate charges: same merchant (description) + same amount,
+   * posted within 48h of each other. Counts distinct flagged transactions.
+   */
+  calculateDuplicateCount(): MetricResult {
+    const expenses = this.transactions.filter(t => t.amount < 0);
+    const flagged = new Set<string>();
+    for (let i = 0; i < expenses.length; i++) {
+      for (let j = i + 1; j < expenses.length; j++) {
+        const a = expenses[i];
+        const b = expenses[j];
+        if (a.id === b.id) continue;
+        if (a.amount !== b.amount) continue;
+        const da = new Date(a.date).getTime();
+        const dbb = new Date(b.date).getTime();
+        if (Math.abs(da - dbb) > 48 * 60 * 60 * 1000) continue;
+        // Merchant match: exact merchant or one contains the other (case-insensitive)
+        const na = (a.merchant || '').trim().toLowerCase();
+        const nb = (b.merchant || '').trim().toLowerCase();
+        if (!na || !nb) continue;
+        if (na !== nb && !na.includes(nb) && !nb.includes(na)) continue;
+        flagged.add(a.id);
+        flagged.add(b.id);
+      }
+    }
+    return { value: flagged.size };
+  }
+
+  /**
+   * Active subscriptions due within the next 7 days.
+   */
+  calculateBillsDue7d(): MetricResult {
+    const subs = this.ctx.subscriptions;
+    if (!subs || subs.length === 0) return { value: 0 };
+    const today = new Date();
+    const cur = today.getDate();
+    const dim = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    let count = 0;
+    for (const s of subs) {
+      let dueIn = s.dueDate - cur;
+      if (dueIn < 0) dueIn += dim;
+      if (dueIn <= 7) count++;
+    }
+    return { value: count };
+  }
+
+  /**
    * Calculate metric by name
    */
   calculate(metric: AlertMetric): MetricResult {
@@ -110,6 +206,12 @@ class MetricCalculator {
         return this.calculateTransactionCount();
       case 'spending_category':
         return this.calculateSpendingTotal(); // Will be overridden per-category
+      case 'balance':
+        return this.calculateBalance();
+      case 'duplicate_count':
+        return this.calculateDuplicateCount();
+      case 'bills_due_7d':
+        return this.calculateBillsDue7d();
       default:
         return { value: 0 };
     }
@@ -182,8 +284,12 @@ interface AlertGenerationContext {
 export class AlertGenerator {
   private calculator: MetricCalculator;
 
-  constructor(private transactions: TransactionType[], days: number = 30) {
-    this.calculator = new MetricCalculator(transactions, days);
+  constructor(
+    private transactions: TransactionType[],
+    days: number = 30,
+    runtimeContext: AlertRuntimeContext = {}
+  ) {
+    this.calculator = new MetricCalculator(transactions, days, runtimeContext);
   }
 
   /**
@@ -198,7 +304,10 @@ export class AlertGenerator {
       savings_rate: 0, // Calculated separately
       streak_days: 0, // From tracking streaks
       goal_progress: 0, // From goals service
-      budget_variance: 0, // Calculated from budgets
+      budget_variance: this.calculator.calculateBudgetVariance().value,
+      balance: this.calculator.calculateBalance().value,
+      duplicate_count: this.calculator.calculateDuplicateCount().value,
+      bills_due_7d: this.calculator.calculateBillsDue7d().value,
     };
   }
 
@@ -254,6 +363,27 @@ export class AlertGenerator {
     severity: AlertSeverity
   ): { title: string; message: string } {
     const metrics = context.currentMetrics;
+    
+    // Runtime-context alerts (balance / duplicates / bills) keyed by primary metric
+    const primaryMetric = rule.conditions[0]?.metric;
+    if (primaryMetric === 'balance') {
+      return {
+        title: 'ยอดเงินคงเหลือต่ำ',
+        message: `ยอดเงินในบัญชีเหลือ ฿${Math.max(0, metrics.balance).toLocaleString()} ต่ำกว่าเกณฑ์ที่ตั้งไว้ ระวังการใช้จ่ายช่วงนี้เพื่อไม่ให้หมดก่อนถึงวันเงินเดือนออก`
+      };
+    }
+    if (primaryMetric === 'duplicate_count') {
+      return {
+        title: 'พบรายการที่อาจถูกตั้งค่าซ้ำ',
+        message: `ตรวจพบ ${metrics.duplicate_count} รายการที่มีร้านค้าและจำนวนเงินเดียวกันภายใน 48 ชั่วโมง อาจเป็นการถูกตั้งเงินซ้ำ เปิดหน้า Activity เพื่อตรวจสอบ`
+      };
+    }
+    if (primaryMetric === 'bills_due_7d') {
+      return {
+        title: 'มีบิลที่จะมาถึง',
+        message: `คุณมี ${metrics.bills_due_7d} รายการสมัคร/บิลที่จะถูกตัดภายใน 7 วันข้างหน้า ตรวจสอบหน้า Subscriptions เพื่อเตรียมแผนเงิน`
+      };
+    }
     
     // Generate dynamic content based on rule type
     switch (rule.category) {
@@ -411,6 +541,66 @@ export const DEFAULT_ALERT_RULES: Omit<AlertRule, 'id' | 'createdAt' | 'updatedA
     autoResolve: true,
     showInFeed: true,
     thresholds: { warning: 0, alert: 10, critical: 25 }
+  },
+  {
+    name: 'Low Balance Warning',
+    description: 'Warns when wallet balance falls below a safe threshold before payday',
+    category: 'budget',
+    severity: 'warning',
+    priority: 'high',
+    triggers: [{ type: 'time_trigger', time: '09:00', days: [0, 1, 2, 3, 4, 5, 6] }],
+    conditions: [
+      { metric: 'balance', operator: 'lt', value: 2000, window: 'daily' }
+    ],
+    conditionsLogic: 'AND',
+    channels: ['in_app', 'push'],
+    timing: 'immediate',
+    cooldownMinutes: 720,
+    maxPerDay: 1,
+    enabled: true,
+    autoResolve: true,
+    showInFeed: true,
+    thresholds: {}
+  },
+  {
+    name: 'Duplicate Charge Detected',
+    description: 'Flags suspected duplicate charges (same merchant + amount within 48h)',
+    category: 'security',
+    severity: 'alert',
+    priority: 'high',
+    triggers: [{ type: 'budget_exceeded' }],
+    conditions: [
+      { metric: 'duplicate_count', operator: 'gte', value: 1 }
+    ],
+    conditionsLogic: 'AND',
+    channels: ['in_app'],
+    timing: 'immediate',
+    cooldownMinutes: 1440,
+    maxPerDay: 2,
+    enabled: true,
+    autoResolve: false,
+    showInFeed: true,
+    thresholds: { warning: 1, alert: 2 }
+  },
+  {
+    name: 'Upcoming Bills Reminder',
+    description: 'Reminds when subscriptions or bills are due within the next 7 days',
+    category: 'pattern',
+    severity: 'info',
+    priority: 'medium',
+    triggers: [{ type: 'weekly_summary' }],
+    conditions: [
+      { metric: 'bills_due_7d', operator: 'gte', value: 1 }
+    ],
+    conditionsLogic: 'AND',
+    channels: ['in_app', 'push'],
+    timing: 'immediate',
+    cooldownMinutes: 1440,
+    maxPerDay: 1,
+    enabled: true,
+    autoResolve: true,
+    showInFeed: true,
+    thresholds: {}
   }
 ];
 

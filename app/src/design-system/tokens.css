@@ -26,7 +26,7 @@
  *   1. NEVER hardcode hex values in components
  *   2. NEVER use brand color for decoration
  *   3. NEVER use semantic color without icon/text pairing
- *   4. Brand #56BE89 ≈ 5% of viewport max
+ *   4. Brand #0FB0CE ≈ 5% of viewport max
  *
  * ============================================================
  */
@@ -35,32 +35,41 @@
    LAYER 1 — BRAND TOKENS
    Immutable. Same value in light and dark.
    Applied ONLY to: CTA, active nav, key insight.
-   v2.0 — Rocket Money visual clone palette:
-     Primary = Prussian Navy #001C5A (RM CTA / active states)
-     Secondary = Di Serria Orange #D6964A (urgent accents)
-     Tertiary = Jordy Blue #6BBAEF (growth / info accents)
+   v3.0 — 2026 Rebrand palette:
+     Primary = Deep Navy #071838 (CTA / active states)
+     Secondary = Tan #C7A784 (premium / urgent accents)
+     Tertiary = Cyan #0FB0CE (growth / info highlights)
+     Interactive Blue = #1786C2 (links, informational)
+     Ice Tint = #E0F2FC (selected / tinted surfaces)
 ───────────────────────────────────────────────────────────── */
 
 :root {
-  /* ── Brand Primary: RM Prussian Navy ── */
-  --brand-primary: #001C5A;
-  --brand-primary-hover: #1A3270;
-  --brand-primary-muted: rgba(0, 28, 90, 0.08);
-  --brand-primary-ghost: rgba(0, 28, 90, 0.18);
+  /* ── Brand Primary: Deep Navy ── */
+  --brand-primary: #071838;
+  --brand-primary-hover: #0F2547;
+  --brand-primary-muted: rgba(7, 24, 56, 0.08);
+  --brand-primary-ghost: rgba(7, 24, 56, 0.18);
   /* Text rendered ON brand-primary background */
   --brand-on-primary: #FFFFFF;
 
-  /* ── Secondary Brand: RM Di Serria Orange ── */
-  /* Used sparingly — notifications, urgent accents ONLY */
-  --accent-orange: #D6964A;
-  --accent-orange-light: #E5B27A;
-  --accent-orange-muted: rgba(214, 150, 74, 0.12);
+  /* ── Secondary Brand: Tan ── */
+  /* Used sparingly — notifications, premium accents ONLY */
+  --accent-orange: #C7A784;
+  --accent-orange-light: #D8BFA3;
+  --accent-orange-muted: rgba(199, 167, 132, 0.12);
 
-  /* ── Tertiary Accent: RM Jordy Blue ── */
+  /* ── Tertiary Accent: Cyan ── */
   /* Growth indicators, investment data ONLY */
-  --accent-cyan: #6BBAEF;
-  --accent-cyan-light: #8FCDF5;
-  --accent-cyan-muted: rgba(107, 186, 239, 0.14);
+  --accent-cyan: #0FB0CE;
+  --accent-cyan-light: #3FC4DB;
+  --accent-cyan-muted: rgba(15, 176, 206, 0.14);
+
+  /* ── Interactive Blue ── */
+  --accent-blue: #1786C2;
+  --accent-blue-muted: rgba(23, 134, 194, 0.12);
+
+  /* ── Ice Tint ── */
+  --surface-tinted: #E0F2FC;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -89,10 +98,10 @@
   --error-text: #991B1B;
 
   /* ── Information: Neutral, contextual ── */
-  --info: #3B82F6;
-  --info-light: #60A5FA;
-  --info-muted: rgba(59, 130, 246, 0.12);
-  --info-text: #1E40AF;
+  --info: #1786C2;
+  --info-light: #3FA3D6;
+  --info-muted: rgba(23, 134, 194, 0.12);
+  --info-text: #0D5A85;
 
   /* ── Insights: AI recommendation (use sparingly) ── */
   /* Do NOT use purple purely for "AI" decoration */
@@ -118,20 +127,21 @@
   /* ── Text ── */
   --text-primary: #111827;
   --text-secondary: #4B5563;
-  --text-muted: #9CA3AF;
+  /* #6B7280 = 4.6:1 on white — meets WCAG AA for small text (was #9CA3AF at 2.5:1) */
+  --text-muted: #6B7280;
   --text-placeholder: #D1D5DB;
   --text-inverse: #FFFFFF;
 
   /* ── Border ── */
   --border-default: #E5E7EB;
   --border-subtle: rgba(0, 0, 0, 0.06);
-  --border-focus: rgba(0, 28, 90, 0.5);
+  --border-focus: rgba(23, 134, 194, 0.5);
 
   /* ── Shadow ── */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-brand: 0 2px 12px rgba(0, 28, 90, 0.2);
+  --shadow-brand: 0 2px 12px rgba(7, 24, 56, 0.2);
 
   /* ── Glass Surface (Apple HIG) ── */
   --glass-bg: rgba(255, 255, 255, 0.85);
@@ -140,16 +150,16 @@
 
   /* ── Skeleton Loading ── */
   --skeleton-base: #E5E7EB;
-  --skeleton-shimmer: #F3F4F6;
+  --skeleton-shimmer: #EFF7FD;
 
   /* ── Tab Bar / Bottom Nav ── */
   --tab-bar-bg: rgba(255, 255, 255, 0.92);
-  --tab-bar-active: #111827;
+  --tab-bar-active: #071838;
   --tab-bar-inactive: #8E8E93;
   --tab-bar-border: rgba(0, 0, 0, 0.06);
 
   /* ── Focus Ring (WCAG 2.4.7) ── */
-  --focus-ring: 2px solid #001C5A;
+  --focus-ring: 2px solid #071838;
   --focus-ring-offset: 2px;
 
   /* ── Card ── */
@@ -160,7 +170,7 @@
   --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
   /* ── Typography ── */
-  --font-sans: "Inter", "Kanit", system-ui, sans-serif;
+  --font-sans: "Inter", "Noto Sans Thai", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --font-size-xs: 0.6875rem;   /* 11px — caption */
   --font-size-sm: 0.75rem;     /* 12px — label */
@@ -178,45 +188,45 @@
 
 [data-theme="dark"] {
   /* Background */
-  --bg-page: #0B0F0A;
-  --bg-surface: #171C15;
-  --bg-elevated: #1E241C;
+  --bg-page: #050D1F;
+  --bg-surface: #071838;
+  --bg-elevated: #0C2140;
   --bg-overlay: rgba(0, 0, 0, 0.75);
-  --bg-input: #252D23;
+  --bg-input: #12294E;
 
   /* Text */
   --text-primary: #FFFFFF;
   --text-secondary: rgba(255, 255, 255, 0.6);
   --text-muted: rgba(255, 255, 255, 0.35);
   --text-placeholder: rgba(255, 255, 255, 0.25);
-  --text-inverse: #0B0F0A;
+  --text-inverse: #071838;
 
   /* Border */
   --border-default: rgba(255, 255, 255, 0.08);
   --border-subtle: rgba(255, 255, 255, 0.04);
-  --border-focus: rgba(107, 186, 239, 0.5);
+  --border-focus: rgba(15, 176, 206, 0.5);
 
   /* Shadow */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-brand: 0 2px 12px rgba(107, 186, 239, 0.25);
+  --shadow-brand: 0 2px 12px rgba(15, 176, 206, 0.25);
 
   /* Glass */
-  --glass-bg: rgba(23, 28, 21, 0.85);
+  --glass-bg: rgba(7, 24, 56, 0.85);
   --glass-border: rgba(255, 255, 255, 0.06);
 
   /* Skeleton */
-  --skeleton-base: #1E241C;
-  --skeleton-shimmer: #252D23;
+  --skeleton-base: #0C2140;
+  --skeleton-shimmer: #12294E;
 
   /* Tab Bar */
-  --tab-bar-bg: rgba(23, 28, 21, 0.92);
+  --tab-bar-bg: rgba(7, 24, 56, 0.92);
   --tab-bar-active: #FFFFFF;
   --tab-bar-inactive: #8E8E93;
 
   /* Card */
-  --card-bg: #171C15;
+  --card-bg: #071838;
   --card-border: rgba(255, 255, 255, 0.08);
   --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }

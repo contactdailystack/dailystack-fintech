@@ -43,7 +43,7 @@ const StatCard: React.FC<StatCardProps> = ({
   label,
   change,
   icon: Icon,
-  iconColor = '#56be89',
+  iconColor = '#0FB0CE',
   variant = 'default',
   onClick,
   delay = 0,
@@ -63,12 +63,12 @@ const StatCard: React.FC<StatCardProps> = ({
         relative overflow-hidden
         rounded-2xl p-4
         ${isHighlight
-          ? 'bg-[rgba(205,255,36,0.1)] border border-[rgba(205,255,36,0.3)]'
+          ? 'bg-[rgba(15, 176, 206,0.1)] border border-[rgba(15, 176, 206,0.3)]'
           : 'bg-[#1A1A1A] border border-[#2A2A2A]'
         }
         ${onClick ? 'cursor-pointer' : ''}
         transition-all duration-200
-        hover:border-[rgba(205,255,36,0.2)]
+        hover:border-[rgba(15, 176, 206,0.2)]
         ${className}
       `}
     >
@@ -77,7 +77,7 @@ const StatCard: React.FC<StatCardProps> = ({
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            background: 'radial-gradient(ellipse at top right, rgba(205,255,36,0.3) 0%, transparent 60%)',
+            background: 'radial-gradient(ellipse at top right, rgba(15, 176, 206,0.3) 0%, transparent 60%)',
           }}
         />
       )}
@@ -91,7 +91,7 @@ const StatCard: React.FC<StatCardProps> = ({
               className="
                 w-10 h-10 rounded-xl
                 flex items-center justify-center
-                bg-[rgba(205,255,36,0.1)]
+                bg-[rgba(15, 176, 206,0.1)]
               "
             >
               <Icon className="w-5 h-5" style={{ color: iconColor }} />

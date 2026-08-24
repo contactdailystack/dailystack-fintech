@@ -48,7 +48,7 @@ const ConcentricRing = memo(function ConcentricRing({
       style={{
         width: radius * 2,
         height: radius * 2,
-        borderColor: 'rgba(86, 190, 137, 0.12)',
+        borderColor: 'rgba(15, 176, 206, 0.12)',
         borderWidth: 1,
       }}
       initial={{ opacity: 0, scale: 0.8 }}
@@ -132,7 +132,7 @@ export const ZenOverlay = memo(function ZenOverlay({
             transition={{ duration: toSeconds(motionTokens.duration.slow), delay: toSeconds(motionTokens.duration.fast), ease: easing.tight }}
             className="absolute"
           >
-            <Shield className="w-10 h-10 text-[#56be89]" />
+            <Shield className="w-10 h-10 text-[#0FB0CE]" />
           </motion.div>
 
           {/* Instruction text */}
@@ -149,7 +149,7 @@ export const ZenOverlay = memo(function ZenOverlay({
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.2em',
-              color: 'rgba(86, 190, 137, 0.4)',
+              color: 'rgba(15, 176, 206, 0.4)',
             }}
           >
             {instructionText ?? defaultText}

@@ -29,9 +29,9 @@ export const pageColors = {
   darkCard: '#0A0A0A',        // CI Brief: Premium Black
 
   // Accent
-  accent: '#56be89',         // CI Brief: Lime Green Primary
-  accentHover: '#6fcca3',     // CI Brief: Primary 600
-  accentMuted: 'rgba(86, 190, 137, 0.15)',
+  accent: '#0FB0CE',         // CI Brief: Lime Green Primary
+  accentHover: '#3FC4DB',     // CI Brief: Primary 600
+  accentMuted: 'rgba(15, 176, 206, 0.15)',
 
   // Text
   text: '#111827',            // Primary text
@@ -61,14 +61,14 @@ export const pageColors = {
   // Category colors (shared across all pages)
   category: {
     food: '#F97316',
-    transport: '#3B82F6',
+    transport: '#1786C2',
     shopping: '#EC4899',
     bills: '#EF4444',
     entertainment: '#8B5CF6',
     health: '#22C55E',
     education: '#F59E0B',
-    investment: '#3B82F6',
-    subscription: '#56be89',
+    investment: '#1786C2',
+    subscription: '#0FB0CE',
     other: '#6B7280',
   },
 
@@ -128,7 +128,7 @@ export const pageColors = {
     internet: '#673AB7',
 
     // Generic
-    transfer: '#3B82F6',
+    transfer: '#1786C2',
     income: '#22C55E',
   } as Record<string, string>,
 } as const;
@@ -138,7 +138,7 @@ export const pageColors = {
 export const pageTypography = {
   // Font families
   fontEN: '"Inter", sans-serif',
-  fontTH: '"Kanit", sans-serif',
+  fontTH: '"Noto Sans Thai", sans-serif',
   fontMono: '"JetBrains Mono", monospace',
 
   // Heading sizes
@@ -277,13 +277,13 @@ export const componentTokens = {
     height: 'h-2',
     radius: 'rounded-full',
     trackColor: '#27272A',
-    fillColor: '#56be89',
+    fillColor: '#0FB0CE',
   },
 
   // Tab pills
   tabPill: {
     radius: 'rounded-full',
-    activeBg: '#56be89',
+    activeBg: '#0FB0CE',
     inactiveBg: '#F4F5F7',
     activeText: '#111827',
     inactiveText: '#111827',

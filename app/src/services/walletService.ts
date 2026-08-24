@@ -190,7 +190,7 @@ export const getPaymentSources = async (): Promise<Array<{
   return [
     { id: 'card1', type: 'card', name: 'Visa •••• 4242', last4: '4242', color: '#1a1a2e' },
     { id: 'card2', type: 'card', name: 'Mastercard •••• 5555', last4: '5555', color: '#2d1b4e' },
-    { id: 'wallet', type: 'wallet', name: 'PicksWise Wallet', color: '#0B0F0A' },
+    { id: 'wallet', type: 'wallet', name: 'PicksWise Wallet', color: '#050D1F' },
     { id: 'bank', type: 'bank', name: 'KBANK •••• 1234', last4: '1234', color: '#0d7377' },
   ];
 };

@@ -62,11 +62,23 @@ export async function getAlertRule(ruleId: string): Promise<AlertRule | null> {
 }
 
 /**
- * Initialize default alert rules for a new user
+ * Initialize default alert rules for a user.
+ * Idempotent: inserts only rules whose name doesn't exist yet, so existing
+ * users receive newly-added default rules on next init without duplicates.
  */
 export async function initializeDefaultRules(userId: string): Promise<void> {
   try {
-    const rulesToInsert = DEFAULT_ALERT_RULES.map((rule, index) => ({
+    const { data: existing, error: selectError } = await supabase
+      .from('alert_rules')
+      .select('name')
+      .eq('user_id', userId);
+    if (selectError) throw selectError;
+
+    const existingNames = new Set((existing || []).map((r: { name: string }) => r.name));
+    const missing = DEFAULT_ALERT_RULES.filter((rule) => !existingNames.has(rule.name));
+    if (missing.length === 0) return;
+
+    const rulesToInsert = missing.map((rule) => ({
       user_id: userId,
       name: rule.name,
       description: rule.description,

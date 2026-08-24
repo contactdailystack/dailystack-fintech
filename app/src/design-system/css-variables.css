@@ -21,10 +21,10 @@
 
 :root {
   /* ── Brand: Lime E-Pay ─────────────────────────────────────── */
-  --color-lime: #56be89;
-  --color-lime-light: #6fcca3;
-  --color-lime-muted: rgba(205, 255, 36, 0.15);
-  --color-lime-ghost: rgba(205, 255, 36, 0.3);
+  --color-lime: #0FB0CE;
+  --color-lime-light: #3FC4DB;
+  --color-lime-muted: rgba(15, 176, 206, 0.15);
+  --color-lime-ghost: rgba(15, 176, 206, 0.3);
 
   /* ── Brand: Orange Accent ──────────────────────────────────── */
   --color-orange: #FF5733;
@@ -52,14 +52,14 @@
   --color-surface: #FFFFFF;
   --color-surface-secondary: #F0F0F0;
   --color-surface-tertiary: #E5E5EA;
-  --color-surface-tinted: rgba(205, 255, 36, 0.08);
-  --color-surface-tinted-strong: rgba(205, 255, 36, 0.15);
+  --color-surface-tinted: rgba(15, 176, 206, 0.08);
+  --color-surface-tinted-strong: rgba(15, 176, 206, 0.15);
 
   /* ── Border (Apple HIG) ────────────────────────────────────── */
   --color-border: #D2D2D7;
   --color-border-subtle: rgba(210, 210, 215, 0.6);
   --color-border-light: #E5E5EA;
-  --color-border-accent: rgba(205, 255, 36, 0.5);
+  --color-border-accent: rgba(15, 176, 206, 0.5);
   --color-border-focus: rgba(0, 122, 255, 0.5);
 
   /* ── Text (Apple HIG) ───────────────────────────────────────── */
@@ -68,7 +68,7 @@
   --color-text-tertiary: #AEAEB2;
   --color-text-placeholder: #C7C7CC;
   --color-text-inverse: #FFFFFF;
-  --color-text-lime: #B8E82A;
+  --color-text-lime: #0FB0CE;
 
   /* ── Semantic: Success (Apple Green) ───────────────────────── */
   --color-success: #34C759;
@@ -100,7 +100,7 @@
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-lime: 0 2px 12px rgba(205, 255, 36, 0.3);
+  --shadow-lime: 0 2px 12px rgba(15, 176, 206, 0.3);
 
   /* ── Component: Glass ──────────────────────────────────────── */
   --glass-surface: rgba(255, 255, 255, 0.85);
@@ -121,17 +121,17 @@
   --color-text-muted: #6E6E73;
 
   /* ── Hero Card: Dark variant (Dashboard HeroBalanceCard) ─── */
-  --color-dark-bg: #0B0F0A;
-  --color-dark-card: #0B0F0A;
+  --color-dark-bg: #050D1F;
+  --color-dark-card: #050D1F;
   --color-dark-border: #1C2520;
-  /* WCAG 4.5:1 on dark-bg #0B0F0A — #C4C4C4 ≈ 5.7:1 */
+  /* WCAG 4.5:1 on dark-bg #050D1F — #C4C4C4 ≈ 5.7:1 */
   --color-dark-text: #C4C4C4;
   /* WCAG 4.5:1 on dark-bg — #E8E8E8 ≈ 12.9:1 */
   --color-dark-text-muted: #E8E8E8;
 
   /* ── Accessibility: Focus ring (WCAG 2.4.7) ────────────── */
   /* 2px solid lime, 2px offset — visible on both light & dark */
-  --focus-ring: 2px solid #56be89;
+  --focus-ring: 2px solid #0FB0CE;
   --focus-ring-offset: 2px;
 
   /* ── Accessibility: Dark lime (passes 4.5:1 on white) ──── */

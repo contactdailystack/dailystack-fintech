@@ -63,7 +63,7 @@ const STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
 // ─── Main Component ───────────────────────────────────────────────────────
 
 export default function AlertsPage() {
-  const { unreadCount, alerts, isLoading } = useAlerts();
+  const { unreadCount, alerts, isLoading, acknowledge, resolve, dismiss } = useAlerts();
   const activeAlerts = useActiveAlerts();
   
   const [showSettings, setShowSettings] = useState(false);
@@ -151,8 +151,8 @@ export default function AlertsPage() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-[#56be89]/10">
-                <Bell className="w-6 h-6 text-[#56be89]" />
+              <div className="p-2 rounded-xl bg-[#0FB0CE]/10">
+                <Bell className="w-6 h-6 text-[#0FB0CE]" />
               </div>
               <div>
                 <h1 className="text-xl font-bold">Behavioral Alerts</h1>
@@ -168,7 +168,7 @@ export default function AlertsPage() {
                 <button
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'list' ? 'bg-[#56be89]/20 text-[#56be89]' : 'text-gray-400'
+                    viewMode === 'list' ? 'bg-[#0FB0CE]/20 text-[#0FB0CE]' : 'text-gray-400'
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -176,7 +176,7 @@ export default function AlertsPage() {
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'grid' ? 'bg-[#56be89]/20 text-[#56be89]' : 'text-gray-400'
+                    viewMode === 'grid' ? 'bg-[#0FB0CE]/20 text-[#0FB0CE]' : 'text-gray-400'
                   }`}
                 >
                   <LayoutGrid className="w-4 h-4" />
@@ -202,7 +202,7 @@ export default function AlertsPage() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 
-                         focus:border-[#56be89]/50 focus:ring-1 focus:ring-[#56be89]/20
+                         focus:border-[#0FB0CE]/50 focus:ring-1 focus:ring-[#0FB0CE]/20
                          placeholder-gray-500 transition-colors"
             />
           </div>
@@ -212,13 +212,13 @@ export default function AlertsPage() {
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors flex-shrink-0 ${
-                showFilters ? 'bg-[#56be89]/20 text-[#56be89]' : 'bg-white/5 text-gray-400'
+                showFilters ? 'bg-[#0FB0CE]/20 text-[#0FB0CE]' : 'bg-white/5 text-gray-400'
               }`}
             >
               <Filter className="w-4 h-4" />
               Filters
               {hasActiveFilters && (
-                <span className="w-2 h-2 rounded-full bg-[#56be89]" />
+                <span className="w-2 h-2 rounded-full bg-[#0FB0CE]" />
               )}
             </button>
 
@@ -227,7 +227,7 @@ export default function AlertsPage() {
               {filters.statuses.length === 1 && filters.statuses[0] === 'active' && (
                 <button
                   onClick={() => setFilters(prev => ({ ...prev, statuses: ['active', 'acknowledged'] }))}
-                  className="px-3 py-1.5 rounded-full bg-[#56be89]/10 text-[#56be89] text-sm flex-shrink-0"
+                  className="px-3 py-1.5 rounded-full bg-[#0FB0CE]/10 text-[#0FB0CE] text-sm flex-shrink-0"
                 >
                   Show All
                 </button>
@@ -268,7 +268,7 @@ export default function AlertsPage() {
                           className={`
                             flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors
                             ${filters.categories.includes(opt.value)
-                              ? 'bg-[#56be89]/20 text-[#56be89]'
+                              ? 'bg-[#0FB0CE]/20 text-[#0FB0CE]'
                               : 'bg-white/5 text-gray-400 hover:bg-white/10'
                             }
                           `}
@@ -293,7 +293,7 @@ export default function AlertsPage() {
                           className={`
                             flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors
                             ${filters.severities.includes(opt.value)
-                              ? 'bg-[#56be89]/20 text-[#56be89]'
+                              ? 'bg-[#0FB0CE]/20 text-[#0FB0CE]'
                               : 'bg-white/5 text-gray-400 hover:bg-white/10'
                             }
                           `}
@@ -318,7 +318,7 @@ export default function AlertsPage() {
                           className={`
                             px-3 py-1.5 rounded-lg text-sm transition-colors
                             ${filters.statuses.includes(opt.value)
-                              ? 'bg-[#56be89]/20 text-[#56be89]'
+                              ? 'bg-[#0FB0CE]/20 text-[#0FB0CE]'
                               : 'bg-white/5 text-gray-400 hover:bg-white/10'
                             }
                           `}
@@ -366,7 +366,7 @@ export default function AlertsPage() {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="mt-4 px-4 py-2 rounded-lg bg-[#56be89]/10 text-[#56be89] hover:bg-[#56be89]/20 transition-colors"
+                className="mt-4 px-4 py-2 rounded-lg bg-[#0FB0CE]/10 text-[#0FB0CE] hover:bg-[#0FB0CE]/20 transition-colors"
               >
                 Clear Filters
               </button>
@@ -383,9 +383,9 @@ export default function AlertsPage() {
               >
                 <AlertCard
                   alert={alert}
-                  onAcknowledge={() => useAlerts().acknowledge(alert.id)}
-                  onResolve={() => useAlerts().resolve(alert.id)}
-                  onDismiss={() => useAlerts().dismiss(alert.id)}
+                  onAcknowledge={() => acknowledge(alert.id)}
+                  onResolve={() => resolve(alert.id)}
+                  onDismiss={() => dismiss(alert.id)}
                   compact={viewMode === 'grid'}
                 />
               </motion.div>

@@ -1,18 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Kanit:wght@300;400;500;600;700&display=swap');
+@import './design-system/fonts.css';
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Onest:wght@400;500;700;900&display=swap');
 @import './design-system/tokens.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @theme {
-  --font-sans: "Inter", "Kanit", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Inter", "Kanit", sans-serif;
-  --font-mono: "JetBrains Mono", "Kanit", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "Inter", "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", "Noto Sans Thai", sans-serif;
+  --font-mono: "JetBrains Mono", "Noto Sans Thai", ui-monospace, SFMono-Regular, monospace;
 
-  /* ── Brand Tokens (CI Approved) ── */
-  --color-brand: #56be89;
-  --color-brand-muted: #6fcca3;
-  --color-brand-light: #6fcca3;
+  /* ── Brand Tokens (2026 Rebrand) ──
+     Deep Navy #071838 · Tan #C7A784 · Blue #1786C2 · Cyan #0FB0CE · Ice #E0F2FC */
+  --color-brand: #0fb0ce;
+  --color-brand-muted: #3fc4db;
+  --color-brand-light: #3fc4db;
+  --color-brand-deep: #071838;
+  --color-brand-blue: #1786c2;
+  --color-brand-tan: #c7a784;
+  --color-brand-ice: #e0f2fc;
 
   /* ── Appearance Tokens (Light Mode — Production Default) ── */
   --color-dark-bg: #FFFFFF;
@@ -24,22 +30,22 @@
   --color-amber-soft: #B45309;
   --color-success: #22C55E;
   --color-warning: #D97706;
-  --color-info: #3B82F6;
+  --color-info: #1786C2;
 }
 
 @layer utilities {
   /* ── Brand Glow ── */
   .pilo-glow {
-    box-shadow: 0 0 40px rgba(86, 190, 137, 0.18);
+    box-shadow: 0 0 40px rgba(15, 176, 206, 0.18);
   }
   .pilo-glow-sm {
-    box-shadow: 0 0 20px rgba(86, 190, 137, 0.12);
+    box-shadow: 0 0 20px rgba(15, 176, 206, 0.12);
   }
   .pilo-glow-emerald {
-    box-shadow: 0 0 30px rgba(34, 197, 94, 0.15);
+    box-shadow: 0 0 30px rgba(15, 176, 206, 0.15);
   }
   .pilo-accent-border {
-    border-color: rgba(86, 190, 137, 0.25);
+    border-color: rgba(23, 134, 194, 0.25);
   }
 
   /* ── Calm Warning Protocol (Amber only — no red) ── */
@@ -83,9 +89,9 @@
     100% { opacity: 1; transform: scale(1); filter: blur(0px); }
   }
   @keyframes slideSuccessGlow {
-    0% { box-shadow: 0 0 0 rgba(86, 190, 137, 0); }
-    50% { box-shadow: 0 0 60px rgba(86, 190, 137, 0.5), 0 0 100px rgba(86, 190, 137, 0.2); }
-    100% { box-shadow: 0 0 20px rgba(86, 190, 137, 0.2); }
+    0% { box-shadow: 0 0 0 rgba(15, 176, 206, 0); }
+    50% { box-shadow: 0 0 60px rgba(15, 176, 206, 0.5), 0 0 100px rgba(23, 134, 194, 0.2); }
+    100% { box-shadow: 0 0 20px rgba(15, 176, 206, 0.2); }
   }
   .breathing-aura {
     animation: breatheIn 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -160,7 +166,7 @@ body {
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3B82F6;
+  background: #1786C2;
 }
 
 /* Animations */

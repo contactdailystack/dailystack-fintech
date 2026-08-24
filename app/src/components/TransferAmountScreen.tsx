@@ -5,8 +5,8 @@
  * Sprint 2: Transaction & Wallet Core
  * 
  * Design Specs (UX Screens Inventory v4.2):
- * - Background: Dark (#0B0F0A)
- * - Primary Accent: Lime Green (#56be89)
+ * - Background: Dark (#050D1F)
+ * - Primary Accent: Lime Green (#0FB0CE)
  * - Typography: Inter font
  * - Layout: One-handed operation optimized
  * 
@@ -91,11 +91,11 @@ export default function TransferAmountScreen({
   // Helper to render recipient icon (accessibility-safe SVG)
   const RecipientIcon = ({ icon, size = 20 }: { icon: Recipient['icon']; size?: number }) => {
     switch (icon) {
-      case 'person': return <User size={size} style={{ color: '#56be89' }} />;
+      case 'person': return <User size={size} style={{ color: '#0FB0CE' }} />;
       case 'woman': return <User size={size} style={{ color: '#FF69B4' }} />;
       case 'elder': return <User size={size} style={{ color: '#AAAAAA' }} />;
-      case 'user': return <User size={size} style={{ color: '#56be89' }} />;
-      case 'building': return <Building2 size={size} style={{ color: '#56be89' }} />;
+      case 'user': return <User size={size} style={{ color: '#0FB0CE' }} />;
+      case 'building': return <Building2 size={size} style={{ color: '#0FB0CE' }} />;
       default: return <User size={size} />;
     }
   };
@@ -104,7 +104,7 @@ export default function TransferAmountScreen({
   const paymentSources: PaymentSource[] = [
     { id: 'card1', type: 'card', name: 'Visa •••• 4242', last4: '4242', color: '#1a1a2e' },
     { id: 'card2', type: 'card', name: 'Mastercard •••• 5555', last4: '5555', color: '#2d1b4e' },
-    { id: 'wallet', type: 'wallet', name: 'PicksWise Wallet', color: '#0B0F0A' },
+    { id: 'wallet', type: 'wallet', name: 'PicksWise Wallet', color: '#050D1F' },
     { id: 'bank', type: 'bank', name: 'KBANK •••• 1234', last4: '1234', color: '#0d7377' },
   ];
 
@@ -182,7 +182,7 @@ export default function TransferAmountScreen({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-h-screen flex flex-col items-center justify-center"
-        style={{ backgroundColor: '#0B0F0A' }}
+        style={{ backgroundColor: '#050D1F' }}
       >
         <motion.div
           initial={{ scale: 0 }}
@@ -190,8 +190,8 @@ export default function TransferAmountScreen({
           transition={{ type: 'spring', damping: 15, stiffness: 300 }}
           className="w-32 h-32 rounded-full flex items-center justify-center"
           style={{
-            backgroundColor: '#0B0F0A',
-            boxShadow: '0 0 60px rgba(86, 190, 137, 0.3)',
+            backgroundColor: '#050D1F',
+            boxShadow: '0 0 60px rgba(15, 176, 206, 0.3)',
           }}
         >
           <motion.div
@@ -199,7 +199,7 @@ export default function TransferAmountScreen({
             animate={{ scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <Check className="w-16 h-16" style={{ color: '#56be89' }} />
+            <Check className="w-16 h-16" style={{ color: '#0FB0CE' }} />
           </motion.div>
         </motion.div>
         <motion.p
@@ -207,7 +207,7 @@ export default function TransferAmountScreen({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="mt-6 text-xl font-medium"
-          style={{ color: '#56be89' }}
+          style={{ color: '#0FB0CE' }}
         >
           {lang === 'th' ? 'โอนสำเร็จ!' : 'Transfer Successful!'}
         </motion.p>
@@ -218,7 +218,7 @@ export default function TransferAmountScreen({
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ backgroundColor: '#0B0F0A' }}
+      style={{ backgroundColor: '#050D1F' }}
     >
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-4">
@@ -263,11 +263,11 @@ export default function TransferAmountScreen({
                   style={{
                     backgroundColor:
                       selectedRecipient?.id === r.id
-                        ? 'rgba(86, 190, 137, 0.15)'
+                        ? 'rgba(15, 176, 206, 0.15)'
                         : 'rgba(255,255,255,0.05)',
                     border:
                       selectedRecipient?.id === r.id
-                        ? '1px solid rgba(86, 190, 137, 0.5)'
+                        ? '1px solid rgba(15, 176, 206, 0.5)'
                         : '1px solid transparent',
                   }}
                 >
@@ -306,7 +306,7 @@ export default function TransferAmountScreen({
               <button
                 onClick={() => setState('select-recipient')}
                 className="text-sm px-3 py-1 rounded-full"
-                style={{ color: '#56be89', backgroundColor: 'rgba(199,255,46,0.1)' }}
+                style={{ color: '#0FB0CE', backgroundColor: 'rgba(199,255,46,0.1)' }}
               >
                 {lang === 'th' ? 'เปลี่ยน' : 'Change'}
               </button>
@@ -368,7 +368,7 @@ export default function TransferAmountScreen({
                   <span className="text-sm text-white/60">
                     {lang === 'th' ? 'ค่าธรรมเนียม' : 'Fee'}
                   </span>
-                  <span className="text-white font-medium" style={{ color: '#56be89' }}>
+                  <span className="text-white font-medium" style={{ color: '#0FB0CE' }}>
                     {lang === 'th' ? 'ฟรี' : 'Free'}
                   </span>
                 </div>
@@ -409,8 +409,8 @@ export default function TransferAmountScreen({
                 className="mt-4 w-full py-4 rounded-2xl font-semibold text-lg transition-all"
                 style={{
                   backgroundColor:
-                    amount && parseFloat(amount) > 0 ? '#56be89' : 'rgba(199,255,46,0.2)',
-                  color: amount && parseFloat(amount) > 0 ? '#0B0F0A' : 'rgba(0,0,0,0.3)',
+                    amount && parseFloat(amount) > 0 ? '#0FB0CE' : 'rgba(199,255,46,0.2)',
+                  color: amount && parseFloat(amount) > 0 ? '#050D1F' : 'rgba(0,0,0,0.3)',
                 }}
               >
                 {lang === 'th' ? 'ดำเนินการต่อ' : 'Continue'}
@@ -429,7 +429,7 @@ export default function TransferAmountScreen({
                 <button
                   onClick={handleConfirm}
                   className="flex-1 py-4 rounded-2xl font-semibold text-lg flex items-center justify-center gap-2"
-                  style={{ backgroundColor: '#56be89', color: '#0B0F0A' }}
+                  style={{ backgroundColor: '#0FB0CE', color: '#050D1F' }}
                 >
                   <Send className="w-5 h-5" />
                   {lang === 'th' ? 'โอนเลย' : 'Send'}
@@ -476,11 +476,11 @@ export default function TransferAmountScreen({
                     style={{
                       backgroundColor:
                         selectedSource?.id === source.id
-                          ? 'rgba(86, 190, 137, 0.15)'
+                          ? 'rgba(15, 176, 206, 0.15)'
                           : 'rgba(255,255,255,0.05)',
                       border:
                         selectedSource?.id === source.id
-                          ? '1px solid rgba(86, 190, 137, 0.5)'
+                          ? '1px solid rgba(15, 176, 206, 0.5)'
                           : '1px solid transparent',
                     }}
                   >
@@ -500,7 +500,7 @@ export default function TransferAmountScreen({
                       )}
                     </div>
                     {selectedSource?.id === source.id && (
-                      <Check className="w-5 h-5" style={{ color: '#56be89' }} />
+                      <Check className="w-5 h-5" style={{ color: '#0FB0CE' }} />
                     )}
                   </button>
                 ))}
@@ -548,7 +548,7 @@ export default function TransferAmountScreen({
               <button
                 onClick={() => setShowRecipientPicker(false)}
                 className="w-full py-4 rounded-2xl font-semibold"
-                style={{ backgroundColor: '#56be89', color: '#0B0F0A' }}
+                style={{ backgroundColor: '#0FB0CE', color: '#050D1F' }}
               >
                 {lang === 'th' ? 'ค้นหา' : 'Search'}
               </button>

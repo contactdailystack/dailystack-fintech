@@ -8,7 +8,7 @@
  * v25.0 Changes (RM Clone):
  * - 4-tab model matching Rocket Money navigation
  * - Net Worth + Transactions moved into Home dashboard
- * - Navy brand (--brand-primary #001C5A) active state
+ * - Navy brand (--brand-primary #071838) active state
  */
 
 import React from 'react';
