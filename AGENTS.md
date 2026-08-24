@@ -57,7 +57,18 @@ When auditing feature renames across the codebase:
 
 ## Changelog
 
-### 2026-08-24 (latest — RM parity P1: Safe to Spend + global alert banners + new alert types + ฿ fix)
+### 2026-08-24 (latest — RM parity P2 features #1–#4 + dead-code purge + production deploy)
+- A1 annual price per row: AllTabItem shows "≈ ฿X/ปี" under monthly/weekly subs (getAnnualAmount weekly×52 · monthly×12; yearly rows unchanged); optional showAmount prop
+- A2 Merchant leaderboard in InsightsPage: top-5 merchants by cumulative spend with rank badges (#1 tan premium color) + mini bars (% of total spend) + largest-single-purchase footer line; skips empty merchant names
+- A3 bill calendar already existed (FullCalendarView tab w/ month nav, date→upcoming drill-down) — verified reachable, no work needed
+- A4 Activation checklist on DashboardPage: 3 steps (add sub / record or import txs / set budget) computed from real data, tap-to-navigate, auto-dismisses permanently when all done (pickswise.checklist.dismissed.v1) or via X
+- Dead code deleted: DatabasePage (+ its orphaned /database route & lazy import), ProfilePage, BalancePage, SplashScreen, OnboardingPage, PrivacyPage; AlertsPage REVIVED — routed at /alerts (GlobalAlertBanners navigates there)
+- Production shipped: commit d86c8b3 pushed to main (fast-forward from 41fc1c0) + vercel --prod → https://dailystack-fintech.vercel.app READY (dpl_CU85cmcLxHN4n6TgXmiPsGgjmvyZ)
+- Supabase CLI still 403 (LegacyDbConfigLoginRoleStatusError / FunctionsApiStatusError) — migration 029 apply + delete-account deploy remain USER actions in Dashboard
+- Dark mode dropped from backlog per user decision
+- TypeScript: 0 errors; production build passes
+
+### 2026-08-24 (RM parity P1: Safe to Spend + global alert banners + new alert types + ฿ fix)
 - Research pass: Rocket Money UX/UI compared against PicksWise; gaps = safe-to-spend, in-app banners, alert types (low balance / duplicate charge / bill-due), $ hardcode; PicksWise already ahead on tx search/filter, notes/splits/rules, ghost hunter
 - Safe to Spend: NEW services/safeToSpend.ts computeSafeToSpend({balance,paydayDay,subs}) → balance − Σ active subs due before next payday (30d window when paydayDay unset); DashboardPage gains 'safe' section (FIRST in DASH_SECTIONS; loadDashPrefs auto-appends for existing users) rendering SafeToSpendCard (big mono amount respects showAmounts, negative → error red + "short by", sub-line bills summary, View-bills CTA → /subscriptions)
 - Alerts system actually alive now: AlertsProvider was NEVER mounted (AlertsPage crashed on open; evaluateAlerts had zero callers) → provider now wraps the whole authed tree in App.tsx; initializeDefaultRules made idempotent per-rule-name (existing users receive newly added defaults without duplicates)
