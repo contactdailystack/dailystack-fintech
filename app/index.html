@@ -14,11 +14,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="PicksWise" />
     <title>PicksWise — Smart Money Tracker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Inter + Noto Sans Thai are self-hosted (public/fonts, see design-system/fonts.css).
-         Onest stays on Google Fonts (used for display headings). -->
-    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- All fonts are self-hosted (public/fonts, design-system/fonts.css).
+         Preload only the first-paint faces: Inter (UI) + JetBrains Mono (hero numbers).
+         Noto Sans Thai loads on demand — EN users shouldn't pay for it. -->
+    <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   </head>
   <body>
     <div id="root"></div>

@@ -49,9 +49,13 @@ import {
   Ghost,
   RefreshCw,
   FileSpreadsheet,
+  Info,
 } from 'lucide-react';
-import { MERCHANT_DATABASE, CATEGORY_META } from '../services/merchantDatabase';
-import type { MerchantTemplate } from '../services/merchantDatabase';
+import { MERCHANT_DATABASE, CATEGORY_META, findCancelInfo } from '../services/merchantDatabase';
+import type { MerchantTemplate, CancelInfo } from '../services/merchantDatabase';
+import { detectSubscriptionSuggestions, normalizeMerchant } from '../services/recurringDetector';
+import type { SubSuggestion } from '../services/recurringDetector';
+import type { Transaction } from '../types';
 // Re-export for CSVImportModal (imports from this file)
 export { MERCHANT_DATABASE, CATEGORY_META };
 import CSVImportModal from './CSVImportModal';
@@ -100,6 +104,8 @@ interface SubscriptionTrackerPageProps {
   theme?: 'dark' | 'light';
   /** Day of month salary arrives (1–31) from profile — enables the "before payday" window */
   paydayDay?: number;
+  /** Recorded transactions — powers auto-discovery of untracked subscriptions (RM parity #1) */
+  transactions?: Transaction[];
   onNavigateToUpgrade?: () => void;
   onNavigateToCalendar?: () => void;
   onNavigateToNotifications?: () => void;
@@ -1465,22 +1471,37 @@ interface ActionsMenuProps {
   onEdit: (sub: Subscription) => void;
   onDelete: (id: string) => void;
   onToggleActive: (sub: Subscription) => void;
+  /** RM parity #2: opens the per-service cancel-instructions sheet (only when known) */
+  onShowCancelInstructions?: (sub: Subscription) => void;
 }
 
 const ActionsMenu: React.FC<ActionsMenuProps> = ({
-  isOpen, subscription, onClose, lang, onMarkPaid, onSkip, onEdit, onDelete, onToggleActive,
+  isOpen, subscription, onClose, lang, onMarkPaid, onSkip, onEdit, onDelete, onToggleActive, onShowCancelInstructions,
 }) => {
   if (!isOpen || !subscription) return null;
   const brandColor = getBrandColor(subscription);
   const isInactive = !subscription.isActive;
+  const cancelInfo = findCancelInfo(subscription.name);
 
   const actions = isInactive ? [
     { label: lang === 'th' ? 'เปิดใช้งานอีกครั้ง' : 'Reactivate', icon: RotateCcw, onClick: () => { haptics.fire('SELECT'); onToggleActive(subscription); onClose(); }, color: dsColors.success },
+    ...(cancelInfo && onShowCancelInstructions ? [{
+      label: lang === 'th' ? 'ดูคู่มือการยกเลิก' : 'View Instructions',
+      icon: Info,
+      onClick: () => { haptics.fire('SELECT'); onShowCancelInstructions(subscription); onClose(); },
+      color: dsColors.accent,
+    }] : []),
     { label: lang === 'th' ? 'แก้ไข' : 'Edit', icon: Pencil, onClick: () => { haptics.fire('SELECT'); onEdit(subscription); onClose(); }, color: dsColors.accent },
     { label: lang === 'th' ? 'ลบ' : 'Delete', icon: Trash2, onClick: () => { haptics.fire('THUD'); onDelete(subscription.id); onClose(); }, color: dsColors.negative, danger: true },
   ] : [
     { label: lang === 'th' ? 'ทำเครื่องหมายว่าจ่ายแล้ว' : 'Mark as Paid', icon: Check, onClick: () => { haptics.fire('SELECT'); onMarkPaid(subscription); onClose(); }, color: dsColors.success },
     { label: lang === 'th' ? 'ข้ามเดือนนี้' : 'Skip this month', icon: SkipForward, onClick: () => { haptics.fire('SELECT'); onSkip(subscription); onClose(); }, color: dsColors.warning },
+    ...(cancelInfo && onShowCancelInstructions ? [{
+      label: lang === 'th' ? 'ดูคู่มือการยกเลิก' : 'View Instructions',
+      icon: Info,
+      onClick: () => { haptics.fire('SELECT'); onShowCancelInstructions(subscription); onClose(); },
+      color: dsColors.accent,
+    }] : []),
     { label: lang === 'th' ? 'ยกเลิกรายการนี้' : 'Cancel subscription', icon: HideIcon, onClick: () => { haptics.fire('THUD'); onToggleActive(subscription); onClose(); }, color: dsColors.textMuted },
     { label: lang === 'th' ? 'แก้ไข' : 'Edit', icon: Pencil, onClick: () => { haptics.fire('SELECT'); onEdit(subscription); onClose(); }, color: dsColors.accent },
     { label: lang === 'th' ? 'ลบ' : 'Delete', icon: Trash2, onClick: () => { haptics.fire('THUD'); onDelete(subscription.id); onClose(); }, color: dsColors.negative, danger: true },
@@ -1543,10 +1564,168 @@ const ActionsMenu: React.FC<ActionsMenuProps> = ({
   );
 };
 
+// ─── Cancel Instructions Sheet (RM parity #2 — replaces concierge cancel) ──
+export interface CancelSheetData {
+  sub: Subscription;
+  info: CancelInfo & { service: string };
+}
+
+const CancelInstructionsSheet: React.FC<{
+  data: CancelSheetData | null;
+  lang: Language;
+  onClose: () => void;
+}> = ({ data, lang, onClose }) => {
+  if (!data || !data.info) return null;
+  const { sub, info } = data;
+  const brandColor = getBrandColor(sub);
+  const steps = lang === 'th' ? info.stepsTh : info.stepsEn;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-end justify-center"
+      >
+        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-md rounded-t-3xl p-6 pb-8 bg-white"
+        >
+          <div className="flex justify-center mb-4">
+            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          </div>
+
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className="w-11 h-11 rounded-2xl flex items-center justify-center text-[16px] font-bold text-white"
+              style={{ backgroundColor: brandColor }}
+            >
+              <span>{getLogoLetter(sub)}</span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-[15px] font-semibold" style={{ color: dsColors.text }}>
+                {lang === 'th' ? 'วิธียกเลิก' : 'How to cancel'} {info.service}
+              </p>
+              <p className="text-[11px]" style={{ color: dsColors.textMuted }}>
+                {lang === 'th'
+                  ? 'ทำตามขั้นตอนที่หน้าเว็บอย่างเป็นทางการ'
+                  : 'Follow these steps on the official site'}
+              </p>
+            </div>
+          </div>
+
+          <ol className="space-y-2.5 mb-5">
+            {steps.map((step, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold flex-shrink-0 mt-0.5"
+                  style={{ backgroundColor: `${brandColor}22`, color: brandColor }}
+                >
+                  {i + 1}
+                </span>
+                <span className="text-[13px] leading-snug" style={{ color: dsColors.text }}>{step}</span>
+              </li>
+            ))}
+          </ol>
+
+          <button
+            onClick={() => {
+              haptics.fire('SELECT');
+              window.open(info.url, '_blank', 'noopener,noreferrer');
+            }}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-[13px] font-semibold text-white transition-transform active:scale-[0.98]"
+            style={{ backgroundColor: brandColor }}
+          >
+            {lang === 'th' ? 'เปิดหน้าจัดการแพ็กเกจ' : 'Open official page'}
+            <ChevronRight className="w-4 h-4" />
+          </button>
+
+          <p className="text-[10px] text-center mt-3" style={{ color: dsColors.textMuted }}>
+            {lang === 'th'
+              ? 'การยกเลิกใน PicksWise เป็นเพียงการซ่อนรายการ — ต้องยกเลิกกับผู้ให้บริการด้วย'
+              : 'Cancelling here only hides it in PicksWise — also cancel with the provider.'}
+          </p>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+// ─── Auto-Discovery Suggestions Card (RM parity #1) ─────────────────────────
+const SuggestionCard: React.FC<{
+  suggestions: SubSuggestion[];
+  lang: Language;
+  onAdd: (s: SubSuggestion) => void;
+  onDismiss: (merchant: string) => void;
+}> = ({ suggestions, lang, onAdd, onDismiss }) => {
+  if (suggestions.length === 0) return null;
+  const cycleLabel = (c: SubSuggestion['cycle']) =>
+    c === 'weekly' ? (lang === 'th' ? 'รายสัปดาห์' : 'weekly')
+      : c === 'yearly' ? (lang === 'th' ? 'รายปี' : 'yearly')
+        : (lang === 'th' ? 'รายเดือน' : 'monthly');
+
+  return (
+    <div className="mx-4 mt-3 rounded-2xl p-4" style={{ backgroundColor: 'rgba(15, 176, 206, 0.08)', border: '1px solid rgba(15, 176, 206, 0.25)' }}>
+      <div className="flex items-center gap-2 mb-1">
+        <Sparkles className="w-4 h-4" style={{ color: dsColors.accent }} />
+        <p className="text-[13px] font-bold" style={{ color: dsColors.text }}>
+          {lang === 'th'
+            ? `พบการชำระเงินซ้ำๆ ${suggestions.length} รายการ`
+            : `Found ${suggestions.length} possible subscription${suggestions.length > 1 ? 's' : ''}`}
+        </p>
+      </div>
+      <p className="text-[11px] mb-3" style={{ color: dsColors.textMuted }}>
+        {lang === 'th'
+          ? 'จากรูปแบบรายจ่ายของคุณ — เพิ่มเพื่อติดตามก่อนถูกตัดเงินลืม'
+          : 'Detected from your spending — track them before they bite.'}
+      </p>
+      <div className="space-y-2">
+        {suggestions.map((s) => (
+          <div key={normalizeMerchant(s.merchant)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-white">
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-bold text-white flex-shrink-0"
+              style={{ backgroundColor: '#1786C2' }}
+            >
+              {getLogoLetter({ name: s.merchant } as Subscription)}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold truncate" style={{ color: dsColors.text }}>{s.merchant}</p>
+              <p className="text-[11px]" style={{ color: dsColors.textMuted, fontFamily: dsTypography.fontMono }}>
+                ฿{s.amount.toLocaleString()} · {cycleLabel(s.cycle)} · {lang === 'th' ? `พบ ${s.occurrences} ครั้ง` : `${s.occurrences} charges`}
+              </p>
+            </div>
+            <button
+              onClick={() => onAdd(s)}
+              className="flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-transform active:scale-95"
+              style={{ backgroundColor: dsColors.accent }}
+            >
+              {lang === 'th' ? 'เพิ่ม' : 'Add'}
+            </button>
+            <button
+              onClick={() => onDismiss(s.merchant)}
+              aria-label={lang === 'th' ? 'ไม่สนใจ' : 'Dismiss'}
+              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+              style={{ color: dsColors.textMuted }}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // ─── Main Page Component ────────────────────────────────────────────────────
 export default function SubscriptionTrackerPage({
   lang = 'en',
   paydayDay: paydayDayProp,
+  transactions = [],
   onNavigateToNotifications,
 }: SubscriptionTrackerPageProps) {
   // State
@@ -1565,6 +1744,51 @@ export default function SubscriptionTrackerPage({
   const [editSubscription, setEditSubscription] = useState<Subscription | null>(null);
   const [menuSubscription, setMenuSubscription] = useState<Subscription | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [cancelSheet, setCancelSheet] = useState<CancelSheetData | null>(null);
+
+  // ── Auto-discovered subscriptions (RM parity #1) ──────────────────────────
+  const DISMISSED_SUGGESTIONS_KEY = 'pickswise.subsuggestions.dismissed.v1';
+  const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(() => {
+    try { return new Set<string>(JSON.parse(localStorage.getItem(DISMISSED_SUGGESTIONS_KEY) || '[]')); }
+    catch { return new Set<string>(); }
+  });
+  const suggestions = useMemo(
+    () => detectSubscriptionSuggestions(transactions, subscriptions)
+      .filter((s) => !dismissedSuggestions.has(normalizeMerchant(s.merchant))),
+    [transactions, subscriptions, dismissedSuggestions]
+  );
+  const persistDismissedSuggestion = useCallback((key: string, next: Set<string>) => {
+    try { localStorage.setItem(DISMISSED_SUGGESTIONS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
+    setDismissedSuggestions(next);
+    void key;
+  }, []);
+  const handleDismissSuggestion = useCallback((merchant: string) => {
+    haptics.fire('SELECT');
+    const next = new Set(dismissedSuggestions);
+    next.add(normalizeMerchant(merchant));
+    persistDismissedSuggestion(merchant, next);
+  }, [dismissedSuggestions, persistDismissedSuggestion]);
+  const handleAddSuggestion = useCallback(async (s: SubSuggestion) => {
+    haptics.fire('SELECT');
+    // Match a quick-add template for category/color when the name is familiar
+    const tpl = MERCHANT_DATABASE.find((m) =>
+      normalizeMerchant(s.merchant).includes(normalizeMerchant(m.name)) ||
+      normalizeMerchant(m.name).includes(normalizeMerchant(s.merchant)));
+    const created = await addSubscription({
+      name: s.merchant,
+      amount: s.amount,
+      dueDate: s.nextDueDay,
+      category: tpl?.category || 'other',
+      billingCycle: s.cycle,
+      color: tpl?.color || CATEGORY_META.other.color,
+      isActive: true,
+    });
+    if (created) setSubscriptions((prev) => [...prev, created]);
+    // Never re-suggest this merchant
+    const next = new Set(dismissedSuggestions);
+    next.add(normalizeMerchant(s.merchant));
+    persistDismissedSuggestion(s.merchant, next);
+  }, [dismissedSuggestions, persistDismissedSuggestion]);
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
@@ -1800,7 +2024,12 @@ export default function SubscriptionTrackerPage({
           onEdit={handleEdit}
           onDelete={handleDelete}
           onToggleActive={handleToggleActive}
+          onShowCancelInstructions={(sub) => {
+            const info = findCancelInfo(sub.name);
+            if (info) setCancelSheet({ sub, info });
+          }}
         />
+        <CancelInstructionsSheet data={cancelSheet} lang={lang} onClose={() => setCancelSheet(null)} />
       </>
     );
   }
@@ -1841,6 +2070,16 @@ export default function SubscriptionTrackerPage({
         <div className="flex items-center justify-center py-16">
           <RefreshCw className="w-6 h-6 animate-spin" style={{ color: dsColors.accent }} />
         </div>
+      )}
+
+      {/* Auto-discovery suggestions (RM parity #1) — visible on Upcoming & All */}
+      {!isLoading && (activeTab === 'upcoming' || activeTab === 'all') && (
+        <SuggestionCard
+          suggestions={suggestions}
+          lang={lang}
+          onAdd={handleAddSuggestion}
+          onDismiss={handleDismissSuggestion}
+        />
       )}
 
       {/* Load error banner */}
@@ -2111,7 +2350,12 @@ export default function SubscriptionTrackerPage({
         onEdit={handleEdit}
         onDelete={handleDelete}
         onToggleActive={handleToggleActive}
+        onShowCancelInstructions={(sub) => {
+          const info = findCancelInfo(sub.name);
+          if (info) setCancelSheet({ sub, info });
+        }}
       />
+      <CancelInstructionsSheet data={cancelSheet} lang={lang} onClose={() => setCancelSheet(null)} />
 
       {/* CSV Import Modal */}
       <CSVImportModal

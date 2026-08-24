@@ -24,6 +24,227 @@ export interface MerchantTemplate {
   logo: string;
 }
 
+// ─── Cancel Instructions (RM-parity: replaces concierge cancellation) ──────
+export interface CancelInfo {
+  /** Official cancel/manage page */
+  url: string;
+  stepsEn: string[];
+  stepsTh: string[];
+}
+
+/** Fuzzy-match a subscription/merchant name against the cancel-instructions DB.
+ *  Exact name wins, then longest containing match. Returns null when unknown. */
+export function findCancelInfo(name: string): (CancelInfo & { service: string }) | null {
+  const clean = (name || '').trim().toLowerCase();
+  if (!clean) return null;
+  let best: { service: string; info: CancelInfo } | null = null;
+  for (const [service, info] of Object.entries(CANCEL_INSTRUCTIONS)) {
+    const key = service.toLowerCase();
+    if (clean === key || clean.includes(key) || key.includes(clean)) {
+      if (!best || service.length > best.service.length) best = { service, info };
+    }
+  }
+  return best ? { ...best.info, service: best.service } : null;
+}
+
+const CANCEL_INSTRUCTIONS: Record<string, CancelInfo> = {
+  Netflix: {
+    url: 'https://www.netflix.com/cancelplan',
+    stepsEn: [
+      'Sign in at netflix.com',
+      'Open Account → Membership',
+      'Tap "Cancel Plan" and confirm',
+      'Streaming stays available until the end of the paid period',
+    ],
+    stepsTh: [
+      'เข้าสู่ระบบที่ netflix.com',
+      'ไปที่ Account → Membership',
+      'กด "Cancel Plan" แล้วยืนยัน',
+      'ดูต่อได้จนถึงวันสิ้นสุดรอบบิลที่จ่ายแล้ว',
+    ],
+  },
+  Spotify: {
+    url: 'https://www.spotify.com/account/subscription/',
+    stepsEn: [
+      'Sign in at spotify.com → Account',
+      'Open "Manage your plan"',
+      'Choose "Cancel Premium"',
+      'Confirm — account reverts to Free after the billing date',
+    ],
+    stepsTh: [
+      'เข้าสู่ระบบ spotify.com → Account',
+      'เปิด "Manage your plan"',
+      'เลือก "Cancel Premium"',
+      'ยืนยัน — บัญชีจะเปลี่ยนเป็นฟรีหลังครบรอบบิล',
+    ],
+  },
+  'YouTube Premium': {
+    url: 'https://www.youtube.com/paid_memberships',
+    stepsEn: [
+      'Open youtube.com/paid_memberships',
+      'Find YouTube Premium → "Manage"',
+      'Tap "Deactivate" → confirm reason',
+      'Benefits continue until the next billing date',
+    ],
+    stepsTh: [
+      'เปิด youtube.com/paid_memberships',
+      'เลือก YouTube Premium → "จัดการ"',
+      'กด "ยกเลิก" → ยืนยันเหตุผล',
+      'ใช้สิทธิ์ต่อได้ถึงวันเรียกเก็บเงินถัดไป',
+    ],
+  },
+  'Disney+': {
+    url: 'https://www.hotstar.com/th/subscriptions',
+    stepsEn: [
+      'Sign in at hotstar.com → My Space',
+      'Open Subscriptions',
+      'Follow "Cancel Subscription" flow',
+      'If billed via Apple/Google, cancel in that store instead',
+    ],
+    stepsTh: [
+      'เข้าสู่ระบบ hotstar.com → My Space',
+      'เปิด Subscriptions',
+      'กด "Cancel Subscription" ตามขั้นตอน',
+      'ถ้าชำระผ่าน Apple/Google ต้องยกเลิกในสโตร์นั้นแทน',
+    ],
+  },
+  'HBO GO': {
+    url: 'https://play.hbogo.co.th/settings/subscription',
+    stepsEn: [
+      'Sign in to HBO GO TH',
+      'Go to Settings → Subscription',
+      'Select "Cancel Subscription" and confirm',
+      'Watch until the current period ends',
+    ],
+    stepsTh: [
+      'เข้าสู่ระบบ HBO GO ไทย',
+      'ไปที่ Settings → Subscription',
+      'เลือก "Cancel Subscription" และยืนยัน',
+      'รับชมต่อได้จนครบรอบที่ชำระแล้ว',
+    ],
+  },
+  IQIYI: {
+    url: 'https://www.iq.com/vip/web/manage',
+    stepsEn: [
+      'Sign in at iq.com → VIP Member center',
+      'Open "My Account → Manage Subscription"',
+      'Turn off auto-renewal / cancel',
+      'VIP perks last until expiry date',
+    ],
+    stepsTh: [
+      'เข้าสู่ระบบ iq.com → ศูนย์ VIP Member',
+      'เปิด "My Account → Manage Subscription"',
+      'ปิด auto-renewal / ยกเลิก',
+      'สิทธิ์ VIP ใช้ได้ถึงวันหมดอายุ',
+    ],
+  },
+  WeTV: {
+    url: 'https://wetv.vip/th/pay/vipcenter',
+    stepsEn: [
+      'Open WeTV VIP Center',
+      'Go to My Subscription',
+      'Disable auto-renewal',
+      'Membership remains active until period end',
+    ],
+    stepsTh: [
+      'เปิดศูนย์ VIP ของ WeTV',
+      'ไปที่ My Subscription',
+      'ปิดการต่ออายุอัตโนมัติ',
+      'สมาชิกยังใช้ได้จนครบรอบ',
+    ],
+  },
+  Apple: {
+    url: 'https://apps.apple.com/th/account/subscriptions',
+    stepsEn: [
+      'iPhone: Settings → [your name] → Subscriptions',
+      'Pick the subscription (Apple TV+, iCloud+, App Store subs)',
+      'Tap "Cancel Subscription"',
+      'Works for any app billed through Apple',
+    ],
+    stepsTh: [
+      'iPhone: Settings → [ชื่อของคุณ] → Subscriptions',
+      'เลือกรายการ (Apple TV+, iCloud+, แอปที่ผ่าน App Store)',
+      'กด "Cancel Subscription"',
+      'ใช้ยกเลิกได้ทุกแอปที่ชำระผ่าน Apple',
+    ],
+  },
+  Google: {
+    url: 'https://play.google.com/store/account/subscriptions',
+    stepsEn: [
+      'Open Play Store → Payments & subscriptions',
+      'Select the subscription (YouTube, Google One, apps)',
+      'Tap "Cancel subscription" → confirm',
+      'Or visit play.google.com/store/account/subscriptions on web',
+    ],
+    stepsTh: [
+      'เปิด Play Store → การชำระเงินและการสมัคร',
+      'เลือกรายการ (YouTube, Google One, แอปต่างๆ)',
+      'กด "ยกเลิกการสมัคร" → ยืนยัน',
+      'หรือเปิด play.google.com/store/account/subscriptions บนเว็บ',
+    ],
+  },
+  Amazon: {
+    url: 'https://www.amazon.com/gp/primecentral',
+    stepsEn: [
+      'Sign in → Prime Central',
+      'Open Membership → "End membership"',
+      'Confirm cancellation',
+      'Prime benefits stop immediately or at period end depending on option',
+    ],
+    stepsTh: [
+      'เข้าสู่ระบบ → Prime Central',
+      'เปิด Membership → "End membership"',
+      'ยืนยันการยกเลิก',
+      'สิทธิ์ Prime อาจหยุดทันทีหรือสิ้นรอบขึ้นกับตัวเลือก',
+    ],
+  },
+  Microsoft: {
+    url: 'https://account.microsoft.com/services',
+    stepsEn: [
+      'Sign in at account.microsoft.com/services',
+      'Find Microsoft 365 → "Manage"',
+      'Choose "Cancel subscription" (or turn off recurring billing)',
+      'Apps switch to read-only mode after expiry',
+    ],
+    stepsTh: [
+      'เข้าสู่ระบบ account.microsoft.com/services',
+      'เลือก Microsoft 365 → "Manage"',
+      'กด "Cancel subscription" (หรือปิด recurring billing)',
+      'แอปจะโหมดดูอย่างเดียวหลังหมดอายุ',
+    ],
+  },
+  Grab: {
+    url: 'https://www.grab.com/th/express/unlimited/',
+    stepsEn: [
+      'Open Grab app → Profile → GrabUnlimited',
+      'Tap "Manage subscription"',
+      'Choose "Cancel" and confirm',
+      'Perks remain until the current cycle ends',
+    ],
+    stepsTh: [
+      'เปิดแอป Grab → โปรไฟล์ → GrabUnlimited',
+      'กด "จัดการแพ็กเกจ"',
+      'เลือก "ยกเลิก" และยืนยัน',
+      'สิทธิ์ยังใช้ได้จนครบรอบปัจจุบัน',
+    ],
+  },
+  Foodpanda: {
+    url: 'https://www.foodpanda.co.th/subscription',
+    stepsEn: [
+      'Open foodpanda → Account → pandapro',
+      'Tap "Manage membership"',
+      'Select "Cancel membership" and confirm',
+      'Free-delivery perks last until period end',
+    ],
+    stepsTh: [
+      'เปิด foodpanda → บัญชี → pandapro',
+      'กด "จัดการสมาชิก"',
+      'เลือก "ยกเลิกสมาชิก" และยืนยัน',
+      'สิทธิ์ส่งฟรีใช้ได้ถึงสิ้นรอบ',
+    ],
+  },
+};
+
 export const MERCHANT_DATABASE: MerchantTemplate[] = [
   // ── Telecom ──────────────────────────────────────────────────────────────
   { name: 'AIS', nameTh: 'AIS ไอเอส', category: 'telecom', billingCycle: 'monthly', approximateAmount: 599, color: '#0093F9', logo: 'A' },

@@ -434,6 +434,7 @@ function AppShell() {
                 lang={lang}
                 theme="light"
                 paydayDay={profile.paydayDay}
+                transactions={transactions}
                 onNavigateToUpgrade={() => navigate('/paywall')}
               />
             } />

@@ -971,9 +971,9 @@ function SpendingCard({ spend, budget, lang, showAmounts }: {
 // ============================================================
 // QUICK STATS GRID
 // ============================================================
-function QuickStatsGrid({ savings, goalProgress, creditBalance, payday, portfolioValue, lang, showAmounts }: {
+function QuickStatsGrid({ savings, goalProgress, creditBalance, payday, portfolioValue, netThisMonth, lang, showAmounts }: {
   savings: number; goalProgress: number; creditBalance: number;
-  payday: number; portfolioValue: number; lang: Language; showAmounts: boolean;
+  payday: number; portfolioValue: number; netThisMonth: number; lang: Language; showAmounts: boolean;
 }) {
   const daysUntilPayday = (() => {
     const today = new Date();
@@ -1011,6 +1011,15 @@ function QuickStatsGrid({ savings, goalProgress, creditBalance, payday, portfoli
       color: creditBalance > 0 ? 'var(--warning)' : 'var(--success)',
       bg: creditBalance > 0 ? 'var(--warning-muted)' : 'var(--success-muted)',
       trend: creditBalance > 0 ? 'up' : null,
+    },
+    {
+      label: lang === 'th' ? 'สุทธิเดือนนี้' : 'Net this month',
+      value: showAmounts ? fmtCompact(netThisMonth, lang) : '••••',
+      sub: lang === 'th' ? 'รายรับ − รายจ่าย' : 'Income − expenses',
+      icon: netThisMonth >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />,
+      color: netThisMonth >= 0 ? 'var(--success)' : 'var(--error)',
+      bg: netThisMonth >= 0 ? 'var(--success-muted)' : 'var(--error-muted)',
+      trend: netThisMonth >= 0 ? ('up' as const) : ('down' as const),
     },
     {
       label: lang === 'th' ? 'สินทรัพย์' : 'Net Worth',
@@ -2111,7 +2120,14 @@ export default function DashboardPage({
                   />
                 </div>
               );
-            case 'stats':
+            case 'stats': {
+              const now = new Date();
+              const netThisMonth = transactions
+                .filter((tx) => {
+                  const d = new Date(tx.date);
+                  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                })
+                .reduce((sum, tx) => sum + tx.amount, 0);
               return (
                 <div key={sectionId} className="mb-3">
                   <QuickStatsGrid
@@ -2120,11 +2136,13 @@ export default function DashboardPage({
                     creditBalance={profile.creditCardBalance || 0}
                     payday={profile.paydayDay || 1}
                     portfolioValue={profile.portfolioValue ?? 0}
+                    netThisMonth={netThisMonth}
                     lang={lang}
                     showAmounts={showAmounts}
                   />
                 </div>
               );
+            }
             case 'recent':
               return (
                 <div key={sectionId} className="mb-3">

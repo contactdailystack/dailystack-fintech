@@ -21,7 +21,8 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           // Animation libraries
           'vendor-motion': ['motion/react'],
-          // Icons
+          // Icons — measured: keeping lucide shared beats splitting (splitting
+          // produced 30+ micro-chunks and inflated per-page bundles)
           'vendor-icons': ['lucide-react'],
           // Supabase
           'vendor-supabase': ['@supabase/supabase-js'],

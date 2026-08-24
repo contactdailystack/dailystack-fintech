@@ -57,7 +57,22 @@ When auditing feature renames across the codebase:
 
 ## Changelog
 
-### 2026-08-24 (latest — RM parity P2 features #1–#4 + dead-code purge + production deploy)
+### 2026-08-24 (latest — Perf Phase 1: fonts + boot parallelization)
+- FONT BUG FOUND: all 8 self-hosted woff2 files were the SAME variable-font file duplicated under 4 weight URLs each (identical MD5) → browser could fetch identical bytes up to 4× (~294KB worst case); consolidated to 3 files (inter-var-latin / jetbrains-mono-var-latin / noto-sans-thai-var-thai, 113KB total) with weight-range @font-face + unicode-range (Noto only serves Thai glyphs; Latin falls through to Inter)
+- DEAD FONT IMPORTS REMOVED: Onest was loaded from Google Fonts TWICE (index.html link + index.css @import) but no CSS token referenced it — both deleted along with JetBrains Mono @import; ZERO third-party font requests now
+- Preload first-paint faces in index.html: inter-var-latin + jetbrains-mono-var-latin (crossorigin); Noto Thai intentionally NOT preloaded (EN users shouldn't pay for it)
+- AuthContext render-first: user state set immediately on session restore/login, getUserProfile() enrichment runs async after (−1 RTT to TTI); guards against stale-user overwrite via prev.user?.id check
+- MEASURED & REVERTED: removing lucide-react from manualChunks produced 30+ icon micro-chunks, inflated SubscriptionTrackerPage 75→93KB and net-zero byte savings — vendor-icons shared chunk KEPT (rationale commented in vite.config.ts)
+- TypeScript: 0 errors; production build passes
+
+### 2026-08-24 (RM parity round 3: auto-discovery + cancel instructions + net income)
+- #1 Auto-discover subscriptions: NEW services/recurringDetector.ts detectSubscriptionSuggestions(txns, subs) — groups expenses by normalized merchant, ≥2 charges, amount max/min ≤1.25×, interval window weekly 6-9d / monthly 25-35d / yearly 350-380d, median amount, ranked by annual impact, top 5, skips merchants matching existing active subs (contains both ways); SuggestionCard on /subscriptions (upcoming+all tabs) w/ Add button (matches MERCHANT_DATABASE template for category/color) + X dismiss persisted in pickswise.subsuggestions.dismissed.v1; App passes transactions prop
+- #2 Cancel instructions (replaces RM concierge): CANCEL_INSTRUCTIONS map in merchantDatabase.ts (Netflix/Spotify/YouTube/Disney+/HBO GO/IQIYI/WeTV/Apple/Google/Amazon/Microsoft/Grab/Foodpanda — TH+EN steps + official URLs), findCancelInfo() longest-match fuzzy lookup; ActionsMenu gains "ดูคู่มือการยกเลิก" row (only when known) → CancelInstructionsSheet bottom sheet w/ numbered steps + open-official-page button + "cancelling here only hides it" disclaimer; wired at BOTH ActionsMenu call sites (calendar view + main)
+- #3 Net income stat: QuickStatsGrid new card "สุทธิเดือนนี้" = Σ tx.amount filtered to current calendar month (income−expense), green/red by sign w/ TrendingUp/Down icon
+- Orphaned translation key subShadowViewCancelInstructions superseded by inline labels (translations.ts untouched)
+- TypeScript: 0 errors; production build passes
+
+### 2026-08-24 (RM parity P2 features #1–#4 + dead-code purge + production deploy)
 - A1 annual price per row: AllTabItem shows "≈ ฿X/ปี" under monthly/weekly subs (getAnnualAmount weekly×52 · monthly×12; yearly rows unchanged); optional showAmount prop
 - A2 Merchant leaderboard in InsightsPage: top-5 merchants by cumulative spend with rank badges (#1 tan premium color) + mini bars (% of total spend) + largest-single-purchase footer line; skips empty merchant names
 - A3 bill calendar already existed (FullCalendarView tab w/ month nav, date→upcoming drill-down) — verified reachable, no work needed

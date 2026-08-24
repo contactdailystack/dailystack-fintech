@@ -68,15 +68,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        const profile = await getUserProfile();
-
+        // Perf Phase 1: render the authed tree immediately with defaults,
+        // then enrich tier/profileName when the fetch lands (−1 RTT to TTI).
         setState({
           user,
-          tier: (profile?.subscription_tier as SubscriptionTier) || 'basic',
-          profileName: profile?.display_name || null,
+          tier: 'basic',
+          profileName: null,
           loading: false,
           error: null,
         });
+        getUserProfile()
+          .then(profile => {
+            setState(prev => (prev.user?.id === user.id
+              ? {
+                  ...prev,
+                  tier: (profile?.subscription_tier as SubscriptionTier) || 'basic',
+                  profileName: profile?.display_name || null,
+                }
+              : prev));
+          })
+          .catch(() => { /* keep basic defaults */ });
       } catch {
         clearTimeout(timeout);
         setState(prev => ({ ...prev, user: null, loading: false, error: null }));
@@ -91,17 +102,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      setState(prev => ({ ...prev, loading: true, error: null }));
-
-      const profile = await getUserProfile();
-
-      setState({
-        user,
-        tier: (profile?.subscription_tier as SubscriptionTier) || 'basic',
-        profileName: profile?.display_name || null,
-        loading: false,
-        error: null,
-      });
+      // Same render-first pattern as init(): don't block the UI on profile fetch.
+      setState(prev => ({ ...prev, user, tier: prev.user?.id === user.id ? prev.tier : 'basic', loading: false, error: null }));
+      getUserProfile()
+        .then(profile => {
+          setState(prev => (prev.user?.id === user.id
+            ? {
+                ...prev,
+                tier: (profile?.subscription_tier as SubscriptionTier) || 'basic',
+                profileName: profile?.display_name || null,
+              }
+            : prev));
+        })
+        .catch(() => { /* keep current values */ });
     });
 
     return unsubscribe;

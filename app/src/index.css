@@ -1,5 +1,4 @@
 @import './design-system/fonts.css';
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Onest:wght@400;500;700;900&display=swap');
 @import './design-system/tokens.css';
 @tailwind base;
 @tailwind components;
