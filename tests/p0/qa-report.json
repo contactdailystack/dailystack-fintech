@@ -1,0 +1,486 @@
+{
+  "timestamp": "2026-07-11T15:54:20.397Z",
+  "verdict": "MAJOR RUNTIME ISSUES FOUND",
+  "summary": {
+    "total": 20,
+    "passed": 10,
+    "failed": 9,
+    "partial": 1
+  },
+  "bySection": {
+    "Currency": {
+      "PASS": 0,
+      "FAIL": 5,
+      "PARTIAL": 0,
+      "BLOCKED": 0
+    },
+    "Subscription": {
+      "PASS": 1,
+      "FAIL": 1,
+      "PARTIAL": 0,
+      "BLOCKED": 0
+    },
+    "CSV Import": {
+      "PASS": 0,
+      "FAIL": 1,
+      "PARTIAL": 0,
+      "BLOCKED": 0
+    },
+    "Duplicate": {
+      "PASS": 0,
+      "FAIL": 1,
+      "PARTIAL": 0,
+      "BLOCKED": 0
+    },
+    "Merchant": {
+      "PASS": 0,
+      "FAIL": 1,
+      "PARTIAL": 0,
+      "BLOCKED": 0
+    },
+    "Responsive": {
+      "PASS": 4,
+      "FAIL": 0,
+      "PARTIAL": 0,
+      "BLOCKED": 0
+    },
+    "Accessibility": {
+      "PASS": 2,
+      "FAIL": 0,
+      "PARTIAL": 1,
+      "BLOCKED": 0
+    },
+    "Stability": {
+      "PASS": 3,
+      "FAIL": 0,
+      "PARTIAL": 0,
+      "BLOCKED": 0
+    }
+  },
+  "results": [
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/components/SubscriptionTrackerPage.tsx",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/components/SubscriptionTrackerPage.tsx",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/components/SubscriptionModal.tsx",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/components/SubscriptionModal.tsx",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/services/subscriptionService.ts",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/services/subscriptionService.ts",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/services/csvImportService.ts",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/services/csvImportService.ts",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/utils/formatters.ts",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/utils/formatters.ts",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "SUB-E2E-001",
+      "section": "Subscription",
+      "label": "App loads without crash",
+      "status": "PASS",
+      "evidence": "URL: http://localhost:5173/",
+      "file": "N/A",
+      "severity": "P0",
+      "expected": "Page loads",
+      "actual": "URL: http://localhost:5173/"
+    },
+    {
+      "id": "SUB-E2E-003",
+      "section": "Subscription",
+      "label": "Add button clickable",
+      "status": "FAIL",
+      "evidence": "Could not find add subscription button",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P0",
+      "expected": "Add button found and clickable",
+      "actual": "Button not found with any selector"
+    },
+    {
+      "id": "CSV-001",
+      "section": "CSV Import",
+      "label": "CSV Import button present",
+      "status": "FAIL",
+      "evidence": "No CSV/Import button found",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P1",
+      "expected": "CSV import button present",
+      "actual": "Not found"
+    },
+    {
+      "id": "DUP-001",
+      "section": "Duplicate",
+      "label": "CSV service exists",
+      "status": "FAIL",
+      "evidence": "csvImportService.ts not found",
+      "file": "csvImportService.ts",
+      "severity": "P1",
+      "expected": "Service exists",
+      "actual": "Not found"
+    },
+    {
+      "id": "MERCH-001",
+      "section": "Merchant",
+      "label": "Merchant database file exists",
+      "status": "FAIL",
+      "evidence": "merchantDatabase.ts not found",
+      "file": "merchantDatabase.ts",
+      "severity": "P1",
+      "expected": "File exists",
+      "actual": "Not found"
+    },
+    {
+      "id": "RESP-iPhone SE",
+      "section": "Responsive",
+      "label": "No horizontal overflow (iPhone SE)",
+      "status": "PASS",
+      "evidence": "No overflow",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P1",
+      "expected": "No horizontal scroll",
+      "actual": "Clean"
+    },
+    {
+      "id": "RESP-iPhone 14",
+      "section": "Responsive",
+      "label": "No horizontal overflow (iPhone 14)",
+      "status": "PASS",
+      "evidence": "No overflow",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P1",
+      "expected": "No horizontal scroll",
+      "actual": "Clean"
+    },
+    {
+      "id": "RESP-iPhone 14 Pro Max",
+      "section": "Responsive",
+      "label": "No horizontal overflow (iPhone 14 Pro Max)",
+      "status": "PASS",
+      "evidence": "No overflow",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P1",
+      "expected": "No horizontal scroll",
+      "actual": "Clean"
+    },
+    {
+      "id": "RESP-Desktop",
+      "section": "Responsive",
+      "label": "No horizontal overflow (Desktop)",
+      "status": "PASS",
+      "evidence": "No overflow",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P1",
+      "expected": "No horizontal scroll",
+      "actual": "Clean"
+    },
+    {
+      "id": "A11Y-001",
+      "section": "Accessibility",
+      "label": "ARIA-labeled elements exist",
+      "status": "PASS",
+      "evidence": "1 ARIA elements found",
+      "file": "Various components",
+      "severity": "P2",
+      "expected": "ARIA attributes present",
+      "actual": "1 found"
+    },
+    {
+      "id": "A11Y-002",
+      "section": "Accessibility",
+      "label": "Form inputs have labels",
+      "status": "PARTIAL",
+      "evidence": "0/2 inputs labeled",
+      "file": "Form components",
+      "severity": "P2",
+      "expected": "Inputs labeled",
+      "actual": "0/2"
+    },
+    {
+      "id": "A11Y-003",
+      "section": "Accessibility",
+      "label": "Keyboard navigation works",
+      "status": "PASS",
+      "evidence": "Tab key navigates focus",
+      "file": "Various",
+      "severity": "P2",
+      "expected": "Keyboard works",
+      "actual": "Tab navigation OK"
+    },
+    {
+      "id": "STAB-001",
+      "section": "Stability",
+      "label": "No React errors",
+      "status": "PASS",
+      "evidence": "No errors",
+      "file": "Various",
+      "severity": "P0",
+      "expected": "Zero errors",
+      "actual": "Clean"
+    },
+    {
+      "id": "STAB-002",
+      "section": "Stability",
+      "label": "No broken routes",
+      "status": "PASS",
+      "evidence": "All routes OK",
+      "file": "Router",
+      "severity": "P0",
+      "expected": "No 404s",
+      "actual": "Clean"
+    },
+    {
+      "id": "STAB-003",
+      "section": "Stability",
+      "label": "Current route loads",
+      "status": "PASS",
+      "evidence": "Current URL: http://localhost:5173/subscriptions",
+      "file": "Router",
+      "severity": "P0",
+      "expected": "Route loads",
+      "actual": "http://localhost:5173/subscriptions"
+    }
+  ],
+  "p0p1Fixes": [
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/components/SubscriptionTrackerPage.tsx",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/components/SubscriptionTrackerPage.tsx",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/components/SubscriptionModal.tsx",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/components/SubscriptionModal.tsx",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/services/subscriptionService.ts",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/services/subscriptionService.ts",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/services/csvImportService.ts",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/services/csvImportService.ts",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/utils/formatters.ts",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/utils/formatters.ts",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "SUB-E2E-003",
+      "section": "Subscription",
+      "label": "Add button clickable",
+      "status": "FAIL",
+      "evidence": "Could not find add subscription button",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P0",
+      "expected": "Add button found and clickable",
+      "actual": "Button not found with any selector"
+    },
+    {
+      "id": "CSV-001",
+      "section": "CSV Import",
+      "label": "CSV Import button present",
+      "status": "FAIL",
+      "evidence": "No CSV/Import button found",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P1",
+      "expected": "CSV import button present",
+      "actual": "Not found"
+    },
+    {
+      "id": "DUP-001",
+      "section": "Duplicate",
+      "label": "CSV service exists",
+      "status": "FAIL",
+      "evidence": "csvImportService.ts not found",
+      "file": "csvImportService.ts",
+      "severity": "P1",
+      "expected": "Service exists",
+      "actual": "Not found"
+    },
+    {
+      "id": "MERCH-001",
+      "section": "Merchant",
+      "label": "Merchant database file exists",
+      "status": "FAIL",
+      "evidence": "merchantDatabase.ts not found",
+      "file": "merchantDatabase.ts",
+      "severity": "P1",
+      "expected": "File exists",
+      "actual": "Not found"
+    }
+  ],
+  "criticalFailures": [
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/components/SubscriptionTrackerPage.tsx",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/components/SubscriptionTrackerPage.tsx",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/components/SubscriptionModal.tsx",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/components/SubscriptionModal.tsx",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/services/subscriptionService.ts",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/services/subscriptionService.ts",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/services/csvImportService.ts",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/services/csvImportService.ts",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "CURR-001",
+      "section": "Currency",
+      "label": "File exists: app/src/utils/formatters.ts",
+      "status": "FAIL",
+      "evidence": "File not found",
+      "file": "app/src/utils/formatters.ts",
+      "severity": "P0",
+      "expected": "File exists",
+      "actual": "File not found"
+    },
+    {
+      "id": "SUB-E2E-003",
+      "section": "Subscription",
+      "label": "Add button clickable",
+      "status": "FAIL",
+      "evidence": "Could not find add subscription button",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P0",
+      "expected": "Add button found and clickable",
+      "actual": "Button not found with any selector"
+    }
+  ],
+  "p1Failures": [
+    {
+      "id": "CSV-001",
+      "section": "CSV Import",
+      "label": "CSV Import button present",
+      "status": "FAIL",
+      "evidence": "No CSV/Import button found",
+      "file": "SubscriptionTrackerPage.tsx",
+      "severity": "P1",
+      "expected": "CSV import button present",
+      "actual": "Not found"
+    },
+    {
+      "id": "DUP-001",
+      "section": "Duplicate",
+      "label": "CSV service exists",
+      "status": "FAIL",
+      "evidence": "csvImportService.ts not found",
+      "file": "csvImportService.ts",
+      "severity": "P1",
+      "expected": "Service exists",
+      "actual": "Not found"
+    },
+    {
+      "id": "MERCH-001",
+      "section": "Merchant",
+      "label": "Merchant database file exists",
+      "status": "FAIL",
+      "evidence": "merchantDatabase.ts not found",
+      "file": "merchantDatabase.ts",
+      "severity": "P1",
+      "expected": "File exists",
+      "actual": "Not found"
+    }
+  ]
+}

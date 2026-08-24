@@ -137,7 +137,7 @@ export function OTPInput({ email, mode, lang, onVerify, onResend, onBack }: OTPI
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-[#0C0D0E]">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-[#0B0F0A]">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -162,7 +162,7 @@ export function OTPInput({ email, mode, lang, onVerify, onResend, onBack }: OTPI
 
           <button
             onClick={onBack}
-            className="w-full font-medium py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all duration-250 cursor-pointer bg-[#C7FF2E] text-[#0C0D0E] hover:bg-white"
+            className="w-full font-medium py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all duration-250 cursor-pointer bg-[#56be89] text-[#0B0F0A] hover:bg-white"
           >
             <span className="font-display font-semibold text-sm">
               {mode === 'verify' ? t.otpContinueBtn : t.otpResetPasswordBtn}
@@ -175,9 +175,9 @@ export function OTPInput({ email, mode, lang, onVerify, onResend, onBack }: OTPI
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-[#0C0D0E]">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-[#0B0F0A]">
       {/* Background glow meshes */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full bg-[#C7FF2E]/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full bg-[#56be89]/10 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-[240px] h-[240px] rounded-full bg-emerald-500/5 blur-[80px] pointer-events-none" />
 
       <motion.div
@@ -188,7 +188,7 @@ export function OTPInput({ email, mode, lang, onVerify, onResend, onBack }: OTPI
       >
         {/* Security badge */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border font-mono text-[11px] tracking-widest uppercase mb-4 bg-[#C7FF2E]/10 text-[#C7FF2E] border-[#C7FF2E]/20">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border font-mono text-[11px] tracking-widest uppercase mb-4 bg-[#56be89]/10 text-[#56be89] border-[#56be89]/20">
             <ShieldCheck className="w-3.5 h-3.5" />
             {t.otpSecureVerification}
           </div>
@@ -210,7 +210,7 @@ export function OTPInput({ email, mode, lang, onVerify, onResend, onBack }: OTPI
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-5 flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono"
+              className="mb-5 flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono"
             >
               <AlertCircle className="w-4 h-4 shrink-0" />
               {error}
@@ -245,15 +245,15 @@ export function OTPInput({ email, mode, lang, onVerify, onResend, onBack }: OTPI
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   disabled={loading || success}
-                  className={`w-12 h-14 md:w-14 md:h-16 text-center text-xl font-mono font-bold transition-all duration-200 rounded-2xl bg-[#1A1B1E] border ${
+                  className={`w-12 h-14 md:w-14 md:h-16 text-center text-xl font-mono font-bold transition-all duration-200 rounded-xl bg-[#1A1B1E] border ${
                     digit 
-                      ? 'border-[#C7FF2E]/50 text-[#C7FF2E] shadow-[0_0_20px_rgba(199,255,46,0.15)]' 
+                      ? 'border-[#56be89]/50 text-[#56be89] shadow-[0_0_20px_rgba(199,255,46,0.2)]' 
                       : 'border-[#2B2D31] text-white'
-                  } focus:border-[#C7FF2E] focus:ring-2 focus:ring-[#C7FF2E]/35 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                  } focus:border-[#56be89] focus:ring-2 focus:ring-[#56be89]/35 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
                     loading ? 'animate-pulse' : ''
                   }`}
                   style={{
-                    boxShadow: digit ? '0 0 20px rgba(199,255,46,0.15)' : 'none'
+                    boxShadow: digit ? '0 0 24px rgba(199,255,46,0.2)' : 'none'
                   }}
                 />
                 
@@ -261,7 +261,7 @@ export function OTPInput({ email, mode, lang, onVerify, onResend, onBack }: OTPI
                 {inputRefs.current[index] === document.activeElement && (
                   <motion.div
                     layoutId="activeDot"
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#C7FF2E]"
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#56be89]"
                   />
                 )}
               </motion.div>
@@ -274,10 +274,10 @@ export function OTPInput({ email, mode, lang, onVerify, onResend, onBack }: OTPI
           type="button"
           onClick={() => handleSubmit()}
           disabled={loading || otp.join('').length !== OTP_LENGTH}
-          className="w-full font-medium py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed transition-all duration-250 mt-4 cursor-pointer bg-[#C7FF2E] text-[#0C0D0E] hover:bg-white"
+          className="w-full font-medium py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed transition-all duration-250 mt-4 cursor-pointer bg-[#56be89] text-[#0B0F0A] hover:bg-white"
         >
           {loading ? (
-            <div className="w-5 h-5 border-2 rounded-full animate-spin border-[#0C0D0E] border-t-transparent" />
+            <div className="w-5 h-5 border-2 rounded-full animate-spin border-[#0B0F0A] border-t-transparent" />
           ) : (
             <>
               <span className="font-display font-semibold text-sm">
@@ -298,7 +298,7 @@ export function OTPInput({ email, mode, lang, onVerify, onResend, onBack }: OTPI
             type="button"
             onClick={handleResend}
             disabled={loading || resendCooldown > 0}
-            className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-[#C7FF2E] hover:text-white disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-[#56be89] hover:text-white disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
             <RotateCcw className={`w-3.5 h-3.5 ${resendCooldown > 0 ? '' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
             {resendCooldown > 0 ? (

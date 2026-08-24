@@ -18,6 +18,12 @@ build/
 .env.production
 .env.production.local
 *.env
+*.bak
+
+# Temp/scratch files
+temp.json
+temp_*.json
+*-temp.json
 
 # Supabase temp files
 supabase/.temp/
@@ -65,3 +71,9 @@ test-results/
 .mavis/**/*.md
 .mavis/**/*.json
 !.mavis/skills/
+
+# Vercel local link
+.vercel/
+
+# TypeScript build info
+*.tsbuildinfo

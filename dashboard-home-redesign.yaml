@@ -1,0 +1,969 @@
+name: "DailyStack Dashboard Home Redesign"
+description: "Redesign Dashboard Home page — Rocket Money 5-section layout using ProfilePage design tokens"
+max_concurrency: 4
+max_consecutive_failures: 2
+max_cycles: 4
+auto_accept: true
+auto_reject_retries: 1
+
+verifier_config:
+  default_verifiers: ["verifier"]
+  audit_sample_rate: 0
+  strict_mode: false
+
+tasks:
+
+  - id: "nav-redesign"
+    title: "[Section 1] Top Navigation Bar — Profile Style"
+    prompt: |
+      ## Mission
+      Redesign the Top Navigation Bar in DashboardPage.tsx to Rocket Money style using ProfilePage as the Design Source of Truth.
+
+      ## Design Rules
+      - ProfilePage = Sole Design Source of Truth
+      - Tokens: bg=#0B0F0A (dark), surface=#F4F5F7, accent=#C7FF2E, white=#FFFFFF
+      - Font: Kanit (TH) / Inter (EN)
+      - NO gradient header (flat dark background only)
+      - Section header font: text-[17px] font-semibold
+      - Card radius: rounded-[32px], padding: px-8 py-6
+
+      ## What to Implement
+      File: `D:\Coding Folder\dailystack-fintech\app\src\components\DashboardPage.tsx`
+
+      Replace the existing Top Navigation Bar section (search for "Settings" or header area near the top of the component) with:
+
+      ```tsx
+      {/* ============================================================ */}
+      {/* TOP NAVIGATION BAR — Rocket Money Style                      */}
+      {/* ============================================================ */}
+
+      {/* Dark gradient bar at top */}
+      <div className="relative">
+        {/* Main nav bar — dark flat background */}
+        <div
+          className="w-full px-5 pt-4 pb-6"
+          style={{ backgroundColor: '#0B0F0A' }}
+        >
+          {/* Row: Left (Settings) + Center (Logo) + Right (Notifications) */}
+          <div className="flex items-center justify-between w-full">
+            {/* Left: Settings Icon */}
+            <button
+              onClick={() => { handlePress(); onNavigate('settings'); }}
+              className="w-10 h-10 rounded-full flex items-center justify-center active:opacity-70 transition-opacity cursor-pointer"
+              aria-label={lang === 'th' ? 'การตั้งค่า' : 'Settings'}
+            >
+              <Settings className="w-5 h-5" style={{ color: '#FFFFFF' }} />
+            </button>
+
+            {/* Center: Rocket Money Logo + Brand */}
+            <div className="flex flex-col items-center gap-0">
+              {/* Brand Icon */}
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center mb-0.5"
+                style={{ backgroundColor: '#C7FF2E' }}
+              >
+                <span className="text-[14px] font-bold" style={{ color: '#0B0F0A', fontFamily: '"Space Grotesk", sans-serif' }}>
+                  R
+                </span>
+              </div>
+              {/* Brand Name */}
+              <span
+                className="text-[13px] font-bold tracking-wide"
+                style={{ color: '#FFFFFF', fontFamily: '"Space Grotesk", sans-serif' }}
+              >
+                ROCKET MONEY
+              </span>
+            </div>
+
+            {/* Right: Notification Bell Icon */}
+            <button
+              onClick={() => { handlePress(); onNavigate('notifications'); }}
+              className="w-10 h-10 rounded-full flex items-center justify-center active:opacity-70 transition-opacity cursor-pointer"
+              aria-label={lang === 'th' ? 'การแจ้งเตือน' : 'Notifications'}
+            >
+              <Bell className="w-5 h-5" style={{ color: '#FFFFFF' }} />
+            </button>
+          </div>
+        </div>
+
+        {/* Soft rounded transition to white content area */}
+        <div
+          className="w-full h-4"
+          style={{
+            backgroundColor: '#0B0F0A',
+            borderBottomLeftRadius: '24px',
+            borderBottomRightRadius: '24px',
+          }}
+        />
+      </div>
+
+      {/* White content area starts here */}
+      <div className="w-full px-4 pt-4 pb-24" style={{ backgroundColor: '#FFFFFF' }}>
+    ```
+
+      ## Implementation Notes
+      - The Settings icon (from lucide-react) should already be imported
+      - Add `Bell` import from lucide-react if not already present
+      - This nav bar REPLACES any existing simple header at the top of the page
+      - The hero card and other content should come AFTER this nav bar
+      - Ensure proper spacing: nav bar ends with dark area, content starts with white
+
+      ## Verification
+      1. Read the file and identify the current top header section
+      2. Replace the entire top header section with the new nav bar code
+      3. Ensure `Bell` is imported from lucide-react
+      4. Run `npx tsc --noEmit` — must pass with 0 errors
+      5. Report exact line numbers changed
+    assigned_to: "frontend-dev"
+    role: "produce"
+    depends_on: []
+    gates: []
+    max_retries: 1
+    timeout_ms: 600000
+    hang_alert_after_ms: 600000
+
+  - id: "hero-widget"
+    title: "[Section 2] Hero Widget — Spending Carousel + Area Chart"
+    prompt: |
+      ## Mission
+      Replace the existing Hero Card in DashboardPage.tsx with a Rocket Money-style Hero Widget featuring:
+      1. Large black "$X,XXX" spend amount
+      2. Green "below avg" badge top-right (positive reinforcement)
+      3. Minimalist area/line chart with budget threshold line
+      4. Payday banner at bottom
+      5. Carousel indicators (3 dots)
+
+      ## Design Rules
+      - ProfilePage = Sole Design Source of Truth
+      - Tokens: bg=#0B0F0A (dark card), surface=#F4F5F7, accent=#C7FF2E
+      - Font: Kanit (TH) / Inter (EN)
+      - Card radius: rounded-[32px], padding: px-8 py-6
+
+      ## Implementation
+
+      Find the EXISTING Hero Card in DashboardPage.tsx (search for "Spent this month" or the first dark card near the top) and REPLACE it entirely with:
+
+      ```tsx
+      {/* ============================================================ */}
+      {/* HERO WIDGET — Spending Control Carousel                    */}
+      {/* ============================================================ */}
+
+      {/* Dark Hero Card */}
+      <div
+        className="w-full rounded-[32px] overflow-hidden"
+        style={{ backgroundColor: '#0B0F0A', padding: 'px-7 py-6' }}
+      >
+        {/* Row 1: Amount (left) + Below Avg Badge (right) */}
+        <div className="flex items-start justify-between w-full mb-4">
+          {/* Left: Monthly Spend */}
+          <div className="flex flex-col items-start gap-1">
+            <span
+              className="text-[11px] font-medium uppercase tracking-wider"
+              style={{ color: '#6B7280', fontFamily: '"Inter", sans-serif' }}
+            >
+              {lang === 'th' ? 'ใช้จ่ายเดือนนี้' : 'SPENT THIS MONTH'}
+            </span>
+            <span
+              className="text-[36px] font-bold leading-none"
+              style={{ color: '#FFFFFF', fontFamily: '"Space Grotesk", sans-serif' }}
+            >
+              ฿{totalSpent.toLocaleString()}
+            </span>
+          </div>
+
+          {/* Right: Below Avg Positive Badge */}
+          {belowAverage > 0 && (
+            <div className="flex items-center gap-1.5 mt-1">
+              <div
+                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: 'rgba(199, 255, 46, 0.15)' }}
+              >
+                <Check className="w-3 h-3" style={{ color: '#C7FF2E' }} />
+              </div>
+              <span
+                className="text-[11px] font-medium"
+                style={{ color: '#C7FF2E', fontFamily: '"Inter", sans-serif' }}
+              >
+                {lang === 'th'
+                  ? `฿${belowAverage.toLocaleString()} ต่ำกว่าค่าเฉลี่ย`
+                  : `$${belowAverage.toLocaleString()} below avg.`}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Row 2: Minimalist Area Chart */}
+        <div className="w-full h-24 mb-4 relative">
+          <svg viewBox="0 0 320 80" className="w-full h-full" preserveAspectRatio="none">
+            {/* Area fill — gradient from accent to transparent */}
+            <defs>
+              <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
+            {/* Generate mock daily spend data for the month */}
+            {(() => {
+              const daysInMonth = 30;
+              const monthlyBudget = monthlyBudgets.length > 0 ? monthlyBudgets[0].amount : totalSpent * 1.3;
+              const budgetLineY = 80 - (monthlyBudget / (totalSpent * 1.5)) * 80;
+
+              // Generate smooth curve data
+              const points: {x: number; y: number}[] = [];
+              let cumulative = 0;
+              const maxSpend = totalSpent * 1.5;
+
+              for (let i = 0; i < daysInMonth; i++) {
+                const dailySpend = i < daysInMonth - 1
+                  ? Math.random() * (totalSpent / 15) * 0.7 + (totalSpent / 30)
+                  : totalSpent - cumulative;
+                cumulative += Math.min(dailySpend, maxSpend - cumulative);
+                const x = (i / (daysInMonth - 1)) * 320;
+                const y = Math.max(10, 80 - (cumulative / maxSpend) * 70);
+                points.push({ x, y });
+              }
+
+              // Build SVG path
+              const linePath = points.reduce((path, pt, i) => {
+                if (i === 0) return `M ${pt.x},${pt.y}`;
+                const prev = points[i - 1];
+                const cpx = (prev.x + pt.x) / 2;
+                return `${path} C ${cpx},${prev.y} ${cpx},${pt.y} ${pt.x},${pt.y}`;
+              }, '');
+
+              const areaPath = `${linePath} L 320,80 L 0,80 Z`;
+
+              const lastPt = points[points.length - 1];
+
+              return (
+                <>
+                  {/* Area fill */}
+                  <path d={areaPath} fill="url(#areaGradient)" />
+                  {/* Line */}
+                  <path
+                    d={linePath}
+                    fill="none"
+                    stroke="#3B82F6"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {/* Current position dot */}
+                  <circle cx={lastPt.x} cy={lastPt.y} r="4" fill="#3B82F6" />
+                  <circle cx={lastPt.x} cy={lastPt.y} r="6" fill="#3B82F6" fillOpacity="0.3" />
+                  {/* Budget threshold line */}
+                  <line
+                    x1="0"
+                    y1={budgetLineY}
+                    x2="320"
+                    y2={budgetLineY}
+                    stroke="#6B7280"
+                    strokeWidth="1"
+                    strokeDasharray="4 3"
+                    strokeOpacity="0.6"
+                  />
+                  {/* Budget label */}
+                  <text
+                    x="4"
+                    y={budgetLineY - 4}
+                    fill="#6B7280"
+                    fontSize="8"
+                    fontFamily="Inter, sans-serif"
+                  >
+                    BUDGET
+                  </text>
+                </>
+              );
+            })()}
+          </svg>
+        </div>
+
+        {/* Row 3: Payday Banner */}
+        <div
+          className="w-full flex items-center justify-between px-4 py-3 rounded-2xl mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
+        >
+          <div className="flex items-center gap-2.5">
+            <Banknote className="w-4 h-4" style={{ color: '#C7FF2E' }} />
+            <span
+              className="text-[13px] font-medium"
+              style={{ color: '#D1D5DB', fontFamily: lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif' }}
+            >
+              {lang === 'th' ? `วันเงินเดือนออก ${daysUntilPayday} วัน` : `Payday in ${daysUntilPayday} days`}
+            </span>
+          </div>
+          <button
+            className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer"
+            aria-label="Info"
+          >
+            <Info className="w-3.5 h-3.5" style={{ color: '#6B7280' }} />
+          </button>
+        </div>
+
+        {/* Row 4: 3-Column Stats */}
+        <div className="grid grid-cols-3 gap-0 mb-4">
+          {/* Spent */}
+          <div className="flex flex-col items-center py-3" style={{ borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+            <span className="text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: '#6B7280', fontFamily: '"Inter", sans-serif' }}>
+              {lang === 'th' ? 'ใช้ไป' : 'SPENT'}
+            </span>
+            <span className="text-[15px] font-bold" style={{ color: '#FFFFFF', fontFamily: '"Space Grotesk", sans-serif' }}>
+              ฿{totalSpent.toLocaleString()}
+            </span>
+          </div>
+          {/* Active */}
+          <div className="flex flex-col items-center py-3" style={{ borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+            <span className="text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: '#6B7280', fontFamily: '"Inter", sans-serif' }}>
+              {lang === 'th' ? 'ใช้งาน' : 'ACTIVE'}
+            </span>
+            <span className="text-[15px] font-bold" style={{ color: '#FFFFFF', fontFamily: '"Space Grotesk", sans-serif' }}>
+              {activeSubscriptions.length}
+            </span>
+          </div>
+          {/* Budget */}
+          <div className="flex flex-col items-center py-3">
+            <span className="text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: '#6B7280', fontFamily: '"Inter", sans-serif' }}>
+              {lang === 'th' ? 'งบ' : 'BUDGET'}
+            </span>
+            <span className="text-[15px] font-bold" style={{ color: '#C7FF2E', fontFamily: '"Space Grotesk", sans-serif' }}>
+              {monthlyBudgets.length > 0
+                ? Math.round((totalSpent / monthlyBudgets[0].amount) * 100)
+                : 0}%
+            </span>
+          </div>
+        </div>
+
+        {/* Row 5: Carousel Indicators */}
+        <div className="flex items-center justify-center gap-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-1.5 rounded-full transition-all duration-300"
+              style={{
+                width: i === 0 ? '20px' : '6px',
+                backgroundColor: i === 0 ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      ```
+
+      ## Required Calculations (add near the top of the component, after existing hooks)
+      Add these computed values:
+      ```tsx
+      // Hero Widget calculations
+      const avgSpend = 3500; // mock average — wire to apiService in Sprint 2
+      const belowAverage = Math.max(0, Math.round(avgSpend - totalSpent));
+      const daysUntilPayday = 8; // mock — wire to transaction history analysis
+      ```
+
+      ## Required Imports
+      Ensure these are in the import section:
+      ```tsx
+      import { Check, Banknote, Info } from 'lucide-react';
+      ```
+
+      ## Verification
+      1. Read DashboardPage.tsx and find the existing Hero Card section
+      2. Replace it entirely with the new Hero Widget code above
+      3. Add `Check`, `Banknote`, `Info` imports from lucide-react if not present
+      4. Add computed values for belowAverage and daysUntilPayday
+      5. Run `npx tsc --noEmit` — must pass with 0 errors
+      6. Report exact lines changed
+    assigned_to: "frontend-dev"
+    role: "produce"
+    depends_on: []
+    gates: []
+    max_retries: 1
+    timeout_ms: 600000
+    hang_alert_after_ms: 600000
+
+  - id: "accounts-widget"
+    title: "[Section 3] Accounts Summary — Net Cash + Chevrons + Sync"
+    prompt: |
+      ## Mission
+      Redesign the Accounts section in DashboardPage.tsx to Rocket Money style:
+      - White card container with subtle dividers
+      - Net Cash = Checking - Card Balance (HIGHLIGHTED green)
+      - Chevron indicators on each row
+      - Sync status + "Sync now" text link
+      - Progressive disclosure structure
+
+      ## Design Rules
+      - ProfilePage = Sole Design Source of Truth
+      - Tokens: bg=#0B0F0A (dark card), surface=#F4F5F7, accent=#C7FF2E, white=#FFFFFF
+      - Font: Kanit (TH) / Inter (EN)
+      - White card with gray dividers (Rocket Money style)
+
+      ## Implementation
+
+      Find the EXISTING Accounts section in DashboardPage.tsx (search for "ACCOUNTS" or the accounts card) and REPLACE it with:
+
+      ```tsx
+      {/* ============================================================ */}
+      {/* ACCOUNTS SUMMARY WIDGET — Rocket Money Style                */}
+      {/* ============================================================ */}
+
+      {/* Accounts Card — White Card + Dividers */}
+      <div className="mb-6">
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-3 px-1">
+          <span
+            className="text-[13px] font-bold uppercase tracking-wider"
+            style={{ color: '#111827', fontFamily: '"Inter", sans-serif' }}
+          >
+            {lang === 'th' ? 'บัญชี' : 'ACCOUNTS'}
+          </span>
+          <button
+            onClick={() => handlePress()}
+            className="flex items-center gap-1.5 cursor-pointer"
+          >
+            <RefreshCw className="w-3 h-3" style={{ color: '#9CA3AF' }} />
+            <span className="text-[11px]" style={{ color: '#9CA3AF', fontFamily: '"Inter", sans-serif' }}>
+              {lang === 'th' ? 'อัปเดตเมื่อ' : 'as of'} {lastSyncText}
+            </span>
+            <span
+              className="text-[11px] font-semibold underline underline-offset-2"
+              style={{ color: '#3B82F6', fontFamily: '"Inter", sans-serif' }}
+            >
+              {lang === 'th' ? 'ซิงค์เลย' : 'Sync now'}
+            </span>
+          </button>
+        </div>
+
+        {/* White Card Container */}
+        <div
+          className="rounded-[24px] overflow-hidden"
+          style={{ backgroundColor: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}
+        >
+          {/* Checking Account Row */}
+          <div
+            className="flex items-center justify-between px-5 py-4 cursor-pointer active:bg-gray-50 transition-all"
+            style={{ borderBottom: '1px solid #F3F4F6' }}
+            onClick={() => handlePress()}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: '#F4F5F7' }}
+              >
+                <Building2 className="w-4 h-4" style={{ color: '#374151' }} />
+              </div>
+              <div className="flex flex-col items-start gap-0.5">
+                <span
+                  className="text-[14px] font-semibold"
+                  style={{ color: '#111827', fontFamily: lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif' }}
+                >
+                  {lang === 'th' ? 'บัญชีหลัก' : 'Checking'}
+                </span>
+                <span className="text-[11px]" style={{ color: '#9CA3AF', fontFamily: '"Inter", sans-serif' }}>
+                  {lang === 'th' ? 'ธนาคารไทยพาณิชย์' : 'SCB Bank'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[15px] font-bold"
+                style={{ color: '#111827', fontFamily: '"Inter", sans-serif' }}
+              >
+                ฿{(checkingBalance).toLocaleString()}
+              </span>
+              <ChevronDown className="w-4 h-4" style={{ color: '#D1D5DB' }} />
+            </div>
+          </div>
+
+          {/* Card Balance Row */}
+          <div
+            className="flex items-center justify-between px-5 py-4 cursor-pointer active:bg-gray-50 transition-all"
+            style={{ borderBottom: '1px solid #F3F4F6' }}
+            onClick={() => handlePress()}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: '#F4F5F7' }}
+              >
+                <CreditCard className="w-4 h-4" style={{ color: '#374151' }} />
+              </div>
+              <div className="flex flex-col items-start gap-0.5">
+                <span
+                  className="text-[14px] font-semibold"
+                  style={{ color: '#111827', fontFamily: lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif' }}
+                >
+                  {lang === 'th' ? 'ยอดบัตร' : 'Card Balance'}
+                </span>
+                <span className="text-[11px]" style={{ color: '#9CA3AF', fontFamily: '"Inter", sans-serif' }}>
+                  {lang === 'th' ? 'วงเงินบัตรเครดิต' : 'Credit Card'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[15px] font-bold"
+                style={{ color: '#111827', fontFamily: '"Inter", sans-serif' }}
+              >
+                ฿{(cardBalance).toLocaleString()}
+              </span>
+              <ChevronDown className="w-4 h-4" style={{ color: '#D1D5DB' }} />
+            </div>
+          </div>
+
+          {/* Net Cash Row — HIGHLIGHTED GREEN */}
+          <div
+            className="flex items-center justify-between px-5 py-4 cursor-pointer active:bg-green-50 transition-all"
+            style={{ borderBottom: '1px solid #F3F4F6', backgroundColor: 'rgba(16, 185, 129, 0.04)' }}
+            onClick={() => handlePress()}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)' }}
+              >
+                <Wallet className="w-4 h-4" style={{ color: '#10B981' }} />
+              </div>
+              <div className="flex flex-col items-start gap-0.5">
+                <span
+                  className="text-[14px] font-bold"
+                  style={{ color: '#111827', fontFamily: lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif' }}
+                >
+                  {lang === 'th' ? 'เงินสดสุทธิ' : 'Net Cash'}
+                </span>
+                <span className="text-[11px]" style={{ color: '#6B7280', fontFamily: '"Inter", sans-serif' }}>
+                  {lang === 'th' ? 'หลังหักยอดบัตร' : 'After Card Balance'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[16px] font-bold"
+                style={{ color: '#10B981', fontFamily: '"Space Grotesk", sans-serif' }}
+              >
+                ฿{Math.max(0, checkingBalance - cardBalance).toLocaleString()}
+              </span>
+              <button
+                className="w-5 h-5 rounded-full flex items-center justify-center cursor-pointer"
+                aria-label="Info"
+              >
+                <Info className="w-3 h-3" style={{ color: '#10B981' }} />
+              </button>
+            </div>
+          </div>
+
+          {/* Savings Row */}
+          <div
+            className="flex items-center justify-between px-5 py-4 cursor-pointer active:bg-gray-50 transition-all"
+            style={{ borderBottom: '1px solid #F3F4F6' }}
+            onClick={() => handlePress()}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: '#F4F5F7' }}
+              >
+                <PiggyBank className="w-4 h-4" style={{ color: '#374151' }} />
+              </div>
+              <div className="flex flex-col items-start gap-0.5">
+                <span
+                  className="text-[14px] font-semibold"
+                  style={{ color: '#111827', fontFamily: lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif' }}
+                >
+                  {lang === 'th' ? 'เงินออม' : 'Savings'}
+                </span>
+                <span className="text-[11px]" style={{ color: '#9CA3AF', fontFamily: '"Inter", sans-serif' }}>
+                  {lang === 'th' ? 'บัญชีเงินฝาก' : 'Savings Account'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[15px] font-bold"
+                style={{ color: '#111827', fontFamily: '"Inter", sans-serif' }}
+              >
+                ฿{(savingsBalance).toLocaleString()}
+              </span>
+              <ChevronDown className="w-4 h-4" style={{ color: '#D1D5DB' }} />
+            </div>
+          </div>
+
+          {/* Investments Row */}
+          <div
+            className="flex items-center justify-between px-5 py-4 cursor-pointer active:bg-gray-50 transition-all"
+            onClick={() => handlePress()}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: '#F4F5F7' }}
+              >
+                <BarChart3 className="w-4 h-4" style={{ color: '#374151' }} />
+              </div>
+              <div className="flex flex-col items-start gap-0.5">
+                <span
+                  className="text-[14px] font-semibold"
+                  style={{ color: '#111827', fontFamily: lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif' }}
+                >
+                  {lang === 'th' ? 'การลงทุน' : 'Investments'}
+                </span>
+                <span className="text-[11px]" style={{ color: '#9CA3AF', fontFamily: '"Inter", sans-serif' }}>
+                  {lang === 'th' ? 'พอร์ตการลงทุน' : 'Investment Portfolio'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[15px] font-bold"
+                style={{ color: '#111827', fontFamily: '"Inter", sans-serif' }}
+              >
+                ฿{(investmentsBalance).toLocaleString()}
+              </span>
+              <ChevronDown className="w-4 h-4" style={{ color: '#D1D5DB' }} />
+            </div>
+          </div>
+        </div>
+      </div>
+      ```
+
+      ## Required Computed Values
+      Add near the component top:
+      ```tsx
+      // Accounts Widget calculations
+      const checkingBalance = 5848;   // mock — wire to accountService
+      const cardBalance = 2001;        // mock — wire to accountService
+      const savingsBalance = 267;      // mock — wire to accountService
+      const investmentsBalance = 0;     // mock — wire to accountService
+      const lastSyncText = lang === 'th' ? '19 ชม. ที่แล้ว' : 'about 19 hours ago';
+      ```
+
+      ## Required Imports
+      Add these imports from lucide-react:
+      ```tsx
+      import {
+        RefreshCw, Building2, Wallet, PiggyBank, BarChart3,
+        ChevronDown, Info
+      } from 'lucide-react';
+      ```
+
+      ## Verification
+      1. Read DashboardPage.tsx and find the existing Accounts section
+      2. Replace it entirely with the new Accounts Widget code
+      3. Add all required imports from lucide-react
+      4. Add computed balance values
+      5. Run `npx tsc --noEmit` — must pass with 0 errors
+      6. Report exact lines changed
+    assigned_to: "frontend-dev"
+    role: "produce"
+    depends_on: []
+    gates: []
+    max_retries: 1
+    timeout_ms: 600000
+    hang_alert_after_ms: 600000
+
+  - id: "setup-progress"
+    title: "[Section 4] Bottom Setup Progress Bar"
+    prompt: |
+      ## Mission
+      Replace the existing Setup section in DashboardPage.tsx with a Rocket Money-style pill progress bar.
+      Position it above the bottom navigation bar.
+
+      ## Design Rules
+      - ProfilePage = Sole Design Source of Truth
+      - Tokens: bg=#0B0F0A (dark), accent=#C7FF2E, surface=#F4F5F7
+      - Font: Kanit (TH) / Inter (EN)
+      - Card radius: rounded-[32px]
+
+      ## Implementation
+
+      Find the existing Setup section (search for "setup" or "COMPLETE SETUP" or progress bar) in DashboardPage.tsx and REPLACE with:
+
+      ```tsx
+      {/* ============================================================ */}
+      {/* SETUP PROGRESS — Rocket Money Style Pill Bar               */}
+      {/* ============================================================ */}
+
+      {/* Pill Progress Bar — positioned above bottom nav */}
+      <div className="w-full px-4 mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span
+              className="text-[12px] font-bold uppercase tracking-wider"
+              style={{ color: '#111827', fontFamily: '"Inter", sans-serif' }}
+            >
+              {lang === 'th' ? 'ตั้งค่าเสร็จสมบูรณ์' : 'COMPLETE SETUP'}
+            </span>
+            <span
+              className="text-[12px] font-semibold"
+              style={{ color: '#9CA3AF', fontFamily: '"Inter", sans-serif' }}
+            >
+              ({setupCompleted}/{setupTotal})
+            </span>
+          </div>
+          <button
+            onClick={() => { handlePress(); onNavigate('setup'); }}
+            className="text-[11px] font-semibold px-3 py-1 rounded-full cursor-pointer transition-all active:scale-95"
+            style={{
+              backgroundColor: '#0B0F0A',
+              color: '#C7FF2E',
+              fontFamily: '"Inter", sans-serif',
+            }}
+          >
+            {lang === 'th' ? 'เริ่มต้น' : 'Get started'}
+          </button>
+        </div>
+
+        {/* Pill Progress Bar */}
+        <div
+          className="w-full h-2 rounded-full overflow-hidden"
+          style={{ backgroundColor: '#F3F4F6' }}
+        >
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${Math.round((setupCompleted / setupTotal) * 100)}%`,
+              backgroundColor: '#3B82F6',
+            }}
+          />
+        </div>
+      </div>
+      ```
+
+      ## Required Computed Values
+      Add near the component top:
+      ```tsx
+      const setupCompleted = 1;  // mock — wire to onboardingService
+      const setupTotal = 6;     // mock — total setup steps
+      ```
+
+      ## Verification
+      1. Read DashboardPage.tsx and find the existing Setup section
+      2. Replace with the new pill progress bar
+      3. Run `npx tsc --noEmit` — must pass with 0 errors
+      4. Report exact lines changed
+    assigned_to: "frontend-dev"
+    role: "produce"
+    depends_on: []
+    gates: []
+    max_retries: 1
+    timeout_ms: 600000
+    hang_alert_after_ms: 600000
+
+  - id: "bottom-nav"
+    title: "[Section 5] Bottom Navigation Bar — 5 Tabs + Green Active"
+    prompt: |
+      ## Mission
+      Replace the existing Bottom Navigation Bar in DashboardPage.tsx with a Rocket Money-style bar:
+      - 5 tabs: Dashboard, Recurring, Spending, Transactions, More
+      - Active tab: GREEN (#C7FF2E) underline + icon + label
+      - Inactive: gray outline icons + gray text
+      - Fixed at bottom, above safe area
+
+      ## Design Rules
+      - ProfilePage = Sole Design Source of Truth
+      - Active indicator: #C7FF2E (GREEN, NOT red) — per user decision
+      - Tokens: bg=#FFFFFF, surface=#F4F5F7, text=#6B7280 (inactive), text=#C7FF2E (active)
+      - Font: Kanit (TH) / Inter (EN)
+
+      ## Implementation
+
+      Find the existing Bottom Navigation Bar in DashboardPage.tsx (search for "bottom-0" or the existing tab bar) and REPLACE with:
+
+      ```tsx
+      {/* ============================================================ */}
+      {/* BOTTOM NAVIGATION BAR — 5 Tabs + Green Active Indicator   */}
+      {/* ============================================================ */}
+
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50"
+        style={{
+          backgroundColor: '#FFFFFF',
+          paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
+          paddingTop: '8px',
+          borderTop: '1px solid #F3F4F6',
+        }}
+      >
+        {/* Tab Row */}
+        <div className="flex items-stretch justify-around px-2">
+          {/* Tab 1: Dashboard (ACTIVE) */}
+          {renderBottomTab({
+            id: 'dashboard',
+            label: lang === 'th' ? 'หน้าแรก' : 'Dashboard',
+            icon: LayoutGrid,
+            isActive: true,
+            onPress: () => { handlePress(); onNavigate('dashboard'); },
+          })}
+
+          {/* Tab 2: Recurring */}
+          {renderBottomTab({
+            id: 'recurring',
+            label: lang === 'th' ? 'รายเดือน' : 'Recurring',
+            icon: ArrowRepeat,
+            isActive: false,
+            onPress: () => { handlePress(); onNavigate('subscriptions'); },
+          })}
+
+          {/* Tab 3: Spending */}
+          {renderBottomTab({
+            id: 'spending',
+            label: lang === 'th' ? 'ใช้จ่าย' : 'Spending',
+            icon: PieChart,
+            isActive: false,
+            onPress: () => { handlePress(); onNavigate('budgets'); },
+          })}
+
+          {/* Tab 4: Transactions */}
+          {renderBottomTab({
+            id: 'transactions',
+            label: lang === 'th' ? 'รายการ' : 'Transactions',
+            icon: Search,
+            isActive: false,
+            onPress: () => { handlePress(); onNavigate('activity'); },
+          })}
+
+          {/* Tab 5: More */}
+          {renderBottomTab({
+            id: 'more',
+            label: lang === 'th' ? 'เพิ่มเติม' : 'More',
+            icon: MoreHorizontal,
+            isActive: false,
+            onPress: () => { handlePress(); onNavigate('settings'); },
+          })}
+        </div>
+      </div>
+      ```
+
+      ## Helper Component
+      Add this helper function AFTER the existing hook declarations and BEFORE the return statement:
+
+      ```tsx
+      // Bottom Tab Helper — Rocket Money Style
+      const renderBottomTab = ({
+        id,
+        label,
+        icon: Icon,
+        isActive,
+        onPress,
+      }: {
+        id: string;
+        label: string;
+        icon: React.ElementType;
+        isActive: boolean;
+        onPress: () => void;
+      }) => (
+        <button
+          onClick={onPress}
+          className="flex flex-col items-center justify-center gap-0.5 py-2 px-3 rounded-xl cursor-pointer transition-all active:scale-95 relative"
+          style={{ minWidth: '64px' }}
+          aria-label={label}
+        >
+          {/* Active indicator — green underline */}
+          {isActive && (
+            <div
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+              style={{ backgroundColor: '#C7FF2E' }}
+            />
+          )}
+          {/* Icon */}
+          <Icon
+            className="w-5 h-5 transition-colors"
+            style={{
+              color: isActive ? '#C7FF2E' : '#9CA3AF',
+              strokeWidth: isActive ? 2.5 : 2,
+            }}
+          />
+          {/* Label */}
+          <span
+            className="text-[10px] font-semibold transition-colors leading-tight"
+            style={{
+              color: isActive ? '#C7FF2E' : '#9CA3AF',
+              fontFamily: lang === 'th' ? '"Kanit", sans-serif' : '"Inter", sans-serif',
+            }}
+          >
+            {label}
+          </span>
+        </button>
+      );
+      ```
+
+      ## Required Imports
+      Add these imports from lucide-react:
+      ```tsx
+      import {
+        LayoutGrid, ArrowRepeat, PieChart, Search, MoreHorizontal,
+        // already imported: Home, CreditCard, TrendingUp, User, Settings, Bell
+      } from 'lucide-react';
+      ```
+
+      ## Verification
+      1. Read DashboardPage.tsx and find the existing bottom navigation bar
+      2. Replace it entirely with the new Bottom Navigation Bar code
+      3. Add `renderBottomTab` helper function
+      4. Add `LayoutGrid, ArrowRepeat, PieChart, Search, MoreHorizontal` imports
+      5. Run `npx tsc --noEmit` — must pass with 0 errors
+      6. Report exact lines changed
+    assigned_to: "frontend-dev"
+    role: "produce"
+    depends_on: []
+    gates: []
+    max_retries: 1
+    timeout_ms: 600000
+    hang_alert_after_ms: 600000
+
+  - id: "final-qa"
+    title: "[QA] Final Verification — TypeScript + Visual QA"
+    prompt: |
+      ## Mission
+      Run comprehensive QA on the Dashboard Home redesign. This is the final gate.
+
+      ## Context
+      - File: `D:\Coding Folder\dailystack-fintech\app\src\components\DashboardPage.tsx`
+      - Expected version: v9.0
+      - Design tokens: bg=#0B0F0A, surface=#F4F5F7, accent=#C7FF2E, white=#FFFFFF
+
+      ## QA Checklist
+
+      ### 1. TypeScript Compilation
+      ```powershell
+      cd D:\Coding Folder\dailystack-fintech\app
+      npx tsc --noEmit
+      ```
+      Expected: 0 errors
+
+      ### 2. Section Presence Check
+      Run these greps in DashboardPage.tsx:
+      - `ROCKET MONEY` → Should find Top Nav section
+      - `HERO WIDGET` → Should find Hero Widget section
+      - `ACCOUNTS SUMMARY` → Should find Accounts section
+      - `SETUP PROGRESS` → Should find Setup section
+      - `BOTTOM NAVIGATION BAR` → Should find Bottom Nav section
+      - `renderBottomTab` → Should find helper function
+
+      ### 3. Token Compliance Check
+      - `C7FF2E` → Should appear in active states (NOT red)
+      - `#0B0F0A` → Should appear in dark cards
+      - `#FFFFFF` → Should appear in white card sections (accounts, bottom nav bg)
+      - `gradient` → Should NOT appear (no gradient header per design rule)
+
+      ### 4. Import Check
+      - All lucide-react icons used in code must be imported:
+        Check, Banknote, Info, RefreshCw, Building2, Wallet, PiggyBank, BarChart3, ChevronDown, LayoutGrid, ArrowRepeat, PieChart, Search, MoreHorizontal, Bell, Settings
+
+      ### 5. Version Update Check
+      - Update version comment from v8.0 to v9.0
+      - Update changelog to reflect all 5 sections
+
+      ## Deliverables
+      Report:
+      1. TypeScript: PASS/FAIL + error count
+      2. Section presence: PASS/FAIL for each of 5 sections
+      3. Token compliance: PASS/FAIL
+      4. Import completeness: PASS/FAIL + missing imports
+      5. Version updated: YES/NO
+      6. Overall verdict: READY TO SHIP / NEEDS MORE WORK
+    assigned_to: "verifier"
+    role: "verify"
+    depends_on: ["nav-redesign", "hero-widget", "accounts-widget", "setup-progress", "bottom-nav"]
+    gates: []
+    max_retries: 1
+    timeout_ms: 300000
+    hang_alert_after_ms: 300000

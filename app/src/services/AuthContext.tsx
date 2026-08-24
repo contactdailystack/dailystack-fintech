@@ -5,17 +5,14 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { signIn, signUp, signOut, onAuthStateChange, getCurrentUser } from './authService';
-import { getOrInitFBIS } from './fbisService';
 import { getUserProfile } from './userTierService';
 import type { SubscriptionTier } from './userTierService';
-import type { FBISMetaRecord } from './fbisService';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 export interface AuthState {
   user: User | null;
   tier: SubscriptionTier;
-  fbis: FBISMetaRecord | null;
   profileName: string | null;
   loading: boolean;
   error: string | null;
@@ -25,7 +22,6 @@ interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (email: string, password: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
-  refreshFBIS: () => Promise<void>;
 }
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -44,61 +40,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
     tier: 'basic',
-    fbis: null,
     profileName: null,
     loading: true,
     error: null,
   });
 
-  const refreshFBIS = useCallback(async () => {
-    const fbis = await getOrInitFBIS();
-    setState(prev => ({ ...prev, fbis }));
-  }, []);
-
   // Load current user + register auth state listener on mount
   useEffect(() => {
     const init = async () => {
-      const user = await getCurrentUser();
+      // P1-02: Add timeout to prevent hanging on slow/offline Supabase
+      const timeout = setTimeout(() => {
+        setState(prev => {
+          if (prev.loading) {
+            console.warn('[AuthContext] getCurrentUser timed out after 15s — proceeding as guest');
+            return { ...prev, user: null, loading: false, error: null };
+          }
+          return prev;
+        });
+      }, 15000);
 
-      if (!user) {
-        setState({ user: null, tier: 'basic', fbis: null, profileName: null, loading: false, error: null });
-        return;
+      try {
+        const user = await getCurrentUser();
+        clearTimeout(timeout);
+
+        if (!user) {
+          setState({ user: null, tier: 'basic', profileName: null, loading: false, error: null });
+          return;
+        }
+
+        const profile = await getUserProfile();
+
+        setState({
+          user,
+          tier: (profile?.subscription_tier as SubscriptionTier) || 'basic',
+          profileName: profile?.display_name || null,
+          loading: false,
+          error: null,
+        });
+      } catch {
+        clearTimeout(timeout);
+        setState(prev => ({ ...prev, user: null, loading: false, error: null }));
       }
-
-      const [profile, fbis] = await Promise.all([
-        getUserProfile(),
-        getOrInitFBIS(),
-      ]);
-
-      setState({
-        user,
-        tier: (profile?.subscription_tier as SubscriptionTier) || 'basic',
-        fbis,
-        profileName: profile?.display_name || null,
-        loading: false,
-        error: null,
-      });
     };
 
     init();
 
     const unsubscribe = onAuthStateChange(async (user) => {
       if (!user) {
-        setState({ user: null, tier: 'basic', fbis: null, profileName: null, loading: false, error: null });
+        setState({ user: null, tier: 'basic', profileName: null, loading: false, error: null });
         return;
       }
 
       setState(prev => ({ ...prev, loading: true, error: null }));
 
-      const [profile, fbis] = await Promise.all([
-        getUserProfile(),
-        getOrInitFBIS(),
-      ]);
+      const profile = await getUserProfile();
 
       setState({
         user,
         tier: (profile?.subscription_tier as SubscriptionTier) || 'basic',
-        fbis,
         profileName: profile?.display_name || null,
         loading: false,
         error: null,
@@ -128,14 +127,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await signOut();
-    setState({ user: null, tier: 'basic', fbis: null, profileName: null, loading: false, error: null });
+    setState({ user: null, tier: 'basic', profileName: null, loading: false, error: null });
   }, []);
 
   // onAuthStateChange already registered in the first useEffect above
   // No duplicate registration needed
 
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout, refreshFBIS }}>
+    <AuthContext.Provider value={{ ...state, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

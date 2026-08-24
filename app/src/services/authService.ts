@@ -1,4 +1,4 @@
-ï»¿/**
+/**
  * authService.ts - Supabase Auth integration
  * All auth operations go through here. No direct supabase.auth calls outside this file.
  * Uses Supabase built-in email confirmation (no custom OTP required).
@@ -28,24 +28,18 @@ export const signUp = async ({ email, password, fullName }: SignUpData): Promise
       password,
       options: {
         data: { full_name: fullName || '' },
-        // Supabase will send confirmation email automatically
-        // User must click confirmation link to activate account
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // P1-01 MVP Decision: disable email confirmation for faster onboarding
+        // Users enter app immediately after signup (auto-confirm pattern)
+        // Email verification can be added in Settings post-launch
       },
     });
 
     if (error) return { success: false, error: error.message };
     if (!data.user) return { success: false, error: 'Signup failed - no user returned.' };
 
-    // If user needs to confirm email
-    if (data.user && !data.session) {
-      return {
-        success: true,
-        user: data.user,
-        needsEmailConfirmation: true,
-        error: 'Please check your email to confirm your account.',
-      };
-    }
-
+    // Auto-confirm signup — skip email confirmation screen (BUG-C3 fix)
+    // Supabase still sends verification email in background, but user enters app immediately
     return { success: true, user: data.user };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error during signup.';

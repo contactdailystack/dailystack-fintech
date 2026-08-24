@@ -1,0 +1,139 @@
+{
+  "summary": "10 mock patterns found across 7 files. 1 CRITICAL dead-code file (mockFintechData.ts — 374 lines, completely unused), 2 HIGH-severity mock services (billingService.ts, walletService.ts), and 4 safe fallback/error-handling patterns in supabase edge functions. 2 .env.local files contain real Stripe test keys and appear to have truncated/fake Supabase placeholder values.",
+  "critical_issues": [
+    {
+      "file": "app/src/data/mockFintechData.ts",
+      "line": 1,
+      "pattern": "Entire file exports hardcoded mock data (INITIAL_PROFILE, INITIAL_STOCKS, INITIAL_TRANSACTIONS, MOCK_INTERPRETATION, WEEKLY_STORIES) — 374 lines total",
+      "severity": "CRITICAL",
+      "recommendation": "remove",
+      "notes": "This file is completely unused — grep found zero imports across the entire app/src and supabase/functions codebase. It contains hardcoded Thai user 'Jonathan' with fake balance (209,891.21), 5 fake stock entries, 10 fake transactions, and hardcoded AI interpretation. Must be deleted before staging deployment."
+    },
+    {
+      "file": "app/src/services/billingService.ts",
+      "line": 1,
+      "pattern": "Full mock billing service — no real Stripe call, simulates success with fake subscriptionId",
+      "severity": "HIGH",
+      "recommendation": "replace",
+      "notes": "billingService.createSubscription() simulates a 700ms network delay then returns a fake subscriptionId. For staging, this means subscription creation never actually hits Stripe. Real Stripe integration (stripeService.ts) exists but billingService.ts bypasses it entirely. If billingService is called from any UI flow, subscriptions will silently fail in production."
+    },
+    {
+      "file": "app/src/services/walletService.ts",
+      "line": 165,
+      "pattern": "getRecentRecipients() returns hardcoded Thai names (สมชาย, สมหญิง, แม่, etc.) instead of fetching from user_recipients table",
+      "severity": "HIGH",
+      "recommendation": "replace",
+      "notes": "MVP placeholder returns fake recipients. These fake Thai names will appear in the transfer UI. getPaymentSources() also returns fake card/wallet/bank data (Visa •••• 4242, etc.). Both functions are straightforward DB fetches once the tables exist."
+    },
+    {
+      "file": "app/src/services/cardService.ts",
+      "line": 48,
+      "pattern": "createVirtualCard() generates last4 using Math.random() — not a real card number",
+      "severity": "MEDIUM",
+      "recommendation": "replace",
+      "notes": "last4 is randomly generated (not from a real card issuer). Still inserts to user_cards DB, so data flows — but card numbers are not real. For staging demo this is acceptable; for production, integrate with a card issuing API (e.g., Stripe Issuing)."
+    },
+    {
+      "file": "app/src/services/apiService.ts",
+      "line": 273,
+      "pattern": "getUserInsights() error handler returns hardcoded fallback (archetype 'balanced_saver', score 50, is_mock: true)",
+      "severity": "MEDIUM",
+      "recommendation": "keep",
+      "notes": "Only triggers when the edge function call fails. Returns a sensible empty-state fallback. The is_mock: true flag is correctly set so UI can detect it. This is standard resilience pattern — not a critical issue."
+    },
+    {
+      "file": "app/src/services/apiService.ts",
+      "line": 296,
+      "pattern": "generateWeeklyStory() error handler returns hardcoded fallback (is_mock: true)",
+      "severity": "MEDIUM",
+      "recommendation": "keep",
+      "notes": "Same pattern as getUserInsights — graceful fallback on error with is_mock: true flag set correctly."
+    },
+    {
+      "file": "app/src/services/apiService.ts",
+      "line": 316,
+      "pattern": "analyzeSpending() error handler returns hardcoded fallback (is_mock: true)",
+      "severity": "MEDIUM",
+      "recommendation": "keep",
+      "notes": "Same resilience pattern — fallback only fires on error, flag correctly set."
+    },
+    {
+      "file": "app/src/services/exportService.ts",
+      "line": 284,
+      "pattern": "shareToGoogleSheets() — Google Sheets API not integrated, returns fake Google Docs URL",
+      "severity": "MEDIUM",
+      "recommendation": "keep",
+      "notes": "Placeholder returns https://docs.google.com/spreadsheets/d/create?title=dailystack-{timestamp}. Function is for demo. Not blocking — user can still export to CSV/Excel."
+    },
+    {
+      "file": ".env.local",
+      "line": 7,
+      "pattern": "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY contain truncated/fake placeholder values (dots '...')",
+      "severity": "HIGH",
+      "recommendation": "replace",
+      "notes": "Keys are clearly fake/placeholder: URL uses 'xyzcompany.supabase.co' and anon keys end with '...' truncation. If this .env.local is loaded in staging, Supabase auth and DB queries will fail silently. Must be replaced with real credentials. The app/.env.local has the actual real Supabase URL and real anon key (both appear valid)."
+    },
+    {
+      "file": ".env.local",
+      "line": 8,
+      "pattern": "NEXT_PUBLIC_SUPABASE_ANON_KEY ends with '...' — truncated/fake",
+      "severity": "HIGH",
+      "recommendation": "replace",
+      "notes": "Same as above — this is a fake placeholder token. Corresponds to the 'xyzcompany' Supabase project."
+    }
+  ],
+  "safe_to_keep": [
+    {
+      "file": "supabase/functions/analyze-spending/index.ts",
+      "line": 58,
+      "reason": "is_mock: true returned only when user has no transactions (null data state) — correct behavior for new users, not a test stub. Edge function calls real DB, sets is_mock flag appropriately."
+    },
+    {
+      "file": "supabase/functions/generate-weekly-story/index.ts",
+      "line": 188,
+      "reason": "Fallback in catch block returns a generic first-time-user story. is_mock: true flag is set. Only executes on real error — not a test stub. Graceful degradation for new users with no transaction history."
+    },
+    {
+      "file": "supabase/functions/user-insights/index.ts",
+      "line": 213,
+      "reason": "Fallback in catch block returns a sensible archetype for new users. is_mock: true flag set. Only triggers on actual errors — not a test stub. Consistent with the 3 other supabase function fallback patterns."
+    },
+    {
+      "file": "app/src/services/fbisService.ts",
+      "line": 131,
+      "reason": "const xp = 10 is a business rule constant (hardcoded per Constitution per the comment). Not mock data — this is the XP cost for budget drift penalty. Design decision, not a placeholder."
+    },
+    {
+      "file": "app/src/components/PiloPillCardShowcase.tsx",
+      "reason": "Design system showcase component with hardcoded example data (driver name 'John D.', car 'Toyota Camry', prices '$24.50', etc.). This is purely a visual reference page, not connected to any production data flow. Labelled as 'Pilo Pill Card Examples'."
+    },
+    {
+      "file": "app/src/components/SkeletonLoader.tsx",
+      "reason": "Loading state UI component — no mock business data. LOADING_MESSAGES are user-facing strings (not test data). Standard skeleton pattern."
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "reason": "Explicitly excluded by audit instructions — this is the internationalization file with UI strings."
+    }
+  ],
+  "env_files_audited": [
+    {
+      "file": ".env.local (root)",
+      "has_real_keys": false,
+      "has_fake_placeholder_keys": true,
+      "notes": "Stripe keys (pk_test_*, sk_test_*, whsec_*) are real Stripe test keys — valid for staging. Supabase URL ('xyzcompany.supabase.co') and anon keys (ending in '...') are clearly placeholder/fake. Should be replaced with real Supabase project credentials."
+    },
+    {
+      "file": "app/.env.local",
+      "has_real_keys": true,
+      "has_fake_placeholder_keys": false,
+      "notes": "VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, and Stripe keys all appear to be real. No truncation or placeholder patterns detected."
+    }
+  ],
+  "dead_code_files": [
+    {
+      "file": "app/src/data/mockFintechData.ts",
+      "reason": "Zero imports found across all TypeScript/TSX files in app/src/ and supabase/functions/. Entire 374-line file is unused dead code."
+    }
+  ]
+}

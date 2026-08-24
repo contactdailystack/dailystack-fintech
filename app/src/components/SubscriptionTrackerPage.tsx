@@ -1,896 +1,1938 @@
-import { useState } from 'react';
+/**
+ * ============================================================
+ * DailyStack — SubscriptionTrackerPage (Subscription Shadow) v4.0
+ * ============================================================
+ * Redesigned to Light Mode (Flat White) matching Net Worth:
+ * - Lime accent (#56be89) — matches Home/Net Worth
+ * - Flat white header (#FFFFFF) — matches Home/Net Worth
+ * - Light hero card (#F5F5F5) — matches Home/Net Worth
+ * - Full-bleed content padding — matches Home/Net Worth
+ * - 36px hero typography — matches Home/Net Worth
+ * - Privacy toggle + Last sync + Pull-to-refresh
+ * - AI Insights card (Ghost Hunter pattern from Net Worth)
+ * - pageTokens as single source of truth
+ *
+ * Tesla-Style Naming:
+ * - Page: Subscription Shadow (เงาการสมัคร)
+ * - Feature: Smart Insights (สมาร์ทอินไซต์)
+ *
+ * Business Logic (preserved 100%):
+ * - All types, utility functions, state, handlers
+ * - SubscriptionModal, ActionsMenu
+ * - BottomNav integration via FloatingBottomNav
+ */
+
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, Trash2, RefreshCw, Calendar, TrendingUp, AlertCircle,
-  CheckCircle2, X, ChevronRight, CreditCard, Zap, Shield,
-  Sparkles, Eye, EyeOff, ArrowUpRight, ArrowDownRight, Clock
+  Settings,
+  Plus,
+  MoreVertical,
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  Calendar,
+  Eye,
+  EyeOff,
+  Sparkles,
+  X,
+  Check,
+  SkipForward,
+  Pencil,
+  Trash2,
+  EyeOff as HideIcon,
+  Bell,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  Ghost,
+  RefreshCw,
+  FileSpreadsheet,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { translations, Language } from '../data/translations';
+import { MERCHANT_DATABASE, CATEGORY_META } from '../services/merchantDatabase';
+import type { MerchantTemplate } from '../services/merchantDatabase';
+// Re-export for CSVImportModal (imports from this file)
+export { MERCHANT_DATABASE, CATEGORY_META };
+import CSVImportModal from './CSVImportModal';
+import { haptics } from '../services/hapticService';
+import { Language } from '../data/translations';
+import { pageTokens } from '../design-system/page-tokens';
+import {
+  loadSubscriptions,
+  addSubscription,
+  updateSubscription,
+  deleteSubscription,
+} from '../services/subscriptionService';
+import { EmptyState } from '../design-system/components/EmptyState';
+
+// ─── Design Tokens (DailyStack Single Source of Truth) ──────────────────────
+const dsColors = pageTokens.colors;
+const dsTypography = pageTokens.typography;
+const dsLayout = pageTokens.layout;
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+type BillingCycle = 'weekly' | 'monthly' | 'yearly';
 
 interface Subscription {
   id: string;
   name: string;
   amount: number;
-  billingCycle: 'Monthly' | 'Yearly' | 'Weekly';
-  nextBillingDate: string;
+  dueDate: number;
   category: string;
-  status: 'Active' | 'Paused' | 'Cancelled';
-  icon?: string;
+  billingCycle: BillingCycle;
   color?: string;
-  lastUsed?: string;
-  usageFrequency?: string;
+  icon?: string;
+  isActive: boolean;
+  lastPaidDate?: string;
+  paidDates?: number[];
+  skipDates?: number[];
+  priceChange?: number; // % change from last billing
+  isGhost?: boolean; // unused subscription
 }
 
 interface SubscriptionTrackerPageProps {
   lang: Language;
-  theme: 'dark' | 'light';
+  theme?: 'dark' | 'light';
+  currentBalance?: number;
   onNavigateToUpgrade?: () => void;
+  onNavigateToCalendar?: () => void;
+  onNavigateToNotifications?: () => void;
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  'Entertainment': '#E879F9',
-  'Productivity': '#38BDF8',
-  'Health': '#4ADE80',
-  'Finance': '#FBBF24',
-  'Technology': '#A78BFA',
-  'Social': '#F472B6',
-  'News': '#FB923C',
-  'Cloud': '#22D3EE',
-  'Other': '#94A3B8'
+// ─── Mock Data (Thai/International services) ─────────────────────────────────
+const MOCK_SUBSCRIPTIONS: Subscription[] = [
+  // Subscriptions
+  { id: '1',  name: 'Netflix',        amount: 1199,  dueDate: 11, category: 'entertainment', billingCycle: 'monthly', color: '#E50914', isActive: true },
+  { id: '2',  name: 'Spotify',        amount: 99,    dueDate: 6,  category: 'entertainment', billingCycle: 'monthly', color: '#1DB954', isActive: true },
+  { id: '3',  name: 'YouTube Premium', amount: 199,  dueDate: 13, category: 'entertainment', billingCycle: 'monthly', color: '#FF0000', isActive: true },
+  { id: '4',  name: 'Disney+',        amount: 299,   dueDate: 16, category: 'entertainment', billingCycle: 'monthly', color: '#113CCF', isActive: true },
+  { id: '5',  name: 'Arcadia',        amount: 59,    dueDate: 7,  category: 'entertainment', billingCycle: 'monthly', isActive: true, isGhost: true },
+  // Bills & Utilities
+  { id: '6',  name: 'Rent',           amount: 12000, dueDate: 15, category: 'bills',        billingCycle: 'monthly', color: '#8B5CF6', isActive: true },
+  { id: '7',  name: 'Internet',       amount: 599,   dueDate: 8,  category: 'bills',        billingCycle: 'monthly', color: '#3B82F6', isActive: true },
+  { id: '8',  name: 'Phone Plan',     amount: 499,   dueDate: 20, category: 'bills',        billingCycle: 'monthly', color: '#F97316', isActive: true },
+  { id: '9',  name: 'Geico',          amount: 245,   dueDate: 22, category: 'bills',        billingCycle: 'monthly', color: '#5BC0EB', isActive: true, priceChange: 12 },
+];
+
+// ─── Utility Functions ───────────────────────────────────────────────────────
+
+const getFontStyle = (lang: Language) => ({
+  fontFamily: lang === 'th' ? dsTypography.fontTH : dsTypography.fontEN,
+});
+
+const formatCurrency = (amount: number, lang: Language): string => {
+  // All amounts stored in THB (baht). Display in THB regardless of language.
+  if (lang === 'th') {
+    return `฿${amount.toLocaleString('th-TH')}`;
+  }
+  // English display: THB amount shown as-is, with ฿ symbol
+  return `฿${amount.toLocaleString('en-US')}`;
 };
 
-export default function SubscriptionTrackerPage({
-  lang,
-  theme,
-  onNavigateToUpgrade
-}: SubscriptionTrackerPageProps) {
-  const t = translations[lang];
-  
-  // Core subscription state
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([
-    {
-      id: 'sub_01',
-      name: 'Netflix Premium',
-      amount: 18.99,
-      billingCycle: 'Monthly',
-      nextBillingDate: '2026-06-25',
-      category: 'Entertainment',
-      status: 'Active',
-      icon: 'NF',
-      color: '#E50914',
-      lastUsed: '2026-06-08',
-      usageFrequency: 'Daily'
-    },
-    {
-      id: 'sub_02',
-      name: 'Spotify Family',
-      amount: 16.99,
-      billingCycle: 'Monthly',
-      nextBillingDate: '2026-06-20',
-      category: 'Entertainment',
-      status: 'Active',
-      icon: 'SP',
-      color: '#1DB954',
-      lastUsed: '2026-06-09',
-      usageFrequency: 'Daily'
-    },
-    {
-      id: 'sub_03',
-      name: 'Adobe Creative Cloud',
-      amount: 54.99,
-      billingCycle: 'Monthly',
-      nextBillingDate: '2026-06-15',
-      category: 'Productivity',
-      status: 'Active',
-      icon: 'AC',
-      color: '#FF0000',
-      lastUsed: '2026-06-07',
-      usageFrequency: 'Weekly'
-    },
-    {
-      id: 'sub_04',
-      name: 'iCloud 200GB',
-      amount: 2.99,
-      billingCycle: 'Monthly',
-      nextBillingDate: '2026-06-18',
-      category: 'Cloud',
-      status: 'Active',
-      icon: 'IC',
-      color: '#38BDF8',
-      lastUsed: '2026-06-09',
-      usageFrequency: 'Constant'
-    },
-    {
-      id: 'sub_05',
-      name: 'ChatGPT Plus',
-      amount: 20.00,
-      billingCycle: 'Monthly',
-      nextBillingDate: '2026-07-01',
-      category: 'Technology',
-      status: 'Active',
-      icon: 'CP',
-      color: '#10A37F',
-      lastUsed: '2026-06-09',
-      usageFrequency: 'Daily'
-    },
-    {
-      id: 'sub_06',
-      name: 'Gym Membership',
-      amount: 49.99,
-      billingCycle: 'Monthly',
-      nextBillingDate: '2026-06-28',
-      category: 'Health',
-      status: 'Active',
-      icon: 'GY',
-      color: '#4ADE80',
-      lastUsed: '2026-06-05',
-      usageFrequency: 'Weekly'
-    }
-  ]);
+/**
+ * Format amount for calendar cell badges (compact: 1.4k, 15k, etc.)
+ */
+const formatAmountCompact = (amount: number, _lang: Language): string => {
+  // All amounts in THB (baht). Compact display for calendar badges.
+  const symbol = '฿';
+  if (amount >= 1_000_000) {
+    const m = amount / 1_000_000;
+    return `${symbol}${m < 10 ? m.toFixed(1) : Math.round(m)}M`;
+  }
+  if (amount >= 1000) {
+    const k = amount / 1000;
+    return `${symbol}${k < 10 ? k.toFixed(1) : Math.round(k)}k`;
+  }
+  return `${symbol}${amount.toLocaleString()}`;
+};
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingSub, setEditingSub] = useState<Subscription | null>(null);
-  const [showNotification, setShowNotification] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'All' | 'Active' | 'Paused' | 'Cancelled'>('All');
-  const [sortBy, setSortBy] = useState<'date' | 'amount' | 'name'>('date');
-  const [expandedSub, setExpandedSub] = useState<string | null>(null);
+/**
+ * Brand color lookup
+ */
+const getBrandColor = (sub: Subscription): string => {
+  if (sub.color) return sub.color;
+  const nameKey = sub.name.toLowerCase();
+  for (const [key, value] of Object.entries(dsColors.brandColors)) {
+    if (nameKey.includes(key) || key.includes(nameKey)) return value as string;
+  }
+  const firstWord = nameKey.split(/\s+/)[0];
+  for (const [key, value] of Object.entries(dsColors.brandColors)) {
+    if (firstWord === key || firstWord.startsWith(key) || key.startsWith(firstWord)) return value as string;
+  }
+  return (dsColors.category as Record<string, string>)[sub.category] || dsColors.category.other;
+};
 
-  // Add form state
-  const [newSubName, setNewSubName] = useState('');
-  const [newSubAmount, setNewSubAmount] = useState('');
-  const [newSubCycle, setNewSubCycle] = useState<'Monthly' | 'Yearly' | 'Weekly'>('Monthly');
-  const [newSubCategory, setNewSubCategory] = useState('Other');
-  const [newSubNextDate, setNewSubNextDate] = useState('');
+/**
+ * 1-letter logo (matches reference: S, N, R, etc.)
+ */
+const getLogoLetter = (sub: Subscription): string => {
+  if (sub.icon) return sub.icon;
+  const name = sub.name.trim();
+  if (!name) return '?';
+  return name[0].toUpperCase();
+};
 
-  // Calculations
-  const monthlyTotal = subscriptions
-    .filter(s => s.status === 'Active')
-    .reduce((sum, s) => {
-      if (s.billingCycle === 'Weekly') return sum + (s.amount * 4.33);
-      if (s.billingCycle === 'Yearly') return sum + (s.amount / 12);
-      return sum + s.amount;
-    }, 0);
+const getDaysUntilDue = (dueDate: number, currentDay: number, daysInMonth: number): {
+  days: number;
+  text: string;
+  isToday: boolean;
+  isSoon: boolean;
+  urgencyLevel: 'today' | 'soon' | 'normal' | 'later';
+} => {
+  let daysUntil = dueDate - currentDay;
+  if (daysUntil < 0) daysUntil += daysInMonth;
+  const isToday = daysUntil === 0;
+  const isSoon = daysUntil <= 3;
+  let text: string;
+  let urgencyLevel: 'today' | 'soon' | 'normal' | 'later';
+  if (isToday) { text = 'today'; urgencyLevel = 'today'; }
+  else if (daysUntil === 1) { text = 'tomorrow'; urgencyLevel = 'soon'; }
+  else if (daysUntil <= 7) { text = `in ${daysUntil} days`; urgencyLevel = 'soon'; }
+  else { text = `in ${daysUntil} days`; urgencyLevel = daysUntil <= 14 ? 'normal' : 'later'; }
+  return { days: daysUntil, text, isToday, isSoon, urgencyLevel };
+};
 
-  const yearlyTotal = monthlyTotal * 12;
-
-  const upcomingThisWeek = subscriptions.filter(s => {
-    if (s.status !== 'Active') return false;
-    const next = new Date(s.nextBillingDate);
-    const now = new Date();
-    const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    return next >= now && next <= weekLater;
-  });
-
-  const thisWeekTotal = upcomingThisWeek.reduce((sum, s) => sum + s.amount, 0);
-
-  // Days until next billing
-  const getDaysUntil = (dateStr: string) => {
-    const next = new Date(dateStr);
-    const now = new Date();
-    const diff = next.getTime() - now.getTime();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  };
-
-  // Filter and sort subscriptions
-  const filteredSubs = subscriptions
-    .filter(s => filterStatus === 'All' || s.status === filterStatus)
+const getUpcomingInWindow = (
+  subscriptions: Subscription[],
+  currentDay: number,
+  daysInMonth: number,
+  paydayDay: number = 25,
+  paydayMode: boolean = false
+): Subscription[] => {
+  return subscriptions
+    .filter(sub => {
+      if (!sub.isActive) return false;
+      if (sub.paidDates?.includes(currentDay)) return false;
+      if (sub.skipDates?.includes(currentDay)) return false;
+      const { days } = getDaysUntilDue(sub.dueDate, currentDay, daysInMonth);
+      if (paydayMode) {
+        let daysUntilPayday = paydayDay - currentDay;
+        if (daysUntilPayday < 0) daysUntilPayday += daysInMonth;
+        return days <= daysUntilPayday;
+      }
+      return days <= 7;
+    })
     .sort((a, b) => {
-      if (sortBy === 'date') return new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime();
-      if (sortBy === 'amount') return b.amount - a.amount;
-      return a.name.localeCompare(b.name);
+      const aDays = getDaysUntilDue(a.dueDate, currentDay, daysInMonth).days;
+      const bDays = getDaysUntilDue(b.dueDate, currentDay, daysInMonth).days;
+      return aDays - bDays;
     });
+};
 
-  // Category breakdown
-  const categoryBreakdown = subscriptions
-    .filter(s => s.status === 'Active')
-    .reduce((acc, s) => {
-      const monthlyAmount = s.billingCycle === 'Weekly' ? s.amount * 4.33 : s.billingCycle === 'Yearly' ? s.amount / 12 : s.amount;
-      acc[s.category] = (acc[s.category] || 0) + monthlyAmount;
-      return acc;
-    }, {} as Record<string, number>);
+const getWindowTotal = (subscriptions: Subscription[]): number => {
+  return subscriptions.reduce((sum, sub) => sum + sub.amount, 0);
+};
 
-  // Handle add subscription
-  const handleAddSubscription = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newSub: Subscription = {
-      id: `sub_${Date.now()}`,
-      name: newSubName,
-      amount: parseFloat(newSubAmount),
-      billingCycle: newSubCycle,
-      nextBillingDate: newSubNextDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      category: newSubCategory,
-      status: 'Active',
-      icon: newSubName.substring(0, 2).toUpperCase(),
-      color: CATEGORY_COLORS[newSubCategory] || CATEGORY_COLORS['Other']
-    };
-    setSubscriptions([...subscriptions, newSub]);
-    setShowAddModal(false);
-    resetForm();
-    setShowNotification(lang === 'en' 
-      ? `Subscription "${newSubName}" tracked successfully` 
-      : `ติดตาม "${newSubName}" สำเร็จแล้ว`);
-    setTimeout(() => setShowNotification(null), 4000);
-  };
+const getAnnualizedAmount = (subscription: Subscription): number => {
+  switch (subscription.billingCycle) {
+    case 'weekly': return subscription.amount * 52;
+    case 'yearly': return subscription.amount;
+    case 'monthly':
+    default: return subscription.amount * 12;
+  }
+};
 
-  // Handle cancel subscription
-  const handleCancelSubscription = (sub: Subscription) => {
-    setSubscriptions(subscriptions.map(s => 
-      s.id === sub.id ? { ...s, status: 'Cancelled' as const } : s
-    ));
-    setShowNotification(lang === 'en'
-      ? `Subscription "${sub.name}" cancelled`
-      : `ยกเลิก "${sub.name}" สำเร็จแล้ว`);
-    setTimeout(() => setShowNotification(null), 4000);
-  };
+const getBillingCycleLabel = (cycle: BillingCycle, lang: Language): string => {
+  switch (cycle) {
+    case 'weekly': return lang === 'th' ? 'รายสัปดาห์' : 'Weekly';
+    case 'yearly': return lang === 'th' ? 'รายปี' : 'Yearly';
+    case 'monthly':
+    default: return lang === 'th' ? 'รายเดือน' : 'Monthly';
+  }
+};
 
-  // Handle delete subscription
-  const handleDeleteSubscription = (subId: string) => {
-    const sub = subscriptions.find(s => s.id === subId);
-    setSubscriptions(subscriptions.filter(s => s.id !== subId));
-    setShowNotification(lang === 'en'
-      ? `Subscription removed`
-      : `ลบการสมัครแล้ว`);
-    setTimeout(() => setShowNotification(null), 4000);
-  };
+const getSafeToSpend = (currentBalance: number, upcomingBills: Subscription[]): number => {
+  const totalBills = upcomingBills.reduce((sum, sub) => sum + sub.amount, 0);
+  return Math.max(0, currentBalance - totalBills);
+};
 
-  // Reset form
-  const resetForm = () => {
-    setNewSubName('');
-    setNewSubAmount('');
-    setNewSubCycle('Monthly');
-    setNewSubCategory('Other');
-    setNewSubNextDate('');
-  };
+// ─── Pull-to-Refresh Hook (Net Worth pattern) ────────────────────────────────
+const usePullToRefresh = (onRefresh: () => Promise<void>) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const startY = React.useRef(0);
+  const isAtTop = React.useRef(true);
 
-  // Get status badge color
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-      case 'Paused': return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-      case 'Cancelled': return 'bg-red-500/10 text-red-400 border-red-500/30';
-      default: return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30';
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.scrollY === 0) {
+      isAtTop.current = true;
+      startY.current = e.touches[0].clientY;
     }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isAtTop.current && e.touches[0].clientY > startY.current) {
+      e.preventDefault();
+      const distance = Math.min(e.touches[0].clientY - startY.current, 100);
+      setPullDistance(distance);
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    if (pullDistance > 60) {
+      setIsRefreshing(true);
+      haptics.fire('SELECT');
+      await onRefresh();
+      setIsRefreshing(false);
+    }
+    setPullDistance(0);
+    isAtTop.current = false;
+  };
+
+  return { isRefreshing, pullDistance, handleTouchStart, handleTouchMove, handleTouchEnd };
+};
+
+// ─── AI Insights Card (Net Worth pattern) ───────────────────────────────────
+interface AIInsightsCardProps {
+  ghostCount: number;
+  potentialSavings: number;
+  priceHikeCount: number;
+  lang: Language;
+  dsColors: typeof pageTokens.colors;
+}
+
+const AIInsightsCard: React.FC<AIInsightsCardProps> = ({ ghostCount, potentialSavings, priceHikeCount, lang, dsColors }) => {
+  const getInsight = () => {
+    if (ghostCount > 0) {
+      return lang === 'th'
+        ? `พบ ${ghostCount} รายการที่ไม่ได้ใช้ ประหยัดได้ ${formatCurrency(potentialSavings, lang)}/เดือน`
+        : `${ghostCount} unused subs found. Save ${formatCurrency(potentialSavings, lang)}/month`;
+    }
+    if (priceHikeCount > 0) {
+      return lang === 'th'
+        ? `${priceHikeCount} รายการขึ้นราคา — ตรวจสอบและเจรจาได้`
+        : `${priceHikeCount} price hikes detected — review and negotiate`;
+    }
+    return lang === 'th'
+      ? 'ค่าใช้จ่ายของคุณอยู่ในเกณฑ์ดี ไม่มีรายการผิดปกติ'
+      : 'Your spending looks healthy — no anomalies detected';
   };
 
   return (
-    <div className="space-y-6 animate-slide-up text-left">
-      
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {showNotification && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-6 right-6 z-50 border px-5 py-3.5 rounded-2xl flex items-center gap-3 shadow-[0_12px_40px_rgba(0,0,0,0.5)] cursor-pointer backdrop-blur-lg bg-[#18191B] border-[#C7FF2E]/40 text-white"
-            onClick={() => setShowNotification(null)}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-[16px] px-5 py-4"
+      style={{
+        backgroundColor: 'rgba(86, 190, 137, 0.1)',
+        border: '1px solid rgba(86, 190, 137, 0.3)',
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: 'rgba(86, 190, 137, 0.2)' }}
+        >
+          <Ghost className="w-5 h-5" style={{ color: dsColors.accent }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[12px] font-semibold mb-1" style={{ color: '#111827' }}>
+            {lang === 'th' ? 'สมาร์ทอินไซต์' : 'Smart Insights'}
+          </p>
+          <p className="text-[14px]" style={{ color: '#111827' }}>
+            {getInsight()}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// ─── Tab Switcher (Net Worth underline pattern) ─────────────────────────────
+type TabType = 'upcoming' | 'all' | 'calendar';
+
+interface TabSwitcherProps {
+  activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
+  lang: Language;
+}
+
+const TabSwitcher: React.FC<TabSwitcherProps> = ({ activeTab, onTabChange, lang }) => {
+  const tabs: { id: TabType; labelEn: string; labelTh: string }[] = [
+    { id: 'upcoming', labelEn: 'Upcoming', labelTh: 'กำลังจะมาถึง' },
+    { id: 'all', labelEn: 'All', labelTh: 'ทั้งหมด' },
+  ];
+
+  return (
+    <div className="flex gap-6 mt-2">
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => { haptics.fire('SELECT'); onTabChange(tab.id); }}
+            className="pb-3 text-[15px] font-semibold transition-all relative"
+            style={{ color: isActive ? dsColors.text : dsColors.textMuted }}
           >
-            <div className="w-2.5 h-2.5 rounded-full animate-ping bg-[#C7FF2E]" />
-            <span className="font-mono text-xs uppercase tracking-wider">{showNotification}</span>
+            {lang === 'th' ? tab.labelTh : tab.labelEn}
+            {isActive && (
+              <motion.div
+                layoutId="recurringActiveTab"
+                className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                style={{ backgroundColor: dsColors.accent }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+// ─── Privacy Toggle (Net Worth pattern) ─────────────────────────────────────
+interface PrivacyToggleProps {
+  showAmount: boolean;
+  onToggle: () => void;
+  lang: Language;
+}
+
+const PrivacyToggle: React.FC<PrivacyToggleProps> = ({ showAmount, onToggle, lang }) => (
+  <button
+    onClick={() => { haptics.fire('SELECT'); onToggle(); }}
+    className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-95"
+    style={{ backgroundColor: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+    aria-label={showAmount ? (lang === 'th' ? 'ซ่อนตัวเลข' : 'Hide amounts') : (lang === 'th' ? 'แสดงตัวเลข' : 'Show amounts')}
+  >
+    {showAmount ? <Eye className="w-4 h-4" style={{ color: '#71717A' }} /> : <EyeOff className="w-4 h-4" style={{ color: dsColors.accent }} />}
+  </button>
+);
+
+// ─── Hero Card (Flat White Light Mode — Net Worth pattern) ─────────────────
+interface HeroCardProps {
+  totalMonthly: number;
+  totalYearly: number;
+  totalSubs: number;
+  totalBills: number;
+  showAmount: boolean;
+  lang: Language;
+  dsColors: typeof pageTokens.colors;
+  dsTypography: typeof pageTokens.typography;
+  onPrivacyToggle: () => void;
+  onSeeAllClick: () => void;
+}
+
+const HeroCard: React.FC<HeroCardProps> = ({
+  totalMonthly, totalYearly, totalSubs, totalBills, showAmount, lang, dsColors, dsTypography, onPrivacyToggle, onSeeAllClick,
+}) => (
+  <div
+    className="rounded-[24px] p-5 -mx-2"
+    style={{
+      backgroundColor: '#F5F5F5',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+    }}
+  >
+    {/* Row 1: Label + Privacy Toggle */}
+    <div className="flex items-center justify-between mb-1">
+      <span
+        className="text-[13px] font-medium"
+        style={{ fontFamily: dsTypography.fontEN, color: dsColors.textMuted }}
+      >
+        {lang === 'th' ? 'ค่าใช้จ่ายต่อเดือน' : 'Monthly recurring spend'}
+      </span>
+      <PrivacyToggle showAmount={showAmount} onToggle={onPrivacyToggle} lang={lang} />
+    </div>
+
+    {/* Row 2: Main Amount — 36px bold (Net Worth pattern) */}
+    <div className="flex items-baseline gap-2 mb-3">
+      <h2
+        className="text-[36px] font-bold leading-none"
+        style={{
+          color: dsColors.text,
+          fontFamily: dsTypography.fontMono,
+          letterSpacing: '-1px',
+        }}
+      >
+        {showAmount ? formatCurrency(totalMonthly, lang) : '••••'}
+      </h2>
+      <span
+        className="text-[13px] font-medium"
+        style={{ color: dsColors.textMuted }}
+      >
+        /{lang === 'th' ? 'เดือน' : 'mo'}
+      </span>
+    </div>
+
+    {/* Row 3: Lime insight pill (Home pattern) */}
+    <div className="flex items-center gap-2 mb-3">
+      <div
+        className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1.5 rounded-full"
+        style={{ backgroundColor: 'rgba(86, 190, 137, 0.15)' }}
+      >
+        <TrendingDown className="w-3.5 h-3.5" style={{ color: dsColors.accent }} />
+        <span className="text-[12px] font-semibold" style={{ color: dsColors.accent }}>
+          {showAmount ? formatCurrency(totalYearly, lang) : '••••'} {lang === 'th' ? 'ต่อปี' : '/year'}
+        </span>
+      </div>
+      <span
+        className="text-[11px] font-medium"
+        style={{ color: dsColors.textMuted }}
+      >
+        {totalSubs + totalBills} {lang === 'th' ? 'รายการ' : 'active'}
+      </span>
+    </div>
+
+    {/* Row 4: Divider (Net Worth pattern) */}
+    <div className="h-px mb-3" style={{ backgroundColor: dsColors.border }} />
+
+    {/* Row 5: Breakdown — Sub vs Bills (Net Worth style) */}
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <p className="text-[11px] font-medium mb-1" style={{ color: dsColors.textMuted }}>
+          {lang === 'th' ? 'รายการสมัคร' : 'Subscriptions'}
+        </p>
+        <p className="text-[17px] font-bold" style={{ color: dsColors.text, fontFamily: dsTypography.fontMono }}>
+          {showAmount ? formatCurrency(totalSubs, lang) : '••••'}
+        </p>
+      </div>
+      <div>
+        <p className="text-[11px] font-medium mb-1" style={{ color: dsColors.textMuted }}>
+          {lang === 'th' ? 'บิลและค่าบริการ' : 'Bills'}
+        </p>
+        <p className="text-[17px] font-bold" style={{ color: dsColors.text, fontFamily: dsTypography.fontMono }}>
+          {showAmount ? formatCurrency(totalBills, lang) : '••••'}
+        </p>
+      </div>
+    </div>
+
+    {/* See full calendar button */}
+    <button
+      onClick={onSeeAllClick}
+      className="w-full mt-4 flex items-center justify-center gap-1.5 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95"
+      style={{ backgroundColor: dsColors.accent, color: '#111827' }}
+    >
+      <Calendar className="w-4 h-4" />
+      {lang === 'th' ? 'ดูปฏิทินเต็ม' : 'See full calendar'}
+    </button>
+  </div>
+);
+
+// ─── Subscription Item Card (48px logo, white card with shadow) ──────────────
+interface SubscriptionItemProps {
+  subscription: Subscription;
+  currentDay: number;
+  daysInMonth: number;
+  lang: Language;
+  onMenuOpen: (sub: Subscription) => void;
+}
+
+const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
+  subscription, currentDay, daysInMonth, lang, onMenuOpen,
+}) => {
+  const daysInfo = getDaysUntilDue(subscription.dueDate, currentDay, daysInMonth);
+  const brandColor = getBrandColor(subscription);
+  const logoLetter = getLogoLetter(subscription);
+  const isGhost = subscription.isGhost;
+  const priceHiked = subscription.priceChange && subscription.priceChange > 0;
+
+  return (
+    <motion.button
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 400 }}
+      // Pill Card spec — matches Home "Complete Setup" pattern
+      className="w-full flex items-center gap-3 rounded-full px-6 py-3 active:scale-[0.98] transition-all text-left"
+      style={{
+        backgroundColor: dsColors.surface,
+        opacity: subscription.isActive ? 1 : 0.5,
+      }}
+    >
+      {/* Brand Logo — 48px (Net Worth pattern) */}
+      <div
+        className="w-12 h-12 rounded-full flex items-center justify-center text-[16px] font-bold text-white shrink-0 relative"
+        style={{ backgroundColor: brandColor }}
+      >
+        <span style={{ fontFamily: dsTypography.fontEN }}>{logoLetter}</span>
+        {isGhost && (
+          <span
+            className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: '#FFFFFF', border: '2px solid #E5E5E5' }}
+          >
+            <Ghost className="w-2.5 h-2.5" style={{ color: dsColors.accent }} />
+          </span>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <h3
+            className="text-[15px] font-semibold truncate"
+            style={{ color: dsColors.text, ...getFontStyle(lang) }}
+          >
+            {subscription.name}
+          </h3>
+          {priceHiked && (
+            <span
+              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold shrink-0"
+              style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: dsColors.negative }}
+            >
+              <TrendingUp className="w-2.5 h-2.5" />
+              {subscription.priceChange}%
+            </span>
+          )}
+        </div>
+        <p className="text-[12px] mt-0.5 truncate" style={{ color: dsColors.textMuted }}>
+          {daysInfo.text} · {getBillingCycleLabel(subscription.billingCycle, lang)}
+        </p>
+      </div>
+
+      {/* Amount — font-mono (Net Worth pattern) */}
+      <span
+        className="text-[15px] font-bold shrink-0"
+        style={{
+          color: subscription.isActive ? dsColors.text : dsColors.textMuted,
+          fontFamily: dsTypography.fontMono,
+        }}
+      >
+        {formatCurrency(subscription.amount, lang)}
+      </span>
+
+      {/* More Options — 44x44 touch target */}
+      <button
+        onClick={(e) => { e.stopPropagation(); haptics.fire('SELECT'); onMenuOpen(subscription); }}
+        className="w-11 h-11 -mr-2 rounded-full flex items-center justify-center transition-colors active:bg-gray-200"
+        style={{ color: dsColors.textMuted }}
+      >
+        <MoreVertical className="w-5 h-5" />
+      </button>
+    </motion.button>
+  );
+};
+
+// ─── Sort Dropdown (Lime active state) ──────────────────────────────────────
+type SortType = 'type' | 'amount' | 'name';
+
+interface SortDropdownProps {
+  sortBy: SortType;
+  onSortChange: (sort: SortType) => void;
+  lang: Language;
+}
+
+const SortDropdown: React.FC<SortDropdownProps> = ({ sortBy, onSortChange, lang }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const options: { id: SortType; labelEn: string; labelTh: string }[] = [
+    { id: 'type', labelEn: 'Type', labelTh: 'ประเภท' },
+    { id: 'amount', labelEn: 'Amount', labelTh: 'จำนวน' },
+    { id: 'name', labelEn: 'Name', labelTh: 'ชื่อ' },
+  ];
+  const currentLabel = options.find(o => o.id === sortBy);
+
+  return (
+    <div className="relative inline-block">
+      <button
+        onClick={() => { haptics.fire('SELECT'); setIsOpen(!isOpen); }}
+        className="flex items-center gap-2 px-4 py-2 rounded-full text-[14px] font-medium transition-all bg-white"
+        style={{ border: `1px solid ${dsColors.border}`, color: dsColors.text }}
+      >
+        <span>{lang === 'th' ? 'เรียงตาม' : 'Sort by'}:</span>
+        <span style={{ color: dsColors.accent }}>
+          {currentLabel ? (lang === 'th' ? currentLabel.labelTh : currentLabel.labelEn) : ''}
+        </span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div
+            className="absolute top-full left-0 mt-2 z-50 py-2 rounded-2xl shadow-lg min-w-[160px] bg-white"
+            style={{ border: `1px solid ${dsColors.border}` }}
+          >
+            {options.map((option) => (
+              <button
+                key={option.id}
+                onClick={() => { haptics.fire('SELECT'); onSortChange(option.id); setIsOpen(false); }}
+                className="w-full px-4 py-2 text-left text-[14px] font-medium transition-colors"
+                style={{
+                  backgroundColor: sortBy === option.id ? 'rgba(86, 190, 137, 0.15)' : 'transparent',
+                  color: sortBy === option.id ? dsColors.accent : dsColors.text,
+                }}
+              >
+                {lang === 'th' ? option.labelTh : option.labelEn}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// ─── All Tab Item (List row pattern) ─────────────────────────────────────────
+interface AllTabItemProps {
+  subscription: Subscription;
+  lang: Language;
+  onMenuOpen: (sub: Subscription) => void;
+}
+
+const AllTabItem: React.FC<AllTabItemProps> = ({ subscription, lang, onMenuOpen }) => {
+  const brandColor = getBrandColor(subscription);
+  const logoLetter = getLogoLetter(subscription);
+
+  return (
+    <motion.button
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 400 }}
+      // Pill Card spec — matches Home "Complete Setup" pattern
+      className="w-full flex items-center gap-3 rounded-full px-6 py-3 active:scale-[0.98] transition-all text-left"
+      style={{
+        backgroundColor: dsColors.surface,
+        opacity: subscription.isActive ? 1 : 0.5,
+      }}
+    >
+      <div
+        className="w-12 h-12 rounded-full flex items-center justify-center text-[16px] font-bold text-white shrink-0"
+        style={{ backgroundColor: brandColor }}
+      >
+        <span style={{ fontFamily: dsTypography.fontEN }}>{logoLetter}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3
+          className="text-[15px] font-semibold truncate"
+          style={{ color: dsColors.text, ...getFontStyle(lang) }}
+        >
+          {subscription.name}
+        </h3>
+        <p className="text-[12px] mt-0.5" style={{ color: dsColors.textMuted }}>
+          {getBillingCycleLabel(subscription.billingCycle, lang)}
+        </p>
+      </div>
+      <span
+        className="text-[15px] font-bold shrink-0"
+        style={{
+          color: subscription.isActive ? dsColors.text : dsColors.textMuted,
+          fontFamily: dsTypography.fontMono,
+        }}
+      >
+        {formatCurrency(subscription.amount, lang)}
+      </span>
+      <button
+        onClick={(e) => { e.stopPropagation(); haptics.fire('SELECT'); onMenuOpen(subscription); }}
+        className="w-11 h-11 -mr-2 rounded-full flex items-center justify-center transition-colors active:bg-gray-200"
+        style={{ color: dsColors.textMuted }}
+      >
+        <MoreVertical className="w-5 h-5" />
+      </button>
+    </motion.button>
+  );
+};
+
+// ─── Full Month Calendar View (Net Worth dark footer pattern) ───────────────
+interface FullCalendarViewProps {
+  subscriptions: Subscription[];
+  currentMonth: number;
+  currentYear: number;
+  daysInMonth: number;
+  lang: Language;
+  onDateClick: (day: number) => void;
+  onMonthChange: (month: number, year: number) => void;
+  onBack: () => void;
+  showAmount: boolean;
+  totalMonthly: number;
+  totalYearly: number;
+}
+
+const FullCalendarView: React.FC<FullCalendarViewProps> = ({
+  subscriptions, currentMonth, currentYear, daysInMonth, lang,
+  onDateClick, onMonthChange, onBack, showAmount, totalMonthly, totalYearly,
+}) => {
+  const monthNamesEn = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthNamesTh = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+
+  // Mon-first day labels (matches reference)
+  const dayNames = lang === 'th'
+    ? ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา']
+    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  const today = new Date();
+  const isCurrentMonth = currentMonth === today.getMonth() && currentYear === today.getFullYear();
+  const currentDay = isCurrentMonth ? today.getDate() : -1;
+
+  const subsByDay = useMemo(() => {
+    const map: Record<number, Subscription[]> = {};
+    subscriptions.filter(s => s.isActive).forEach(s => {
+      if (!map[s.dueDate]) map[s.dueDate] = [];
+      map[s.dueDate].push(s);
+    });
+    return map;
+  }, [subscriptions]);
+
+  // Mon-first: (jsDay + 6) % 7
+  const firstDayOfMonthJs = new Date(currentYear, currentMonth, 1).getDay();
+  const firstDayOfMonthMonFirst = (firstDayOfMonthJs + 6) % 7;
+  const calendarDays: (number | null)[] = [];
+  for (let i = 0; i < firstDayOfMonthMonFirst; i++) calendarDays.push(null);
+  for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
+
+  const prevMonth = () => {
+    const newMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const newYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    onMonthChange(newMonth, newYear);
+  };
+  const nextMonth = () => {
+    const newMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+    const newYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+    onMonthChange(newMonth, newYear);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: dsColors.background }}>
+      {/* Header — Flat white (Home/Net Worth pattern) */}
+      <div
+        className="px-0 pt-1 pb-3"
+        style={{ backgroundColor: dsColors.background, borderBottom: `1px solid ${dsColors.border}` }}
+      >
+        <div className="flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-colors active:bg-gray-100"
+          >
+            <ChevronLeft className="w-6 h-6" style={{ color: dsColors.text }} />
+          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={prevMonth}
+              className="w-7 h-7 rounded-full flex items-center justify-center transition-colors active:bg-gray-100"
+            >
+              <ChevronLeft className="w-4 h-4" style={{ color: dsColors.textMuted }} />
+            </button>
+            <h3
+              className="text-[17px] font-semibold min-w-[120px] text-center"
+              style={{ color: dsColors.text, ...getFontStyle(lang) }}
+            >
+              {lang === 'th' ? monthNamesTh[currentMonth] : monthNamesEn[currentMonth]} {currentYear}
+            </h3>
+            <button
+              onClick={nextMonth}
+              className="w-7 h-7 rounded-full flex items-center justify-center transition-colors active:bg-gray-100"
+            >
+              <ChevronRight className="w-4 h-4" style={{ color: dsColors.textMuted }} />
+            </button>
+          </div>
+
+          <div className="w-11 h-11" />
+        </div>
+      </div>
+
+      {/* Calendar */}
+      <div className="flex-1 px-3 pt-3 pb-48">
+        <div className="grid grid-cols-7 mb-2">
+          {dayNames.map((day, i) => (
+            <div
+              key={i}
+              className="text-center text-[11px] font-medium"
+              style={{ color: dsColors.textMuted }}
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-px">
+          {calendarDays.map((day, index) => {
+            if (day === null) return <div key={`empty-${index}`} className="aspect-square" />;
+            const subsOnDay = subsByDay[day] || [];
+            const hasSubs = subsOnDay.length > 0;
+            const isToday = day === currentDay;
+            const isPast = currentDay > 0 && day < currentDay;
+
+            return (
+              <div
+                key={day}
+                onClick={() => hasSubs && onDateClick(day)}
+                className={`
+                  aspect-square flex flex-col items-center justify-start pt-1
+                  transition-all relative
+                  ${hasSubs ? 'cursor-pointer active:scale-95' : 'cursor-default'}
+                `}
+                style={{
+                  backgroundColor: isToday ? 'rgba(86, 190, 137, 0.15)' : 'transparent',
+                  opacity: isPast ? 0.45 : 1,
+                }}
+              >
+                <span
+                  className="text-[10px] self-start pl-1"
+                  style={{
+                    color: isToday ? '#65A30D' : isPast ? dsColors.textMuted : dsColors.text,
+                    fontWeight: isToday ? 700 : 500,
+                  }}
+                >
+                  {day}
+                </span>
+                {hasSubs && (
+                  <div className="flex flex-col gap-0.5 mt-0.5 w-full items-center">
+                    {subsOnDay.slice(0, 3).map((sub) => {
+                      const brandColor = getBrandColor(sub);
+                      return (
+                        <div key={sub.id} className="flex flex-col items-center gap-0.5 w-full">
+                          <div
+                            className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white shrink-0"
+                            style={{ backgroundColor: brandColor }}
+                          >
+                            <span>{getLogoLetter(sub)}</span>
+                          </div>
+                          <div
+                            className="px-1 py-px rounded text-[8px] font-bold leading-none"
+                            style={{
+                              backgroundColor: dsColors.accent,
+                              color: '#111827',
+                              minWidth: 18,
+                              textAlign: 'center',
+                            }}
+                          >
+                            {formatAmountCompact(sub.amount, lang)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sticky Footer — Flat White Light Mode (rounded-[24px] for consistency) */}
+      <div
+        className="fixed bottom-[84px] left-0 right-0 z-30 px-2 pb-3"
+      >
+        <div
+          className="rounded-[24px] p-5"
+          style={{
+            backgroundColor: '#F5F5F5',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+          }}
+        >
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <span className="text-[12px] font-medium" style={{ color: dsColors.textMuted }}>
+              {subscriptions.filter(s => s.isActive && s.category !== 'bills').length} {lang === 'th' ? 'รายการสมัคร' : 'Subscriptions'}
+            </span>
+            <span className="text-[12px] font-medium" style={{ color: dsColors.textMuted }}>
+              {subscriptions.filter(s => s.isActive && s.category === 'bills').length} {lang === 'th' ? 'บิลและค่าบริการ' : 'Bills'}
+            </span>
+          </div>
+          <div className="flex items-start justify-between gap-4">
+            <span
+              className="text-[36px] font-bold leading-none"
+              style={{ color: dsColors.text, fontFamily: dsTypography.fontMono, letterSpacing: '-1px' }}
+            >
+              {showAmount ? formatCurrency(totalMonthly, lang) : '••••'}
+            </span>
+            <span
+              className="text-[36px] font-bold leading-none"
+              style={{ color: dsColors.text, fontFamily: dsTypography.fontMono, letterSpacing: '-1px' }}
+            >
+              ~{showAmount ? formatCurrency(totalYearly, lang) : '••••'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Empty State (Design System) ────────────────────────────────────────────
+const SubscriptionEmptyState: React.FC<{ lang: Language }> = ({ lang }) => (
+  <EmptyState
+    icon={Sparkles}
+    title={lang === 'th' ? 'ยังไม่มีรายการ' : 'No subscriptions yet'}
+    description={
+      lang === 'th'
+        ? 'เพิ่มรายการบิลหรือบริการที่คุณใช้เป็นประจำ'
+        : 'Add your recurring subscriptions to track your monthly spending'
+    }
+  />
+);
+
+// ─── Add/Edit Modal — Full UX Redesign ───────────────────────────────────────
+// Key improvements:
+// - Merchant quick-add with Thai-specific merchants
+// - THB currency (no more "สตางค์" confusion)
+// - 8 expanded categories
+// - Smart pre-fill when merchant selected
+// - Inline validation
+// - Mobile-optimized keyboard handling
+
+interface SubscriptionModalProps {
+  isOpen: boolean;
+  mode: 'add' | 'edit';
+  subscription?: Subscription | null;
+  onClose: () => void;
+  onSave: (sub: Omit<Subscription, 'id'> | Subscription) => void;
+  lang: Language;
+}
+
+const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
+  isOpen, mode, subscription, onClose, onSave, lang,
+}) => {
+  const [name, setName] = useState(subscription?.name || '');
+  const [amount, setAmount] = useState(subscription?.amount?.toString() || '');
+  const [dueDate, setDueDate] = useState((subscription?.dueDate || 1).toString());
+  const [category, setCategory] = useState(subscription?.category || 'other');
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>(subscription?.billingCycle || 'monthly');
+  const [isActive, setIsActive] = useState(subscription?.isActive ?? true);
+  // ── Merchant search state ──
+  const [showMerchantPicker, setShowMerchantPicker] = useState(false);
+  const [merchantSearch, setMerchantSearch] = useState('');
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Reset when opened / mode changes
+  useEffect(() => {
+    if (subscription) {
+      setName(subscription.name);
+      setAmount(subscription.amount.toString());
+      setDueDate(subscription.dueDate.toString());
+      setCategory(subscription.category);
+      setBillingCycle(subscription.billingCycle);
+      setIsActive(subscription.isActive);
+      setShowMerchantPicker(false);
+      setMerchantSearch('');
+    } else {
+      setName(''); setAmount(''); setDueDate('1'); setCategory('other'); setBillingCycle('monthly'); setIsActive(true);
+      setShowMerchantPicker(false); setMerchantSearch('');
+    }
+  }, [subscription, isOpen]);
+
+  // Focus name input when modal opens
+  useEffect(() => {
+    if (isOpen && !subscription) {
+      setTimeout(() => nameInputRef.current?.focus(), 100);
+    }
+  }, [isOpen, subscription]);
+
+  // Filter merchants by search
+  const filteredMerchants = useMemo(() => {
+    if (!merchantSearch.trim()) return MERCHANT_DATABASE;
+    const q = merchantSearch.toLowerCase();
+    return MERCHANT_DATABASE.filter(
+      m => m.name.toLowerCase().includes(q) || m.nameTh.includes(merchantSearch)
+    );
+  }, [merchantSearch]);
+
+  // Auto-fill fields when a merchant is selected
+  const handleMerchantSelect = (merchant: MerchantTemplate) => {
+    setName(lang === 'th' ? merchant.nameTh : merchant.name);
+    setAmount(merchant.approximateAmount.toString());
+    setCategory(merchant.category);
+    setBillingCycle(merchant.billingCycle);
+    setShowMerchantPicker(false);
+    setMerchantSearch('');
+  };
+
+  if (!isOpen) return null;
+
+  // ── Validation ──
+  const nameError = name.trim().length > 0 && name.trim().length < 2;
+  const amountNum = parseFloat(amount);
+  const amountError = amount !== '' && (isNaN(amountNum) || amountNum <= 0);
+  const canSubmit = name.trim().length >= 2 && amount !== '' && !amountError;
+
+  const handleSubmit = () => {
+    if (!canSubmit) return;
+    const subData = {
+      name: name.trim(),
+      amount: amountNum,
+      dueDate: parseInt(dueDate),
+      category,
+      billingCycle,
+      color: (CATEGORY_META[category]?.color) || dsColors.category.other,
+      isActive,
+    };
+    if (mode === 'edit' && subscription) onSave({ ...subscription, ...subData });
+    else onSave(subData);
+    onClose();
+  };
+
+  // All category keys
+  const allCategories = Object.keys(CATEGORY_META);
+
+  // ── Render ──
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-end justify-center"
+      >
+        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-md rounded-t-3xl p-5 pb-8 bg-white max-h-[92vh] overflow-y-auto"
+        >
+          {/* Drag handle */}
+          <div className="flex justify-center mb-3">
+            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          </div>
+
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[17px] font-bold" style={{ color: dsColors.text, ...getFontStyle(lang) }}>
+              {mode === 'add'
+                ? (lang === 'th' ? 'เพิ่มรายการใหม่' : 'Add Subscription')
+                : (lang === 'th' ? 'แก้ไขรายการ' : 'Edit Subscription')}
+            </h2>
+            <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100" aria-label="Close">
+              <X className="w-5 h-5" style={{ color: dsColors.textMuted }} />
+            </button>
+          </div>
+
+          {/* ── Step 1: Merchant Picker (only in add mode) ── */}
+          {mode === 'add' && !showMerchantPicker && (
+            <button
+              onClick={() => setShowMerchantPicker(true)}
+              className="w-full mb-3 flex items-center gap-2 px-4 py-3 rounded-xl text-[14px] font-medium transition-all active:scale-[0.98]"
+              style={{
+                backgroundColor: 'rgba(86, 190, 137, 0.08)',
+                border: `1.5px dashed ${dsColors.accent}`,
+                color: dsColors.accent,
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              {lang === 'th' ? 'เลือกจากรายการยอดนิยม' : 'Quick add from popular list'}
+            </button>
+          )}
+
+          {/* ── Merchant Picker Panel ── */}
+          {mode === 'add' && showMerchantPicker && (
+            <div className="mb-3 p-3 rounded-xl" style={{ backgroundColor: '#F5F5F5' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <button
+                  onClick={() => { setShowMerchantPicker(false); setMerchantSearch(''); }}
+                  className="p-1.5 rounded-full hover:bg-gray-200"
+                >
+                  <ChevronLeft className="w-4 h-4" style={{ color: dsColors.text }} />
+                </button>
+                <input
+                  ref={nameInputRef}
+                  type="text"
+                  value={merchantSearch}
+                  onChange={(e) => setMerchantSearch(e.target.value)}
+                  placeholder={lang === 'th' ? 'ค้นหาบริการ...' : 'Search services...'}
+                  className="flex-1 px-3 py-2 rounded-lg text-[14px] outline-none bg-white"
+                  style={{ border: `1px solid ${dsColors.border}`, color: dsColors.text, ...getFontStyle(lang) }}
+                />
+              </div>
+              {/* Merchant grid */}
+              <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto">
+                {filteredMerchants.slice(0, 18).map((merchant) => (
+                  <button
+                    key={merchant.name}
+                    onClick={() => handleMerchantSelect(merchant)}
+                    className="flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all active:scale-95"
+                    style={{ backgroundColor: '#FFFFFF', border: `1px solid ${dsColors.border}` }}
+                  >
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
+                      style={{ backgroundColor: merchant.color }}
+                    >
+                      {merchant.logo}
+                    </div>
+                    <span className="text-[10px] font-medium leading-tight" style={{ color: dsColors.text, ...getFontStyle(lang) }}>
+                      {lang === 'th' ? merchant.nameTh : merchant.name}
+                    </span>
+                  </button>
+                ))}
+                {filteredMerchants.length === 0 && (
+                  <p className="col-span-3 text-center text-[13px] py-4" style={{ color: dsColors.textMuted }}>
+                    {lang === 'th' ? 'ไม่พบรายการที่ค้นหา' : 'No results found'}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {/* ── Name ── */}
+            <div>
+              <label className="block text-[12px] font-medium mb-1.5" style={{ color: dsColors.text }}>
+                {lang === 'th' ? 'ชื่อบริการ *' : 'Service Name *'}
+              </label>
+              <input
+                ref={nameInputRef}
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={lang === 'th' ? 'เช่น Netflix, AIS, ค่าเช่า' : 'e.g. Netflix, AIS, Rent'}
+                className="w-full px-4 py-3 rounded-xl text-[15px] outline-none"
+                style={{
+                  border: `1.5px solid ${nameError ? dsColors.negative : dsColors.border}`,
+                  backgroundColor: '#FAFAFA',
+                  color: dsColors.text,
+                  ...getFontStyle(lang),
+                }}
+                autoFocus={mode === 'edit'}
+              />
+              {nameError && (
+                <p className="text-[11px] mt-1" style={{ color: dsColors.negative }}>
+                  {lang === 'th' ? 'กรุณาใส่ชื่ออย่างน้อย 2 ตัวอักษร' : 'Name must be at least 2 characters'}
+                </p>
+              )}
+            </div>
+
+            {/* ── Amount — THB default ── */}
+            <div>
+              <label className="block text-[12px] font-medium mb-1.5" style={{ color: dsColors.text }}>
+                {lang === 'th' ? 'จำนวนเงิน (บาท) *' : 'Amount (THB) *'}
+              </label>
+              <div className="relative">
+                <span
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[17px] font-bold"
+                  style={{ color: dsColors.accent }}
+                >
+                  ฿
+                </span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0"
+                  className="w-full pl-9 pr-4 py-3 rounded-xl text-[17px] font-bold outline-none"
+                  style={{
+                    border: `1.5px solid ${amountError ? dsColors.negative : dsColors.border}`,
+                    backgroundColor: '#FAFAFA',
+                    color: dsColors.text,
+                    fontFamily: dsTypography.fontMono,
+                  }}
+                />
+                {amountError && (
+                  <p className="absolute -bottom-5 right-0 text-[11px]" style={{ color: dsColors.negative }}>
+                    {lang === 'th' ? 'กรุณาใส่ตัวเลขที่ถูกต้อง' : 'Enter a valid amount'}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* ── Due Date ── */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[12px] font-medium" style={{ color: dsColors.text }}>
+                  {lang === 'th' ? 'วันที่ต้องชำระ' : 'Due Date'}
+                </label>
+                <span className="text-[14px] font-bold" style={{ color: dsColors.accent, fontFamily: dsTypography.fontMono }}>
+                  {lang === 'th' ? `วันที่ ${dueDate}` : `Day ${dueDate}`}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="1" max="31"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full h-2 rounded-full appearance-none cursor-pointer bg-gray-200"
+                style={{ accentColor: dsColors.accent }}
+              />
+              {/* Day chips */}
+              <div className="flex justify-between mt-1">
+                {[1, 10, 20, 31].map(d => (
+                  <button
+                    key={d}
+                    onClick={() => setDueDate(d.toString())}
+                    className="text-[10px] px-1.5 py-0.5 rounded transition-all"
+                    style={{ color: dsColors.textMuted }}
+                  >
+                    {d === 31 ? '' : d}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Category — 8 categories ── */}
+            <div>
+              <label className="block text-[12px] font-medium mb-2" style={{ color: dsColors.text }}>
+                {lang === 'th' ? 'หมวดหมู่' : 'Category'}
+              </label>
+              <div className="grid grid-cols-4 gap-1.5">
+                {allCategories.map((catId) => {
+                  const cat = CATEGORY_META[catId];
+                  const isSelected = category === catId;
+                  return (
+                    <button
+                      key={catId}
+                      onClick={() => setCategory(catId)}
+                      className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-center transition-all active:scale-95"
+                      style={{
+                        backgroundColor: isSelected ? `${cat.color}20` : '#F5F5F5',
+                        border: `1.5px solid ${isSelected ? cat.color : 'transparent'}`,
+                        color: isSelected ? cat.color : dsColors.textMuted,
+                      }}
+                    >
+                      <div
+                        className="w-5 h-5 rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                      <span className="text-[10px] font-medium leading-tight" style={{ ...getFontStyle(lang) }}>
+                        {lang === 'th' ? cat.labelTh : cat.labelEn}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Billing Cycle ── */}
+            <div>
+              <label className="block text-[12px] font-medium mb-2" style={{ color: dsColors.text }}>
+                {lang === 'th' ? 'รอบการเก็บเงิน' : 'Billing Cycle'}
+              </label>
+              <div className="flex gap-2">
+                {(['weekly', 'monthly', 'yearly'] as BillingCycle[]).map((cycle) => {
+                  const isSelected = billingCycle === cycle;
+                  return (
+                    <button
+                      key={cycle}
+                      onClick={() => setBillingCycle(cycle)}
+                      className="flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition-all active:scale-95"
+                      style={{
+                        backgroundColor: isSelected ? dsColors.accent : '#F5F5F5',
+                        color: isSelected ? '#111827' : dsColors.text,
+                      }}
+                    >
+                      {getBillingCycleLabel(cycle, lang)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Active Toggle ── */}
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-medium" style={{ color: dsColors.text }}>
+                {lang === 'th' ? 'เปิดใช้งาน' : 'Active'}
+              </span>
+              <button
+                onClick={() => setIsActive(!isActive)}
+                className="w-12 h-7 rounded-full transition-all relative"
+                style={{ backgroundColor: isActive ? dsColors.accent : 'rgba(128,128,128,0.2)' }}
+                aria-pressed={isActive}
+              >
+                <div
+                  className="absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all"
+                  style={{ left: isActive ? 'calc(100% - 24px)' : '4px' }}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* ── Submit Button ── */}
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className="w-full mt-5 py-4 rounded-xl text-[15px] font-bold transition-all active:scale-[0.98] disabled:opacity-40"
+            style={{
+              backgroundColor: canSubmit ? dsColors.accent : '#E5E5E5',
+              color: canSubmit ? '#111827' : '#9CA3AF',
+            }}
+          >
+            {mode === 'add'
+              ? (lang === 'th' ? '✓ เพิ่มรายการ' : '✓ Add Subscription')
+              : (lang === 'th' ? '✓ บันทึก' : '✓ Save Changes')}
+          </button>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+// ─── Actions Menu ───────────────────────────────────────────────────────────
+interface ActionsMenuProps {
+  isOpen: boolean;
+  subscription: Subscription | null;
+  onClose: () => void;
+  lang: Language;
+  onMarkPaid: (sub: Subscription) => void;
+  onSkip: (sub: Subscription) => void;
+  onEdit: (sub: Subscription) => void;
+  onDelete: (id: string) => void;
+  onHide: (sub: Subscription) => void;
+}
+
+const ActionsMenu: React.FC<ActionsMenuProps> = ({
+  isOpen, subscription, onClose, lang, onMarkPaid, onSkip, onEdit, onDelete, onHide,
+}) => {
+  if (!isOpen || !subscription) return null;
+  const brandColor = getBrandColor(subscription);
+
+  const actions = [
+    { label: lang === 'th' ? 'ทำเครื่องหมายว่าจ่ายแล้ว' : 'Mark as Paid', icon: Check, onClick: () => { haptics.fire('SELECT'); onMarkPaid(subscription); onClose(); }, color: dsColors.success },
+    { label: lang === 'th' ? 'ข้ามเดือนนี้' : 'Skip this month', icon: SkipForward, onClick: () => { haptics.fire('SELECT'); onSkip(subscription); onClose(); }, color: dsColors.warning },
+    { label: lang === 'th' ? 'ซ่อนรายการนี้' : 'Hide for now', icon: HideIcon, onClick: () => { haptics.fire('SELECT'); onHide(subscription); onClose(); }, color: dsColors.textMuted },
+    { label: lang === 'th' ? 'แก้ไข' : 'Edit', icon: Pencil, onClick: () => { haptics.fire('SELECT'); onEdit(subscription); onClose(); }, color: dsColors.accent },
+    { label: lang === 'th' ? 'ลบ' : 'Delete', icon: Trash2, onClick: () => { haptics.fire('THUD'); onDelete(subscription.id); onClose(); }, color: dsColors.negative, danger: true },
+  ];
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-end justify-center"
+      >
+        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-md rounded-t-3xl p-6 pb-8 bg-white"
+        >
+          <div className="flex justify-center mb-4">
+            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          </div>
+
+          <div className="flex items-center gap-3 mb-5">
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center text-[16px] font-bold text-white"
+              style={{ backgroundColor: brandColor }}
+            >
+              <span>{getLogoLetter(subscription)}</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-[15px] font-semibold" style={{ color: dsColors.text }}>{subscription.name}</p>
+              <p className="text-[13px] font-bold" style={{ color: dsColors.textMuted, fontFamily: dsTypography.fontMono }}>
+                {formatCurrency(subscription.amount, lang)}/{lang === 'th' ? 'เดือน' : 'month'}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {actions.map((action, index) => (
+              <button
+                key={index}
+                onClick={action.onClick}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors"
+                style={{
+                  backgroundColor: action.danger ? 'rgba(239, 68, 68, 0.08)' : 'rgba(128, 128, 128, 0.06)',
+                  color: action.color,
+                }}
+              >
+                <action.icon className="w-5 h-5" />
+                {action.label}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+// ─── Main Page Component ────────────────────────────────────────────────────
+export default function SubscriptionTrackerPage({
+  lang = 'en',
+  currentBalance = 15000,
+  onNavigateToNotifications,
+}: SubscriptionTrackerPageProps) {
+  // State
+  const [activeTab, setActiveTab] = useState<TabType>('upcoming');
+  const [paydayEnabled, setPaydayEnabled] = useState(false);
+  const [paydayDay, setPaydayDay] = useState(25);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showCSVImport, setShowCSVImport] = useState(false);
+  const [editSubscription, setEditSubscription] = useState<Subscription | null>(null);
+  const [menuSubscription, setMenuSubscription] = useState<Subscription | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
+  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
+
+  // Privacy toggle (Net Worth pattern)
+  const [showAmount, setShowAmount] = useState(true);
+  const [notificationCount] = useState(3);
+
+  // Last sync
+  const [lastSyncAt, setLastSyncAt] = useState<Date | null>(new Date());
+
+  // Date calculations
+  const today = new Date();
+  const currentDay = today.getDate();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  // Auto-hide amounts when app in background (Net Worth pattern)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) setShowAmount(false);
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  // Load real subscriptions from Supabase on mount
+  useEffect(() => {
+    async function fetchSubs() {
+      setIsLoading(true);
+      setLoadError(null);
+      try {
+        const data = await loadSubscriptions();
+        if (data.length > 0) {
+          setSubscriptions(data);
+        } else {
+          // Fallback to demo data for unauthenticated / empty DB state
+          setSubscriptions(MOCK_SUBSCRIPTIONS);
+        }
+      } catch (err) {
+        console.error('[SubscriptionTracker] Load failed:', err);
+        setLoadError(lang === 'th'
+          ? 'โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่'
+          : 'Failed to load. Please try again.');
+        setSubscriptions(MOCK_SUBSCRIPTIONS); // graceful fallback
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchSubs();
+  }, []);
+
+  // Filter visible
+  const visibleSubscriptions = useMemo(() => subscriptions.filter(s => !hiddenIds.has(s.id)), [subscriptions, hiddenIds]);
+  const upcomingSubscriptions = useMemo(
+    () => getUpcomingInWindow(visibleSubscriptions, currentDay, daysInMonth, paydayDay, paydayEnabled),
+    [visibleSubscriptions, currentDay, daysInMonth, paydayDay, paydayEnabled]
+  );
+  const totalUpcomingAmount = useMemo(() => getWindowTotal(upcomingSubscriptions), [upcomingSubscriptions]);
+
+  // Totals
+  const totals = useMemo(() => {
+    const active = visibleSubscriptions.filter(s => s.isActive);
+    const subItems = active.filter(s => s.category !== 'bills');
+    const billItems = active.filter(s => s.category === 'bills');
+    const subTotal = subItems.reduce((sum, s) => sum + s.amount, 0);
+    const billTotal = billItems.reduce((sum, s) => sum + s.amount, 0);
+    return {
+      subTotal, billTotal,
+      totalMonthly: subTotal + billTotal,
+      totalYearly: (subTotal + billTotal) * 12,
+      subCount: subItems.length,
+      billCount: billItems.length,
+    };
+  }, [visibleSubscriptions]);
+
+  // AI Insights data — P2-4: Real Ghost Hunter detection
+  // A subscription is a "ghost" if it's active but hasn't been paid in 60+ days
+  const GHOST_THRESHOLD_DAYS = 60;
+  const isGhostSubscription = (s: typeof visibleSubscriptions[0]): boolean => {
+    // Use explicit flag if set
+    if (s.isGhost) return true;
+    // Active but no payment record
+    if (!s.lastPaidDate) return s.isActive;
+    // Active but last payment was over 60 days ago
+    const daysSincePaid = (Date.now() - new Date(s.lastPaidDate).getTime()) / (1000 * 60 * 60 * 24);
+    return s.isActive && daysSincePaid > GHOST_THRESHOLD_DAYS;
+  };
+  const ghostSubs = visibleSubscriptions.filter(isGhostSubscription);
+  const ghostCount = ghostSubs.length;
+  const potentialSavings = ghostSubs.reduce((sum, s) => sum + s.amount, 0);
+  const priceHikeCount = visibleSubscriptions.filter(s => s.priceChange && s.priceChange > 0).length;
+
+  // Pull-to-refresh
+  const refreshData = useCallback(async () => {
+    setLoadError(null);
+    try {
+      const data = await loadSubscriptions();
+      if (data.length > 0) setSubscriptions(data);
+      setLastSyncAt(new Date());
+    } catch (err) {
+      console.error('[SubscriptionTracker] Refresh failed:', err);
+      setLoadError(lang === 'th'
+        ? 'อัปเดตไม่สำเร็จ กรุณาลองใหม่'
+        : 'Refresh failed. Please try again.');
+    }
+  }, [lang]);
+  const { isRefreshing, pullDistance, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(refreshData);
+
+  // Sort state for All tab
+  const [sortBy, setSortBy] = useState<'type' | 'amount' | 'name'>('type');
+  const allSubscriptions = useMemo(() => {
+    const sorted = [...visibleSubscriptions];
+    switch (sortBy) {
+      case 'amount': return sorted.sort((a, b) => b.amount - a.amount);
+      case 'name': return sorted.sort((a, b) => a.name.localeCompare(b.name));
+      case 'type':
+      default: return sorted.sort((a, b) => a.dueDate - b.dueDate);
+    }
+  }, [visibleSubscriptions, sortBy]);
+
+  const groupedSubscriptions = useMemo(() => {
+    const groups: Record<string, Subscription[]> = { subscriptions: [], bills: [] };
+    allSubscriptions.forEach(sub => {
+      if (sub.category === 'bills') groups.bills.push(sub);
+      else groups.subscriptions.push(sub);
+    });
+    return groups;
+  }, [allSubscriptions]);
+
+  const getYearlyTotal = (subs: Subscription[]) => subs.reduce((sum, sub) => sum + getAnnualizedAmount(sub), 0);
+
+  // Handlers
+  const handleMarkPaid = useCallback((sub: Subscription) => { console.log('Mark paid:', sub.name); }, []);
+  const handleSkip = useCallback((sub: Subscription) => { console.log('Skip month for:', sub.name); }, []);
+  const handleHide = useCallback((sub: Subscription) => { setHiddenIds(prev => new Set([...prev, sub.id])); }, []);
+  const handleDelete = useCallback(async (id: string) => {
+    await deleteSubscription(id);
+    setSubscriptions(prev => prev.filter(s => s.id !== id));
+  }, []);
+  const handleAdd = useCallback(async (sub: Omit<Subscription, 'id'>) => {
+    const created = await addSubscription(sub);
+    if (created) {
+      setSubscriptions(prev => [...prev, created]);
+    }
+  }, []);
+  const handleEdit = useCallback((sub: Subscription) => { setEditSubscription(sub); setShowAddModal(true); }, []);
+  const handleSaveEdit = useCallback(async (sub: Subscription) => {
+    const updated = await updateSubscription(sub);
+    if (updated) {
+      setSubscriptions(prev => prev.map(s => s.id === sub.id ? updated : s));
+    }
+    setEditSubscription(null);
+  }, []);
+  const handleSeeFullCalendar = useCallback(() => {
+    setActiveTab('calendar');
+    setCalendarMonth(currentMonth);
+    setCalendarYear(currentYear);
+  }, [currentMonth, currentYear]);
+  const handleCSVImportComplete = useCallback(() => {
+    refreshData();
+  }, [refreshData]);
+  const handleDateClick = useCallback((day: number) => {
+    setSelectedDate(day);
+    setActiveTab('upcoming');
+  }, []);
+
+  // Format last sync
+  const formatLastSync = (date: Date) => {
+    return date.toLocaleTimeString(lang === 'th' ? 'th-TH' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // ─── Render: Calendar (full-page, no header) ─────────────────────────────
+  if (activeTab === 'calendar') {
+    return (
+      <>
+        <FullCalendarView
+          subscriptions={visibleSubscriptions}
+          currentMonth={calendarMonth}
+          currentYear={calendarYear}
+          daysInMonth={new Date(calendarYear, calendarMonth + 1, 0).getDate()}
+          lang={lang}
+          onDateClick={handleDateClick}
+          onMonthChange={(m, y) => { setCalendarMonth(m); setCalendarYear(y); }}
+          onBack={() => setActiveTab('upcoming')}
+          showAmount={showAmount}
+          totalMonthly={totals.totalMonthly}
+          totalYearly={totals.totalYearly}
+        />
+        <SubscriptionModal
+          isOpen={showAddModal}
+          mode={editSubscription ? 'edit' : 'add'}
+          subscription={editSubscription}
+          onClose={() => { setShowAddModal(false); setEditSubscription(null); }}
+          onSave={editSubscription ? (handleSaveEdit as any) : (handleAdd as any)}
+          lang={lang}
+        />
+        <ActionsMenu
+          isOpen={showMenu}
+          subscription={menuSubscription}
+          onClose={() => setShowMenu(false)}
+          lang={lang}
+          onMarkPaid={handleMarkPaid}
+          onSkip={handleSkip}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onHide={handleHide}
+        />
+      </>
+    );
+  }
+
+  // ─── Render: Upcoming / All — DailyStack Design System ─────────────────
+  return (
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: dsColors.background, ...getFontStyle(lang) }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Pull-to-Refresh Indicator (Net Worth pattern) */}
+      <AnimatePresence>
+        {pullDistance > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed top-0 left-0 right-0 z-30 flex items-center justify-center py-4"
+            style={{
+              backgroundColor: pullDistance > 60 ? dsColors.accent : dsColors.surface,
+              transform: `translateY(${pullDistance}px)`,
+            }}
+          >
+            <div className="flex items-center gap-2" style={{ color: pullDistance > 60 ? '#111827' : dsColors.text }}>
+              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-sm font-medium">
+                {isRefreshing ? (lang === 'th' ? 'กำลังอัปเดต...' : 'Refreshing...') : `${Math.round(pullDistance)}%`}
+              </span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Header Section */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#C7FF2E] animate-ping" />
-            <span className="font-mono text-[9px] uppercase tracking-widest text-[#C7FF2E] font-bold">
-              {lang === 'en' ? 'LAYER 5' : 'ชั้น 5'}
-            </span>
-          </div>
-          <h1 className="font-display font-black text-2xl text-white tracking-tight">
-            {lang === 'en' ? 'Subscription Tracker' : 'ติดตามการสมัคร'}
-          </h1>
-          <p className="text-xs text-zinc-400 font-mono uppercase tracking-wider">
-            {lang === 'en' ? 'Financial Intelligence Layer' : 'ชั้นข้อมูลทางการเงิน'}
-          </p>
+      {/* Initial load spinner */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-16">
+          <RefreshCw className="w-6 h-6 animate-spin" style={{ color: dsColors.accent }} />
         </div>
+      )}
 
-        <button
-          id="btn-add-subscription"
-          onClick={() => setShowAddModal(true)}
-          className="bg-gradient-to-r from-[#C7FF2E] to-[#51FF85] text-black font-display font-black text-xs px-5 py-3 rounded-2xl uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-[#C7FF2E]/10 hover:from-white hover:to-white hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+      {/* Load error banner */}
+      {loadError && !isLoading && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mx-4 mb-3 flex items-center gap-2 px-4 py-3 rounded-xl text-[13px]"
+          style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', color: dsColors.negative }}
         >
-          <Plus className="w-4 h-4" />
-          {lang === 'en' ? 'Add' : 'เพิ่ม'}
-        </button>
-      </div>
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span className="flex-1">{loadError}</span>
+          <button
+            onClick={refreshData}
+            className="font-semibold underline underline-offset-2"
+          >
+            {lang === 'th' ? 'ลองใหม่' : 'Retry'}
+          </button>
+        </motion.div>
+      )}
 
-      {/* Stats Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Monthly Total */}
-        <div className="border rounded-[24px] p-5 bg-[#1A1D26]/90 border-[#2D313E] hover:border-[#C7FF2E]/40 transition-all duration-300 hover:-translate-y-0.5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="w-9 h-9 rounded-xl bg-[#C7FF2E]/10 flex items-center justify-center">
-              <CreditCard className="w-4 h-4 text-[#C7FF2E]" />
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-              {lang === 'en' ? 'Monthly' : 'รายเดือน'}
-            </span>
-          </div>
-          <div className="text-2xl font-black font-display text-white">
-            ${monthlyTotal.toFixed(2)}
-          </div>
-          <div className="text-[10px] font-mono text-zinc-500 mt-1">
-            {lang === 'en' ? 'Total recurring' : 'รวมค่าสมัคร'}
-          </div>
-        </div>
+      {/* Flat White Header (Home/Net Worth pattern) */}
+      <div className="px-0 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold" style={{ color: dsColors.text }}>
+            {lang === 'th' ? 'เงาการสมัคร' : 'Subscription Shadow'}
+          </h1>
 
-        {/* Yearly Total */}
-        <div className="border rounded-[24px] p-5 bg-[#1A1D26]/90 border-[#2D313E] hover:border-[#C7FF2E]/40 transition-all duration-300 hover:-translate-y-0.5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="w-9 h-9 rounded-xl bg-[#38BDF8]/10 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-[#38BDF8]" />
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-              {lang === 'en' ? 'Yearly' : 'รายปี'}
-            </span>
-          </div>
-          <div className="text-2xl font-black font-display text-white">
-            ${yearlyTotal.toFixed(2)}
-          </div>
-          <div className="text-[10px] font-mono text-zinc-500 mt-1">
-            {lang === 'en' ? 'Projected annual' : 'คาดการณ์รายปี'}
-          </div>
-        </div>
-
-        {/* This Week */}
-        <div className="border rounded-[24px] p-5 bg-[#1A1D26]/90 border-[#2D313E] hover:border-[#C7FF2E]/40 transition-all duration-300 hover:-translate-y-0.5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="w-9 h-9 rounded-xl bg-[#FBBF24]/10 flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-[#FBBF24]" />
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-              {lang === 'en' ? 'This Week' : 'สัปดาห์นี้'}
-            </span>
-          </div>
-          <div className="text-2xl font-black font-display text-white">
-            ${thisWeekTotal.toFixed(2)}
-          </div>
-          <div className="text-[10px] font-mono text-zinc-500 mt-1">
-            {upcomingThisWeek.length} {lang === 'en' ? 'charges' : 'รายการ'}
-          </div>
-        </div>
-
-        {/* Active Count */}
-        <div className="border rounded-[24px] p-5 bg-[#1A1D26]/90 border-[#2D313E] hover:border-[#C7FF2E]/40 transition-all duration-300 hover:-translate-y-0.5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="w-9 h-9 rounded-xl bg-[#4ADE80]/10 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" />
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-              {lang === 'en' ? 'Active' : 'ใช้งาน'}
-            </span>
-          </div>
-          <div className="text-2xl font-black font-display text-white">
-            {subscriptions.filter(s => s.status === 'Active').length}
-          </div>
-          <div className="text-[10px] font-mono text-zinc-500 mt-1">
-            {lang === 'en' ? 'subscriptions' : 'การสมัคร'}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Left Column: Subscription List */}
-        <div className="lg:col-span-8 space-y-4">
-          
-          {/* Filter & Sort Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              {(['All', 'Active', 'Paused', 'Cancelled'] as const).map(status => (
-                <button
-                  key={status}
-                  onClick={() => setFilterStatus(status)}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
-                    filterStatus === status
-                      ? 'bg-[#C7FF2E] text-black font-bold'
-                      : 'bg-[#1A1D26] text-zinc-400 border border-[#2D313E] hover:border-[#C7FF2E]/40'
-                  }`}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { haptics.fire('SELECT'); onNavigateToNotifications?.(); }}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-transform active:scale-95 relative"
+              style={{ backgroundColor: dsColors.surface }}
+              aria-label={lang === 'th' ? 'การแจ้งเตือน' : 'Notifications'}
+            >
+              <Bell className="w-5 h-5" strokeWidth={1.5} style={{ color: dsColors.text }} />
+              {notificationCount > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center"
+                  style={{ backgroundColor: dsColors.accent, color: '#111827' }}
                 >
-                  {status}
-                </button>
-              ))}
-            </div>
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </span>
+              )}
+            </button>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-                {lang === 'en' ? 'Sort:' : 'เรียง:'}
-              </span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'date' | 'amount' | 'name')}
-                className="bg-[#1A1D26] border border-[#2D313E] text-zinc-300 text-[10px] font-mono px-3 py-1.5 rounded-xl focus:outline-none focus:border-[#C7FF2E]/40 cursor-pointer"
-              >
-                <option value="date">{lang === 'en' ? 'Next Billing' : 'วันตัดถัดไป'}</option>
-                <option value="amount">{lang === 'en' ? 'Amount' : 'จำนวน'}</option>
-                <option value="name">{lang === 'en' ? 'Name' : 'ชื่อ'}</option>
-              </select>
-            </div>
-          </div>
+            {/* CSV Import Button */}
+            <button
+              onClick={() => { haptics.fire('SELECT'); setShowCSVImport(true); }}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-transform active:scale-95"
+              style={{ backgroundColor: dsColors.surface }}
+              aria-label={lang === 'th' ? 'นำเข้าจากไฟล์' : 'Import from file'}
+              title={lang === 'th' ? 'นำเข้าจากไฟล์ CSV' : 'Import from CSV'}
+            >
+              <FileSpreadsheet className="w-5 h-5" strokeWidth={1.5} style={{ color: dsColors.text }} />
+            </button>
 
-          {/* Subscription List */}
-          <div className="space-y-3">
-            {filteredSubs.length === 0 ? (
-              <div className="border rounded-[24px] p-12 bg-[#1A1D26]/90 border-[#2D313E] text-center">
-                <div className="w-16 h-16 rounded-full bg-[#C7FF2E]/10 mx-auto mb-4 flex items-center justify-center">
-                  <CreditCard className="w-8 h-8 text-[#C7FF2E]/40" />
-                </div>
-                <h3 className="font-display font-bold text-white text-lg mb-2">
-                  {lang === 'en' ? 'No subscriptions yet' : 'ยังไม่มีการสมัคร'}
-                </h3>
-                <p className="text-zinc-400 text-sm mb-4">
-                  {lang === 'en' 
-                    ? 'Start tracking your recurring payments to get financial clarity' 
-                    : 'เริ่มติดตามการชำระเงินประจำเพื่อความชัดเจนทางการเงิน'}
-                </p>
-                <button
-                  onClick={() => setShowAddModal(true)}
-                  className="bg-[#C7FF2E] text-black font-display font-bold text-xs px-6 py-3 rounded-xl uppercase tracking-wider cursor-pointer hover:bg-white transition-all"
-                >
-                  {lang === 'en' ? 'Add First Subscription' : 'เพิ่มการสมัครแรก'}
-                </button>
-              </div>
-            ) : (
-              filteredSubs.map((sub) => {
-                const daysUntil = getDaysUntil(sub.nextBillingDate);
-                const isExpanded = expandedSub === sub.id;
-                const catColor = CATEGORY_COLORS[sub.category] || CATEGORY_COLORS['Other'];
-                
-                return (
-                  <motion.div
-                    key={sub.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`border rounded-[20px] bg-[#1A1D26]/90 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 ${
-                      sub.status === 'Active' 
-                        ? 'border-[#2D313E] hover:border-[#C7FF2E]/40' 
-                        : 'border-[#2D313E]/50 opacity-60'
-                    }`}
-                  >
-                    {/* Main Row */}
-                    <div 
-                      className="p-5 flex items-center justify-between cursor-pointer"
-                      onClick={() => setExpandedSub(isExpanded ? null : sub.id)}
-                    >
-                      <div className="flex items-center gap-4">
-                        {/* Icon */}
-                        <div 
-                          className="w-12 h-12 rounded-xl flex items-center justify-center font-display font-black text-sm text-white"
-                          style={{ backgroundColor: `${sub.color}20`, borderColor: `${sub.color}40`, borderWidth: 1 }}
-                        >
-                          {sub.icon || sub.name.substring(0, 2).toUpperCase()}
-                        </div>
+            <button
+              onClick={() => { haptics.fire('SELECT'); }}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-transform active:scale-95"
+              style={{ backgroundColor: dsColors.surface }}
+              aria-label={lang === 'th' ? 'การตั้งค่า' : 'Settings'}
+            >
+              <Settings className="w-5 h-5" strokeWidth={1.5} style={{ color: dsColors.text }} />
+            </button>
 
-                        {/* Details */}
-                        <div className="text-left">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-display font-bold text-white">{sub.name}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-wider border ${getStatusColor(sub.status)}`}>
-                              {sub.status}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="text-[10px] font-mono text-zinc-500" style={{ color: catColor }}>
-                              {sub.category}
-                            </span>
-                            <span className="text-[10px] text-zinc-600">•</span>
-                            <span className="text-[10px] font-mono text-zinc-500">
-                              {sub.billingCycle}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        {/* Amount */}
-                        <div className="text-right">
-                          <div className="font-display font-black text-white text-lg">
-                            ${sub.amount.toFixed(2)}
-                          </div>
-                          <div className="text-[10px] font-mono text-zinc-500">
-                            {daysUntil <= 0 
-                              ? (lang === 'en' ? 'Due today' : 'วันนี้')
-                              : daysUntil === 1 
-                                ? (lang === 'en' ? 'Tomorrow' : 'พรุ่งนี้')
-                                : `${daysUntil} ${lang === 'en' ? 'days' : 'วัน'}`}
-                          </div>
-                        </div>
-
-                        {/* Expand Icon */}
-                        <ChevronRight className={`w-5 h-5 text-zinc-500 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
-                      </div>
-                    </div>
-
-                    {/* Expanded Details */}
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="border-t border-[#2D313E]/50 overflow-hidden"
-                        >
-                          <div className="p-5 bg-[#12141C]/50 space-y-4">
-                            {/* Next Billing */}
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 text-zinc-400">
-                                <Calendar className="w-4 h-4" />
-                                <span className="text-[10px] font-mono uppercase tracking-wider">
-                                  {lang === 'en' ? 'Next Billing Date' : 'วันตัดถัดไป'}
-                                </span>
-                              </div>
-                              <span className="text-[10px] font-mono text-white">
-                                {new Date(sub.nextBillingDate).toLocaleDateString(lang === 'en' ? 'en-US' : 'th-TH', { 
-                                  month: 'short', 
-                                  day: 'numeric', 
-                                  year: 'numeric' 
-                                })}
-                              </span>
-                            </div>
-
-                            {/* Usage */}
-                            {sub.lastUsed && (
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-zinc-400">
-                                  <Clock className="w-4 h-4" />
-                                  <span className="text-[10px] font-mono uppercase tracking-wider">
-                                    {lang === 'en' ? 'Last Used' : 'ใช้ล่าสุด'}
-                                  </span>
-                                </div>
-                                <span className="text-[10px] font-mono text-white">
-                                  {new Date(sub.lastUsed).toLocaleDateString(lang === 'en' ? 'en-US' : 'th-TH', { 
-                                    month: 'short', 
-                                    day: 'numeric' 
-                                  })}
-                                </span>
-                              </div>
-                            )}
-
-                            {/* Frequency */}
-                            {sub.usageFrequency && (
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-zinc-400">
-                                  <Zap className="w-4 h-4" />
-                                  <span className="text-[10px] font-mono uppercase tracking-wider">
-                                    {lang === 'en' ? 'Frequency' : 'ความถี่'}
-                                  </span>
-                                </div>
-                                <span className="text-[10px] font-mono text-white">
-                                  {sub.usageFrequency}
-                                </span>
-                              </div>
-                            )}
-
-                            {/* Annual Cost */}
-                            <div className="flex items-center justify-between pt-3 border-t border-[#2D313E]/50">
-                              <div className="flex items-center gap-2 text-zinc-400">
-                                <TrendingUp className="w-4 h-4" />
-                                <span className="text-[10px] font-mono uppercase tracking-wider">
-                                  {lang === 'en' ? 'Annual Cost' : 'ค่าใช้จ่ายรายปี'}
-                                </span>
-                              </div>
-                              <span className="text-[10px] font-mono font-bold text-[#C7FF2E]">
-                                ${(sub.amount * (sub.billingCycle === 'Weekly' ? 52 : sub.billingCycle === 'Yearly' ? 1 : 12)).toFixed(2)}
-                              </span>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center gap-3 pt-2">
-                              {sub.status === 'Active' ? (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleCancelSubscription(sub);
-                                  }}
-                                  className="flex-1 px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-500/5 text-red-400 text-[10px] font-mono uppercase tracking-wider hover:bg-red-500/10 transition-all cursor-pointer flex items-center justify-center gap-2"
-                                >
-                                  <X className="w-3.5 h-3.5" />
-                                  {lang === 'en' ? 'Cancel' : 'ยกเลิก'}
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSubscriptions(subscriptions.map(s => 
-                                      s.id === sub.id ? { ...s, status: 'Active' as const } : s
-                                    ));
-                                    setShowNotification(lang === 'en' 
-                                      ? `Subscription "${sub.name}" reactivated` 
-                                      : `เปิดใช้งาน "${sub.name}" อีกครั้ง`);
-                                    setTimeout(() => setShowNotification(null), 4000);
-                                  }}
-                                  className="flex-1 px-4 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-emerald-400 text-[10px] font-mono uppercase tracking-wider hover:bg-emerald-500/10 transition-all cursor-pointer flex items-center justify-center gap-2"
-                                >
-                                  <RefreshCw className="w-3.5 h-3.5" />
-                                  {lang === 'en' ? 'Reactivate' : 'เปิดใช้งาน'}
-                                </button>
-                              )}
-                              
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteSubscription(sub.id);
-                                }}
-                                className="px-4 py-2.5 rounded-xl border border-zinc-700/50 bg-zinc-800/30 text-zinc-500 text-[10px] font-mono uppercase tracking-wider hover:bg-zinc-800 hover:text-red-400 hover:border-red-500/30 transition-all cursor-pointer flex items-center justify-center gap-2"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                {lang === 'en' ? 'Delete' : 'ลบ'}
-                              </button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })
-            )}
+            <button
+              onClick={() => { haptics.fire('SELECT'); setEditSubscription(null); setShowAddModal(true); }}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-transform active:scale-95"
+              style={{ backgroundColor: dsColors.accent }}
+              aria-label={lang === 'th' ? 'เพิ่มรายการ' : 'Add Subscription'}
+            >
+              <Plus className="w-5 h-5" strokeWidth={2.5} style={{ color: '#111827' }} />
+            </button>
           </div>
         </div>
 
-        {/* Right Column: Category Breakdown & Insights */}
-        <div className="lg:col-span-4 space-y-4">
-          
-          {/* Category Breakdown */}
-          <div className="border rounded-[24px] p-5 bg-[#1A1D26]/90 border-[#2D313E] hover:border-[#C7FF2E]/30 transition-all duration-300">
-            <h3 className="font-display font-bold text-white text-sm mb-4 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-[#C7FF2E]" />
-              {lang === 'en' ? 'Category Breakdown' : 'แยกตามหมวดหมู่'}
-            </h3>
-
-            <div className="space-y-3">
-              {Object.entries(categoryBreakdown)
-                .sort(([, a], [, b]) => b - a)
-                .map(([category, amount]) => {
-                  const catColor = CATEGORY_COLORS[category] || CATEGORY_COLORS['Other'];
-                  const percentage = (amount / monthlyTotal) * 100;
-                  
-                  return (
-                    <div key={category} className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: catColor }} />
-                          <span className="text-[11px] font-mono text-zinc-300">{category}</span>
-                        </div>
-                        <span className="text-[11px] font-mono font-bold text-white">
-                          ${amount.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="h-1.5 bg-[#12141C] rounded-full overflow-hidden">
-                        <div 
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{ width: `${percentage}%`, backgroundColor: catColor }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-
-          {/* Upcoming Charges */}
-          <div className="border rounded-[24px] p-5 bg-[#1A1D26]/90 border-[#2D313E] hover:border-[#C7FF2E]/30 transition-all duration-300">
-            <h3 className="font-display font-bold text-white text-sm mb-4 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#FBBF24]" />
-              {lang === 'en' ? 'Upcoming Charges' : 'รายการจะถูกตัดเร็วๆ นี้'}
-            </h3>
-
-            {upcomingThisWeek.length === 0 ? (
-              <div className="text-center py-6">
-                <div className="w-12 h-12 rounded-full bg-[#C7FF2E]/10 mx-auto mb-3 flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-[#C7FF2E]/40" />
-                </div>
-                <p className="text-zinc-500 text-xs font-mono">
-                  {lang === 'en' ? 'No charges this week' : 'ไม่มีรายการสัปดาห์นี้'}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {upcomingThisWeek.map(sub => {
-                  const daysUntil = getDaysUntil(sub.nextBillingDate);
-                  return (
-                    <div key={sub.id} className="flex items-center justify-between p-3 rounded-xl bg-[#12141C]/50 border border-[#2D313E]/30">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-[10px] text-white"
-                          style={{ backgroundColor: `${sub.color}20` }}
-                        >
-                          {sub.icon}
-                        </div>
-                        <div className="text-left">
-                          <p className="text-xs font-medium text-white">{sub.name}</p>
-                          <p className="text-[10px] font-mono text-zinc-500">
-                            {daysUntil === 0 
-                              ? (lang === 'en' ? 'Today' : 'วันนี้')
-                              : daysUntil === 1 
-                                ? (lang === 'en' ? 'Tomorrow' : 'พรุ่งนี้')
-                                : `${daysUntil} ${lang === 'en' ? 'days' : 'วัน'}`}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-xs font-mono font-bold text-white">
-                        ${sub.amount.toFixed(2)}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Quick Insight */}
-          <div className="border rounded-[24px] p-5 bg-gradient-to-br from-[#1E2235] via-[#191C28] to-[#13151D] border-[#373B4D] hover:border-[#C7FF2E]/30 transition-all duration-300">
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-[#C7FF2E] animate-pulse" />
-              <span className="text-[9px] font-mono uppercase tracking-widest text-[#C7FF2E] font-bold">
-                {lang === 'en' ? 'AI INSIGHT' : 'ข้อมูลเชิงลึก'}
-              </span>
-            </div>
-            
-            <p className="text-xs text-zinc-300 leading-relaxed mb-4">
-              {lang === 'en'
-                ? `You have ${subscriptions.filter(s => s.status === 'Active').length} active subscriptions totaling $${monthlyTotal.toFixed(2)}/month. `
-                : `คุณมี ${subscriptions.filter(s => s.status === 'Active').length} การสมัครใช้งาน รวม $${monthlyTotal.toFixed(2)}/เดือน. `}
-              {monthlyTotal > 100
-                ? (lang === 'en'
-                  ? `Consider reviewing subscriptions you use less than once a week to optimize spending.`
-                  : `พิจารณาทบทวนการสมัครที่ใช้น้อยกว่าสัปดาห์ละครั้งเพื่อปรับปรุงการใช้จ่าย`)
-                : (lang === 'en'
-                  ? `Your subscription spending is well-managed. Keep tracking!`
-                  : `การใช้จ่ายสมัครของคุณอยู่ในเกณฑ์ดี จอบบริหารต่อไป!`)}
-            </p>
-
-            <div className="flex items-center gap-2 text-[#C7FF2E]">
-              <ArrowUpRight className="w-4 h-4" />
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider">
-                {lang === 'en' ? 'Monthly Savings Potential' : 'ศักยภาพประหยัดรายเดือน'}
-              </span>
-            </div>
-            <div className="text-2xl font-black font-display text-white mt-1">
-              ${(monthlyTotal * 0.15).toFixed(2)}
-            </div>
-          </div>
-        </div>
+        {/* Tab Switcher */}
+        <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} lang={lang} />
       </div>
 
-      {/* Add Subscription Modal */}
-      <AnimatePresence>
-        {showAddModal && (
+      {/* Content — DashboardPage space-y-4 pattern */}
+      <div className="space-y-4 mt-3">
+        {activeTab === 'upcoming' && (
           <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowAddModal(false)}
-              className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 cursor-pointer"
+            {/* Hero Card (Flat White Light Mode) */}
+            <HeroCard
+              totalMonthly={totals.totalMonthly}
+              totalYearly={totals.totalYearly}
+              totalSubs={totals.subTotal}
+              totalBills={totals.billTotal}
+              showAmount={showAmount}
+              lang={lang}
+              dsColors={dsColors}
+              dsTypography={dsTypography}
+              onPrivacyToggle={() => setShowAmount(!showAmount)}
+              onSeeAllClick={handleSeeFullCalendar}
             />
 
-            {/* Modal */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
-            >
-              <div className="bg-[#1A1D26] border border-[#2D313E] rounded-[32px] p-6 max-w-md w-full pointer-events-auto shadow-2xl">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="font-display font-black text-xl text-white">
-                      {lang === 'en' ? 'Add Subscription' : 'เพิ่มการสมัคร'}
-                    </h3>
-                    <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mt-1">
-                      {lang === 'en' ? 'Track a recurring payment' : 'ติดตามการชำระเงินประจำ'}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setShowAddModal(false)}
-                    className="w-10 h-10 rounded-xl bg-[#232733] border border-[#2D313E] flex items-center justify-center text-zinc-400 hover:text-white cursor-pointer transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+            {/* AI Insights Card (Net Worth pattern) */}
+            <AIInsightsCard
+              ghostCount={ghostCount}
+              potentialSavings={potentialSavings}
+              priceHikeCount={priceHikeCount}
+              lang={lang}
+              dsColors={dsColors}
+            />
 
-                <form onSubmit={handleAddSubscription} className="space-y-4">
-                  {/* Name */}
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 block">
-                      {lang === 'en' ? 'Service Name' : 'ชื่อบริการ'}
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newSubName}
-                      onChange={(e) => setNewSubName(e.target.value)}
-                      placeholder="e.g. Netflix, Spotify"
-                      className="w-full border border-[#2D313E] bg-[#232733] rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#C7FF2E]/40 transition-colors"
-                    />
-                  </div>
-
-                  {/* Amount & Cycle */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 block">
-                        {lang === 'en' ? 'Amount' : 'จำนวน'}
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-mono text-sm">$</span>
-                        <input
-                          type="number"
-                          required
-                          step="0.01"
-                          min="0"
-                          value={newSubAmount}
-                          onChange={(e) => setNewSubAmount(e.target.value)}
-                          placeholder="9.99"
-                          className="w-full border border-[#2D313E] bg-[#232733] rounded-xl pl-8 pr-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#C7FF2E]/40 transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 block">
-                        {lang === 'en' ? 'Billing Cycle' : 'รอบการตัด'}
-                      </label>
-                      <select
-                        value={newSubCycle}
-                        onChange={(e) => setNewSubCycle(e.target.value as 'Monthly' | 'Yearly' | 'Weekly')}
-                        className="w-full border border-[#2D313E] bg-[#232733] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C7FF2E]/40 transition-colors cursor-pointer"
-                      >
-                        <option value="Monthly">{lang === 'en' ? 'Monthly' : 'รายเดือน'}</option>
-                        <option value="Yearly">{lang === 'en' ? 'Yearly' : 'รายปี'}</option>
-                        <option value="Weekly">{lang === 'en' ? 'Weekly' : 'รายสัปดาห์'}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Category */}
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 block">
-                      {lang === 'en' ? 'Category' : 'หมวดหมู่'}
-                    </label>
-                    <select
-                      value={newSubCategory}
-                      onChange={(e) => setNewSubCategory(e.target.value)}
-                      className="w-full border border-[#2D313E] bg-[#232733] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C7FF2E]/40 transition-colors cursor-pointer"
-                    >
-                      {Object.keys(CATEGORY_COLORS).map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Next Billing Date */}
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 block">
-                      {lang === 'en' ? 'Next Billing Date (Optional)' : 'วันตัดถัดไป (ไม่บังคับ)'}
-                    </label>
-                    <input
-                      type="date"
-                      value={newSubNextDate}
-                      onChange={(e) => setNewSubNextDate(e.target.value)}
-                      className="w-full border border-[#2D313E] bg-[#232733] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C7FF2E]/40 transition-colors"
-                    />
-                  </div>
-
-                  {/* Submit */}
-                  <button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-[#C7FF2E] to-[#51FF85] text-black font-display font-black text-sm py-4 rounded-2xl uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-[#C7FF2E]/10 hover:from-white hover:to-white mt-4"
-                  >
-                    {lang === 'en' ? 'Add Subscription' : 'เพิ่มการสมัคร'}
-                  </button>
-                </form>
+            {/* Last sync indicator (Net Worth pattern) */}
+            {lastSyncAt && (
+              <div className="flex items-center justify-end gap-1.5 px-1 -mt-2">
+                <RefreshCw className="w-3 h-3" style={{ color: dsColors.textMuted }} />
+                <span className="text-[10px] font-mono" style={{ color: dsColors.textMuted }}>
+                  {lang === 'th' ? 'อัปเดต' : 'Updated'} {formatLastSync(lastSyncAt)}
+                </span>
               </div>
-            </motion.div>
+            )}
+
+            {/* Selected Date Info */}
+            {selectedDate && (
+              <div className="px-4 py-3 rounded-xl" style={{ backgroundColor: 'rgba(86, 190, 137, 0.1)' }}>
+                <p className="text-[13px] font-medium" style={{ color: '#111827' }}>
+                  {lang === 'th' ? 'รายการวันที่' : 'Items on day'} {selectedDate}
+                </p>
+              </div>
+            )}
+
+            {/* Upcoming Items */}
+            <div className="space-y-3">
+              {upcomingSubscriptions.length > 0 ? (
+                upcomingSubscriptions.map((sub) => (
+                  <SubscriptionItem
+                    key={sub.id}
+                    subscription={sub}
+                    currentDay={currentDay}
+                    daysInMonth={daysInMonth}
+                    lang={lang}
+                    onMenuOpen={(s) => { setMenuSubscription(s); setShowMenu(true); }}
+                  />
+                ))
+              ) : (
+                <div className="py-12">
+                  <p className="text-center text-[14px]" style={{ color: dsColors.textMuted }}>
+                    {paydayEnabled
+                      ? (lang === 'th' ? `ไม่มีรายการที่ต้องชำระก่อนวันที่ ${paydayDay}` : `No charges due before day ${paydayDay}`)
+                      : (lang === 'th' ? 'ไม่มีรายการที่ต้องชำระใน 7 วันนี้' : 'No upcoming charges in the next 7 days')}
+                  </p>
+                </div>
+              )}
+            </div>
           </>
         )}
-      </AnimatePresence>
+
+        {activeTab === 'all' && (
+          <div>
+            <div className="flex justify-center mb-3">
+              <SortDropdown sortBy={sortBy} onSortChange={setSortBy} lang={lang} />
+            </div>
+
+            {allSubscriptions.length > 0 ? (
+              <div className="space-y-5">
+                {groupedSubscriptions.subscriptions.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-3 px-1">
+                      <h3 className="text-[12px] font-bold uppercase tracking-wider" style={{ color: dsColors.textMuted }}>
+                        {groupedSubscriptions.subscriptions.length} {lang === 'th' ? 'รายการสมัคร' : 'SUBSCRIPTIONS'}
+                      </h3>
+                      <span className="text-[12px] font-medium" style={{ color: dsColors.textMuted }}>
+                        {formatCurrency(getYearlyTotal(groupedSubscriptions.subscriptions), lang)}/{lang === 'th' ? 'ปี' : 'year'}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      {groupedSubscriptions.subscriptions.map((sub) => (
+                        <AllTabItem key={sub.id} subscription={sub} lang={lang} onMenuOpen={(s) => { setMenuSubscription(s); setShowMenu(true); }} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {groupedSubscriptions.bills.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-3 px-1">
+                      <h3 className="text-[12px] font-bold uppercase tracking-wider" style={{ color: dsColors.textMuted }}>
+                        {groupedSubscriptions.bills.length} {lang === 'th' ? 'บิลและค่าบริการ' : 'BILLS & UTILITIES'}
+                      </h3>
+                      <span className="text-[12px] font-medium" style={{ color: dsColors.textMuted }}>
+                        {formatCurrency(getYearlyTotal(groupedSubscriptions.bills), lang)}/{lang === 'th' ? 'ปี' : 'year'}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      {groupedSubscriptions.bills.map((sub) => (
+                        <AllTabItem key={sub.id} subscription={sub} lang={lang} onMenuOpen={(s) => { setMenuSubscription(s); setShowMenu(true); }} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <SubscriptionEmptyState lang={lang} />
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      <SubscriptionModal
+        isOpen={showAddModal}
+        mode={editSubscription ? 'edit' : 'add'}
+        subscription={editSubscription}
+        onClose={() => { setShowAddModal(false); setEditSubscription(null); }}
+        onSave={editSubscription ? (handleSaveEdit as any) : (handleAdd as any)}
+        lang={lang}
+      />
+      <ActionsMenu
+        isOpen={showMenu}
+        subscription={menuSubscription}
+        onClose={() => setShowMenu(false)}
+        lang={lang}
+        onMarkPaid={handleMarkPaid}
+        onSkip={handleSkip}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onHide={handleHide}
+      />
+
+      {/* CSV Import Modal */}
+      <CSVImportModal
+        isOpen={showCSVImport}
+        onClose={() => setShowCSVImport(false)}
+        onImportComplete={handleCSVImportComplete}
+        lang={lang}
+      />
     </div>
   );
 }

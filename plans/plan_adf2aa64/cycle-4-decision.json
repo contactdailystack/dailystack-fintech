@@ -1,0 +1,8 @@
+{
+  "last_cycle": [
+    { "task_id": "p3-page-audit", "verdict": "manual_retry", "reason": "Task timed out on general worker. Retry with same instructions, possibly with a different agent type or with timeout increased." }
+  ],
+  "next_cycle": [],
+  "plan_complete": false,
+  "message_to_user": "p3-page-audit timed out. Approving retry — will try again."
+}

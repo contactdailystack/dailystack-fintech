@@ -20,6 +20,7 @@ import {
   LayoutGrid,
   List
 } from 'lucide-react';
+import { ListSkeleton } from '../design-system/components/LoadingSkeleton';
 import { 
   useAlerts, 
   useActiveAlerts 
@@ -150,8 +151,8 @@ export default function AlertsPage() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-[#CCFF00]/10">
-                <Bell className="w-6 h-6 text-[#CCFF00]" />
+              <div className="p-2 rounded-xl bg-[#56be89]/10">
+                <Bell className="w-6 h-6 text-[#56be89]" />
               </div>
               <div>
                 <h1 className="text-xl font-bold">Behavioral Alerts</h1>
@@ -167,7 +168,7 @@ export default function AlertsPage() {
                 <button
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'list' ? 'bg-[#CCFF00]/20 text-[#CCFF00]' : 'text-gray-400'
+                    viewMode === 'list' ? 'bg-[#56be89]/20 text-[#56be89]' : 'text-gray-400'
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -175,7 +176,7 @@ export default function AlertsPage() {
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'grid' ? 'bg-[#CCFF00]/20 text-[#CCFF00]' : 'text-gray-400'
+                    viewMode === 'grid' ? 'bg-[#56be89]/20 text-[#56be89]' : 'text-gray-400'
                   }`}
                 >
                   <LayoutGrid className="w-4 h-4" />
@@ -201,7 +202,7 @@ export default function AlertsPage() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 
-                         focus:border-[#CCFF00]/50 focus:ring-1 focus:ring-[#CCFF00]/20
+                         focus:border-[#56be89]/50 focus:ring-1 focus:ring-[#56be89]/20
                          placeholder-gray-500 transition-colors"
             />
           </div>
@@ -211,13 +212,13 @@ export default function AlertsPage() {
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors flex-shrink-0 ${
-                showFilters ? 'bg-[#CCFF00]/20 text-[#CCFF00]' : 'bg-white/5 text-gray-400'
+                showFilters ? 'bg-[#56be89]/20 text-[#56be89]' : 'bg-white/5 text-gray-400'
               }`}
             >
               <Filter className="w-4 h-4" />
               Filters
               {hasActiveFilters && (
-                <span className="w-2 h-2 rounded-full bg-[#CCFF00]" />
+                <span className="w-2 h-2 rounded-full bg-[#56be89]" />
               )}
             </button>
 
@@ -226,7 +227,7 @@ export default function AlertsPage() {
               {filters.statuses.length === 1 && filters.statuses[0] === 'active' && (
                 <button
                   onClick={() => setFilters(prev => ({ ...prev, statuses: ['active', 'acknowledged'] }))}
-                  className="px-3 py-1.5 rounded-full bg-[#CCFF00]/10 text-[#CCFF00] text-sm flex-shrink-0"
+                  className="px-3 py-1.5 rounded-full bg-[#56be89]/10 text-[#56be89] text-sm flex-shrink-0"
                 >
                   Show All
                 </button>
@@ -267,7 +268,7 @@ export default function AlertsPage() {
                           className={`
                             flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors
                             ${filters.categories.includes(opt.value)
-                              ? 'bg-[#CCFF00]/20 text-[#CCFF00]'
+                              ? 'bg-[#56be89]/20 text-[#56be89]'
                               : 'bg-white/5 text-gray-400 hover:bg-white/10'
                             }
                           `}
@@ -292,7 +293,7 @@ export default function AlertsPage() {
                           className={`
                             flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors
                             ${filters.severities.includes(opt.value)
-                              ? 'bg-[#CCFF00]/20 text-[#CCFF00]'
+                              ? 'bg-[#56be89]/20 text-[#56be89]'
                               : 'bg-white/5 text-gray-400 hover:bg-white/10'
                             }
                           `}
@@ -317,7 +318,7 @@ export default function AlertsPage() {
                           className={`
                             px-3 py-1.5 rounded-lg text-sm transition-colors
                             ${filters.statuses.includes(opt.value)
-                              ? 'bg-[#CCFF00]/20 text-[#CCFF00]'
+                              ? 'bg-[#56be89]/20 text-[#56be89]'
                               : 'bg-white/5 text-gray-400 hover:bg-white/10'
                             }
                           `}
@@ -347,11 +348,7 @@ export default function AlertsPage() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 rounded-xl bg-white/5 animate-pulse" />
-            ))}
-          </div>
+          <ListSkeleton items={3} />
         ) : filteredAlerts.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
@@ -369,7 +366,7 @@ export default function AlertsPage() {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="mt-4 px-4 py-2 rounded-lg bg-[#CCFF00]/10 text-[#CCFF00] hover:bg-[#CCFF00]/20 transition-colors"
+                className="mt-4 px-4 py-2 rounded-lg bg-[#56be89]/10 text-[#56be89] hover:bg-[#56be89]/20 transition-colors"
               >
                 Clear Filters
               </button>

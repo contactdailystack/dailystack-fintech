@@ -1,0 +1,39 @@
+version: 1
+plan:
+  name: DailyStack MVP Comprehensive Audit
+  max_concurrency: 5
+  max_consecutive_failures: 2
+  max_cycles: 8
+  auto_reject_retries: 1
+tasks:
+  - id: status-architecture
+    title: Phase 1-2: Project Status and Architecture Audit
+    prompt: "You are auditing the DailyStack FinTech MVP. Work directory: D:\\Coding Folder\\dailystack-fintech. Create a report at: D:\\Coding Folder\\dailystack-fintech\\reports\\mvp-audit\\phase1-2-status-architecture.md. Analyze the entire codebase. Determine Features Implemented (Completed/Partial/Missing): Authentication, Dashboard, Transactions, Budgets, Subscriptions, AI Insights, Weekly Stories, Goals, Alternative Assets, Payments. Provide MVP Scope Recommendation: Essential features vs deferred features. Calculate Completion Percentages: Product, Design System, Frontend, Backend, Database, Infrastructure, Overall MVP Readiness. Architecture Audit: Frontend (Folder Structure, Component Architecture, Reusability, Scalability), Backend (Service Architecture, API Design, Error Handling), Database (Supabase schema), Infrastructure (Environment Config, Secrets Management). List Architecture Weaknesses with specific file paths and fixes. Use Thai language for headers. Include specific file paths."
+    assigned_to: general
+    verify_skip_reason: Analysis task
+    max_retries: 1
+  - id: code-quality-security
+    title: Phase 3-4: Code Quality and Security Audit
+    prompt: "You are auditing code quality and security for DailyStack FinTech. Work directory: D:\\Coding Folder\\dailystack-fintech. Create a report at: D:\\Coding Folder\\dailystack-fintech\\reports\\mvp-audit\\phase3-4-code-security.md. Code Quality Audit: Code Smell Detection (long functions, deep nesting, magic numbers, unused variables), Dead Code Detection (commented code, unused imports, duplicate implementations), Large Components (over 200 lines), Technical Debt Inventory (file path, issue, fix complexity). Code Quality Score 0-100: Readability, Maintainability, Reusability, Testability. Security Audit: Authentication Security (authService.ts, AuthContext.tsx, AuthPage.tsx) - password requirements, session handling, token storage. Authorization - role-based access, PaywallGate.tsx, PaywallPage.tsx. Secrets Exposure - .env.example, VITE_ prefix, hardcoded secrets, supabaseClient.ts. Input Validation - SQL injection risks. XSS Vulnerabilities - innerHTML usage. API Security - apiService.ts edge function calls. Categorize issues as Critical/High/Medium/Low with file paths and fixes. Use Thai language for headers."
+    assigned_to: general
+    verify_skip_reason: Analysis task
+    max_retries: 1
+  - id: performance-ux
+    title: Phase 5-6: Performance and UX/UI Audit
+    prompt: "You are auditing performance and UX/UI for DailyStack FinTech. Work directory: D:\\Coding Folder\\dailystack-fintech. Create a report at: D:\\Coding Folder\\dailystack-fintech\\reports\\mvp-audit\\phase5-6-performance-ux.md. Performance Audit: Bundle Analysis (package.json dependencies, lucide-react, motion, react-dom), React Performance Issues (missing React.memo, inline arrow functions, useCallback/useMemo, prop drilling), Code Splitting (React.lazy usage in App.tsx, Suspense boundaries), API Performance (apiService.ts, retry logic), Memory Issues (event listeners, leaks). Top 5 Performance Bottlenecks with file paths and fixes. UX/UI Audit: Visual Hierarchy (DashboardPage.tsx, ActivityPage.tsx), Navigation Flow (FloatingBottomNav.tsx), Accessibility (ARIA labels, color contrast, prefers-reduced-motion), Mobile Responsiveness (Tailwind responsive prefixes), Empty/Loading/Error States, Form Experience (AuthPage.tsx, OnboardingPage.tsx), Design System Consistency (design-system/). Rate Best Practices: Apple HIG, Tesla, FinTech (0-10). Use Thai language for headers."
+    assigned_to: general
+    verify_skip_reason: Analysis task
+    max_retries: 1
+  - id: journey-qa
+    title: Phase 7-8: User Journey and QA Audit
+    prompt: "You are auditing user journeys and QA for DailyStack FinTech. Work directory: D:\\Coding Folder\\dailystack-fintech. Create a report at: D:\\Coding Folder\\dailystack-fintech\\reports\\mvp-audit\\phase7-8-journey-qa.md. User Journey Audit: Onboarding Flow (OnboardingPage.tsx), Registration/Login Flow (AuthPage.tsx), Dashboard Flow (DashboardPage.tsx), Transaction Recording Flow (ActivityPage.tsx), Core Feature Flows (SubscriptionTrackerPage.tsx, BudgetManagementPage.tsx, InsightsPage.tsx, MoneyTwinPage.tsx, WeeklyStoryPage.tsx), Settings/Profile (ProfileSettingsPage.tsx), Logout Flow (handleLogout in App.tsx). Pain Points by Flow, Exit Points. QA and Regression Audit: Runtime Errors (TypeScript risks, uncaught promises, null/undefined), Build Errors (tsconfig.json, TypeScript strictness), Edge Cases (empty states, network failure, large data), Race Conditions (async operations, state updates), State Synchronization (App.tsx context). Regression Risk Assessment (Low/Medium/High). Use Thai language for headers."
+    assigned_to: general
+    verify_skip_reason: Analysis task
+    max_retries: 1
+  - id: launch-readiness
+    title: Phase 9: MVP Launch Readiness and Final Report
+    prompt: "You are creating the final MVP Launch Readiness assessment. Work directory: D:\\Coding Folder\\dailystack-fintech. First read these reports: phase1-2-status-architecture.md, phase3-4-code-security.md, phase5-6-performance-ux.md, phase7-8-journey-qa.md in the reports/mvp-audit folder. Then create the final report at: D:\\Coding Folder\\dailystack-fintech\\reports\\mvp-audit\\FINAL-MVP-AUDIT-REPORT.md. Issue Prioritization: P0 (Must Fix) - data loss, security vulnerabilities, auth failures. P1 (Should Fix) - UX issues, performance problems, edge cases. P2 (Can Improve Later) - code refactoring, minor polish. MVP Launch Score 0-100: Security (0-25), Functional (0-25), Performance (0-20), UX (0-15), Code Quality (0-15). Go/No-Go Recommendation: Ready/Conditionally Ready/Not Ready with justification. Quick Wins Top 10: what to fix, file path, effort, impact. Pre-Launch Checklist. Final Report Structure: Executive Summary, Project Status Overview, Critical Findings, Security/Performance/UX Findings, Technical Debt, Quick Wins, MVP Launch Readiness Score, Pre-Launch Checklist, Recommendation, Appendices. Use Thai language for headers. This is the FINAL stakeholder deliverable."
+    assigned_to: general
+    depends_on: [status-architecture, code-quality-security, performance-ux, journey-qa]
+    verify_skip_reason: Synthesis task
+    max_retries: 2

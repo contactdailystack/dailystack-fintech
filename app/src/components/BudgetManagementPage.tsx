@@ -8,6 +8,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { Transaction, UserProfile } from '../types';
 import { translations, Language } from '../data/translations';
+import { haptics } from '../services/hapticService';
 
 interface BudgetCategory {
   id: string;
@@ -36,8 +37,62 @@ export default function BudgetManagementPage({
   const t = translations[lang];
   const [activeTab, setActiveTab] = useState<'overview' | 'categories' | 'goals'>('overview');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryBudget, setNewCategoryBudget] = useState<number>(0);
   const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
   const [showAlert, setShowAlert] = useState(false);
+  
+  // Form state for editing category
+  const [editName, setEditName] = useState('');
+  const [editBudgetLimit, setEditBudgetLimit] = useState<number>(0);
+  
+  // Open edit modal with category data
+  const handleEditCategory = (category: BudgetCategory) => {
+    setEditingCategory(category);
+    setEditName(category.name);
+    setEditBudgetLimit(category.budgetLimit);
+  };
+  
+  // Open add modal
+  const handleOpenAddModal = () => {
+    setNewCategoryName('');
+    setNewCategoryBudget(0);
+    setShowAddModal(true);
+  };
+  
+  // Save edited category
+  const handleSaveCategory = () => {
+    if (!editingCategory) return;
+    
+    setCategories(prev => prev.map(cat => 
+      cat.id === editingCategory.id 
+        ? { ...cat, name: editName, budgetLimit: editBudgetLimit }
+        : cat
+    ));
+    
+    // Close modal
+    setEditingCategory(null);
+    setEditName('');
+    setEditBudgetLimit(0);
+  };
+  
+  // Handle add new category
+  const handleAddCategory = () => {
+    if (!newCategoryName.trim() || newCategoryBudget <= 0) return;
+    
+    const newCategory: BudgetCategory = {
+      id: Date.now().toString(),
+      name: newCategoryName,
+      icon: <Wallet className="w-4 h-4" />,
+      budgetLimit: newCategoryBudget,
+      spent: 0,
+      color: '#6B7280',
+    };
+    setCategories(prev => [...prev, newCategory]);
+    setShowAddModal(false);
+    setNewCategoryName('');
+    setNewCategoryBudget(0);
+  };
 
   // Default budget categories with realistic Thai spending data
   const [categories, setCategories] = useState<BudgetCategory[]>([
@@ -46,9 +101,9 @@ export default function BudgetManagementPage({
     { id: '3', name: lang === 'th' ? 'ช้อปปิ้ง' : 'Shopping', icon: <ShoppingBag className="w-4 h-4" />, budgetLimit: 6000, spent: 7820, color: '#EC4899' },
     { id: '4', name: lang === 'th' ? 'บันเทิง' : 'Entertainment', icon: <Film className="w-4 h-4" />, budgetLimit: 3000, spent: 1850, color: '#8B5CF6' },
     { id: '5', name: lang === 'th' ? 'บิลและสาธารณูปโภค' : 'Bills & Utilities', icon: <Zap className="w-4 h-4" />, budgetLimit: 5000, spent: 4200, color: '#10B981' },
-    { id: '6', name: lang === 'th' ? 'สุขภาพ' : 'Health', icon: <Heart className="w-4 h-4" />, budgetLimit: 2000, spent: 850, color: '#EF4444' },
+    { id: '6', name: lang === 'th' ? 'สุขภาพ' : 'Health', icon: <Heart className="w-4 h-4" />, budgetLimit: 2000, spent: 850, color: '#F97316' },
     { id: '7', name: lang === 'th' ? 'การศึกษา' : 'Education', icon: <Book className="w-4 h-4" />, budgetLimit: 3000, spent: 1500, color: '#06B6D4' },
-    { id: '8', name: lang === 'th' ? 'การลงทุน' : 'Investment', icon: <TrendingUp className="w-4 h-4" />, budgetLimit: 10000, spent: 10000, color: '#C7FF2E' },
+    { id: '8', name: lang === 'th' ? 'การลงทุน' : 'Investment', icon: <TrendingUp className="w-4 h-4" />, budgetLimit: 10000, spent: 10000, color: 'var(--color-lime)' },
   ]);
 
   // Calculate totals
@@ -98,10 +153,10 @@ export default function BudgetManagementPage({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4" id="budget-header">
         <div className="text-left">
           <h2 className={`font-display font-extrabold text-2xl ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-            {lang === 'th' ? 'จัดการงบประมาณ' : 'Budget Management'}
+            {lang === 'th' ? 'ผู้พิทักษ์การใช้จ่าย' : 'Spending Guardian'}
           </h2>
           <p className="text-xs text-zinc-500 font-mono tracking-wider">
-            {lang === 'th' ? 'วางแผนและติดตามการใช้จ่ายอย่างชาญฉลาด' : 'PLAN & TRACK YOUR SPENDING INTELLIGENTLY'}
+            {lang === 'th' ? 'วางแผนและติดตามการใช้จ่ายอย่างชาญฉลาด' : 'GUARD YOUR SPENDING INTELLIGENTLY'}
           </p>
         </div>
 
@@ -111,14 +166,14 @@ export default function BudgetManagementPage({
             <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
               {lang === 'th' ? 'คงเหลือ' : 'Remaining'}
             </p>
-            <p className={`text-sm font-display font-bold ${remaining > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            <p className={`text-sm font-display font-bold ${remaining > 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
               {formatCurrency(remaining)}
             </p>
           </div>
           {overBudgetCategories.length > 0 && (
             <button
               onClick={() => setShowAlert(true)}
-              className="p-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors"
+              className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-colors"
             >
               <Bell className="w-4 h-4" />
             </button>
@@ -133,7 +188,7 @@ export default function BudgetManagementPage({
           onClick={() => setActiveTab('overview')}
           className={`flex-1 px-4 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'overview' 
-              ? (theme === 'dark' ? 'bg-[#C7FF2E] text-black font-semibold' : 'bg-white text-[#1D1D1F] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-black/5')
+              ? (theme === 'dark' ? 'bg-[var(--color-lime)] text-black font-semibold' : 'bg-white text-[#1D1D1F] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-black/5')
               : 'text-zinc-500 hover:text-zinc-300'
           }`}
         >
@@ -145,7 +200,7 @@ export default function BudgetManagementPage({
           onClick={() => setActiveTab('categories')}
           className={`flex-1 px-4 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'categories'
-              ? (theme === 'dark' ? 'bg-[#C7FF2E] text-black font-semibold' : 'bg-white text-[#1D1D1F] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-black/5')
+              ? (theme === 'dark' ? 'bg-[var(--color-lime)] text-black font-semibold' : 'bg-white text-[#1D1D1F] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-black/5')
               : 'text-zinc-500 hover:text-zinc-300'
           }`}
         >
@@ -157,7 +212,7 @@ export default function BudgetManagementPage({
           onClick={() => setActiveTab('goals')}
           className={`flex-1 px-4 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'goals'
-              ? (theme === 'dark' ? 'bg-[#C7FF2E] text-black font-semibold' : 'bg-white text-[#1D1D1F] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-black/5')
+              ? (theme === 'dark' ? 'bg-[var(--color-lime)] text-black font-semibold' : 'bg-white text-[#1D1D1F] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-black/5')
               : 'text-zinc-500 hover:text-zinc-300'
           }`}
         >
@@ -189,8 +244,8 @@ export default function BudgetManagementPage({
                       {formatCurrency(totalBudget)}
                     </p>
                   </div>
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${overallPercent > 100 ? 'bg-red-500/10' : overallPercent > 80 ? 'bg-amber-500/10' : 'bg-emerald-500/10'}`}>
-                    <span className={`text-2xl font-display font-black ${overallPercent > 100 ? 'text-red-400' : overallPercent > 80 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${overallPercent > 100 ? 'bg-amber-500/10' : overallPercent > 80 ? 'bg-amber-500/10' : 'bg-emerald-500/10'}`}>
+                    <span className={`text-2xl font-display font-black ${overallPercent > 100 ? 'text-amber-400' : overallPercent > 80 ? 'text-amber-400' : 'text-emerald-400'}`}>
                       {Math.round(overallPercent)}%
                     </span>
                   </div>
@@ -204,7 +259,7 @@ export default function BudgetManagementPage({
                     transition={{ duration: 1, ease: 'easeOut' }}
                     className={`h-full rounded-full ${
                       overallPercent > 100
-                        ? 'bg-gradient-to-r from-red-500 to-red-600'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600'
                         : overallPercent > 80
                         ? 'bg-gradient-to-r from-amber-500 to-amber-400'
                         : 'bg-gradient-to-r from-emerald-500 to-emerald-400'
@@ -217,7 +272,7 @@ export default function BudgetManagementPage({
                     {lang === 'th' ? 'ใช้ไป' : 'Spent'}: <span className="text-zinc-300">{formatCurrency(totalSpent)}</span>
                   </span>
                   <span className="text-zinc-500">
-                    {lang === 'th' ? 'คงเหลือ' : 'Left'}: <span className={remaining > 0 ? 'text-emerald-400' : 'text-red-400'}>{formatCurrency(Math.max(0, remaining))}</span>
+                    {lang === 'th' ? 'คงเหลือ' : 'Left'}: <span className={remaining > 0 ? 'text-emerald-400' : 'text-amber-400'}>{formatCurrency(Math.max(0, remaining))}</span>
                   </span>
                 </div>
               </div>
@@ -251,19 +306,19 @@ export default function BudgetManagementPage({
             {(overBudgetCategories.length > 0 || nearLimitCategories.length > 0) && (
               <div className="space-y-3" id="budget-alerts-section">
                 {overBudgetCategories.map(cat => (
-                  <div key={cat.id} className="flex items-center gap-3 p-4 rounded-xl bg-red-500/5 border border-red-500/20">
-                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                      <AlertCircle className="w-5 h-5 text-red-400" />
+                  <div key={cat.id} className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                      <AlertCircle className="w-5 h-5 text-amber-400" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-red-400">
+                      <p className="text-sm font-semibold text-amber-400">
                         {lang === 'th' ? 'เกินงบ' : 'Over Budget'}
                       </p>
                       <p className="text-xs text-zinc-400">
                         {cat.name} {lang === 'th' ? 'ใช้ไป' : 'spent'} {formatCurrency(cat.spent)} / {formatCurrency(cat.budgetLimit)}
                       </p>
                     </div>
-                    <span className="text-sm font-mono font-bold text-red-400">
+                    <span className="text-sm font-mono font-bold text-amber-400">
                       +{formatCurrency(cat.spent - cat.budgetLimit)}
                     </span>
                   </div>
@@ -316,7 +371,7 @@ export default function BudgetManagementPage({
                             initial={{ height: 0 }}
                             animate={{ height: `${spentHeight}%` }}
                             transition={{ duration: 0.5, delay: idx * 0.1 }}
-                            className={`w-full rounded-sm ${isOver ? 'bg-red-500/80' : 'bg-brand/60'}`}
+                            className={`w-full rounded-sm ${isOver ? 'bg-amber-500/80' : 'bg-brand/60'}`}
                           />
                         </div>
                         <span className="text-[9px] font-mono text-zinc-500">{month.month}</span>
@@ -374,6 +429,7 @@ export default function BudgetManagementPage({
           >
             {/* Category Cards */}
             {categories.map((cat, idx) => {
+              const bgColor = cat.color && cat.color.startsWith && (cat.color as string).startsWith('var(') ? (cat.color as string) : `${cat.color}20`;
               const percent = (cat.spent / cat.budgetLimit) * 100;
               const isOver = percent > 100;
               const isNear = percent >= 80 && percent <= 100;
@@ -390,7 +446,7 @@ export default function BudgetManagementPage({
                     <div className="flex items-center gap-3 mb-3">
                       <div 
                         className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
-                        style={{ backgroundColor: `${cat.color}20` }}
+                        style={{ backgroundColor: bgColor }}
                       >
                         {cat.icon}
                       </div>
@@ -402,7 +458,7 @@ export default function BudgetManagementPage({
                       </div>
                       <div className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold ${
                         isOver 
-                          ? 'bg-red-500/10 text-red-400 border border-red-500/30'
+                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
                           : isNear
                           ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
                           : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
@@ -418,7 +474,7 @@ export default function BudgetManagementPage({
                         transition={{ duration: 0.8, delay: idx * 0.1 }}
                         className={`h-full rounded-full ${
                           isOver 
-                            ? 'bg-gradient-to-r from-red-500 to-red-600'
+                            ? 'bg-gradient-to-r from-amber-500 to-amber-600'
                             : isNear
                             ? 'bg-gradient-to-r from-amber-500 to-amber-400'
                             : 'bg-gradient-to-r from-emerald-500 to-emerald-400'
@@ -435,7 +491,7 @@ export default function BudgetManagementPage({
                       </span>
                       <div className="flex gap-2">
                         <button 
-                          onClick={() => setEditingCategory(cat)}
+                          onClick={() => handleEditCategory(cat)}
                           className="p-1.5 rounded-lg hover:bg-zinc-800/50 transition-colors text-zinc-500 hover:text-white"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -449,7 +505,7 @@ export default function BudgetManagementPage({
 
             {/* Add Category Button */}
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={handleOpenAddModal}
               className="w-full p-4 rounded-2xl border-2 border-dashed border-zinc-800 text-zinc-500 hover:border-brand hover:text-brand transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
@@ -611,12 +667,23 @@ export default function BudgetManagementPage({
                   <label className="block text-xs font-mono text-zinc-500 uppercase tracking-wider mb-2">
                     {lang === 'th' ? 'ชื่อหมวดหมู่' : 'Category Name'}
                   </label>
-                  <input
-                    type="text"
-                    defaultValue={editingCategory?.name || ''}
-                    placeholder={lang === 'th' ? 'เช่น อาหาร, การเดินทาง' : 'e.g. Food, Transport'}
-                    className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-brand transition-colors"
-                  />
+                  {editingCategory ? (
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder={lang === 'th' ? 'เช่น อาหาร, การเดินทาง' : 'e.g. Food, Transport'}
+                      className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-brand transition-colors"
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder={lang === 'th' ? 'เช่น อาหาร, การเดินทาง' : 'e.g. Food, Transport'}
+                      className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-brand transition-colors"
+                    />
+                  )}
                 </div>
 
                 <div>
@@ -625,16 +692,30 @@ export default function BudgetManagementPage({
                   </label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-mono">฿</span>
-                    <input
-                      type="number"
-                      defaultValue={editingCategory?.budgetLimit || ''}
-                      placeholder="0"
-                      className="w-full pl-8 pr-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-brand transition-colors"
-                    />
+                    {editingCategory ? (
+                      <input
+                        type="number"
+                        value={editBudgetLimit || ''}
+                        onChange={(e) => setEditBudgetLimit(Number(e.target.value))}
+                        placeholder="0"
+                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-brand transition-colors"
+                      />
+                    ) : (
+                      <input
+                        type="number"
+                        value={newCategoryBudget || ''}
+                        onChange={(e) => setNewCategoryBudget(Number(e.target.value))}
+                        placeholder="0"
+                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-brand transition-colors"
+                      />
+                    )}
                   </div>
                 </div>
 
-                <button className="w-full py-3 rounded-xl bg-brand text-black font-semibold hover:bg-brand-muted transition-colors flex items-center justify-center gap-2">
+                <button 
+                  onClick={editingCategory ? handleSaveCategory : handleAddCategory}
+                  className="w-full py-3 rounded-xl bg-brand text-black font-semibold hover:bg-brand-muted transition-colors flex items-center justify-center gap-2"
+                >
                   <Save className="w-4 h-4" />
                   {lang === 'th' ? 'บันทึก' : 'Save'}
                 </button>
@@ -659,12 +740,12 @@ export default function BudgetManagementPage({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-dark-card border border-red-500/30 rounded-2xl p-6 z-50"
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-dark-card border border-amber-500/30 rounded-2xl p-6 z-50"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                    <AlertCircle className="w-5 h-5 text-red-400" />
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                    <AlertCircle className="w-5 h-5 text-amber-400" />
                   </div>
                   <h3 className="text-lg font-display font-bold text-white">
                     {lang === 'th' ? 'แจ้งเตือนงบประมาณ' : 'Budget Alert'}
@@ -687,9 +768,9 @@ export default function BudgetManagementPage({
 
               <div className="space-y-2 mb-6">
                 {overBudgetCategories.map(cat => (
-                  <div key={cat.id} className="flex items-center justify-between p-3 rounded-xl bg-red-500/5 border border-red-500/20">
+                  <div key={cat.id} className="flex items-center justify-between p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
                     <span className="text-sm text-zinc-300">{cat.icon} {cat.name}</span>
-                    <span className="text-sm font-mono font-bold text-red-400">
+                    <span className="text-sm font-mono font-bold text-amber-400">
                       +{formatCurrency(cat.spent - cat.budgetLimit)}
                     </span>
                   </div>

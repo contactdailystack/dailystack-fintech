@@ -1,0 +1,51 @@
+{
+  "name": "DailyStack",
+  "short_name": "DailyStack",
+  "description": "Personal Finance & Subscription Management Assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0F0A",
+  "theme_color": "#0B0F0A",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your Money Pulse dashboard",
+      "url": "/?tab=dashboard",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Subscriptions",
+      "short_name": "Subscriptions",
+      "description": "View your subscriptions",
+      "url": "/?tab=subscriptions",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Goals",
+      "short_name": "Goals",
+      "description": "Track your financial goals",
+      "url": "/?tab=goals",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

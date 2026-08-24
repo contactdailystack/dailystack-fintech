@@ -1,13 +1,6 @@
-﻿export type Language = 'en' | 'th';
+export type Language = 'en' | 'th';
 
 export interface TranslationDict {
-  // Navigation tabs
-  dashboardTab: string;
-  radarTabMenu: string;
-  insightsTab: string;
-  storiesTab: string;
-  settingsTab: string;
-
   // Common UI Elements
   brand: string;
   subtitle: string;
@@ -46,6 +39,11 @@ export interface TranslationDict {
   introductionSkip: string;
   moduleLabel: string;
   luxurySystem: string;
+  moneyPulse: { title: string; subtitle: string; desc: string };
+  ghostHunt: { title: string; subtitle: string; desc: string };
+  storyBegins: { title: string; subtitle: string; desc: string };
+  guardianReady: { title: string; subtitle: string; desc: string };
+  readyLaunch: { title: string; subtitle: string; desc: string };
   immediateImpact: string;
   averageWeeklySavings: string;
   reducedRegret: string;
@@ -73,6 +71,7 @@ export interface TranslationDict {
   secureFinOS: string;
   loginSub: string;
   emailId: string;
+  authSuccess: { title: string; subtitle: string };
   
   // OTP Screen
   otpTitle: string;
@@ -129,22 +128,15 @@ export interface TranslationDict {
   futureHorizon: string;
   socialDefense: string;
   valueSeeking: string;
-  radarHighIndex: string;
   tacticalEngine: string;
   readyReasoning: string;
   infiniteMemory: string;
   chatPlaceholder: string;
-  chatFallbackSave: string;
-  chatFallbackInvest: string;
-  chatFallbackImpulse: string;
-  chatFallbackDefault: string;
   chatProcessing: string;
 
   // Insights / Analytics Screen
   valueInsightsTitle: string;
   valueInsightsSub: string;
-  analyticsTab: string;
-  behaviorTab: string;
   spendCalculation: string;
   spendSub: string;
   categoryDensity: string;
@@ -155,26 +147,6 @@ export interface TranslationDict {
   deepCoreTitle: string;
   deepCoreSub: string;
   upgradeFutureOS: string;
-  emotionalIndex: string;
-  whySovereignSpend: string;
-  whySovereignSpendDesc: string;
-  triggerLimitText: string;
-  triggerHighText: string;
-  diagnosticTitle: string;
-  copingAssessment: string;
-  copingAssessmentText1: string;
-  copingAssessmentText2: string;
-  wantCompleteGraph: string;
-  wantCompleteGraphDesc: string;
-
-  // Storyboard Screen
-  weeklyNarrative: string;
-  lockCtaBtn: string;
-  premiumSovereignActive: string;
-  verifiedLedger: string;
-  prevStoryboard: string;
-  nextStoryboard: string;
-  indexIndicator: string;
 
   // Stock Detail Modal
   assetAnalysis: string;
@@ -280,38 +252,148 @@ export interface TranslationDict {
     goalSimulationNow: string;
     goalSimulationReturn: string;
 
-    // Money Twin Blueprint Page
-    moneyTwinTitle: string;
-    moneyTwinSub: string;
-    moneyTwinYourTwin: string;
-    moneyTwinLevel: string;
-    moneyTwinStreak: string;
-    moneyTwinArchetype: string;
-    moneyTwinTwinRadar: string;
-    moneyTwinCurrentVsIdeal: string;
-    moneyTwinCurrent: string;
-    moneyTwinIdeal: string;
-    moneyTwinPredictionEngine: string;
-    moneyTwinPredictionSub: string;
-    moneyTwinRecommendations: string;
-    moneyTwinEvolution: string;
-    moneyTwinEliteFeature: string;
-    moneyTwinEliteDesc: string;
-    moneyTwinUnlockElite: string;
-    moneyTwinAllGood: string;
-    moneyTwinBasicPreview: string;
-    moneyTwinProActive: string;
-    moneyTwinProDesc: string;
-  }
+    netWorthHeroLabel: string;
+    netWorthPositiveChange: string;
+    netWorthNegativeChange: string;
+    assetBreakdownTitle: string;
+    quickAddPlaceholder: string;
+    aiCategorySuggestion: string;
+    underBudgetProgress: string;
+    overBudgetProgress: string;
+    subscriptionWarning3Days: string;
+    adaptiveFABMessage: string;
+
+    // PaywallPage
+    paywallHeading: string;
+    paywallSubheading: string;
+    paywallTogglePro: string;
+    paywallToggleElite: string;
+    paywallPerYear: string;
+    paywallPerMonth: string;
+    paywallSubscribe: string;
+    paywallAutoRenew: string;
+    paywallWelcome: string;
+    paywallSuccessText: string;
+    paywallGetStarted: string;
+    paywallFeatures: string;
+    paywallFree: string;
+    paywallLoading: string;
+    paywallScanQr: string;
+    paywallScanQrHint: string;
+    paywallWaitingPayment: string;
+    paywallQrExpiresIn: string;
+    paywallPaymentFailed: string;
+    paywallBack: string;
+    paywallQrExpired: string;
+    paywallTryAgain: string;
+
+    // Subscription Shadow Page
+    subscriptionShadowTitle: string;
+    subscriptionShadowSubtitle: string;
+    subShadowAddBtn: string;
+    subShadowMonthly: string;
+    subShadowTotalRecurring: string;
+    subShadowYearly: string;
+    subShadowProjectedAnnual: string;
+    subShadowThisWeek: string;
+    subShadowCharges: string;
+    subShadowActiveCount: string;
+    subShadowActiveLabel: string;
+    subShadowAllFilter: string;
+    subShadowPausedFilter: string;
+    subShadowCancelledFilter: string;
+    subShadowSortLabel: string;
+    subShadowSortNextBilling: string;
+    subShadowSortAmount: string;
+    subShadowSortName: string;
+    subShadowNoSubs: string;
+    subShadowNoSubsDesc: string;
+    subShadowAddFirst: string;
+    subShadowDueToday: string;
+    subShadowTomorrow: string;
+    subShadowDays: string;
+    subShadowNextBillingDate: string;
+    subShadowLastUsed: string;
+    subShadowFrequency: string;
+    subShadowAnnualCost: string;
+    subShadowCancelBtn: string;
+    subShadowReactivateBtn: string;
+    subShadowDeleteBtn: string;
+    subShadowCategoryBreakdown: string;
+    subShadowUpcomingCharges: string;
+    subShadowNoChargesThisWeek: string;
+    subShadowAiInsightTitle: string;
+    subShadowSavingsPotential: string;
+    subShadowAddModalTitle: string;
+    subShadowAddModalDesc: string;
+    subShadowServiceName: string;
+    subShadowBillingCycle: string;
+    subShadowCategory: string;
+    subShadowNextBillingOptional: string;
+    subShadowCalendarTab: string;
+    subShadowListTab: string;
+    subShadowConciergeTitle: string;
+    subShadowConciergeDesc: string;
+    subShadowConciergeBtn: string;
+    subShadowCancelPhone: string;
+    subShadowCancelEmail: string;
+    subShadowCancelWeb: string;
+    subShadowViewCancelInstructions: string;
+    subShadowUpcomingTab: string;
+    subShadowAllTab: string;
+    subShadowComingUpCardTitle: string;
+    subShadowLeftToPay: string;
+    subShadowActiveSubscriptions: string;
+    subShadowPredictiveAmount: string;
+    subShadowSkipThisMonth: string;
+    subShadowEditAmount: string;
+    subShadowMarkAsCancelled: string;
+    subShadowSharedWith: string;
+    subShadowPriceHiked: string;
+    subShadowPaidThisMonth: string;
+    subShadowUpcomingBills: string;
+    subShadowMicroBilling: string;
+    subShadowLinkedTo: string;
+
+    // AI Coach Section
+    aiCoachTitle: string;
+    aiCoachSummary: string;
+
+    // Campaign CTAs (Tesla-style action buttons)
+    ctaAddTransaction: string;
+    ctaSetBudget: string;
+    ctaViewReport: string;
+    ctaSaveMoney: string;
+
+  // Campaign Push Notification Labels
+  pushGhostDetected: string;
+  pushGuardianAlert: string;
+  pushGoalProgress: string;
+
+  // Slide to Upgrade / SwipeConfirm
+  slideUpgrade: string;
+  slideConfirm: string;
+  swipeConfirm: string;
+
+  // Common UI
+  commonGoBack: string;
+  commonInfo: string;
+
+  // Profile Settings Page
+  profileTitle: string;
+  profileDefaultsName: string;
+  profileSetupComplete: string;
+  profileEditProfileAria: string;
+  profileEditNamePrompt: string;
+  profileEditEmailPrompt: string;
+  profileLogOut: string;
+
+  // Bottom Navigation
+  bottomNavNavigation: string;
+}
 
 export const translations: Record<Language, TranslationDict> = {
   en: {
-    dashboardTab: "Decision Center",
-    radarTabMenu: "Money Twin",
-    insightsTab: "Insights",
-    storiesTab: "Stories",
-    settingsTab: "More",
-
     brand: "PicksWise",
     subtitle: "EVERY FINANCIAL DECISION MATTERS",
     reserveVault: "PicksWise Sovereign Reserve",
@@ -352,6 +434,11 @@ export const translations: Record<Language, TranslationDict> = {
     averageWeeklySavings: "Average Monthly Savings Boost",
     reducedRegret: "Reduced Unplanned Regrets",
     pathFreedom: "Path to Financial Freedom",
+    moneyPulse: { title: "Money Pulse", subtitle: "Real-time financial heartbeat", desc: "See your money flow, track every transaction, understand your patterns instantly." },
+    ghostHunt: { title: "Ghost Hunter", subtitle: "Find hidden subscriptions", desc: "AI detects subscriptions you forgot about and helps you cancel them." },
+    storyBegins: { title: "Your Story Begins", subtitle: "Weekly money chapters", desc: "Get personalized weekly summaries that read like your financial diary." },
+    guardianReady: { title: "Guardian Mode", subtitle: "Never overspend again", desc: "Smart budget alerts keep you on track before you exceed your limits." },
+    readyLaunch: { title: "You're Ready", subtitle: "Start your journey", desc: "Your financial transformation starts now." },
     commitmentTitle: "Commitment Declaration",
     commitmentSubtitle: "Commit to your financial transformation",
     commitmentStatement: "I acknowledge that financial sovereignty begins with disciplined awareness. I commit to engaging with DailyStack honestly, tracking my behaviors consistently, and honoring the system that honors me.",
@@ -363,7 +450,7 @@ export const translations: Record<Language, TranslationDict> = {
       options: [
         { title: "Save More Money", subtitle: "Reduce unnecessary spending and build a cushion" },
         { title: "Track Every Expense", subtitle: "Gain full visibility of where money goes" },
-        { title: "Control Impulse Spending", subtitle: "Manage emotional and behavioral triggers" },
+        { title: "Stop Wasted Subscriptions", subtitle: "Detect ghost subscriptions and cancel them fast" },
         { title: "Build Long-Term Wealth", subtitle: "Grow assets and plan for the future" }
       ]
     },
@@ -382,14 +469,14 @@ export const translations: Record<Language, TranslationDict> = {
         type: "challenge"
       },
       {
-        title: "Enter the Behavior Intelligence Era",
-        desc: "Stop logging transactions. Categorize emotional buying indicators like Impulse, Stress-Release, and Social Pressure. Know exactly WHY your money leaves.",
+        title: "See Your Subscription Shadow",
+        desc: "Stop losing money silently. We surface every recurring charge, flag price hikes instantly, and show exactly where your subscriptions leak.",
         statsVal: "-38.2%",
-        statsLabel: "Reduced Unplanned Regrets"
+        statsLabel: "Reduced Unplanned Charges"
       },
       {
-        title: "Your Dynamic Weekly Money Narrative",
-        desc: "Get stories, not numbers. Our AI digest compiles your cash behaviors into gorgeous storyboards, mapping future asset returns against current micro-rewards.",
+        title: "Your Personal AI Money Coach",
+        desc: "Get stories, not spreadsheets. Our AI digest compiles your cash flow into clear weekly insights, mapping future savings against daily habits.",
         statsVal: "2x Faster",
         statsLabel: "Path to Financial Freedom"
       },
@@ -404,8 +491,9 @@ export const translations: Record<Language, TranslationDict> = {
     launchOS: "Launch OS",
 
     secureFinOS: "Secure Financial OS",
-    loginSub: "Experience high-end wealth intelligence designed for complete financial confidence.",
+    loginSub: "Access the system with Face ID for maximum security and speed.",
     emailId: "EMAIL ID OR ACCOUNT",
+    authSuccess: { title: "Login Successful!", subtitle: "Taking you to your dashboard..." },
 
     // OTP Screen
     otpTitle: "Verify Your Email",
@@ -461,21 +549,14 @@ export const translations: Record<Language, TranslationDict> = {
     futureHorizon: "Future Horizon Orientation",
     socialDefense: "Social Pressure Defense",
     valueSeeking: "Calculated Value Seeking",
-    radarHighIndex: "You index 2.4x higher than standard generational patterns in capital protection metrics.",
     tacticalEngine: "TACTICAL ADVISORY ENGINE",
     readyReasoning: "ONLINE READY • ADVANCED REASONING LOADED",
     infiniteMemory: "Get Infinite Memory",
     chatPlaceholder: 'Ask: "Why do I suffer unplanned spending spikes?" or "Establish a budget plan"',
-    chatFallbackSave: "As a {archetype}, your core future confidence relies on structured systems. I recommend establishing an autonomous '10% core multiplier' where that portion of every incoming settlement bypasses your retail accounts and settles instantly into MSFT or treasury classes. This mitigates mid-week dopamine leakages.",
-    chatFallbackInvest: "We see extreme demographic stability in Apple (AAPL) and NVIDIA (NVDA) positions inside your current profile. To maximize compound momentum, focus 80% on these system anchors, and contain speculative micro-plays under a strict 4% emotional playground limit.",
-    chatFallbackImpulse: "Our analysis confirms Wednesday evenings are your highest risk timeframe due to accumulated cortisol spikes triggering minor hardware gadgets and fine dining purchases. Establish a 24-hour 'cooling lock-out' rule specifically for these hours. Delaying purchase execution by 24 hours destroys 91% of impulse urges instantly.",
-    chatFallbackDefault: "Interesting strategic query. In alignment with your {archetype} blueprint, we must protect your future capital integrity by prioritizing stability. I recommend examining your socializing expenditure next week to filter out transactional casual acquaintances. What specifically triggers your buying dopamine today?",
     chatProcessing: "Cognitive agent is processing behavioral calibrations...",
 
     valueInsightsTitle: "Value & Behavior Insights",
     valueInsightsSub: "PSYCHOLOGICAL LEDGER & PATTERN CALIBRATION",
-    analyticsTab: "Analytics Overview",
-    behaviorTab: "Behavior Intelligence",
     spendCalculation: "EXPENDITURE CALCULATION",
     spendSub: "Aggregated Current Session Regrets",
     categoryDensity: "CATEGORICAL DENSITY EXCLUSIVITY",
@@ -486,25 +567,6 @@ export const translations: Record<Language, TranslationDict> = {
     deepCoreTitle: "BEHAVIOR DEEP-CORE SCANNING",
     deepCoreSub: "Unlock fully automated micro-story analysis of your financial future self.",
     upgradeFutureOS: "UPGRADE FUTURE OPERATING SYSTEM",
-    emotionalIndex: "EMOTIONAL BUYING INDEX",
-    whySovereignSpend: "Why do I spend money?",
-    whySovereignSpendDesc: "DailyStack maps your psychological state to every outbound settlement. This highlights dopamine triggers, social pressures and stress vulnerabilities.",
-    triggerLimitText: "Limit Recommended",
-    triggerHighText: "High alignment",
-    diagnosticTitle: "BEHAVIORAL DIAGNOSTIC",
-    copingAssessment: "Your Coping-Economy Assessment",
-    copingAssessmentText1: "You cleared {impulseCount} unplanned impulses and {stressCount} stress-mitigating payments this session context.",
-    copingAssessmentText2: "Insight Agent report: Wednesday nights generate high work pressure, which frequently triggers minor technological hardware purchases. Rerouting this behavior into active physical recreation or meditation would secure you roughly $2,640 of autonomous yearly savings.",
-    wantCompleteGraph: "WANT A COMPLETE LIFETIME GRAPH?",
-    wantCompleteGraphDesc: "Track emotional correlations across 12+ months securely.",
-
-    weeklyNarrative: "AI Weekly Narrative",
-    lockCtaBtn: "Unshackle Future Metrics",
-    premiumSovereignActive: "PRO / ELITE tier active",
-    verifiedLedger: "100% verified ledger",
-    prevStoryboard: "Previous Story",
-    nextStoryboard: "Next Story",
-    indexIndicator: "INDEX",
 
     assetAnalysis: "ASSET ANALYSIS ENGINE",
     unitSharePrice: "UNIT SHARE PRICE",
@@ -543,42 +605,42 @@ alternativeLocked: "ELITE Tier Required",
     alternativeLockedDesc: "Unlock the Alternative Assets Vault with ELITE plan",
 
     // Budget Management Page
-    budgetTitle: "Budget Management",
-    budgetSub: "PLAN & TRACK YOUR SPENDING INTELLIGENTLY",
+    budgetTitle: "Spending Guardian",
+    budgetSub: "PLAN & TRACK YOUR GUARDIAN PROTECTION",
     budgetOverviewTab: "Overview",
     budgetCategoriesTab: "Categories",
     budgetGoalsTab: "Goals",
-    budgetTotalBudget: "Monthly Total Budget",
+    budgetTotalBudget: "Monthly Guardian Limit",
     budgetSpent: "Spent",
-    budgetLeft: "Left",
+    budgetLeft: "Remaining",
     budgetDaysLeft: "Days Left",
     budgetAvgDay: "Avg/Day",
     budgetProjected: "Projected",
-    budgetOverBudget: "Over Budget",
+    budgetOverBudget: "Over Guardian",
     budgetNearLimit: "Near Limit",
     budgetMonthlyTrend: "Monthly Trend",
-    budgetAIRecommendation: "AI Recommendation",
+    budgetAIRecommendation: "Guardian Recommendation",
     budgetSetCoolRule: "Set Cooling Rule",
-    budgetAddCategory: "Add New Category",
-    budgetEditCategory: "Edit Category",
-    budgetCategoryName: "Category Name",
-    budgetMonthlyLimit: "Monthly Budget",
+    budgetAddCategory: "Add Guardian Category",
+    budgetEditCategory: "Edit Guardian Category",
+    budgetCategoryName: "Guardian Name",
+    budgetMonthlyLimit: "Monthly Limit",
     budgetSave: "Save",
     budgetCancel: "Cancel",
-    budgetDeleteCategory: "Delete Category",
+    budgetDeleteCategory: "Delete Guardian",
     budgetDeleteConfirm: "Are you sure?",
     budgetProgressBar: "Progress",
-    budgetOverBudgetAlert: "Over Budget Alert",
-    budgetAddFirstBudget: "Add your first budget category",
-    budgetNoCategories: "No categories yet",
+    budgetOverBudgetAlert: "Guardian Alert",
+    budgetAddFirstBudget: "Set your first Guardian",
+    budgetNoCategories: "No Guardians yet",
     budgetUnlockElite: "Unlock with ELITE",
-    budgetEliteFeature: "Advanced budget analytics & multi-month trends",
-    budgetCreateFirst: "Create Budget",
+    budgetEliteFeature: "Advanced Guardian analytics & multi-month trends",
+    budgetCreateFirst: "Create Guardian",
     budgetAllGoals: "All Goals",
 
     // Goal Simulation Page
-    goalSimulationTitle: "Goal Simulation",
-    goalSimulationSub: "Plan your financial future with AI-powered scenarios",
+    goalSimulationTitle: "Goal Launcher",
+    goalSimulationSub: "Ignite and track your financial trajectories",
     goalSimulationGoalsTab: "Goals",
     goalSimulationSimulationTab: "Simulation",
     goalSimulationUnlockElite: "Unlock Elite",
@@ -601,358 +663,565 @@ alternativeLocked: "ELITE Tier Required",
     goalSimulationTimeToGoal: "Time to Goal",
     goalSimulationAIInsight: "AI Insight",
     goalSimulationUnlockAdvanced: "Unlock Advanced Simulations",
-    goalSimulationUnlockAdvancedDesc: "Get access to Money Twin projections, multiple goal tracking, and AI-powered scenario comparisons.",
+    goalSimulationUnlockAdvancedDesc: "Get access to advanced projections, multiple goal tracking, and AI-powered scenario comparisons.",
     goalSimulationUpgradeElite: "Upgrade to Elite",
     goalSimulationComplete: "Complete",
     goalSimulationNow: "Now",
     goalSimulationReturn: "return",
 
-    // Money Twin Blueprint Page
-    moneyTwinTitle: "Money Twin Blueprint",
-    moneyTwinSub: "Your financial twin persona — current vs. ideal state",
-    moneyTwinYourTwin: "Your Twin Identity",
-    moneyTwinLevel: "Money Twin Level",
-    moneyTwinStreak: "streak",
-    moneyTwinArchetype: "Archetype",
-    moneyTwinTwinRadar: "Twin Radar",
-    moneyTwinCurrentVsIdeal: "Current (solid) vs. Ideal (dashed) — fill the gap",
-    moneyTwinCurrent: "Current",
-    moneyTwinIdeal: "Ideal",
-    moneyTwinPredictionEngine: "Twin Prediction Engine",
-    moneyTwinPredictionSub: "AI-driven next financial decision forecast",
-    moneyTwinRecommendations: "Alignment Recommendations",
-    moneyTwinEvolution: "Twin Evolution",
-    moneyTwinEliteFeature: "ELITE Feature",
-    moneyTwinEliteDesc: "Weekly twin evolution requires ELITE plan.",
-    moneyTwinUnlockElite: "Unlock ELITE",
-    moneyTwinAllGood: "Your twin is well-aligned! Keep doing what you're doing.",
-    moneyTwinBasicPreview: "PREMIUM PREVIEW — 3 of 5 axes shown",
-    moneyTwinProActive: "PRO ACTIVE — Full 5-axis radar unlocked",
-    moneyTwinProDesc: "Upgrade to ELITE to unlock behavioral predictions and weekly timeline.",
+    netWorthHeroLabel: "NET WORTH",
+    netWorthPositiveChange: "+$320 from yesterday",
+    netWorthNegativeChange: "-$180 from yesterday",
+    assetBreakdownTitle: "Assets vs Liabilities",
+    quickAddPlaceholder: "How much did you spend?",
+    aiCategorySuggestion: "AI Suggestion • Confirm",
+    underBudgetProgress: "Remaining $2,400 until end of month",
+    overBudgetProgress: "Over Guardian this month by 15%...",
+    subscriptionWarning3Days: "Charged in 3 days • $299",
+    adaptiveFABMessage: "Record your first expense to start behavioral analysis today.",
+
+    // PaywallPage
+    paywallHeading: "Get PicksWise",
+    paywallSubheading: "Unlock your financial potential",
+    paywallTogglePro: "PRO",
+    paywallToggleElite: "ELITE",
+    paywallPerYear: "/year",
+    paywallPerMonth: "/month",
+    paywallSubscribe: "Subscribe",
+    paywallAutoRenew: "Auto-renews monthly. Cancel anytime.",
+    paywallWelcome: "Welcome to Premium!",
+    paywallSuccessText: "You can now access premium features",
+    paywallGetStarted: "Get Started",
+    paywallFeatures: "Features",
+    paywallFree: "Free",
+    paywallLoading: "Loading...",
+    paywallScanQr: "Scan QR to pay with PromptPay",
+    paywallScanQrHint: "Open your banking app and scan this QR code to complete payment",
+    paywallWaitingPayment: "Waiting for payment...",
+    paywallQrExpiresIn: "QR expires in",
+    paywallPaymentFailed: "Payment failed. Please try again.",
+    paywallBack: "Back",
+    paywallQrExpired: "QR code expired",
+    paywallTryAgain: "Try Again",
+
+    // Subscription Shadow Page
+    subscriptionShadowTitle: "Subscription Shadow",
+    subscriptionShadowSubtitle: "Financial Intelligence Layer",
+    subShadowAddBtn: "Add",
+    subShadowMonthly: "Monthly",
+    subShadowTotalRecurring: "Total recurring",
+    subShadowYearly: "Yearly",
+    subShadowProjectedAnnual: "Projected annual",
+    subShadowThisWeek: "This Week",
+    subShadowCharges: "charges",
+    subShadowActiveCount: "Active",
+    subShadowActiveLabel: "subscriptions",
+    subShadowAllFilter: "All",
+    subShadowPausedFilter: "Paused",
+    subShadowCancelledFilter: "Cancelled",
+    subShadowSortLabel: "Sort:",
+    subShadowSortNextBilling: "Next Billing",
+    subShadowSortAmount: "Amount",
+    subShadowSortName: "Name",
+    subShadowNoSubs: "No subscriptions yet",
+    subShadowNoSubsDesc: "Start tracking your recurring payments to get financial clarity",
+    subShadowAddFirst: "Add First Subscription",
+    subShadowDueToday: "Due today",
+    subShadowTomorrow: "Tomorrow",
+    subShadowDays: "days",
+    subShadowNextBillingDate: "Next Billing Date",
+    subShadowLastUsed: "Last Used",
+    subShadowFrequency: "Frequency",
+    subShadowAnnualCost: "Annual Cost",
+    subShadowCancelBtn: "Cancel",
+    subShadowReactivateBtn: "Reactivate",
+    subShadowDeleteBtn: "Delete",
+    subShadowCategoryBreakdown: "Category Breakdown",
+    subShadowUpcomingCharges: "Upcoming Charges",
+    subShadowNoChargesThisWeek: "No charges this week",
+    subShadowAiInsightTitle: "AI INSIGHT",
+    subShadowSavingsPotential: "Monthly Savings Potential",
+    subShadowAddModalTitle: "Add Subscription",
+    subShadowAddModalDesc: "Track a recurring payment",
+    subShadowServiceName: "Service Name",
+    subShadowBillingCycle: "Billing Cycle",
+    subShadowCategory: "Category",
+    subShadowNextBillingOptional: "Next Billing Date (Optional)",
+    subShadowCalendarTab: "Calendar View",
+    subShadowListTab: "List View",
+    subShadowConciergeTitle: "Cancellation Assistant",
+    subShadowConciergeDesc: "Let PicksWise handle the cancellation or manage it directly:",
+    subShadowConciergeBtn: "AI Concierge Cancel",
+    subShadowCancelPhone: "Phone",
+    subShadowCancelEmail: "Email",
+    subShadowCancelWeb: "Website",
+    subShadowViewCancelInstructions: "View Instructions",
+    subShadowUpcomingTab: "Upcoming",
+    subShadowAllTab: "All",
+    subShadowComingUpCardTitle: "Coming Up",
+    subShadowLeftToPay: "Left to Pay",
+    subShadowActiveSubscriptions: "Active Services",
+    subShadowPredictiveAmount: "Predictive",
+    subShadowSkipThisMonth: "Skip This Month",
+    subShadowEditAmount: "Edit Amount",
+    subShadowMarkAsCancelled: "Mark as Cancelled",
+    subShadowSharedWith: "Shared with",
+    subShadowPriceHiked: "Price Hiked",
+    subShadowPaidThisMonth: "Paid This Month",
+    subShadowUpcomingBills: "Upcoming Bills",
+    subShadowMicroBilling: "Micro-billing",
+    subShadowLinkedTo: "Linked to",
+
+    // AI Coach Section
+    aiCoachTitle: "AI Coach",
+    aiCoachSummary: "Your spending this month is higher than usual. Consider reducing 2 unnecessary expenses.",
+
+    // Campaign CTAs (Tesla-style action buttons)
+    ctaAddTransaction: "+ Money Pulse",
+    ctaSetBudget: "Set Guardian",
+    ctaViewReport: "Read My Story",
+    ctaSaveMoney: "Ignite Goal",
+
+    // Campaign Push Notification Labels
+    pushGhostDetected: "Ghost Detected",
+    pushGuardianAlert: "Guardian Alert",
+    pushGoalProgress: "Goal Progress",
+
+    // Slide to Upgrade / SwipeConfirm
+    slideUpgrade: "Slide to Unlock",
+    slideConfirm: "Slide to confirm",
+    swipeConfirm: "Swipe to confirm",
+
+    // Common UI
+    commonGoBack: "Go back",
+    commonInfo: "Info",
+
+    // Profile Settings Page
+    profileTitle: "Profile",
+    profileDefaultsName: "Your Name",
+    profileSetupComplete: "Setup complete",
+    profileEditProfileAria: "Edit profile",
+    profileEditNamePrompt: "Edit name:",
+    profileEditEmailPrompt: "Edit email:",
+    profileLogOut: "Log Out",
+
+    // Bottom Navigation
+    bottomNavNavigation: "Primary Navigation",
   },
   th: {
-    dashboardTab: "ศูนย์การตัดสินใจ",
-    radarTabMenu: "Money Twin",
-    insightsTab: "ข้อมูลเชิงลึก",
-    storiesTab: "นิทัศน์สติการเงิน",
-    settingsTab: "เมนูเพิ่มเติม",
 
     brand: "PicksWise",
-    subtitle: "ทุกการตัดสินใจทางการเงินล้วนมีความหมาย",
-    reserveVault: "ห้องสำรองสินทรัพย์อัจฉริยะ PicksWise",
-    portfolioTitle: "พอร์ตโฟลิโอการตัดสินใจ",
-    totalPortfolio: "มูลค่าการจัดสรรการตัดสินใจรวม",
-    growthLabel: "+14.31% การเติบโตเชิงรุก",
-    assetPerformance: "ผลตอบแทนจากการตัดสินใจที่ชาญฉลาด",
-    liveFeed: "ฟีดบริบทการวิเคราะห์การตัดสินใจสดเรียลไทม์",
+    subtitle: "ทุกการตัดสินใจทางการเงินมีความหมาย",
+    reserveVault: "คลังสำรอง PicksWise Sovereign",
+    portfolioTitle: "พอร์ตการตัดสินใจ",
+    totalPortfolio: "มูลค่ารวมการตัดสินใจที่จัดสรรแล้ว",
+    growthLabel: "+14.31% การเติบโตของการกระทำ",
+    assetPerformance: "การวิเคราะห์ผลตอบแทนการตัดสินใจ",
+    liveFeed: "ฟีดข้อมูลสถานการณ์การตัดสินใจแบบสด",
     sparksLabel: "ประกายการตัดสินใจใน 30 วัน",
-    recentLedger: "บัญชีแยกประเภทการตัดสินใจเชิงรอบคอบ",
-    ledgerSub: "สรุปการตัดสินใจขาเข้าและขาออกแบบเรียลไทม์",
-    searchPlaceholder: "ค้นหาการตัดสินใจและมาตรการ...",
-    noRecords: "ไม่พบข้อมูลการตัดสินใจที่ตรงกับเกณฑ์",
-    coreBalance: "ยอดสมดุลงบหลักสำรอง",
-    deposit: "ฝากสัดส่วน",
-    withdraw: "ดึงยอดคืน",
-    transfer: "เบี่ยงทิศทางออก",
-    getPremium: "ปลดล็อกเว่อร์ชัน 5.2 พรีเมียม",
-    sovereignVerified: "การตัดสินใจเชิงอธิปไตยผ่านการรับรอง",
-    legalName: "ความปลอดภัยของสิทธิ์ตัวตนแท้จริง",
-    commsRoute: "เส้นทางการวิเคราะห์เชิงพฤติกรรมทันที",
-    terminateSession: "ยุติเซสชั่นการทำงานเพื่อความปลอดภัย",
-    commitSpecs: "อัปโหลดข้อระบุระบบหลัก",
-    premiumOS: "ระบบการออกแบบเว่อร์ชัน 5.2 OS",
-    coreLevel: "ระดับบริการพื้นฐาน PicksWise",
-    currentOperationalTier: "ระดับการรับรองสถิติการตัดสินใจ",
-    currentOperationalTierDesc: "แผนการสมัครสมาชิกที่ใช้งานอยู่และระดับการเข้าถึงฟีเจอร์ปัจจุบันของคุณ",
-    freeTierPitch: "คุณกำลังดำเนินงานบนโหนดพฤติกรรมเสรีทั่วไปโดยไม่มีการคาลิเบรตประสิทธิภาพสูง ตัวตนดิจิทัล Twin, แผนที่นำทางแห่งอนาคต และคลังการตัดสินใจระดับอนันต์ยังถูกระงับสิทธิ์",
-    activateLuxury: "เปิดใช้ระบบตัดสินใจอธิปไตยพรีเมียมทันที",
-    secureEncryptionTitle: "สถาปัตยกรรมแยกความปลอดภัยความมั่นคงแซนด์บ็อกซ์",
-    secureEncryptionPitch: "รายละเอียดบัญชี PicksWise ของคุณได้รับการปกป้องเป็นความลับแยกต่างหากในสภาพแวดล้อม Client Sandbox ของอุปกรณ์ผู้ใช้ ตัวแปรวิเคราะห์ภายในสอดคล้องกับมาตรฐานความปลอดภัย ไม่แชร์ข้อมูลเพื่อการจัดส่งโฆษณาภายนอก",
-    yearsOfAutonomousCapital: "ชุดการตัดสินใจทางการเงินที่ฉลาดขึ้นเหล่านี้จะจัดตั้งทุนอิสระมูลค่า $84k ในอนาคต",
+    recentLedger: "บัญชีแยกประเภทการตัดสินใจ Sovereign",
+    ledgerSub: "ยอดเงินเข้าและออกที่คำนวณแบบเรียลไทม์",
+    searchPlaceholder: "ค้นหาการตัดสินใจและการกระทำ...",
+    noRecords: "ไม่พบการตัดสินใจที่ตรงกับคำค้นหา",
+    coreBalance: "ผลตอบแทนยอดเงินหลัก",
+    deposit: "จัดสรรเข้า",
+    withdraw: "ถอนการจัดสรร",
+    transfer: "โอนออกภายนอก",
+    getPremium: "ปลดล็อกเวอร์ชัน 5.2 พรีเมียม",
+    sovereignVerified: "ยืนยันการตัดสินใจแบบ Sovereign แล้ว",
+    legalName: "หมายเลขประจำตัวตนที่ยืนยันแล้ว",
+    commsRoute: "การจัดเส้นทางการสื่อสารแบบเรียลไทม์",
+    terminateSession: "สิ้นสุดเซสชันอย่างปลอดภัย",
+    commitSpecs: "ข้อมูลจำเพาะระบบที่บันทึกไว้",
+    premiumOS: "เวอร์ชัน 5.2 ดีไซน์ OS",
+    coreLevel: "ระดับระบบ PicksWise",
+    currentOperationalTier: "ระดับการตัดสินใจปัจจุบัน",
+    currentOperationalTierDesc: "แผนการสมัครสมาชิกที่ใช้งานอยู่และระดับการเข้าถึงฟีเจอร์ของคุณ",
+    freeTierPitch: "คุณกำลังใช้งานระบบพื้นฐานที่ไม่ได้ปรับเทียบ โปรไฟล์ทวินที่มีความแม่นยำสูง เส้นทางในอนาคต และหน่วยความจำการตัดสินใจที่ไม่จำกัดยังคงถูกล็อคอยู่",
+    activateLuxury: "เปิดใช้งานความแม่นยำของการตัดสินใจระดับพรีเมียม",
+    secureEncryptionTitle: "สถาปัตยกรรมความปลอดภัยแบบแซนด์บ็อกซ์",
+    secureEncryptionPitch: "โปรไฟล์ PicksWise ของคุณถูกแยกไว้ในเครื่องผ่านไคลเอนต์จัดเก็บข้อมูลแบบแซนด์บ็อกซ์มาตรฐาน พารามิเตอร์ภายในได้รับการตรวจสอบกับระดับความปลอดภัยฝั่งไคลเอนต์ ไม่มีการติดตามเพื่อโฆษณา",
+    yearsOfAutonomousCapital: "ชุดการตัดสินใจที่ฉลาดขึ้นนี้จะสร้างทุนในอนาคตได้ $84k",
 
-    introductionSkip: "ข้ามคำแนะนำแนะนำระบบ",
-    moduleLabel: "โมดูลย่อย",
-    luxurySystem: "อุปกรณ์อัจฉริยะลักชัวรี",
-    immediateImpact: "ผลลัพธ์เชิงบวกทันที",
-    averageWeeklySavings: "ตัวแปรประหยัดเฉลี่ยปรับขึ้น",
-    reducedRegret: "ประเมินแล้วลดความเสียใจเรื่องใช้จ่ายไร้ประโยชน์",
-    pathFreedom: "ความคล่องตัวระบบการเงินอิสระ",
-    commitmentTitle: "ปฏิญญาความมุ่งมั่น",
-    commitmentSubtitle: "มอบสัญญาต่อการเปลี่ยนแปลงทางการเงินของคุณ",
-    commitmentStatement: "ข้าพเจ้าตระหนักว่าความเป็นเจ้าของทางการเงินเริ่มต้นจากวินัยและการตระหนักรู้ ข้าพเจ้าขอสัญญาว่าจะใช้งาน DailyStack อย่างซื่อสัตย์ ติดตามพฤติกรรมอย่างสม่ำเสมอ และเคารพระบบที่เคารพข้าพเจ้า",
-    commitmentConfirm: "ข้าพเจ้ามุ่งมั่นในเส้นทางนี้",
-    commitmentDecline: "ต้องการเวลาเพิ่มเติม",
-    nextStep: "ความสามารถถัดไปของอุปกรณ์",
+    introductionSkip: "ข้ามคำแนะนำ",
+    moduleLabel: "โมดูล",
+    luxurySystem: "ระบบระดับหรู",
+    immediateImpact: "ผลลัพธ์ทันที",
+    averageWeeklySavings: "ยอดออมเฉลี่ยต่อเดือนที่เพิ่มขึ้น",
+    reducedRegret: "ลดความเสียดายที่ไม่ได้วางแผน",
+    pathFreedom: "เส้นทางสู่อิสรภาพทางการเงิน",
+    moneyPulse: { title: "พัลส์เงิน", subtitle: "จังหวะหัวใจทางการเงินแบบเรียลไทม์", desc: "ดูการไหลเวียนของเงิน ติดตามทุกธุรกรรม และเข้าใจรูปแบบพฤติกรรมของคุณทันที" },
+    ghostHunt: { title: "ผู้ล่าบอกรับสมาชิก", subtitle: "ค้นหาการสมัครบริการที่ซ่อนอยู่", desc: "AI ตรวจจับการสมัครบริการที่คุณลืมและช่วยคุณยกเลิกได้ทันที" },
+    storyBegins: { title: "เรื่องราวของคุณเริ่มต้นขึ้น", subtitle: "บทสรุปการเงินรายสัปดาห์", desc: "รับสรุปพฤติกรรมการเงินรายสัปดาห์ในรูปแบบเรื่องราวที่อ่านง่ายเหมือนไดอารี่ส่วนตัว" },
+    guardianReady: { title: "เปิดโหมดผู้พิทักษ์", subtitle: "ไม่ใช้เงินเกินตัวอีกต่อไป", desc: "การแจ้งเตือนงบประมาณอัจฉริยะช่วยให้คุณอยู่ในเส้นทางที่ถูกต้องก่อนที่จะเกินวงเงิน" },
+    readyLaunch: { title: "คุณพร้อมแล้ว", subtitle: "เริ่มต้นการเดินทางของคุณ", desc: "การเปลี่ยนแปลงทางการเงินของคุณเริ่มต้นขึ้นตอนนี้" },
+    commitmentTitle: "คำประกาศข้อตกลงร่วมกัน",
+    commitmentSubtitle: "มุ่งมั่นที่จะปฏิวัติทางการเงินของคุณ",
+    commitmentStatement: "ข้าพเจ้ายอมรับว่าอิสรภาพทางการเงินเริ่มต้นด้วยวินัยและความตระหนักรู้ ข้าพเจ้าสัญญาว่าจะใช้ PicksWise อย่างซื่อสัตย์ ติดตามพฤติกรรมอย่างสม่ำเสมอ และเคารพระบบที่ให้เกียรติข้าพเจ้า",
+    commitmentConfirm: "ฉันมุ่งมั่นในการเดินทางครั้งนี้",
+    commitmentDecline: "ฉันยังต้องการเวลาอีก",
+    nextStep: "ความสามารถถัดไป",
     financialChallenge: {
-      question: "คุณกำลังเผชิญความท้าทายทางการเงินอะไร?",
+      question: "ความท้าทายทางการเงินหลักของคุณคืออะไร ?",
       options: [
-        { title: "ออมเงินให้มากขึ้น", subtitle: "ลดการใช้จ่ายที่ไม่จำเป็นและสร้างเงินสำรอง" },
-        { title: "ติดตามทุกการใช้จ่าย", subtitle: "เห็นชัดว่าเงินไปไหนทั้งหมด" },
-        { title: "ควบคุมการซื้อหวั่นไหว", subtitle: "จัดการตัวกระตุ้นทางอารมณ์และพฤติกรรม" },
-        { title: "สร้างความมั่งคั่งระยะยาว", subtitle: "เติบโตของสินทรัพย์และวางแผนอนาคต" }
+        { title: "เก็บออมเงินให้มากขึ้น", subtitle: "ลดการใช้จ่ายที่ไม่จำเป็นและสร้างเงินสำรอง" },
+        { title: "ติดตามทุกค่าใช้จ่าย", subtitle: "สร้างความชัดเจนว่าเงินของคุณถูกใช้ไปที่ไหนบ้าง" },
+        { title: "หยุดรั่วไหลจากค่าสมัคร", subtitle: "ตรวจพบค่าสมัครที่ลืมแล้วยกเลิกได้ทันที" },
+        { title: "สร้างความมั่งคั่งระยะยาว", subtitle: "เพิ่มพูนสินทรัพย์และวางแผนสำหรับอนาคต" }
       ]
     },
     onboardingSteps: [
       {
-        title: "ติดตามการใช้จ่ายอย่างง่ายดายไร้กังวล",
-        desc: "จัดการกระแสการเงินของคุณด้วยอินเตอร์เฟสผู้รักษาที่เข้าใจง่ายอย่างเป็นธรรมชาติ ตั้งเกณฑ์เกราะกำบัง วิเคราะห์ทางจิตวิทยา และเข้าถึงการสะสมกำไรสติรวดเร็ว",
+        title: "ติดตามค่าใช้จ่ายของคุณได้อย่างง่ายดาย",
+        desc: "จัดการการเงินของคุณด้วยอินเทอร์เฟซที่ใช้งานง่าย ตั้งเกณฑ์มาตรฐาน วิเคราะห์ดัชนีทางจิตวิทยาการซื้อ และรักษาผลประโยชน์ทบต้นของคุณอย่างปลอดภัย",
         statsVal: "+24.6%",
-        statsLabel: "ตัวแปรประหยัดเฉลี่ยปรับขึ้น"
+        statsLabel: "ยอดออมเฉลี่ยต่อเดือนที่เพิ่มขึ้น"
       },
       {
         title: "ความท้าทายทางการเงินหลัก",
         desc: "เลือกเป้าหมายที่สำคัญที่สุดสำหรับคุณในตอนนี้",
         statsVal: "1 / 5",
-        statsLabel: "เลือกหนึ่งข้อ",
+        statsLabel: "เลือกหนึ่งรายการ",
         type: "challenge"
       },
       {
-        title: "ก้าวสู่ยุคพฤติกรรมข้อมูลอัจฉริยะ",
-        desc: "หยุดกรอกตัวเลขแบบดั้งเดิม แยกประเภทอารมณ์ที่กำหนดการใช้จ่าย เช่น ความวู่วาม ความเครียดสะสม และแรงกดดันทางสังคม รู้แน่ชัดว่าทำไมเงินถึงรั่วไหลออกไป",
+        title: "เห็นเงาการสมัครของคุณ",
+        desc: "หยุดเงินรั่วไหลอย่างเงียบๆ เราแสดงค่าสมัครรายเดือนทุกรายการ แจ้งเตือนเมื่อราคาขึ้นทันที และชี้ให้เห็นว่าค่าสมัครของคุณหลุดออกจากมือตรงไหน",
         statsVal: "-38.2%",
-        statsLabel: "ประเมินแล้วลดความเสียใจเรื่องใช้จ่ายไร้ประโยชน์"
+        statsLabel: "ลดค่าใช้จ่ายที่ไม่ได้วางแผน"
       },
       {
-        title: "เรื่องเล่ากระแสเงินส่วนตัวรายสัปดาห์",
-        desc: "รับชมเรื่องเล่าแทนตารางวิเคราะห์ดาดๆ เทพปัญญาประดิษฐ์ของเราสรุปพฤติกรรมทางการเงินของคุณเป็นสตอรี่บอร์ดแสนหรูหรา เชื่อมต่อมูลค่าในอนาคตเทียบกับความสุขชั่วคราว",
-        statsVal: "เสร็จสิ้นเร็วขึ้น 2 เท่า",
-        statsLabel: "ความคล่องตัวถึงเป้าหมายทางการเงินเสรี"
+        title: "โค้ชการเงินส่วนตัวด้วย AI",
+        desc: "รับข้อมูลในรูปแบบเรื่องราว ไม่ใช่แค่ตัวเลข ระบบ AI ของเราสังเคราะห์กระแสเงินสดของคุณเป็นข้อมูลเชิงลึกรายสัปดาห์ที่ชัดเจน เพื่อให้คุณเห็นเป้าหมายการออมในอนาคตเทียบกับนิสัยการใช้จ่ายในแต่ละวัน",
+        statsVal: "เร็วขึ้น 2 เท่า",
+        statsLabel: "เส้นทางสู่อิสรภาพทางการเงิน"
       },
       {
-        title: "ปฏิญญาความมุ่งมั่น",
-        desc: "มอบสัญญาต่อการเปลี่ยนแปลงทางการเงินของคุณ",
+        title: "คำประกาศข้อตกลงร่วมกัน",
+        desc: "มุ่งมั่นที่จะปฏิวัติทางการเงินของคุณ",
         statsVal: "ขั้นตอนที่ 5",
-        statsLabel: "คำมั่นสัญญาขั้นสุดท้าย"
+        statsLabel: "การมุ่งมั่นขั้นสุดท้าย"
       }
     ],
 
-    launchOS: "เปิดตัวระบบ",
+    launchOS: "เปิดใช้งานระบบ",
 
-    secureFinOS: "ระบบความปลอดภัยทางการเงินเชิงลึก",
-    loginSub: "สัมผัสความชาญฉลาดด้านการเงินชั้นสูง เพื่อความมั่นใจอย่างสมบูรณ์แบบในอนาคตผู้พิทักษ์",
-    emailId: "ที่อยู่อีเมล หรือรหัสประจำบัญชี",
+    secureFinOS: "ระบบการเงินปลอดภัย",
+    loginSub: "เข้าสู่ระบบด้วย Face ID เพื่อความปลอดภัยสูงสุดและความรวดเร็ว",
+    emailId: "อีเมล หรือ บัญชีผู้ใช้งาน",
+    authSuccess: { title: "เข้าสู่ระบบสำเร็จ!", subtitle: "กำลังนำคุณไปยังแดชบอร์ด..." },
 
     // OTP Screen
     otpTitle: "ยืนยันอีเมลของคุณ",
     otpSubtitle: "เราได้ส่งรหัสยืนยันไปยัง",
-    otpEnterCode: "ใส่รหัส 6 หลัก",
+    otpEnterCode: "กรอกรหัส 6 หลัก",
     otpVerifyBtn: "ยืนยันอีเมล",
-    otpResendQuestion: "ไม่ได้รับรหัส?",
-    otpResendIn: "ส่งใหม่ใน",
-    otpResend: "ส่งรหัสใหม่",
-    otpBack: "← กลับไปหน้าล็อกอิน",
+    otpResendQuestion: "ไม่ได้รับรหัสใช่ไหม?",
+    otpResendIn: "ส่งอีกครั้งใน",
+    otpResend: "ส่งรหัสอีกครั้ง",
+    otpBack: "← กลับสู่หน้าล็อกอิน",
     otpSuccessTitle: "ยืนยันอีเมลสำเร็จ!",
-    otpSuccessVerify: "ยืนยันอีเมลสำเร็จ!",
-    otpSuccessReset: "รีเซ็ตรหัสผ่านสำเร็จ!",
+    otpSuccessVerify: "ยืนยันอีเมลแล้ว!",
+    otpSuccessReset: "รีเซ็ตรหัสผ่านแล้ว!",
     otpSuccessVerifySub: "อีเมลของคุณได้รับการยืนยันแล้ว ยินดีต้อนรับสู่ PicksWise!",
-    otpSuccessResetSub: "ตอนนี้คุณสามารถตั้งรหัสผ่านใหม่สำหรับบัญชีของคุณได้แล้ว",
-    otpContinueBtn: "ไปยังหน้าหลัก",
+    otpSuccessResetSub: "คุณสามารถตั้งรหัสผ่านใหม่สำหรับบัญชีของคุณได้แล้ว",
+    otpContinueBtn: "เข้าสู่แดชบอร์ด",
     otpResetPasswordBtn: "ตั้งรหัสผ่านใหม่",
-    otpSecureVerification: "การยืนยันความปลอดภัย",
+    otpSecureVerification: "การยืนยันที่ปลอดภัย",
     otpInvalidError: "รหัสยืนยันไม่ถูกต้อง กรุณาลองอีกครั้ง",
     otpFailedError: "การยืนยันล้มเหลว กรุณาลองอีกครั้ง",
-    otpResendError: "ส่งรหัสใหม่ไม่สำเร็จ กรุณาลองอีกครั้ง",
-    password: "รหัสเข้าใช้งานส่วนบุคคล (PASSWORD)",
+    otpResendError: "ส่งรหัสอีกครั้งล้มเหลว กรุณาลองอีกครั้ง",
+    password: "รหัสผ่าน",
     forgot: "ลืมรหัสผ่าน?",
-    enterOS: "เข้าสู่ระบบปฏิบัติการการเงินส่วนตัว",
-    initAccount: "เริ่มสร้างและลงทะเบียนเสาหลักกระเป๋า",
-    orMaster: "หรือเข้าผ่านช่องทางพาร์ทเนอร์หลัก",
-    appleCard: "บัตร Apple Card",
-    googleCloud: "บัญชี Google Cloud",
-    alreadyEngineered: "ลงทะเบียนติดตั้งเสร็จเรียบร้อยแล้ว?",
-    newToDailyStack: "เพิ่งเคยสัมผัสเทคโนโลยี DailyStack ใช่หรือไม่?",
-    loginCore: "เข้าใช้งานโหมดกระเป๋าหลัก",
-    registerSecurely: "ติดตั้งรักษาสิทธิปลอดภัยสูงสุด",
-    bankSecured: "คุ้มครองเครือข่ายด้วยระบบถอดรหัสระดับ AES-256",
-
+    enterOS: "เข้าสู่ระบบปฏิบัติการทางการเงิน",
+    initAccount: "เริ่มต้นบัญชีระบบ",
+    orMaster: "หรือเชื่อมต่อบัญชีหลัก",
+    appleCard: "Apple Card",
+    googleCloud: "Google Cloud",
+    alreadyEngineered: "มีบัญชีอยู่แล้วใช่ไหม?",
+    newToDailyStack: "เพิ่งเริ่มใช้ PicksWise?",
+    loginCore: "เข้าสู่ระบบหลัก",
+    registerSecurely: "ลงทะเบียนอย่างปลอดภัย",
+    bankSecured: "ระบบความปลอดภัยระดับธนาคาร AES-256",
 
     // Base Currency Selection
     baseCurrencyTitle: "เลือกสกุลเงินหลักของคุณ",
-    baseCurrencySub: "เลือกสกุลเงินหลักสำหรับการคำนวณและติดตามทั้งหมด",
+    baseCurrencySub: "เลือกสกุลเงินหลักสำหรับการคำนวณและติดตามข้อมูลทั้งหมด",
     baseCurrencySelect: "เลือกสกุลเงิน",
     baseCurrencyConfirm: "ยืนยันสกุลเงิน",
     baseCurrencyTHB: "บาทไทย (THB)",
     baseCurrencyUsd: "ดอลลาร์สหรัฐ (USD)",
     baseCurrencyEur: "ยูโร (EUR)",
-    baseCurrencyGbp: "ปอนด์สเตอร์ลิง (GBP)",
+    baseCurrencyGbp: "ปอนด์อังกฤษ (GBP)",
     baseCurrencyJpy: "เยนญี่ปุ่น (JPY)",
     baseCurrencySgd: "ดอลลาร์สิงคโปร์ (SGD)",
-    identityRadar: "การวิเคราะห์เรดาร์ระบุตัวตน",
-    coreSignature: "รหัสระบุเอกลักษณ์พฤติกรรมทางการเงินขั้นพื้นฐาน",
-    confidenceScore: "คะแนนความถูกต้องแม่นยำในการถอดสัญชาตญาณ",
-    biometricIndicators: "ตัวบ่งชี้ชีวมาตรทางการเงินขั้นสูง",
-    calibrationsTitle: "ระดับการตั้งค่าสมรรถนะการใช้สมองทางการเงิน",
-    impulseRating: "ดัชนีแรงขับแรงดึงดูดของอารมณ์ชั่วคราว (Dopamine)",
-    futureHorizon: "วิสัยทัศน์และการเล็งผลเป้าหมายระยะยาว",
-    socialDefense: "เกราะป้องกันการกดดันและล่อลวงทางสังคม",
-    valueSeeking: "การพยายามแสวงหาความคุ้มค่าที่คำนวณแล้วอย่างถี่ถ้วน",
-    radarHighIndex: "คะแนนเกราะประหยัดเพื่อความมั่นคงระยะยาวของคุณสูงกว่าเกณฑ์สถิติดิจิทัลเฉลี่ยของภูมิภาคถึง 2.4 เท่าตัว",
-    tacticalEngine: "ระบบที่ปรึกษากลยุกต์ปัญญาประดิษฐ์",
-    readyReasoning: "ระบบอัจฉริยะออนไลน์พร้อมทำงาน • ข้อมูลตรรกะระดับสูงถูกคาลิเบรตเรียบร้อย",
-    infiniteMemory: "อัปเกรดระบบจัดเก็บความจำถาวร",
-    chatPlaceholder: 'ลองถาม: "ทำไมฉันมักจะเผลอใจจ่ายเงินซื้อของเล่นแบบกะทันหันบ่อยครั้ง?" หรือ "ช่วยทำแผนงบความสุขให้ที"',
-    chatFallbackSave: "ในฐานะนักใช้จ่ายประเภท {archetype} หลักคิดพื้นฐานในการรักษาตัวตนอนาคตของคุณขึ้นอยู่กับการสร้างกลไกขับเคลื่อน แนะนำให้จัดตั้ง 'ตัวคูณเงินเก็บ 10% อัตโนมัติ' ซึ่งระบบจะดึงยอดนี้ส่งเข้าไปลงทุนในหุ้นเสาหลักเช่น MSFT หรือคลังทันที ช่วยป้องกันสภาวะสารเสพติดความสุขใจแตกช่วงกลางสัปดาห์ได้อย่างดี",
-    chatFallbackInvest: "เราพบว่าสัดส่วนของ Apple (AAPL) และ NVIDIA (NVDA) ในระบบของคุณมีความมั่นคงทางการค้าสูงมาก แนะนำให้เน้นการถือสัดส่วนเสาหลักเหล่านี้ 80% และจำกัดความเสี่ยงไปกับทางเลือกที่มีความแปลกใหม่ทางอารมณ์ไม่เกิน 4% เพื่อความปลอดภัยสูงสุด",
-    chatFallbackImpulse: "ผลการวิเคราะห์ยืนยันว่าเย็นวันพุธเป็นช่วงเวลาที่มีรอยรั่วความเสี่ยงสูงที่สุดเนื่องจากความเหนื่อยล้าสะสม แนะนำให้ตั้งกฎ 'แช่เย็นชะลอกาย 24 ชั่วโมง' เป็นเกราะสำหรับสินค้าฟุ่มเฟือย ชะลอการจ่ายเพียงวันเดียวจะลดอาการอยากลงได้ถึง 91%",
-    chatFallbackDefault: "คำถามที่ดีมากตามหลักสมองผู้ซื้อแบบ {archetype} เราต้องปกป้องสิทธิภาพรวมของสมดุลการเงินด้วยความรอบคอบ แนะนำให้ทบทวนความคุ้มค่าในหมวดการเที่ยวเล่นสังคมกับคนรู้จักห่างๆ ในสัปดาห์หน้า อะไรเป็นสิ่งดึงดูดใจหลักในการซื้อสินค้าของคุณวันนี้?",
-    chatProcessing: "วิเคราะห์พฤติกรรมและคาลิเบรตความแม่นยำทางจิตวิทยาการเงิน...",
 
-    valueInsightsTitle: "ข้อมูลเชิงลึกในพฤติกรรมและความคุ้มค่า",
-    valueInsightsSub: "การถอดรหัสบัญชีแยกประเภททางจิตวิทยาและการประเมินสัดส่วน",
-    analyticsTab: "ภาพรวมสถิติตัวเลข",
-    behaviorTab: "บทวิเคราะห์สติปัญญาทางอารมณ์",
-    spendCalculation: "การคำนวณสัดส่วนกระแสเงินออกรวม",
-    spendSub: "ความเสียใจและมูลค่าการใช้จ่ายที่เก็บบันทึกสะสม",
-    categoryDensity: "สัดส่วนความเข้มข้นของการเลือกซื้อรายหมวดหมู่",
-    radarRevelation: "จุดกำเนิดพฤติกรรมเรดาร์ค้นพบข้อมูลสำคัญ",
-    dopamineOutflows: "ได้รับการควบคุมพฤติกรรมปล่อยสารจ่ายความสุข",
-    impulseDecreasedText: "สัดส่วนความวู่วามของคุณลดตัวลงเป็นบวก 12.4% ในรอบสัปดาห์นี้ การปรับกระแสไปลงทุนตรงกลุ่มสินทรัพย์เพิ่มมูลค่า ช่วยให้ประหยัดพลังงานตัวเงินได้กว่า $340.00 และเดินหน้าทำกำไรทบต้นแล้ว",
-    topRegulatedClass: "กลุ่มหมวดหมู่ที่มีผลงานการระงับใจยอดเยี่ยม: อุปกรณ์เทคโนโลยีส่วนเกิน",
-    deepCoreTitle: "ระบบสแกนเอกลักษณ์แกนสมองผู้จ่ายแบบรอบด้าน",
-    deepCoreSub: "คลิกเพื่อปลดล็อกสตอรี่วิเคราะห์อนาคตของตัวเอกลักษณ์คุณล่วงหน้า",
-    upgradeFutureOS: "สมัครทดสอบแผนรับใช้ระบบปฏิบัติการส่วนตัว",
-    emotionalIndex: "ดัชนีระดับอารมณ์ที่เข้ามาสร้างผลกระทบต่อรายการใช้จ่าย",
-    whySovereignSpend: "พวกเราทำเงินออกไปด้วยสารสมองชนิดใด?",
-    whySovereignSpendDesc: "DailyStack จับคู่สถานะจิตสำนึกของคุณต่อทุกรายการบัญชีแยกประเภทภายนอก ทำให้ค้นพบจุดเร้าทางอารมณ์ แรงกดกันกลุ่มเพื่อน และความเปราะบางยามเมื่อยล้าสะสม",
-    triggerLimitText: "ข้อแนะนำการควบคุมเป็นกรณีพิเศษ",
-    triggerHighText: "สัดส่วนพฤติกรรมเชิงบวกเป็นปกติสุข",
-    diagnosticTitle: "การตรวจสอบวินิจฉัยทางการแพทย์การเงินของปัญญาประดิษฐ์",
-    copingAssessment: "บทสรุปประเมินสภาวการณ์ใช้จ่ายเพื่อระบายภาวะกดดันภายนอก",
-    copingAssessmentText1: "คุณสามารถระงับความเสี่ยงจากเหตุวู่วามได้ {impulseCount} ครั้ง และผ่านพ้นวิกฤตการใช้จ่ายชดเชยระดับความเครียดสะสมได้ {stressCount} รายการในเซสชั่นประมวลผลนี้",
-    copingAssessmentText2: "รายงานสรุปของผู้ตรวจการสติ: ค่ำคืนวันพุธเป็นช่วงวิกฤตก่อความเครียดหนาแน่น มักดึงใจให้มองหาเทคโนโลยีตอบสนองชั่วคราว การเปลี่ยนย้ายเวลาไปพึ่งพาการออกกำลังกายหรือการฟื้นฟูจิตใจจะเพิ่มขีดความสามารถการเก็บออมทุนส่วนตัวกว่า $2,640 ต่อปีสะสม",
-    wantCompleteGraph: "ต้องการดูรากฐานและเส้นพัฒนาทางอารมณ์เต็มสเกลหรือไม่?",
-    wantCompleteGraphDesc: "เฝ้าระวังอัตราสถิติความเชื่อมโยงของผลอารมณ์และสติการถือครองยาวนาน 12+ เดือน",
+    identityRadar: "เรดาร์วิเคราะห์ตัวตน",
+    coreSignature: "ลายเซ็นทางการเงินหลัก",
+    confidenceScore: "ความน่าเชื่อถือของการวิเคราะห์",
+    biometricIndicators: "ตัวบ่งชี้ทางการเงินเชิงชีวภาพ",
+    calibrationsTitle: "การประเมินการรับรู้ทางการเงิน",
+    impulseRating: "ระดับแรงกระตุ้นโดปามีน",
+    futureHorizon: "เป้าหมายในอนาคต",
+    socialDefense: "ภูมิคุ้มกันแรงกดดันทางสังคม",
+    valueSeeking: "การแสวงหาคุณค่าที่คำนวณไว้",
+    tacticalEngine: "ระบบแนะนำเชิงยุทธวิธี",
+    readyReasoning: "ระบบออนไลน์ • โหลดการคิดวิเคราะห์ขั้นสูงแล้ว",
+    infiniteMemory: "รับความจำไม่จำกัด",
+    chatPlaceholder: "ถาม: \"ทำไมฉันถึงมียอดใช้จ่ายพุ่งขึ้นโดยไม่ได้วางแผน?\" หรือ \"ช่วยจัดแผนงบประมาณให้หน่อย\"",
+    chatProcessing: "ระบบอัจฉริยะกำลังประมวลผลการวิเคราะห์พฤติกรรม...",
 
-    weeklyNarrative: "ข้อมูลนิทัศน์รายสัปดาห์ปัญญาประดิษฐ์",
-    lockCtaBtn: "เปิดขอบเขตวิเคราะห์ตัวชี้วัดความคล่องตัวทั้งหมด",
-    premiumSovereignActive: "บัญชี PRO / ELITE เปิดทำงาน",
-    verifiedLedger: "บัญชีรายรับรายจ่ายผ่านการตรวจมาตรฐานสากลแล้ว 100%",
-    prevStoryboard: "ย้อนกลับ",
-    nextStoryboard: "ขั้นตอนถัดไป",
-    indexIndicator: "รหัสดัชนี",
+    valueInsightsTitle: "ข้อมูลเชิงลึกด้านคุณค่าและพฤติกรรม",
+    valueInsightsSub: "การคำนวณทางจิตวิทยาและรูปแบบพฤติกรรม",
+    spendCalculation: "การคำนวณยอดใช้จ่าย",
+    spendSub: "ยอดใช้จ่ายที่รู้สึกเสียดายสะสมในการใช้งานรอบนี้",
+    categoryDensity: "ความหนาแน่นรายหมวดหมู่เฉพาะ",
+    radarRevelation: "ข้อมูลเปิดเผยจากเรดาร์",
+    dopamineOutflows: "ควบคุมการใช้จ่ายตามอารมณ์แล้ว",
+    impulseDecreasedText: "ระดับแรงกระตุ้นของคุณลดลง 12.4% ในเดือนนี้ การเปลี่ยนทิศทางเงินส่วนนั้นช่วยให้คุณประหยัดเงินได้ประมาณ $340.00 ซึ่งถูกนำไปลงทุนทบต้นในสินทรัพย์หลักของคุณโดยตรง",
+    topRegulatedClass: "หมวดหมู่ควบคุมได้ดีที่สุด: ยอดใช้จ่ายด้านเทคโนโลยี",
+    deepCoreTitle: "สแกนลึกระดับพฤติกรรม",
+    deepCoreSub: "ปลดล็อกการวิเคราะห์อนาคตทางการเงินของคุณด้วยเรื่องราวสั้น ๆ แบบอัตโนมัติ",
+    upgradeFutureOS: "อัปเกรดระบบปฏิบัติการแห่งอนาคต",
 
-    assetAnalysis: "ระบบถอดโครงสร้างพฤติกรรมข้อมูลหลักทรัพย์ชั้นสูง",
-    unitSharePrice: "ราคาเฉลี่ยต่อหน่วยสัดส่วนมูลค่า",
-    percentageMetric: "อัตราตัววัดผลงานผลตอบแทนเปอร์เซ็นต์",
-    chartFluctuations: "รายงานสรุปวิวัฒนาการทิศทางในระยะเวลา 30 วัน",
-    sellPosition: "ขายครองหุ้นออก",
-    acquireShares: "เข้าสะสมเพิ่มเติม",
-    simulatedSell: "ระบบได้ทำการทดสอบจำลองรายการขายของป้าย {symbol} สำเร็จ ช่องทางเชื่อมต่อแลกเปลี่ยนภายนอกพร้อมดูแลคุณสมบูรณ์แบบบน Premium OS เท่านั้น",
-    simulatedBuy: "ระบบได้ทำการทดสอบจำลองกระบวนการเข้าซื้อของป้าย {symbol} สำเร็จ พอร์ตและสะพานตลาดโลกเปิดพร้อมใช้งานครบกระบวนการบน Premium OS เท่านั้น",
+    assetAnalysis: "ระบบวิเคราะห์สินทรัพย์",
+    unitSharePrice: "ราคาหุ้นต่อหน่วย",
+    percentageMetric: "ตัวชี้วัดเปอร์เซ็นต์",
+    chartFluctuations: "ประวัติการขึ้นลงของมูลค่าในรอบ 30 วัน",
+    sellPosition: "ขายสินทรัพย์",
+    acquireShares: "ซื้อหุ้น",
+    simulatedSell: "จำลองการขาย {symbol} เรียบร้อยแล้ว ฟีเจอร์จริงจะเปิดใช้งานในระบบระดับพรีเมียม",
+    simulatedBuy: "จำลองการซื้อ {symbol} เรียบร้อยแล้ว ฟีเจอร์จริงจะเปิดใช้งานในระบบระดับพรีเมียม",
 
-    inboundVault: "ฝากสินทรัพย์เข้าบัญชีรักษาการ",
-    outboundVault: "ถอนกระแสเสรีออกจากระบบห้องสำรอง",
-    externalWallet: "โอนออกไปยังกระเป๋าเงินพาร์ทเนอร์ปลายทาง",
-    recipientRouting: "รหัสบัตรหรือกระเป๋าปลายทางผู้รักษาเพื่อทำธุรกรรมโอน",
-    transactionCost: "มูลค่าในการทำรายการ ($ สหรัฐอเมริกา)",
-    actionAmountError: "กรุณาระบุมูลค่าตัวเลขจำนวนเงินที่ถูกต้องแม่นยำเกินกว่าศูนย์เท่านั้น",
-    withdrawError: "ไม่พบกระแสยอดเงินคงเหลือกระเป๋าหลักรองรับการถอนจำนวนนี้",
-    transferError: "ไม่พบสัดส่วนยอดเงินคงเหลือเพียงพอต่อกระบวนการพิจารณาเป้าหมายที่โหนดคอยน์",
-    transferRecipientError: "กรุณาระบุรหัสบัญชีหรือข้อมูลผู้รับเงินปลายทางอย่างชัดเจนกุมสิทธิ",
-    depositSuccess: "ทำการปกป้องฝากเข้าระบบสำรองสำเร็จยอด +${amount}",
-    withdrawSuccess: "ทำการถอนสินทรัพย์ออกจากห้องนิรภัยเรียบร้อยแล้วยอด -${amount}",
-    transferSuccess: "ได้ทำเรื่องโอนกระแสสินทรัพย์ยอด -${amount} ไปถึงปลายทางรหัส {recipient} สำเร็จ",
-    executeProtocol: "ยืนยันการอนุมัติธุรกรรมความปลอดภัยขั้นสูงสุด",
-    quickActionPrompt: "ได้รับการยืนยันการตั้งค่าจากคีย์บอร์ดความเร็วสูง",
+    inboundVault: "ฝากเงินเข้าคลังเก็บเงิน",
+    outboundVault: "ถอนเงินจากคลังเก็บเงิน",
+    externalWallet: "โอนไปยังกระเป๋าเงินภายนอก",
+    recipientRouting: "หมายเลขบัญชีผู้รับปลายทาง",
+    transactionCost: "ค่าธรรมเนียมธุรกรรม ($ USD)",
+    actionAmountError: "กรุณากรอกจำนวนเงินที่ถูกต้อง",
+    withdrawError: "ยอดเงินคงเหลือในคลังเก็บเงินไม่เพียงพอ",
+    transferError: "ยอดเงินคงเหลือไม่เพียงพอสำหรับการโอนภายนอก",
+    transferRecipientError: "กรุณาระบุหมายเลขกระเป๋าเงินผู้รับที่ถูกต้อง",
+    depositSuccess: "ฝากเงินเข้าคลังสำเร็จ +${amount}",
+    withdrawSuccess: "ถอนเงินจากคลังสำเร็จ -${amount}",
+    transferSuccess: "โอนเงินสำเร็จ -${amount} ไปยัง {recipient}",
+    executeProtocol: "ดำเนินการตามระบบความปลอดภัย",
+    quickActionPrompt: "สั่งการด่วนจากคลังเก็บเงิน",
 
-    alternativeVaultTitle: "ตู้นิรภัยสินทรัพย์ทางเลือก",
-    alternativeVaultSub: "วิเคราะห์พฤติกรรมการลงทุนในสินทรัพย์ทางเลือก",
+    alternativeVaultTitle: "คลังเก็บสินทรัพย์ทางเลือก",
+    alternativeVaultSub: "วิเคราะห์พฤติกรรมการลงทุนในสินทรัพย์ทางเลือกของคุณ",
     alternativeAddAsset: "เพิ่มสินทรัพย์ใหม่",
-    alternativeEditAsset: "แก้ไขรายละเอียดสินทรัพย์",
+    alternativeEditAsset: "แก้ไขสินทรัพย์",
     alternativeDeleteAsset: "ลบสินทรัพย์",
     alternativeTotalValue: "มูลค่ารวม",
-    alternativeTotalPL: "กำไร/ขาดทุน",
+    alternativeTotalPL: "กำไร / ขาดทุน",
     alternativeAvgReturn: "ผลตอบแทนเฉลี่ย",
     alternativeNoAssets: "ยังไม่มีสินทรัพย์ทางเลือก",
-    alternativeLocked: "ต้องเป็นสมาชิก ELITE",
-    alternativeLockedDesc: "ปลดล็อกตู้นิรภัยสินทรัพย์ทางเลือกด้วยแพลน ELITE",
+    alternativeLocked: "จำเป็นต้องใช้ระดับ ELITE",
+    alternativeLockedDesc: "ปลดล็อกคลังเก็บสินทรัพย์ทางเลือกด้วยแผน ELITE",
 
     // Budget Management Page
-    budgetTitle: "จัดการงบประมาณ",
-    budgetSub: "วางแผนและติดตามการใช้จ่ายอย่างชาญฉลาด",
+    budgetTitle: "ผู้พิทักษ์การใช้จ่าย",
+    budgetSub: "วางแผนและติดตามการคุ้มครองการใช้จ่ายของคุณ",
     budgetOverviewTab: "ภาพรวม",
     budgetCategoriesTab: "หมวดหมู่",
     budgetGoalsTab: "เป้าหมาย",
-    budgetTotalBudget: "งบประมาณรวมเดือนนี้",
-    budgetSpent: "ใช้ไป",
+    budgetTotalBudget: "ขีดจำกัดผู้พิทักษ์รายเดือน",
+    budgetSpent: "ใช้ไปแล้ว",
     budgetLeft: "คงเหลือ",
-    budgetDaysLeft: "วันที่เหลือ",
-    budgetAvgDay: "เฉลี่ย/วัน",
-    budgetProjected: "การคาดการณ์",
-    budgetOverBudget: "เกินงบ",
-    budgetNearLimit: "ใกล้ถึงขีดจำกัด",
+    budgetDaysLeft: "จำนวนวันคงเหลือ",
+    budgetAvgDay: "เฉลี่ยต่อวัน",
+    budgetProjected: "ยอดประมาณการ",
+    budgetOverBudget: "ใช้จ่ายเกินขีดจำกัด",
+    budgetNearLimit: "ใกล้เต็มขีดจำกัด",
     budgetMonthlyTrend: "แนวโน้มรายเดือน",
-    budgetAIRecommendation: "คำแนะนำ AI",
-    budgetSetCoolRule: "ตั้งกฎคูลดาวน์",
-    budgetAddCategory: "เพิ่มหมวดหมู่ใหม่",
-    budgetEditCategory: "แก้ไขหมวดหมู่",
-    budgetCategoryName: "ชื่อหมวดหมู่",
-    budgetMonthlyLimit: "งบประมาณรายเดือน",
+    budgetAIRecommendation: "คำแนะนำผู้พิทักษ์",
+    budgetSetCoolRule: "ตั้งกฎหักห้ามใจ",
+    budgetAddCategory: "เพิ่มหมวดหมู่ผู้พิทักษ์",
+    budgetEditCategory: "แก้ไขหมวดหมู่ผู้พิทักษ์",
+    budgetCategoryName: "ชื่อผู้พิทักษ์",
+    budgetMonthlyLimit: "วงเงินรายเดือน",
     budgetSave: "บันทึก",
     budgetCancel: "ยกเลิก",
-    budgetDeleteCategory: "ลบหมวดหมู่",
+    budgetDeleteCategory: "ลบผู้พิทักษ์",
     budgetDeleteConfirm: "คุณแน่ใจหรือไม่?",
     budgetProgressBar: "ความคืบหน้า",
-    budgetOverBudgetAlert: "แจ้งเตือนเกินงบ",
-    budgetAddFirstBudget: "เพิ่มหมวดหมู่งบประมาณแรกของคุณ",
-    budgetNoCategories: "ยังไม่มีหมวดหมู่",
-    budgetUnlockElite: "ปลดล็อกด้วย ELITE",
-    budgetEliteFeature: "การวิเคราะห์งบขั้นสูงและแนวโน้มหลายเดือน",
-    budgetCreateFirst: "สร้างงบประมาณ",
+    budgetOverBudgetAlert: "แจ้งเตือนเกินขีดจำกัด",
+    budgetAddFirstBudget: "ตั้งค่าผู้พิทักษ์รายแรกของคุณ",
+    budgetNoCategories: "ยังไม่มีผู้พิทักษ์การใช้จ่าย",
+    budgetUnlockElite: "ปลดล็อกด้วยแผน ELITE",
+    budgetEliteFeature: "การวิเคราะห์ผู้พิทักษ์ขั้นสูงและแนวโน้มหลายเดือน",
+    budgetCreateFirst: "สร้างผู้พิทักษ์",
     budgetAllGoals: "เป้าหมายทั้งหมด",
 
     // Goal Simulation Page
-    goalSimulationTitle: "จำลองเป้าหมาย",
-    goalSimulationSub: "วางแผนอนาคตทางการเงินด้วยการจำลอง AI",
+    goalSimulationTitle: "ตัวปล่อยเป้าหมาย",
+    goalSimulationSub: "วางแผนอนาคตทางการเงินของคุณด้วยสถานการณ์จำลองอัจฉริยะ",
     goalSimulationGoalsTab: "เป้าหมาย",
-    goalSimulationSimulationTab: "จำลอง",
+    goalSimulationSimulationTab: "การจำลอง",
     goalSimulationUnlockElite: "ปลดล็อก Elite",
-    goalSimulationTargetDate: "วันเป้าหมาย",
-    goalSimulationRemaining: "คงเหลือ",
-    goalSimulationSaved: "ออมแล้ว",
-    goalSimulationTarget: "เป้า",
-    goalSimulationMonths: "เดือน",
-    goalSimulationAIRecommendation: "คำแนะนำ AI",
+    goalSimulationTargetDate: "วันที่เป้าหมาย",
+    goalSimulationRemaining: "ยอดคงเหลือที่ต้องเก็บ",
+    goalSimulationSaved: "เก็บออมแล้ว",
+    goalSimulationTarget: "ยอดเป้าหมาย",
+    goalSimulationMonths: "จำนวนเดือน",
+    goalSimulationAIRecommendation: "คำแนะนำจาก AI",
     goalSimulationScenario: "สถานการณ์จำลอง",
-    goalSimulationModerateGrowth: "การเติบโตแบบปานกลาง",
-    goalSimulationAggressiveSave: "ออมเข้มข้น",
-    goalSimulationRelaxedPace: "ผ่อนคลาย",
-    goalSimulationMonthlyContribution: "เงินออมรายเดือน",
-    goalSimulationProjectedTimeline: "ไทม์ไลน์ที่คาดการณ์",
-    goalSimulation24Months: "คาดการณ์ 24 เดือน",
-    goalSimulationRun: "รัน",
-    goalSimulationSimulating: "กำลังจำลอง...",
-    goalSimulationProjectedValue: "มูลค่าคาดการณ์",
-    goalSimulationTimeToGoal: "เวลาถึงเป้า",
-    goalSimulationAIInsight: "ข้อมูลเชิงลึก AI",
+    goalSimulationModerateGrowth: "เติบโตปานกลาง",
+    goalSimulationAggressiveSave: "ออมเชิงรุก",
+    goalSimulationRelaxedPace: "ออมแบบผ่อนคลาย",
+    goalSimulationMonthlyContribution: "ยอดเก็บออมรายเดือน",
+    goalSimulationProjectedTimeline: "ระยะเวลาประเมิน",
+    goalSimulation24Months: "ประมาณการในอีก 24 เดือน",
+    goalSimulationRun: "เริ่มการจำลอง",
+    goalSimulationSimulating: "กำลังประมวลผลการจำลอง...",
+    goalSimulationProjectedValue: "มูลค่าประเมินในอนาคต",
+    goalSimulationTimeToGoal: "เวลาที่จะบรรลุเป้าหมาย",
+    goalSimulationAIInsight: "มุมมองเชิงลึกจาก AI",
     goalSimulationUnlockAdvanced: "ปลดล็อกการจำลองขั้นสูง",
-    goalSimulationUnlockAdvancedDesc: "เข้าถึงการคาดการณ์ Money Twin, การติดตามหลายเป้าหมาย และการเปรียบเทียบสถานการณ์ AI",
-    goalSimulationUpgradeElite: "อัปเกรดเป็น Elite",
-    goalSimulationComplete: "สำเร็จ",
-    goalSimulationNow: "ปัจจุบัน",
-    goalSimulationReturn: "ผลตอบแทน",
+    goalSimulationUnlockAdvancedDesc: "เข้าถึงการจำลองการเงินขั้นสูง การติดตามหลายเป้าหมายพร้อมกัน และการเปรียบเทียบสถานการณ์ด้วย AI",
+    goalSimulationUpgradeElite: "อัปเกรดเป็นระดับ Elite",
+    goalSimulationComplete: "Complete",
+    goalSimulationNow: "ขณะนี้",
+    goalSimulationReturn: "return",
 
-    // Money Twin Blueprint Page
-    moneyTwinTitle: "พิมพ์เขียว Money Twin",
-    moneyTwinSub: "ตัวตนทางการเงินของคุณ — สถานะปัจจุบันเทียบเป้าหมาย",
-    moneyTwinYourTwin: "ตัวตน Money Twin ของคุณ",
-    moneyTwinLevel: "Money Twin ระดับ",
-    moneyTwinStreak: "สตรีค",
-    moneyTwinArchetype: "แบบแผนพฤติกรรม",
-    moneyTwinTwinRadar: "เรดาร์ Twin",
-    moneyTwinCurrentVsIdeal: "สถานะปัจจุบัน (เส้นทึบ) เทียบเป้าหมาย (เส้นประ) — เติมเต็มช่องว่าง",
-    moneyTwinCurrent: "ปัจจุบัน",
-    moneyTwinIdeal: "เป้าหมาย",
-    moneyTwinPredictionEngine: "เครื่องคาดการณ์ Twin",
-    moneyTwinPredictionSub: "การคาดการณ์การตัดสินใจทางการเงินถัดไปด้วย AI",
-    moneyTwinRecommendations: "คำแนะนำปรับแนว Twin",
-    moneyTwinEvolution: "วิวัฒนาการ Twin",
-    moneyTwinEliteFeature: "ฟีเจอร์ ELITE",
-    moneyTwinEliteDesc: "วิวัฒนาการ Twin รายสัปดาห์ต้องใช้แพลน ELITE",
-    moneyTwinUnlockElite: "ปลดล็อก ELITE",
-    moneyTwinAllGood: "Twin ของคุณสอดคล้องดีแล้ว! รักษาสิ่งที่ทำอยู่",
-    moneyTwinBasicPreview: "ตัวอย่างพรีเมียม — แสดง 3 จาก 5 แกน",
-    moneyTwinProActive: "PRO เปิดใช้งาน — เรดาร์ 5 แกนเต็มรูปแบบปลดล็อกแล้ว",
-    moneyTwinProDesc: "อัปเกรดเป็น ELITE เพื่อปลดล็อกการคาดการณ์พฤติกรรมและไทม์ไลน์รายสัปดาห์",
+    netWorthHeroLabel: "NET WORTH",
+    netWorthPositiveChange: "+$320 from yesterday",
+    netWorthNegativeChange: "-$180 from yesterday",
+    assetBreakdownTitle: "Assets vs Liabilities",
+    quickAddPlaceholder: "How much did you spend?",
+    aiCategorySuggestion: "AI Suggestion • Confirm",
+    underBudgetProgress: "Remaining $2,400 until end of month",
+    overBudgetProgress: "Over budget this month by 15%...",
+    subscriptionWarning3Days: "Charged in 3 days • $299",
+    adaptiveFABMessage: "Record your first expense to start behavioral analysis today.",
+
+    // PaywallPage
+    paywallHeading: "รับ PicksWise",
+    paywallSubheading: "ปลดล็อกศักยภาพทางการเงินของคุณ",
+    paywallTogglePro: "PRO",
+    paywallToggleElite: "ELITE",
+    paywallPerYear: "/ปี",
+    paywallPerMonth: "/เดือน",
+    paywallSubscribe: "สมัครสมาชิก",
+    paywallAutoRenew: "ต่ออายุอัตโนมัติ ยกเลิกได้ทุกเมื่อ",
+    paywallWelcome: "ยินดีต้อนรับสู่ Premium!",
+    paywallSuccessText: "คุณสามารถใช้งานฟีเจอร์พิเศษได้แล้ว",
+    paywallGetStarted: "เริ่มต้นใช้งาน",
+    paywallFeatures: "ฟีเจอร์",
+    paywallFree: "ฟรี",
+    paywallLoading: "กำลังโหลด...",
+    paywallScanQr: "สแกน QR เพื่อชำระผ่านพร้อมเพย์",
+    paywallScanQrHint: "เปิดแอปธนาคารของคุณแล้วสแกน QR นี้เพื่อชำระเงิน",
+    paywallWaitingPayment: "กำลังรอการชำระเงิน...",
+    paywallQrExpiresIn: "QR หมดอายุในอีก",
+    paywallPaymentFailed: "ชำระเงินไม่สำเร็จ กรุณาลองอีกครั้ง",
+    paywallBack: "ย้อนกลับ",
+    paywallQrExpired: "QR หมดอายุแล้ว",
+    paywallTryAgain: "ลองอีกครั้ง",
+
+    // Subscription Shadow Page
+    subscriptionShadowTitle: "เงาการสมัคร",
+    subscriptionShadowSubtitle: "ชั้นข้อมูลทางการเงิน",
+    subShadowAddBtn: "เพิ่ม",
+    subShadowMonthly: "รายเดือน",
+    subShadowTotalRecurring: "รวมค่าสมัคร",
+    subShadowYearly: "รายปี",
+    subShadowProjectedAnnual: "คาดการณ์รายปี",
+    subShadowThisWeek: "สัปดาห์นี้",
+    subShadowCharges: "รายการ",
+    subShadowActiveCount: "ใช้งาน",
+    subShadowActiveLabel: "การสมัคร",
+    subShadowAllFilter: "ทั้งหมด",
+    subShadowPausedFilter: "พักการใช้งาน",
+    subShadowCancelledFilter: "ยกเลิกแล้ว",
+    subShadowSortLabel: "เรียง:",
+    subShadowSortNextBilling: "วันตัดถัดไป",
+    subShadowSortAmount: "จำนวนเงิน",
+    subShadowSortName: "ชื่อ",
+    subShadowNoSubs: "ยังไม่มีการสมัคร",
+    subShadowNoSubsDesc: "เริ่มติดตามการชำระเงินประจำเพื่อความชัดเจนทางการเงินของคุณ",
+    subShadowAddFirst: "เพิ่มการสมัครแรก",
+    subShadowDueToday: "วันนี้",
+    subShadowTomorrow: "พรุ่งนี้",
+    subShadowDays: "วัน",
+    subShadowNextBillingDate: "วันตัดถัดไป",
+    subShadowLastUsed: "ใช้งานล่าสุด",
+    subShadowFrequency: "ความถี่",
+    subShadowAnnualCost: "ค่าใช้จ่ายรายปี",
+    subShadowCancelBtn: "ยกเลิกการสมัคร",
+    subShadowReactivateBtn: "เปิดใช้งานอีกครั้ง",
+    subShadowDeleteBtn: "ลบ",
+    subShadowCategoryBreakdown: "แยกตามหมวดหมู่",
+    subShadowUpcomingCharges: "รายการจะถูกตัดเร็ว ๆ นี้",
+    subShadowNoChargesThisWeek: "ไม่มีรายการในสัปดาห์นี้",
+    subShadowAiInsightTitle: "ข้อมูลเชิงลึก AI",
+    subShadowSavingsPotential: "ศักยภาพการประหยัดรายเดือน",
+    subShadowAddModalTitle: "เพิ่มการสมัคร",
+    subShadowAddModalDesc: "ติดตามการชำระเงินประจำ",
+    subShadowServiceName: "ชื่อบริการ",
+    subShadowBillingCycle: "รอบการตัดบัญชี",
+    subShadowCategory: "หมวดหมู่",
+    subShadowNextBillingOptional: "วันตัดถัดไป (ไม่บังคับ)",
+    subShadowCalendarTab: "มุมมองปฏิทิน",
+    subShadowListTab: "มุมมองรายการ",
+    subShadowConciergeTitle: "ผู้ช่วยการยกเลิก",
+    subShadowConciergeDesc: "ให้ PicksWise ช่วยยกเลิกบริการอัตโนมัติ หรือดำเนินการด้วยตนเอง:",
+    subShadowConciergeBtn: "ให้ AI ยกเลิกบริการ",
+    subShadowCancelPhone: "โทรศัพท์",
+    subShadowCancelEmail: "อีเมล",
+    subShadowCancelWeb: "เว็บไซต์",
+    subShadowViewCancelInstructions: "ดูคู่มือการยกเลิก",
+    subShadowUpcomingTab: "รายการถัดไป",
+    subShadowAllTab: "ทั้งหมด",
+    subShadowComingUpCardTitle: "รายการเร็วๆ นี้",
+    subShadowLeftToPay: "ยอดค้างชำระเดือนนี้",
+    subShadowActiveSubscriptions: "บริการที่เปิดใช้งาน",
+    subShadowPredictiveAmount: "คาดการณ์",
+    subShadowSkipThisMonth: "ข้ามเดือนนี้",
+    subShadowEditAmount: "แก้ไขยอดเงิน",
+    subShadowMarkAsCancelled: "ทำเครื่องหมายว่ายกเลิกแล้ว",
+    subShadowSharedWith: "แชร์ค่าใช้จ่ายกับ",
+    subShadowPriceHiked: "ราคาปรับขึ้น",
+    subShadowPaidThisMonth: "ชำระแล้วในเดือนนี้",
+    subShadowUpcomingBills: "บิลที่กำลังมาถึง",
+    subShadowMicroBilling: "บิลรายย่อย",
+    subShadowLinkedTo: "ชำระผ่าน",
+
+    // AI Coach Section
+    aiCoachTitle: "AI Coach",
+    aiCoachSummary: "สรุปสั้น ๆ: ค่าใช้จ่ายครึ่งเดือนนี้สูงกว่าปกติ และแนะนำให้ลดค่าใช้จ่ายที่ไม่จำเป็น 2 รายการ",
+
+    // Campaign CTAs (Tesla-style action buttons)
+    ctaAddTransaction: "+ Money Pulse",
+    ctaSetBudget: "Set Guardian",
+    ctaViewReport: "Read My Story",
+    ctaSaveMoney: "Ignite Goal",
+
+    // Campaign Push Notification Labels
+    pushGhostDetected: "Ghost Detected",
+    pushGuardianAlert: "Guardian Alert",
+    pushGoalProgress: "Goal Progress",
+
+    // Slide to Upgrade / SwipeConfirm
+    slideUpgrade: "ปลดล็อก",
+    slideConfirm: "ปัดเพื่อยืนยัน",
+    swipeConfirm: "ปัดเพื่อยืนยัน",
+
+    // Common UI
+    commonGoBack: "ย้อนกลับ",
+    commonInfo: "ข้อมูล",
+
+    // Profile Settings Page
+    profileTitle: "โปรไฟล์",
+    profileDefaultsName: "ชื่อของคุณ",
+    profileSetupComplete: "ตั้งค่าเสร็จแล้ว",
+    profileEditProfileAria: "แก้ไขโปรไฟล์",
+    profileEditNamePrompt: "แก้ไขชื่อ:",
+    profileEditEmailPrompt: "แก้ไขอีเมล:",
+    profileLogOut: "ออกจากระบบ",
+
+    // Bottom Navigation
+    bottomNavNavigation: "การนำทางหลัก",
   }
 };

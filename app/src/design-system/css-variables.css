@@ -1,0 +1,140 @@
+/**
+ * @deprecated since v36 — Token architecture migrated to tokens.css
+ * ============================================================
+ * DailyStack Design System — CSS Custom Properties v3.0 (LEGACY)
+ * ============================================================
+ * SSOT is now: design-system/tokens.css
+ * Do NOT import this file. Use tokens.css instead.
+ * ============================================================
+ * Pilo Light Mode — Apple HIG + Lime E-Pay Accent
+ *
+ * Usage: Import this file in your app entry point
+ * (e.g., main.tsx, App.tsx, or index.css):
+ *
+ *   @import './design-system/css-variables.css';
+ *
+ * Or include the variables directly in your CSS layer.
+ *
+ * All values mirror color-tokens.ts — single source of truth.
+ * ============================================================
+ */
+
+:root {
+  /* ── Brand: Lime E-Pay ─────────────────────────────────────── */
+  --color-lime: #56be89;
+  --color-lime-light: #6fcca3;
+  --color-lime-muted: rgba(205, 255, 36, 0.15);
+  --color-lime-ghost: rgba(205, 255, 36, 0.3);
+
+  /* ── Brand: Orange Accent ──────────────────────────────────── */
+  --color-orange: #FF5733;
+  --color-orange-light: #FF7A52;
+  --color-orange-muted: rgba(255, 87, 51, 0.15);
+  --color-orange-ghost: rgba(255, 87, 51, 0.3);
+
+  /* ── Brand: Cyan ───────────────────────────────────────────── */
+  --color-cyan: #0284C7;
+  --color-cyan-light: #38BDF8;
+  --color-cyan-dark: #0369A1;
+  --color-cyan-muted: rgba(2, 132, 199, 0.15);
+  --color-cyan-ghost: rgba(2, 132, 199, 0.3);
+
+  /* ── Background (Pilo Light) ───────────────────────────────── */
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F5F5F7;
+  --color-bg-card: #FFFFFF;
+  --color-bg-elevated: #FAFAFA;
+  --color-bg-input: #F0F0F0;
+  --color-bg-tab-bar: rgba(255, 255, 255, 0.92);
+  --color-bg-backdrop: rgba(0, 0, 0, 0.4);
+
+  /* ── Surface (Pilo Light) ──────────────────────────────────── */
+  --color-surface: #FFFFFF;
+  --color-surface-secondary: #F0F0F0;
+  --color-surface-tertiary: #E5E5EA;
+  --color-surface-tinted: rgba(205, 255, 36, 0.08);
+  --color-surface-tinted-strong: rgba(205, 255, 36, 0.15);
+
+  /* ── Border (Apple HIG) ────────────────────────────────────── */
+  --color-border: #D2D2D7;
+  --color-border-subtle: rgba(210, 210, 215, 0.6);
+  --color-border-light: #E5E5EA;
+  --color-border-accent: rgba(205, 255, 36, 0.5);
+  --color-border-focus: rgba(0, 122, 255, 0.5);
+
+  /* ── Text (Apple HIG) ───────────────────────────────────────── */
+  --color-text-primary: #1D1D1F;
+  --color-text-secondary: #86868B;
+  --color-text-tertiary: #AEAEB2;
+  --color-text-placeholder: #C7C7CC;
+  --color-text-inverse: #FFFFFF;
+  --color-text-lime: #B8E82A;
+
+  /* ── Semantic: Success (Apple Green) ───────────────────────── */
+  --color-success: #34C759;
+  --color-success-light: rgba(52, 199, 89, 0.12);
+
+  /* ── Semantic: Neutral / Info (Apple Blue) ─────────────────── */
+  --color-neutral: #007AFF;
+  --color-neutral-light: rgba(0, 122, 255, 0.12);
+
+  /* ── Semantic: Insights / AI (Apple Purple) ────────────────── */
+  --color-insights: #AF52DE;
+  --color-insights-light: rgba(175, 82, 222, 0.12);
+
+  /* ── Warning (Apple Orange — NOT red) ──────────────────────── */
+  --color-warning: #FF9F0A;
+  --color-warning-warm: #FF9500;
+  --color-warning-soft: #FFCC00;
+  --color-warning-muted: rgba(255, 159, 10, 0.15);
+  --color-warning-ghost: rgba(255, 159, 10, 0.3);
+  --color-warning-pulse: rgba(255, 159, 10, 0.6);
+
+  /* ── Error (Apple Red — sparingly only) ──────────────────────── */
+  --color-error: #FF3B30;
+  --color-error-light: rgba(255, 59, 48, 0.12);
+  --color-error-ghost: rgba(255, 59, 48, 0.3);
+
+  /* ── Component Shadows ─────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-lime: 0 2px 12px rgba(205, 255, 36, 0.3);
+
+  /* ── Component: Glass ──────────────────────────────────────── */
+  --glass-surface: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-blur: blur(20px);
+
+  /* ── Component: Skeleton ────────────────────────────────────── */
+  --skeleton-base: #E5E5EA;
+  --skeleton-shimmer: #F5F5F7;
+
+  /* ── Component: Tab Bar ────────────────────────────────────── */
+  --tab-bar-bg: rgba(255, 255, 255, 0.92);
+  --tab-bar-active: #1D1D1F;
+  --tab-bar-inactive: #8E8E93;
+  --tab-bar-border: rgba(0, 0, 0, 0.06);
+
+  /* ── Text: Muted (Apple system gray) ─────────────────────── */
+  --color-text-muted: #6E6E73;
+
+  /* ── Hero Card: Dark variant (Dashboard HeroBalanceCard) ─── */
+  --color-dark-bg: #0B0F0A;
+  --color-dark-card: #0B0F0A;
+  --color-dark-border: #1C2520;
+  /* WCAG 4.5:1 on dark-bg #0B0F0A — #C4C4C4 ≈ 5.7:1 */
+  --color-dark-text: #C4C4C4;
+  /* WCAG 4.5:1 on dark-bg — #E8E8E8 ≈ 12.9:1 */
+  --color-dark-text-muted: #E8E8E8;
+
+  /* ── Accessibility: Focus ring (WCAG 2.4.7) ────────────── */
+  /* 2px solid lime, 2px offset — visible on both light & dark */
+  --focus-ring: 2px solid #56be89;
+  --focus-ring-offset: 2px;
+
+  /* ── Accessibility: Dark lime (passes 4.5:1 on white) ──── */
+  /* #6B8E00 ≈ 4.5:1 on #FFFFFF */
+  --color-lime-accessible: #5E8C00;
+}

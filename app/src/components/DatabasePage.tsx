@@ -194,20 +194,6 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
   goal_id UUID
 );`
           },
-          transaction_emotions: {
-            columns: [
-              { name: 'transaction_id', type: 'UUID (PK, FK)', desc: 'Maps to root transaction event' },
-              { name: 'emotion_type', type: 'VARCHAR', desc: 'Trigger catalyst (Joy, Stress, Social, Neutral)' },
-              { name: 'confidence_score', type: 'NUMERIC', desc: 'AI parser reliability percentage (0.0 - 1.0)' },
-              { name: 'source', type: 'VARCHAR', desc: 'Indicates user feedback or neural model classification (User | AI)' }
-            ],
-            sql: `CREATE TABLE transaction_emotions (
-  transaction_id UUID PRIMARY KEY REFERENCES transactions(id) ON DELETE CASCADE,
-  emotion_type VARCHAR(50) CHECK (emotion_type IN ('Happy', 'Stress', 'Reward', 'Social', 'Motivated', 'Anxious', 'Neutral')),
-  confidence_score NUMERIC(3,2) CHECK (confidence_score BETWEEN 0.0 AND 1.0),
-  source VARCHAR(30) DEFAULT 'AI Generated'
-);`
-          },
           transaction_behavior_signals: {
             columns: [
               { name: 'transaction_id', type: 'UUID (PK, FK)', desc: 'Link to root transaction event' },
@@ -239,7 +225,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       {
         id: 4,
         name: 'Goal Layer',
-        desc: 'Future-orientated milestone trackers fueling the Money Twin profile',
+        desc: 'Future-orientated milestone trackers fueling savings discipline',
         tables: {
           goals: {
             columns: [
@@ -388,51 +374,6 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       },
       {
         id: 8,
-        name: 'Money Twin Layer',
-        desc: 'Bioreactive copy mapping of user’s behavioral traits and scoring',
-        tables: {
-          money_twin_profiles: {
-            columns: [
-              { name: 'user_id', type: 'UUID (PK, FK)', desc: 'Links strictly to sovereign user identification' },
-              { name: 'behavior_score', type: 'NUMERIC', desc: 'General behavioral performance calculation (0-100)' },
-              { name: 'risk_score', type: 'NUMERIC', desc: 'Volatile emotional impulse risk indicator' },
-              { name: 'discipline_score', type: 'NUMERIC', desc: 'Delayed gratification consistency' },
-              { name: 'goal_score', type: 'NUMERIC', desc: 'Milestone deadline proximity performance' },
-              { name: 'consistency_score', type: 'NUMERIC', desc: 'Daily tracking cadence record ratio' },
-              { name: 'growth_score', type: 'NUMERIC', desc: 'Asset net acceleration curve performance' },
-              { name: 'last_updated', type: 'TIMESTAMP', desc: 'Biometric snapshot sync sync instance' }
-            ],
-            sql: `CREATE TABLE money_twin_profiles (
-  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  behavior_score NUMERIC(5,2) DEFAULT 90.00,
-  risk_score NUMERIC(5,2) DEFAULT 10.00,
-  discipline_score NUMERIC(5,2) DEFAULT 85.00,
-  goal_score NUMERIC(5,2) DEFAULT 75.00,
-  consistency_score NUMERIC(5,2) DEFAULT 95.00,
-  growth_score NUMERIC(5,2) DEFAULT 80.00,
-  last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);`
-          },
-          money_twin_traits: {
-            columns: [
-              { name: 'id', type: 'UUID (PK)', desc: 'Unique trait ID tag' },
-              { name: 'user_id', type: 'UUID (FK)', desc: 'Root user link' },
-              { name: 'trait_name', type: 'VARCHAR', desc: 'Impulse Buyer | Careful Planner | Opportunity Seeker | Lifestyle Spender' },
-              { name: 'trait_value', type: 'VARCHAR', desc: 'Cognitive descriptor explanation' },
-              { name: 'confidence_score', type: 'NUMERIC', desc: 'Fidelity of biometric character mapping (0.00 - 1.00)' }
-            ],
-            sql: `CREATE TABLE money_twin_traits (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  trait_name VARCHAR(100) NOT NULL,
-  trait_value VARCHAR(255) NOT NULL,
-  confidence_score NUMERIC(3,2) CHECK (confidence_score BETWEEN 0.0 AND 1.0)
-);`
-          }
-        }
-      },
-      {
-        id: 9,
         name: 'Transformation Layer',
         desc: 'Gamification algorithms, achievements, and behavioral streaks metrics',
         tables: {
@@ -501,7 +442,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
         }
       },
       {
-        id: 10,
+        id: 9,
         name: 'Dashboard Widget Layer',
         desc: 'Enables custom-tailored layouts and dynamic visibility based on permissions',
         tables: {
@@ -539,7 +480,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
         }
       },
       {
-        id: 11,
+        id: 10,
         name: 'AI Memory Layer',
         desc: 'Retains long-term contextual semantic memories securely',
         tables: {
@@ -594,7 +535,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       {
         user_id: dummyUserId,
         theme: 'dark',
-        dashboard_layout: 'bento-fbis-centric',
+        dashboard_layout: 'bento-standard',
         quick_add_mode: false,
         notification_preferences: { email: true, alerts: true, telegram: false },
         ai_personality: 'Direct (Stoic Master)',
@@ -628,7 +569,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
 
     // Live categories table
     const categoriesList = [
-      { id: 'cat_tech', user_id: dummyUserId, parent_id: null, name: 'Technology', icon: 'Laptop', color: '#C7FF2E', category_type: 'Expense' },
+      { id: 'cat_tech', user_id: dummyUserId, parent_id: null, name: 'Technology', icon: 'Laptop', color: '#56be89', category_type: 'Expense' },
       { id: 'cat_transport', user_id: dummyUserId, parent_id: null, name: 'Transportation', icon: 'Car', color: '#38BDF8', category_type: 'Expense' },
       { id: 'cat_social', user_id: dummyUserId, parent_id: null, name: 'Socializing', icon: 'Users', color: '#818CF8', category_type: 'Expense' },
       { id: 'cat_dining', user_id: dummyUserId, parent_id: null, name: 'Dining', icon: 'Coffee', color: '#FB923C', category_type: 'Expense' },
@@ -654,7 +595,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
         amount: Math.abs(t.amount),
         currency: 'USD',
         description: t.merchant,
-        note: t.why ? `User conscious feedback: ${t.why}` : null,
+        note: null,
         transaction_date: t.date || '2026-06-07',
         created_at: `${t.date || '2026-06-07'} 12:45:00`,
         updated_at: `${t.date || '2026-06-07'} 12:45:00`
@@ -672,28 +613,21 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       goal_id: t.goalAssociation ? 'goal_health_101' : null
     }));
 
-    const transaction_emotions = transactions.map((t, idx) => {
-      let emo: any = t.emotion || 'Neutral';
-      if (emo === 'Stressed') emo = 'Stress';
-      if (emo === 'Rewarding') emo = 'Reward';
+    const essentialCategories = ['Bills', 'Utilities', 'Health', 'Transportation', 'Groceries'];
+
+    const transaction_behavior_signals = transactions.map((t, idx) => {
+      const isEssential = essentialCategories.includes(t.category || '');
       return {
         transaction_id: `db_tx_${t.id || idx}`,
-        emotion_type: emo as any,
-        confidence_score: t.emotion === 'Impulse' ? 0.94 : 0.85,
-        source: 'User Selected'
+        behavior_type: isEssential ? 'Essential' : 'Lifestyle',
+        confidence_score: 0.90,
+        ai_reason: `Categorized as ${isEssential ? 'essential' : 'lifestyle'} spending at ${t.merchant}.`
       };
     });
 
-    const transaction_behavior_signals = transactions.map((t, idx) => ({
-      transaction_id: `db_tx_${t.id || idx}`,
-      behavior_type: t.behavioralCategory || (t.emotion === 'Impulse' ? 'Impulse' : (t.emotion === 'Stress' ? 'Emotional' : 'Essential')),
-      confidence_score: t.riskScore ? Number((t.riskScore / 100).toFixed(2)) : 0.90,
-      ai_reason: t.behaviorImpact || `Calculated spending driven by ${t.emotion} triggers targeting ${t.merchant}.`
-    }));
-
     const transaction_intents = transactions.map((t, idx) => ({
       transaction_id: `db_tx_${t.id || idx}`,
-      intent_type: t.intent || (t.emotion === 'Impulse' ? 'Want' : 'Need'),
+      intent_type: essentialCategories.includes(t.category || '') ? 'Need' : 'Want',
       confidence_score: 0.95
     }));
 
@@ -752,27 +686,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       { id: 'rec_02', user_id: dummyUserId, recommendation_type: 'Goal Acceleration', title: 'Sweep Excess Balance to Reserve', description: 'Your Business workspace has $14,500 surplus. Redirect $2,500 safely to Emergency Reserve Goal.', action_required: false, priority: 'Medium', generated_at: '2026-06-07 07:11:15' }
     ];
 
-    // Layer 8 Money Twin profiles & traits
-    const money_twin_profiles = [
-      {
-        user_id: dummyUserId,
-        behavior_score: Number((96 - (transactions.filter(t => t.emotion === 'Impulse').length * 8) - (transactions.filter(t => t.emotion === 'Stress').length * 5)).toFixed(2)),
-        risk_score: Number(((transactions.filter(t => t.emotion === 'Impulse').length / Math.max(1, transactions.length)) * 100).toFixed(2)),
-        discipline_score: Number((100 - (transactions.filter(t => t.emotion === 'Impulse').length * 10)).toFixed(2)),
-        goal_score: 87.20,
-        consistency_score: 95.00,
-        growth_score: 92.50,
-        last_updated: '2026-06-07 08:00:00'
-      }
-    ];
-
-    const money_twin_traits = [
-      { id: 'trait_01', user_id: dummyUserId, trait_name: 'Impulse Protector', trait_value: 'Strong immediate response with cooling rules, but vulnerable in late night hours.', confidence_score: 0.94 },
-      { id: 'trait_02', user_id: dummyUserId, trait_name: 'Strategic Planner', trait_value: 'Allocates high proportion to productivity investments like dev hardware.', confidence_score: 0.88 },
-      { id: 'trait_03', user_id: dummyUserId, trait_name: 'Energy-ROI Maximizer', trait_value: 'Re-allocates money into health and relationship bonds consciously.', confidence_score: 0.91 }
-    ];
-
-    // Layer 9 Transformation
+    // Layer 8 Transformation
     const behavior_scores = [
       { user_id: dummyUserId, date: '2026-06-07', score: 92, reason: 'Zero impulse events recorded today, active self-audit.' },
       { user_id: dummyUserId, date: '2026-06-06', score: 84, reason: 'High-value developer laptop calculated purchase.' },
@@ -796,12 +710,12 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       { user_id: dummyUserId, streak_type: 'Impulse Containment Cadence', current_streak: 3, best_streak: 11, updated_at: '2026-06-07 08:15:00' }
     ];
 
-    // Layer 10 Dashboard configuration
+    // Layer 9 Dashboard configuration
     const dashboard_widgets = [
       { id: 'wd_01', widget_name: 'Behavior Score Ring', widget_type: 'Visual Gauge', availability_plan: 'Core' },
-      { id: 'wd_02', widget_name: 'Emotional Outflows Ledger', widget_type: 'Structured Table', availability_plan: 'Core' },
+      { id: 'wd_02', widget_name: 'Spending Summary Ledger', widget_type: 'Structured Table', availability_plan: 'Core' },
       { id: 'wd_03', widget_name: 'Autopilot Behavioral Lock', widget_type: 'Interactive Toggle', availability_plan: 'Premium OS' },
-      { id: 'wd_04', widget_name: 'Money Twin AI Radar Matrix', widget_type: 'Charts Radar', availability_plan: 'Premium OS' }
+      { id: 'wd_04', widget_name: 'Goal Progress Radar Matrix', widget_type: 'Charts Radar', availability_plan: 'Premium OS' }
     ];
 
     const user_dashboard_layouts = [
@@ -811,7 +725,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       { user_id: dummyUserId, widget_id: 'wd_04', position: 4, is_visible: profile.plan === 'elite', custom_settings: { mode: 'radar' } }
     ];
 
-    // Layer 11 AI Memories
+    // Layer 10 AI Memories
     const ai_memories = [
       { id: 'mem_01', user_id: dummyUserId, memory_type: 'Habit', memory_content: 'Jonathan tends to log impulse purchases on Wednesday afternoons, usually driven by mid-week professional fatigue.', importance_score: 8, created_at: '2026-06-03 18:00:00', updated_at: '2026-06-03 18:00:00' },
       { id: 'mem_02', user_id: dummyUserId, memory_type: 'Goal', memory_content: 'Highly focused on securing tech devs hardware and gym memberships; these are consciously categorised as growth investments.', importance_score: 9, created_at: '2026-06-06 14:15:00', updated_at: '2026-06-07 08:00:00' },
@@ -826,7 +740,6 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       categories: categoriesList,
       transactions: mappedTransactions,
       transaction_contexts,
-      transaction_emotions,
       transaction_behavior_signals,
       transaction_intents,
       goals,
@@ -835,8 +748,6 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       budgets,
       ai_insights,
       ai_recommendations,
-      money_twin_profiles,
-      money_twin_traits,
       behavior_scores,
       achievements,
       user_achievements,
@@ -863,7 +774,13 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
   // Founder rule variables for visual response panel
   const founderRuleInsights = useMemo(() => {
     // 1. Improving or regressing
-    const profileTwin = liveRows.money_twin_profiles?.[0] ?? { behavior_score: 0 };
+    const midnightCount = transactions.filter(t => t.timeOfDay === 'Midnight').length;
+    const profileTwin = {
+      behavior_score: Math.max(50, 96 - midnightCount * 6),
+      discipline_score: Math.max(50, Math.round(100 - midnightCount * 8)),
+      consistency_score: 95.00,
+      growth_score: 92.50
+    };
     const streakData = liveRows.streaks;
     const activeRiskInfo = liveRows.ai_insights.find((i: any) => i.insight_type === 'Risk');
     const goalsList = liveRows.goals;
@@ -886,7 +803,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       },
       behaviors: {
         totalTx: transactions.length,
-        impulseRatio: ((transactions.filter(t => t.emotion === 'Impulse').length / Math.max(1, transactions.length)) * 100).toFixed(0),
+        impulseRatio: ((midnightCount / Math.max(1, transactions.length)) * 100).toFixed(0),
         wantVsNeedRatio: '14% Wants / 86% Core Needs based on behavioral intent mappings.',
         wantVsNeedRatioTh: 'ตามดัชนีกำหนด ความต้องการชั่วครู่ (Want) อยู่ที่ 14% ส่วนปัจจัยพื้นฐาน (Need) อยู่ที่ 86%',
         shiftDescription: 'Strategic hardware updates (Growth category) hold supreme capital outlays over immediate dopamine items.',
@@ -940,7 +857,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       {/* Dynamic Header Badge Section */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-zinc-900 pb-5">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[9.5px] font-mono font-bold uppercase tracking-widest bg-[#C7FF2E]/10 border-[#C7FF2E]/30 text-[#C7FF2E]">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[9.5px] font-mono font-bold uppercase tracking-widest bg-[#56be89]/10 border-[#56be89]/30 text-[#56be89]">
             <Layers className="w-3.5 h-3.5" />
             <span>Behavioral Intelligence Schema V5.1 Engaged</span>
           </div>
@@ -957,7 +874,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
         <div className="flex flex-wrap items-center gap-2">
           <div className="bg-[#121315] border border-zinc-800 px-3 py-2 rounded-xl text-center">
             <span className="block font-mono text-[9px] text-zinc-500 uppercase">Interactive Layers</span>
-            <span className="font-display font-bold text-sm text-[#C7FF2E]">11 Relational Spaces</span>
+            <span className="font-display font-bold text-sm text-[#56be89]">10 Relational Spaces</span>
           </div>
           <div className="bg-[#121315] border border-zinc-800 px-3 py-2 rounded-xl text-center">
             <span className="block font-mono text-[9px] text-zinc-500 uppercase">Live DB Records</span>
@@ -969,14 +886,14 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
       </div>
 
       {/* CORE SPECIFICATIONS - THE 5 FOUNDER RULES BLOCK */}
-      <div id="founder-rule-analyzer-box" className="p-6 rounded-[32px] border bg-zinc-950 border-[#C7FF2E]/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 rounded-bl-[150px] bg-gradient-to-br from-[#C7FF2E]/5 to-transparent pointer-events-none" />
+      <div id="founder-rule-analyzer-box" className="p-6 rounded-[32px] border bg-zinc-950 border-[#56be89]/20 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 rounded-bl-[150px] bg-gradient-to-br from-[#56be89]/5 to-transparent pointer-events-none" />
         
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
-              <span className="font-mono text-[9px] font-black tracking-widest text-[#C7FF2E] uppercase flex items-center gap-1">
-                <BrainCircuit className="w-4 h-4 text-[#C7FF2E] animate-pulse" />
+              <span className="font-mono text-[9px] font-black tracking-widest text-[#56be89] uppercase flex items-center gap-1">
+                <BrainCircuit className="w-4 h-4 text-[#56be89] animate-pulse" />
                 FOUNDER RULE CORE PROMPT
               </span>
               <h3 className="font-display font-extrabold text-lg text-white uppercase tracking-tight">
@@ -1012,7 +929,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
                   onClick={() => setFounderQuery(tab.id)}
                   className={`px-3 py-2 text-[10px] sm:text-xs font-mono rounded-xl border tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
                     founderQuery === tab.id 
-                      ? 'bg-[#C7FF2E] text-black border-[#C7FF2E] font-extrabold' 
+                      ? 'bg-[#56be89] text-black border-[#56be89] font-extrabold' 
                       : 'bg-[#121315] border-zinc-850 text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -1030,7 +947,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
               <div className="grid grid-cols-1 md:grid-cols-12 gap-5" id="resilient-results">
                 <div className="md:col-span-4 space-y-1 bg-black/40 p-4 rounded-xl border border-zinc-850">
                   <span className="font-mono text-[9px] text-zinc-500 uppercase block">Active Metric Status</span>
-                  <span className="text-xl font-display font-black text-[#C7FF2E] block uppercase">
+                  <span className="text-xl font-display font-black text-[#56be89] block uppercase">
                     {lang === 'en' ? founderRuleInsights.progress.status : founderRuleInsights.progress.statusTh}
                   </span>
                   <div className="flex items-center gap-2 pt-2">
@@ -1044,7 +961,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
                     <p className="text-xs text-zinc-300 leading-relaxed font-sans">
                       {lang === 'en' ? founderRuleInsights.progress.trendText : founderRuleInsights.progress.trendTextTh}
                     </p>
-                    <p className="text-[10px] font-mono text-[#C7FF2E] mt-1 font-semibold">
+                    <p className="text-[10px] font-mono text-[#56be89] mt-1 font-semibold">
                       {lang === 'en' ? founderRuleInsights.progress.streakDesc : founderRuleInsights.progress.streakDescTh}
                     </p>
                   </div>
@@ -1077,7 +994,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
                   <p className="text-xs text-zinc-300">
                     {lang === 'en' ? founderRuleInsights.behaviors.wantVsNeedRatio : founderRuleInsights.behaviors.wantVsNeedRatioTh}
                   </p>
-                  <p className="text-xs text-[#C7FF2E] font-semibold">
+                  <p className="text-xs text-[#56be89] font-semibold">
                     {lang === 'en' ? founderRuleInsights.behaviors.shiftDescription : founderRuleInsights.behaviors.shiftDescriptionTh}
                   </p>
 
@@ -1085,7 +1002,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
                     {founderRuleInsights.behaviors.signalsSummary.map((s, i) => (
                       <div key={i} className="flex items-center justify-between text-[11px] bg-zinc-950 px-3 py-1.5 rounded-lg border border-zinc-900">
                         <span className="font-mono text-zinc-300 block">{s.type}</span>
-                        <span className="font-mono text-[#C7FF2E] font-black">{s.ratio}</span>
+                        <span className="font-mono text-[#56be89] font-black">{s.ratio}</span>
                         <span className="text-zinc-500 text-[10px] font-sans block">{s.desc}</span>
                       </div>
                     ))}
@@ -1096,7 +1013,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
 
             {founderQuery === 'risks' && (
               <div className="grid grid-cols-1 md:grid-cols-12 gap-5" id="risk-results">
-                <div className="md:col-span-4 space-y-1 bg-black/40 p-4 rounded-xl border border-red-950/40 text-left">
+                <div className="md:col-span-4 space-y-1 bg-black/40 p-4 rounded-xl border border-danger text-left">
                   <span className="font-mono text-[9px] text-rose-500 uppercase flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3" /> Vulnerability Vector
                   </span>
@@ -1109,14 +1026,14 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
                 </div>
 
                 <div className="md:col-span-8 space-y-3 text-left">
-                  <div className="p-3 bg-red-900/10 border border-red-500/15 rounded-xl">
-                    <span className="block font-mono text-[9px] text-red-400 uppercase font-black">AI Stress Trigger Mapping Flag</span>
+                  <div className="p-3 bg-danger border border-danger rounded-xl">
+                    <span className="block font-mono text-[9px] text-amber-400 uppercase font-black">AI Stress Trigger Mapping Flag</span>
                     <p className="text-xs text-zinc-200 mt-1">
                       {lang === 'en' ? founderRuleInsights.risks.vulnerabilityNode : founderRuleInsights.risks.vulnerabilityNodeTh}
                     </p>
                   </div>
                   <p className="text-xs text-emerald-400 font-mono">
-                    ✅ {lang === 'en' ? founderRuleInsights.risks.mitigationStatus : founderRuleInsights.risks.mitigationStatusTh}
+                    [OK] {lang === 'en' ? founderRuleInsights.risks.mitigationStatus : founderRuleInsights.risks.mitigationStatusTh}
                   </p>
 
                   <div className="grid grid-cols-3 gap-2 text-[10px] pt-1">
@@ -1136,10 +1053,10 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
               <div className="grid grid-cols-1 md:grid-cols-12 gap-5" id="goals-results">
                 <div className="md:col-span-4 space-y-1 bg-black/40 p-4 rounded-xl border border-zinc-850 text-left">
                   <span className="font-mono text-[9px] text-zinc-500 uppercase block">Active Milestones Tracked</span>
-                  <span className="text-xl font-display font-black text-[#C7FF2E] block uppercase">
+                  <span className="text-xl font-display font-black text-[#56be89] block uppercase">
                     {founderRuleInsights.goals.activeCount} GOAL OBJECTIVES
                   </span>
-                  <p className="text-[10px] text-[#C7FF2E] font-mono font-bold pt-1">
+                  <p className="text-[10px] text-[#56be89] font-mono font-bold pt-1">
                     {founderRuleInsights.goals.proximityRate}
                   </p>
                 </div>
@@ -1154,7 +1071,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
                       <div key={i} className="bg-zinc-950 px-3 py-2 rounded-xl border border-zinc-900 space-y-1">
                         <div className="flex justify-between text-[11px] font-mono">
                           <span className="text-white font-bold">{m.title}</span>
-                          <span className="text-[#C7FF2E] font-black">{m.progress}</span>
+                          <span className="text-[#56be89] font-black">{m.progress}</span>
                         </div>
                         <div className="flex justify-between text-[9px] text-zinc-500 font-mono">
                           <span>{m.completion}</span>
@@ -1171,7 +1088,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
               <div className="grid grid-cols-1 md:grid-cols-12 gap-5" id="ai-next-results">
                 <div className="md:col-span-4 space-y-1.5 bg-black/40 p-4 rounded-xl border border-zinc-850 text-left">
                   <span className="font-mono text-[9px] text-zinc-500 uppercase block">Core Priority Action Target</span>
-                  <p className="text-xs font-display font-bold text-[#C7FF2E] leading-tight block">
+                  <p className="text-xs font-display font-bold text-[#56be89] leading-tight block">
                     {lang === 'en' ? founderRuleInsights.ai_next.priorityAction : founderRuleInsights.ai_next.priorityActionTh}
                   </p>
                   <p className="text-[10px] text-zinc-400 font-sans">
@@ -1181,7 +1098,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
 
                 <div className="md:col-span-8 space-y-3 text-left">
                   <div className="bg-zinc-950 border border-zinc-900 p-3 rounded-xl">
-                    <span className="font-mono text-[9px] text-[#C7FF2E] uppercase font-black">AI Recommendations Trigger</span>
+                    <span className="font-mono text-[9px] text-[#56be89] uppercase font-black">AI Recommendations Trigger</span>
                     <p className="text-xs text-zinc-100 font-bold mt-1">
                       {founderRuleInsights.ai_next.priorityRec}
                     </p>
@@ -1214,7 +1131,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
         <div className="lg:col-span-4 space-y-4" id="schema-layer-menu">
           <div className="p-4 rounded-3xl bg-zinc-950 border border-zinc-850 space-y-3">
             <h3 className="font-display font-extrabold text-sm text-zinc-300 uppercase tracking-tight flex items-center gap-1.5">
-              <Database className="w-4 h-4 text-[#C7FF2E]" />
+              <Database className="w-4 h-4 text-[#56be89]" />
               <span>11-Layer Database Sandbox</span>
             </h3>
             <p className="text-[10px] text-zinc-500">
@@ -1231,12 +1148,12 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
                     onClick={() => handleLayerSelect(layer.id)}
                     className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
                       isActive 
-                        ? 'bg-[#1C1D20] border-[#C7FF2E]/30 text-white' 
+                        ? 'bg-[#1C1D20] border-[#56be89]/30 text-white' 
                         : 'bg-transparent border-transparent hover:bg-zinc-900/60 text-zinc-400 hover:text-zinc-200'
                     }`}
                   >
                     <span className={`w-5 h-5 rounded-lg flex items-center justify-center font-mono text-[10px] font-bold ${
-                      isActive ? 'bg-[#C7FF2E] text-black font-extrabold' : 'bg-zinc-900 text-zinc-500'
+                      isActive ? 'bg-[#56be89] text-black font-extrabold' : 'bg-zinc-900 text-zinc-500'
                     }`}>
                       {layer.id}
                     </span>
@@ -1268,15 +1185,15 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
                     onClick={() => setSelectedTable(tableName)}
                     className={`w-full text-left px-3 py-2.5 rounded-xl border font-mono text-xs transition-all cursor-pointer flex items-center justify-between ${
                       isSelected 
-                        ? 'bg-transparent border-emerald-500/40 text-[#C7FF2E]' 
+                        ? 'bg-transparent border-emerald-500/40 text-[#56be89]' 
                         : 'bg-zinc-900 text-zinc-400 border-zinc-950 hover:text-zinc-200'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <Table className={`w-3.5 h-3.5 ${isSelected ? 'text-[#C7FF2E]' : 'text-zinc-500'}`} />
+                      <Table className={`w-3.5 h-3.5 ${isSelected ? 'text-[#56be89]' : 'text-zinc-500'}`} />
                       <span>{tableName}</span>
                     </div>
-                    {isSelected && <span className="w-1.5 h-1.5 bg-[#C7FF2E] rounded-full animate-ping" />}
+                    {isSelected && <span className="w-1.5 h-1.5 bg-[#56be89] rounded-full animate-ping" />}
                   </button>
                 );
               })}
@@ -1291,7 +1208,7 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
           <div className="p-6 rounded-[28px] bg-zinc-950 border border-zinc-850 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-900 pb-3">
               <div className="text-left space-y-0.5">
-                <span className="font-mono text-[9px] text-[#C7FF2E] uppercase tracking-widest block">Core Table Properties</span>
+                <span className="font-mono text-[9px] text-[#56be89] uppercase tracking-widest block">Core Table Properties</span>
                 <h4 className="font-mono font-black text-white text-lg flex items-center gap-1.5 pt-1">
                   <Terminal className="w-5 h-5 text-emerald-400" />
                   <span>public.{selectedTable}</span>
@@ -1303,14 +1220,14 @@ export default function DatabasePage({ transactions, profile, lang }: DatabasePa
                 <button
                   id="btn-toggle-sql-cols"
                   onClick={() => setShowSqlDef(false)}
-                  className={`px-3 py-1 text-[10px] font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${!showSqlDef ? 'bg-[#C7FF2E] text-black font-extrabold' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`px-3 py-1 text-[10px] font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${!showSqlDef ? 'bg-[#56be89] text-black font-extrabold' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                   Columns
                 </button>
                 <button
                   id="btn-toggle-sql-def"
                   onClick={() => setShowSqlDef(true)}
-                  className={`px-3 py-1 text-[10px] font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${showSqlDef ? 'bg-[#C7FF2E] text-black font-extrabold' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`px-3 py-1 text-[10px] font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${showSqlDef ? 'bg-[#56be89] text-black font-extrabold' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                   SQL DDL Schema
                 </button>

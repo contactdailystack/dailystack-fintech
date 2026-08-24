@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DailyStack - จัดการเงินอย่างฉลาด</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pilo-green: #CCFF00;
+            --emerald-mint: #C7FF2E;
+            --dark-bg: #0D0D0D;
+            --card-bg: #1A1A1A;
+            --card-hover: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0A0A0;
+            --text-muted: #666666;
+            --danger: #FF6B6B;
+            --success: #4ADE80;
+            --warning: #FBBF24;
+            --gradient-primary: linear-gradient(135deg, var(--pilo-green), var(--emerald-mint));
+            --gradient-dark: linear-gradient(180deg, #1A1A1A 0%, #0D0D0D 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Phone Frame Container */
+        .phone-container {
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--dark-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--dark-bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .status-bar .time {
+            font-weight: 600;
+        }
+
+        .status-bar .icons {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .status-bar .icons svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px 28px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--pilo-green);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-item span {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .nav-item .fab {
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -28px;
+            box-shadow: 0 4px 20px rgba(204, 255, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item .fab svg {
+            width: 28px;
+            height: 28px;
+            color: var(--dark-bg);
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            padding-bottom: 100px;
+            min-height: calc(100vh - 60px);
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Onboarding Screen */
+        .onboarding {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 24px 40px;
+            text-align: center;
+            background: var(--dark-bg);
+        }
+
+        .onboarding-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .onboarding-screen.active {
+            display: flex;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .onboarding-icon {
+            width: 120px;
+            height: 120px;
+            background: var(--gradient-primary);
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 40px rgba(204, 255, 0, 0.3);
+        }
+
+        .onboarding-icon svg {
+            width: 60px;
+            height: 60px;
+            color: var(--dark-bg);
+        }
+
+        .onboarding h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .onboarding p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 40px;
+            max-width: 320px;
+        }
+
+        .onboarding-dots {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            width: 24px;
+            border-radius: 4px;
+            background: var(--pilo-green);
+        }
+
+        .btn-primary {
+            width: 100%;
+            max-width: 320px;
+            padding: 16px 32px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 16px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark-bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(204, 255, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(204, 255, 0, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            padding: 20px 24px;
+            background: linear-gradient(180deg, var(--dark-bg) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .greeting {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .user-name {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* Net Worth Card */
+        .networth-card {
+            margin: 0 24px 24px;
+            padding: 24px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .networth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: var(--gradient-primary);
+            opacity: 0.1;
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .networth-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .networth-amount {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+
+        .networth-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: rgba(74, 222, 128, 0.2);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--success);
+        }
+
+        .networth-change.negative {
+            background: rgba(255, 107, 107, 0.2);
+            color: var(--danger);
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 0 24px 24px;
+        }
+
+        .stat-card {
+            padding: 16px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-card.income {
+            border-left: 3px solid var(--success);
+        }
+
+        .stat-card.expense {
+            border-left: 3px solid var(--danger);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .stat-amount {
+            font-size: 20px;
+            font-weight: 600;
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Spending Progress */
+        .spending-progress {
+            margin: 0 24px 24px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .progress-amount {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar-container {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-status {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .progress-status strong {
+            color: var(--pilo-green);
+        }
+
+        /* Section Title */
+        .section-title {
+            padding: 0 24px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-title a {
+            font-size: 14px;
+            color: var(--pilo-green);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Bills Section */
+        .bills-scroll {
+            display: flex;
+            gap: 12px;
+            padding: 0 24px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            margin-bottom: 24px;
+        }
+
+        .bills-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bill-card {
+            min-width: 160px;
+            padding: 16px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            scroll-snap-align: start;
+            transition: all 0.3s ease;
+        }
+
+        .bill-card:hover {
+            background: var(--card-hover);
+            transform: translateY(-2px);
+        }
+
+        .bill-card.due-soon {
+            border-color: var(--warning);
+            background: rgba(251, 191, 36, 0.1);
+        }
+
+        .bill-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(204, 255, 0, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .bill-icon svg {
+            width: 20px;
+            height: 20px;
+            color: var(--pilo-green);
+        }
+
+        .bill-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .bill-amount {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+
+        .bill-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .bill-date.urgent {
+            color: var(--warning);
+            font-weight: 500;
+        }
+
+        /* Recent Transactions */
+        .transaction-list {
+            padding: 0 24px;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .transaction-icon svg {
+            width: 22px;
+            height: 22px;
+            color: var(--text-secondary);
+        }
+
+        .transaction-details {
+            flex: 1;
+        }
+
+        .transaction-name {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .transaction-category {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .transaction-amount {
+            font-size: 15px;
+            font-weight: 600;
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+
+        .transaction-amount.expense {
+            color: var(--text-primary);
+        }
+
+        .transaction-amount.income {
+            color: var(--success);
+        }
+
+        /* Bills Page */
+        .bills-page-header {
+            padding: 20px 24px;
+        }
+
+        .bills-page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .bills-page-header p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .monthly-summary {
+            margin: 0 24px 24px;
+            padding: 20px;
+            background: var(--gradient-primary);
+            border-radius: 20px;
+            color: var(--dark-bg);
+        }
+
+        .monthly-summary h3 {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .monthly-summary .amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .monthly-summary .note {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .bills-list {
+            padding: 0 24px;
+        }
+
+        .bills-list-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .bills-list-item:hover {
+            background: var(--card-hover);
+        }
+
+        .bills-list-item .bill-logo {
+            width: 48px;
+            height: 48px;
+            background: rgba(204, 255, 0, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .bills-list-item .bill-info {
+            flex: 1;
+        }
+
+        .bills-list-item .bill-name {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .bills-list-item .bill-next {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .bills-list-item .bill-price {
+            text-align: right;
+        }
+
+        .bills-list-item .bill-price .amount {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+
+        .bills-list-item .bill-price .status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(74, 222, 128, 0.2);
+            color: var(--success);
+        }
+
+        .bills-list-item .bill-price .status.upcoming {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--warning);
+        }
+
+        /* Add Transaction Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .add-transaction-modal {
+            width: 100%;
+            max-width: 430px;
+            background: var(--card-bg);
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            animation: slideUp 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .amount-input-container {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .currency-symbol {
+            font-size: 24px;
+            color: var(--text-secondary);
+            margin-right: 4px;
+        }
+
+        .amount-input {
+            font-size: 48px;
+            font-weight: 700;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            text-align: center;
+            width: 200px;
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+
+        .amount-input:focus {
+            outline: none;
+        }
+
+        .amount-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .category-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 8px;
+            background: var(--dark-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover {
+            background: var(--card-hover);
+        }
+
+        .category-btn.selected {
+            background: rgba(204, 255, 0, 0.1);
+            border-color: var(--pilo-green);
+        }
+
+        .category-btn .icon {
+            width: 32px;
+            height: 32px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category-btn .icon svg {
+            width: 18px;
+            height: 18px;
+            color: var(--text-secondary);
+        }
+
+        .category-btn.selected .icon {
+            background: var(--gradient-primary);
+        }
+
+        .category-btn.selected .icon svg {
+            color: var(--dark-bg);
+        }
+
+        .category-btn span {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .category-btn.selected span {
+            color: var(--pilo-green);
+        }
+
+        .type-toggle {
+            display: flex;
+            background: var(--dark-bg);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Prompt', sans-serif;
+        }
+
+        .type-btn.active {
+            background: var(--gradient-primary);
+            color: var(--dark-bg);
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 16px;
+            background: var(--dark-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: var(--pilo-green);
+        }
+
+        .note-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 16px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark-bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(204, 255, 0, 0.4);
+        }
+
+        /* Profile Page */
+        .profile-header {
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark-bg);
+        }
+
+        .profile-name {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .profile-email {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .profile-menu {
+            padding: 0 24px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background: var(--card-hover);
+        }
+
+        .menu-item .icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(204, 255, 0, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-item .icon svg {
+            width: 20px;
+            height: 20px;
+            color: var(--pilo-green);
+        }
+
+        .menu-item .text {
+            flex: 1;
+        }
+
+        .menu-item .text h3 {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .menu-item .text p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .menu-item .arrow {
+            color: var(--text-muted);
+        }
+
+        .menu-item .arrow svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .menu-item.danger .icon {
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .menu-item.danger .icon svg {
+            color: var(--danger);
+        }
+
+        /* Premium Banner */
+        .premium-banner {
+            margin: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(204, 255, 0, 0.2), rgba(199, 255, 46, 0.1));
+            border: 1px solid rgba(204, 255, 0, 0.3);
+            border-radius: 20px;
+        }
+
+        .premium-banner .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--gradient-primary);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dark-bg);
+            margin-bottom: 12px;
+        }
+
+        .premium-banner h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .premium-banner p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .premium-banner .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .premium-banner .feature-tag {
+            padding: 6px 12px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .premium-banner .upgrade-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 12px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dark-bg);
+            cursor: pointer;
+        }
+
+        /* Calculator */
+        .calculator-container {
+            padding: 0 24px 24px;
+        }
+
+        .calculator {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .calculator-display {
+            text-align: right;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 16px;
+        }
+
+        .calculator-display .expression {
+            font-size: 16px;
+            color: var(--text-secondary);
+            min-height: 24px;
+        }
+
+        .calculator-display .result {
+            font-size: 36px;
+            font-weight: 700;
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .calc-btn {
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+        }
+
+        .calc-btn:hover {
+            background: var(--card-hover);
+        }
+
+        .calc-btn:active {
+            transform: scale(0.95);
+        }
+
+        .calc-btn.operator {
+            background: rgba(204, 255, 0, 0.1);
+            color: var(--pilo-green);
+        }
+
+        .calc-btn.equals {
+            background: var(--gradient-primary);
+            color: var(--dark-bg);
+        }
+
+        .calc-btn.clear {
+            background: rgba(255, 107, 107, 0.2);
+            color: var(--danger);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease forwards;
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-24 {
+            margin-top: 24px;
+        }
+
+        .mb-24 {
+            margin-bottom: 24px;
+        }
+
+        .px-24 {
+            padding-left: 24px;
+            padding-right: 24px;
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--card-bg);
+            border-top-color: var(--pilo-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--card-bg);
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(204, 255, 0, 0.3);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            z-index: 300;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <!-- Onboarding Screens -->
+        <div id="onboarding" class="onboarding">
+            <!-- Screen 1 -->
+            <div class="onboarding-screen active" data-screen="1">
+                <div class="onboarding-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </div>
+                <h1>ยินดีต้อนรับสู่<br>DailyStack</h1>
+                <p>แอปจัดการเงินอัจฉริยะ ที่ช่วยให้คุณเห็นภาพการเงินชัดเจน โดยไม่ต้องพิมพ์เองทุกรายการ</p>
+                <div class="onboarding-dots">
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <button class="btn-primary" onclick="nextScreen()">เริ่มต้นใช้งาน</button>
+            </div>
+
+            <!-- Screen 2 -->
+            <div class="onboarding-screen" data-screen="2">
+                <div class="onboarding-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <h1>เชื่อมต่อธนาคาร<br>อัตโนมัติ</h1>
+                <p>ระบบจะดึงข้อมูลรายรับ-รายจ่ายจากบัญชีของคุณทุกวัน โดยไม่ต้องกรอกข้อมูลเอง แม้แต่บรรทัดเดียว</p>
+                <div class="onboarding-dots">
+                    <div class="dot"></div>
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <button class="btn-primary" onclick="nextScreen()">ต่อไป</button>
+            </div>
+
+            <!-- Screen 3 -->
+            <div class="onboarding-screen" data-screen="3">
+                <div class="onboarding-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </div>
+                <h1>แจ้งเตือนก่อน<br>บิลตัดเงิน</h1>
+                <p>ระบบจะเตือนคุณล่วงหน้าก่อนที่ค่าบริการรายเดือนจะถูกตัด พร้อมช่วยหาบิลที่คุณอาจลืมยกเลิก</p>
+                <div class="onboarding-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                </div>
+                <button class="btn-primary" onclick="nextScreen()">เข้าใจแล้ว</button>
+            </div>
+
+            <!-- Screen 4 -->
+            <div class="onboarding-screen" data-screen="4">
+                <div class="onboarding-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <h1>เริ่มจัดการเงิน<br>ได้ทันที</h1>
+                <p>ทดลองใช้งานฟรี ดูตัวอย่างข้อมูล ไม่ต้องเชื่อมต่อบัญชีก็เห็นว่าแอปใช้ง่ายแค่ไหน</p>
+                <div class="onboarding-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot active"></div>
+                </div>
+                <button class="btn-primary" onclick="finishOnboarding()">เข้าใช้งาน</button>
+            </div>
+        </div>
+
+        <!-- Main App (Hidden Initially) -->
+        <div id="mainApp" style="display: none;">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="status-bar">
+                    <span class="time">22:31</span>
+                    <div class="icons">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7.46 3 3.34 4.78.29 7.67c-.18.18-.29.43-.29.71 0 .28.11.53.29.71l11.29 11.29c.19.19.44.29.71.29.27 0 .52-.1.71-.29L24.71 8.38c.18-.18.29-.43.29-.71 0-.28-.11-.53-.29-.71C21.66 4.78 17.54 3 13 3h-1z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 4h3a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3V1h2v2h6V1h2v2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                    </div>
+                </div>
+
+                <div class="dashboard-header">
+                    <p class="greeting">สวัสดีตอนค่ำ 👋</p>
+                    <h1 class="user-name">คุณพิชญา</h1>
+                </div>
+
+                <div class="networth-card">
+                    <p class="networth-label">มูลค่าสุทธิ</p>
+                    <h2 class="networth-amount">฿847,250</h2>
+                    <span class="networth-change">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                        +฿12,450 ดูเดือนนี้
+                    </span>
+                </div>
+
+                <div class="quick-stats">
+                    <div class="stat-card income">
+                        <p class="stat-label">รายได้</p>
+                        <p class="stat-amount">฿125,000</p>
+                    </div>
+                    <div class="stat-card expense">
+                        <p class="stat-label">รายจ่าย</p>
+                        <p class="stat-amount">฿67,450</p>
+                    </div>
+                </div>
+
+                <div class="spending-progress">
+                    <div class="progress-header">
+                        <span class="progress-title">วงเงินคงเหลือวันนี้</span>
+                        <span class="progress-amount">฿2,150 / ฿4,500</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: 48%;"></div>
+                    </div>
+                    <p class="progress-status">คุณใช้เงินไป <strong>48%</strong> ของงบวันนี้ เยี่ยมมาก!</p>
+                </div>
+
+                <div class="section-title">
+                    <h2>📋 บิลที่จะถึง</h2>
+                    <a href="#" onclick="showPage('bills')">ดูทั้งหมด</a>
+                </div>
+
+                <div class="bills-scroll">
+                    <div class="bill-card due-soon">
+                        <div class="bill-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        </div>
+                        <p class="bill-name">K+ Premium</p>
+                        <p class="bill-amount">฿299</p>
+                        <p class="bill-date urgent">ถึง 15 มิ.ย.</p>
+                    </div>
+                    <div class="bill-card">
+                        <div class="bill-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <p class="bill-name">Netflix</p>
+                        <p class="bill-amount">฿399</p>
+                        <p class="bill-date">ถึง 20 มิ.ย.</p>
+                    </div>
+                    <div class="bill-card">
+                        <div class="bill-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                        </div>
+                        <p class="bill-name">Spotify</p>
+                        <p class="bill-amount">฿159</p>
+                        <p class="bill-date">ถึง 25 มิ.ย.</p>
+                    </div>
+                    <div class="bill-card">
+                        <div class="bill-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        </div>
+                        <p class="bill-name">AIS 5G</p>
+                        <p class="bill-amount">฿599</p>
+                        <p class="bill-date">ถึง 28 มิ.ย.</p>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <h2>💳 รายการล่าสุด</h2>
+                </div>
+
+                <div class="transaction-list">
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        </div>
+                        <div class="transaction-details">
+                            <p class="transaction-name">Central Department Store</p>
+                            <p class="transaction-category">ช้อปปิ้ง</p>
+                        </div>
+                        <span class="transaction-amount expense">-฿3,450</span>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                        </div>
+                        <div class="transaction-details">
+                            <p class="transaction-name">Starbucks</p>
+                            <p class="transaction-category">อาหารและเครื่องดื่ม</p>
+                        </div>
+                        <span class="transaction-amount expense">-฿195</span>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        </div>
+                        <div class="transaction-details">
+                            <p class="transaction-name">เงินเดือนเข้า</p>
+                            <p class="transaction-category">รายได้</p>
+                        </div>
+                        <span class="transaction-amount income">+฿125,000</span>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        </div>
+                        <div class="transaction-details">
+                            <p class="transaction-name">Makro</p>
+                            <p class="transaction-category">ซื้อของใช้บ้าน</p>
+                        </div>
+                        <span class="transaction-amount expense">-฿1,890</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bills Page -->
+            <div id="bills" class="page">
+                <div class="status-bar">
+                    <span class="time">22:31</span>
+                    <div class="icons">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7.46 3 3.34 4.78.29 7.67c-.18.18-.29.43-.29.71 0 .28.11.53.29.71l11.29 11.29c.19.19.44.29.71.29.27 0 .52-.1.71-.29L24.71 8.38c.18-.18.29-.43.29-.71 0-.28-.11-.53-.29-.71C21.66 4.78 17.54 3 13 3h-1z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 4h3a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3V1h2v2h6V1h2v2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                    </div>
+                </div>
+
+                <div class="bills-page-header">
+                    <h1>📋 บิลรายเดือน</h1>
+                    <p>ติดตามและจัดการค่าบริการที่ชำระทุกเดือน</p>
+                </div>
+
+                <div class="monthly-summary">
+                    <h3>ค่าใช้จ่ายประจำเดือนนี้</h3>
+                    <p class="amount">฿1,456</p>
+                    <p class="note">💡 คุณสามารถประหยัดได้ถึง ฿890/เดือน จากการยกเลิกบริการที่ไม่ได้ใช้</p>
+                </div>
+
+                <div class="bills-list">
+                    <div class="bills-list-item">
+                        <div class="bill-logo">📺</div>
+                        <div class="bill-info">
+                            <p class="bill-name">K+ Premium</p>
+                            <p class="bill-next">จ่ายทุกวันที่ 15</p>
+                        </div>
+                        <div class="bill-price">
+                            <p class="amount">฿299</p>
+                            <span class="status upcoming">เร็วๆ นี้</span>
+                        </div>
+                    </div>
+                    <div class="bills-list-item">
+                        <div class="bill-logo">🎬</div>
+                        <div class="bill-info">
+                            <p class="bill-name">Netflix</p>
+                            <p class="bill-next">จ่ายทุกวันที่ 20</p>
+                        </div>
+                        <div class="bill-price">
+                            <p class="amount">฿399</p>
+                            <span class="status">ปกติ</span>
+                        </div>
+                    </div>
+                    <div class="bills-list-item">
+                        <div class="bill-logo">🎵</div>
+                        <div class="bill-info">
+                            <p class="bill-name">Spotify Premium</p>
+                            <p class="bill-next">จ่ายทุกวันที่ 25</p>
+                        </div>
+                        <div class="bill-price">
+                            <p class="amount">฿159</p>
+                            <span class="status">ปกติ</span>
+                        </div>
+                    </div>
+                    <div class="bills-list-item">
+                        <div class="bill-logo">📱</div>
+                        <div class="bill-info">
+                            <p class="bill-name">AIS 5G</p>
+                            <p class="bill-next">จ่ายทุกวันที่ 28</p>
+                        </div>
+                        <div class="bill-price">
+                            <p class="amount">฿599</p>
+                            <span class="status">ปกติ</span>
+                        </div>
+                    </div>
+                    <div class="bills-list-item">
+                        <div class="bill-logo">☁️</div>
+                        <div class="bill-info">
+                            <p class="bill-name">iCloud 200GB</p>
+                            <p class="bill-next">จ่ายทุกวันที่ 1</p>
+                        </div>
+                        <div class="bill-price">
+                            <p class="amount">฿89</p>
+                            <span class="status">ปกติ</span>
+                        </div>
+                    </div>
+                    <div class="bills-list-item">
+                        <div class="bill-logo">🏋️</div>
+                        <div class="bill-info">
+                            <p class="bill-name">Fitness First</p>
+                            <p class="bill-next">จ่ายทุกวันที่ 5</p>
+                        </div>
+                        <div class="bill-price">
+                            <p class="amount">฿890</p>
+                            <span class="status upcoming">ใช้น้อย</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculator Page -->
+            <div id="calculator" class="page">
+                <div class="status-bar">
+                    <span class="time">22:31</span>
+                    <div class="icons">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7.46 3 3.34 4.78.29 7.67c-.18.18-.29.43-.29.71 0 .28.11.53.29.71l11.29 11.29c.19.19.44.29.71.29.27 0 .52-.1.71-.29L24.71 8.38c.18-.18.29-.43.29-.71 0-.28-.11-.53-.29-.71C21.66 4.78 17.54 3 13 3h-1z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 4h3a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3V1h2v2h6V1h2v2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                    </div>
+                </div>
+
+                <div class="dashboard-header">
+                    <h1 class="user-name">🔢 เครื่องคิดเลข</h1>
+                    <p style="color: var(--text-secondary); font-size: 14px;">คำนวณและบันทึกได้ทันที</p>
+                </div>
+
+                <div class="calculator-container">
+                    <div class="calculator">
+                        <div class="calculator-display">
+                            <p class="expression" id="calcExpression"></p>
+                            <p class="result" id="calcResult">0</p>
+                        </div>
+                        <div class="calculator-grid">
+                            <button class="calc-btn clear" onclick="calcClear()">C</button>
+                            <button class="calc-btn operator" onclick="calcInput('(')">(</button>
+                            <button class="calc-btn operator" onclick="calcInput(')')">)</button>
+                            <button class="calc-btn operator" onclick="calcInput('/')">÷</button>
+                            <button class="calc-btn" onclick="calcInput('7')">7</button>
+                            <button class="calc-btn" onclick="calcInput('8')">8</button>
+                            <button class="calc-btn" onclick="calcInput('9')">9</button>
+                            <button class="calc-btn operator" onclick="calcInput('*')">×</button>
+                            <button class="calc-btn" onclick="calcInput('4')">4</button>
+                            <button class="calc-btn" onclick="calcInput('5')">5</button>
+                            <button class="calc-btn" onclick="calcInput('6')">6</button>
+                            <button class="calc-btn operator" onclick="calcInput('-')">−</button>
+                            <button class="calc-btn" onclick="calcInput('1')">1</button>
+                            <button class="calc-btn" onclick="calcInput('2')">2</button>
+                            <button class="calc-btn" onclick="calcInput('3')">3</button>
+                            <button class="calc-btn operator" onclick="calcInput('+')">+</button>
+                            <button class="calc-btn" onclick="calcInput('0')">0</button>
+                            <button class="calc-btn" onclick="calcInput('.')">.</button>
+                            <button class="calc-btn" onclick="calcBackspace()">⌫</button>
+                            <button class="calc-btn equals" onclick="calcEquals()">=</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile" class="page">
+                <div class="status-bar">
+                    <span class="time">22:31</span>
+                    <div class="icons">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7.46 3 3.34 4.78.29 7.67c-.18.18-.29.43-.29.71 0 .28.11.53.29.71l11.29 11.29c.19.19.44.29.71.29.27 0 .52-.1.71-.29L24.71 8.38c.18-.18.29-.43.29-.71 0-.28-.11-.53-.29-.71C21.66 4.78 17.54 3 13 3h-1z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 4h3a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3V1h2v2h6V1h2v2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                    </div>
+                </div>
+
+                <div class="profile-header">
+                    <div class="profile-avatar">พ</div>
+                    <h1 class="profile-name">คุณพิชญา สมชาย</h1>
+                    <p class="profile-email">pitchaya@example.com</p>
+                </div>
+
+                <div class="premium-banner">
+                    <span class="badge">✨ PRO</span>
+                    <h3>อัปเกรดเป็น Pro</h3>
+                    <p>ปลดล็อกฟีเจอร์ทั้งหมด ซิงค์บัญชีไม่จำกัด และสถิติเชิงลึก</p>
+                    <div class="features">
+                        <span class="feature-tag">🔗 ซิงค์ไม่จำกัด</span>
+                        <span class="feature-tag">📊 สถิติลึก</span>
+                        <span class="feature-tag">💾 Export Excel</span>
+                        <span class="feature-tag">🔔 Alert ฉลาด</span>
+                    </div>
+                    <button class="upgrade-btn">฿149/เดือน — ทดลองฟรี 30 วัน</button>
+                </div>
+
+                <div class="profile-menu">
+                    <div class="menu-item">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div class="text">
+                            <h3>บัญชีธนาคาร</h3>
+                            <p>เชื่อมต่อ 3 บัญชี</p>
+                        </div>
+                        <div class="arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </div>
+                        <div class="text">
+                            <h3>ตั้งค่าแอป</h3>
+                            <p>การแจ้งเตือน, ธีม</p>
+                        </div>
+                        <div class="arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                        <div class="text">
+                            <h3>ศูนย์ช่วยเหลือ</h3>
+                            <p>คำถามที่พบบ่อย, ติดต่อเรา</p>
+                        </div>
+                        <div class="arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                    <div class="menu-item danger">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        </div>
+                        <div class="text">
+                            <h3>ออกจากระบบ</h3>
+                            <p>ออกจากการใช้งาน</p>
+                        </div>
+                        <div class="arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <nav class="bottom-nav">
+                <a class="nav-item active" onclick="showPage('dashboard')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>หน้าแรก</span>
+                </a>
+                <a class="nav-item" onclick="showPage('bills')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>บิล</span>
+                </a>
+                <a class="nav-item" onclick="openAddModal()">
+                    <div class="fab">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                    <span>เพิ่ม</span>
+                </a>
+                <a class="nav-item" onclick="showPage('calculator')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="16" y1="18" x2="16" y2="18"/></svg>
+                    <span>เครื่องคิดเลข</span>
+                </a>
+                <a class="nav-item" onclick="showPage('profile')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>โปรไฟล์</span>
+                </a>
+            </nav>
+
+            <!-- Add Transaction Modal -->
+            <div class="modal-overlay" id="addModal">
+                <div class="add-transaction-modal">
+                    <div class="modal-handle"></div>
+                    <h2 class="modal-title">บันทึกรายการ</h2>
+
+                    <div class="type-toggle">
+                        <button class="type-btn active" onclick="setTransactionType('expense')">รายจ่าย</button>
+                        <button class="type-btn" onclick="setTransactionType('income')">รายรับ</button>
+                    </div>
+
+                    <div class="amount-input-container">
+                        <span class="currency-symbol">฿</span>
+                        <input type="text" class="amount-input" id="amountInput" placeholder="0" inputmode="decimal">
+                    </div>
+
+                    <div class="category-grid">
+                        <button class="category-btn selected" data-category="food">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                            </div>
+                            <span>อาหาร</span>
+                        </button>
+                        <button class="category-btn" data-category="transport">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                            </div>
+                            <span>เดินทาง</span>
+                        </button>
+                        <button class="category-btn" data-category="shopping">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            </div>
+                            <span>ช้อปปิ้ง</span>
+                        </button>
+                        <button class="category-btn" data-category="bills">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                            </div>
+                            <span>บิล</span>
+                        </button>
+                        <button class="category-btn" data-category="entertainment">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                            </div>
+                            <span>บันเทิง</span>
+                        </button>
+                        <button class="category-btn" data-category="health">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            </div>
+                            <span>สุขภาพ</span>
+                        </button>
+                        <button class="category-btn" data-category="education">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                            </div>
+                            <span>การศึกษา</span>
+                        </button>
+                        <button class="category-btn" data-category="other">
+                            <div class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                            </div>
+                            <span>อื่นๆ</span>
+                        </button>
+                    </div>
+
+                    <input type="text" class="note-input" id="noteInput" placeholder="เพิ่มบันทึก (ไม่บังคับ)">
+
+                    <button class="save-btn" onclick="saveTransaction()">บันทึก</button>
+                </div>
+            </div>
+
+            <!-- Toast -->
+            <div class="toast" id="toast">
+                <p>บันทึกสำเร็จ! ✅</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Onboarding
+        let currentScreen = 1;
+        const totalScreens = 4;
+
+        function nextScreen() {
+            if (currentScreen < totalScreens) {
+                document.querySelector(`.onboarding-screen[data-screen="${currentScreen}"]`).classList.remove('active');
+                currentScreen++;
+                document.querySelector(`.onboarding-screen[data-screen="${currentScreen}"]`).classList.add('active');
+            }
+        }
+
+        function finishOnboarding() {
+            document.getElementById('onboarding').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+        }
+
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget?.classList.add('active');
+        }
+
+        // Add Transaction Modal
+        function openAddModal() {
+            document.getElementById('addModal').classList.add('active');
+            document.getElementById('amountInput').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('addModal').classList.remove('active');
+            document.getElementById('amountInput').value = '';
+            document.getElementById('noteInput').value = '';
+        }
+
+        // Transaction Type Toggle
+        let transactionType = 'expense';
+
+        function setTransactionType(type) {
+            transactionType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        // Category Selection
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Save Transaction
+        function saveTransaction() {
+            const amount = document.getElementById('amountInput').value;
+            const note = document.getElementById('noteInput').value;
+            const category = document.querySelector('.category-btn.selected').dataset.category;
+
+            if (!amount || amount === '0') {
+                return;
+            }
+
+            // Show toast
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+
+            // Close modal
+            closeModal();
+        }
+
+        // Calculator
+        let calcExpression = '';
+
+        function calcInput(value) {
+            calcExpression += value;
+            document.getElementById('calcExpression').textContent = calcExpression
+                .replace(/\*/g, '×')
+                .replace(/\//g, '÷');
+
+            try {
+                if (value !== '+' && value !== '-' && value !== '*' && value !== '/' && value !== '(' && value !== ')') {
+                    const result = Function('"use strict"; return (' + calcExpression + ')')();
+                    if (!isNaN(result) && isFinite(result)) {
+                        document.getElementById('calcResult').textContent = result.toLocaleString('th-TH', { maximumFractionDigits: 2 });
+                    }
+                }
+            } catch (e) {
+                // Invalid expression, do nothing
+            }
+        }
+
+        function calcClear() {
+            calcExpression = '';
+            document.getElementById('calcExpression').textContent = '';
+            document.getElementById('calcResult').textContent = '0';
+        }
+
+        function calcBackspace() {
+            calcExpression = calcExpression.slice(0, -1);
+            document.getElementById('calcExpression').textContent = calcExpression
+                .replace(/\*/g, '×')
+                .replace(/\//g, '÷');
+        }
+
+        function calcEquals() {
+            try {
+                const result = Function('"use strict"; return (' + calcExpression + ')')();
+                if (!isNaN(result) && isFinite(result)) {
+                    document.getElementById('calcResult').textContent = result.toLocaleString('th-TH', { maximumFractionDigits: 2 });
+                    calcExpression = result.toString();
+                    document.getElementById('calcExpression').textContent = '';
+                }
+            } catch (e) {
+                document.getElementById('calcResult').textContent = 'Error';
+            }
+        }
+
+        // Amount Input - Number only
+        document.getElementById('amountInput').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9.]/g, '');
+            const parts = this.value.split('.');
+            if (parts.length > 2) {
+                this.value = parts[0] + '.' + parts.slice(1).join('');
+            }
+        });
+
+        // Close modal on backdrop click
+        document.getElementById('addModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.querySelectorAll('.time').forEach(el => {
+                el.textContent = `${hours}:${minutes}`;
+            });
+        }
+
+        updateTime();
+        setInterval(updateTime, 60000);
+    </script>
+</body>
+</html>

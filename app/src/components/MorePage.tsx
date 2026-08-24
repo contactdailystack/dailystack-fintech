@@ -685,7 +685,7 @@ export default function MorePage({
                       setSubscriptions(subscriptions.filter(s => s.id !== sub.id));
                       triggerToast(`Subscription "${sub.name}" audited and cancelled`);
                     }}
-                    className="p-2 border border-slate-900 hover:border-red-500/30 text-zinc-500 hover:text-red-400 hover:bg-red-500/5 rounded-xl transition-all cursor-pointer font-bold text-xs"
+                    className="p-2 border border-slate-900 hover:border-amber-500/30 text-zinc-500 hover:text-amber-400 hover:bg-amber-500/5 rounded-xl transition-all cursor-pointer font-bold text-xs"
                     title="Audited / Cancel subscription"
                   >
                     Cancel
@@ -853,7 +853,7 @@ export default function MorePage({
                 <button 
                   type="button"
                   onClick={onLogout}
-                  className="text-red-400 font-mono text-[10px] font-extrabold uppercase hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-amber-400 font-mono text-[10px] font-extrabold uppercase hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" /> Deauthenticate Session
                 </button>

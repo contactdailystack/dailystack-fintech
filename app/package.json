@@ -5,25 +5,30 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "prebuild": "bash ../scripts/verify-no-live-secrets.sh",
         "build": "tsc -b && vite build",
         "preview": "vite preview",
         "lint": "eslint .",
         "db:migrate": "node ./scripts/apply_migrations.cjs",
         "test": "npx playwright test --config ../playwright.config.ts",
         "test:ui": "npx playwright test --config ../playwright.config.ts --project=chromium",
-        "test:report": "npx playwright show-report --config ../playwright.config.ts"
+        "test:report": "npx playwright show-report --config ../playwright.config.ts",
+        "lh": "lighthouse http://localhost:5173 --output=html --output-path=../lighthouse/report.html --chrome-flags='--headless'",
+        "lh:ci": "lighthouse http://localhost:5173 --output json --output-path ../lighthouse/results.json --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage'"
     },
     "dependencies": {
         "@stripe/stripe-js": "^9.8.0",
         "@supabase/supabase-js": "^2.49.0",
         "clsx": "^2.1.1",
+        "framer-motion": "^11.18.2",
         "lucide-react": "^0.474.0",
         "motion": "^11.18.2",
         "qrcode": "^1.5.4",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "react-router-dom": "^6.28.0",
-        "stripe": "^22.2.0"
+        "stripe": "^22.2.0",
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "@playwright/test": "^1.60.0",
@@ -32,6 +37,7 @@
         "@types/react-dom": "^18.3.5",
         "@vitejs/plugin-react": "^4.3.4",
         "autoprefixer": "^10.4.20",
+        "lighthouse": "^13.4.0",
         "pg": "^8.10.0",
         "postcss": "^8.5.1",
         "tailwindcss": "^3.4.17",

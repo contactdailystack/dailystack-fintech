@@ -1,0 +1,562 @@
+version: 1
+plan:
+  name: "DailyStack iOS HIG Redesign"
+  max_concurrency: 3
+  max_consecutive_failures: 2
+  max_cycles: 10
+  auto_reject_retries: 1
+  verifier_config:
+    default_verifiers: [verifier]
+    audit_sample_rate: 0.0
+
+tasks:
+  - id: "foundation-tokens"
+    title: "Consolidate Design Tokens — Lime + Pilo Light"
+    prompt: |
+      You are the iOS HIG design system architect for DailyStack.
+
+      DESIGN DECISIONS (locked — do not change):
+      - Colors: Lime E-Pay style (#CDFF24 / #D4FF3A)
+      - Theme: Pilo Light Mode (white/light backgrounds)
+      - Typography: Inter (EN) + Kanit (TH)
+      - Design language: Apple HIG (Clarity, Deference, Depth)
+      - Tab bar: App Store style (5 tabs: Home, Recurring, Net Worth, Transaction, Profile)
+
+      MISSION: Rewrite `app/src/design-system/color-tokens.ts` to be THE single source of truth for the Pilo Light theme.
+
+      YOUR SPEC:
+      1. Read the current `app/src/design-system/color-tokens.ts`
+      2. Read `app/src/design-system/spacing-tokens.ts` (keep as-is, it's good)
+      3. Read `app/src/design-system/typography.ts` (keep as-is, Inter+Kanit is correct)
+      4. Read `app/src/design-system/PRINCIPLES.md`
+      5. Rewrite color-tokens.ts with these Apple HIG + Pilo Light values:
+         - Background: #FFFFFF (white), #F5F5F7 (Apple system gray 6 bg)
+         - Surface: #FFFFFF (cards), #F0F0F0 (secondary surfaces)
+         - Primary/Accent: Lime #CDFF24, light #D4FF3A, muted rgba(205,255,36,0.15)
+         - Text primary: #1D1D1F (Apple dark text)
+         - Text secondary: #86868B (Apple secondary label)
+         - Text tertiary: #AEAEB2 (Apple tertiary label)
+         - Success: #34C759 (Apple system green)
+         - Warning: #FF9F0A (Apple system orange) — NEVER use red
+         - Error: #FF3B30 (Apple system red) — sparingly only
+         - Insight/AI: #AF52DE (Apple system purple)
+         - Border: #D2D2D7 (Apple separator)
+         - Shadow: rgba(0,0,0,0.08) soft shadow for cards
+      6. Also create `app/src/design-system/css-variables.css` with CSS custom properties
+      7. Update `app/src/design-system/index.ts` to export the new tokens cleanly
+
+      WRITE these files:
+      - `app/src/design-system/color-tokens.ts` — complete rewrite
+      - `app/src/design-system/css-variables.css` — new file with CSS custom properties
+      - `app/src/design-system/index.ts` — updated exports
+
+      Verify by running: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: list of files changed and TypeScript result.
+    assigned_to: "general"
+    role: "produce"
+    verify_skip_reason: "Design token changes are structural — TypeScript compilation serves as the verification gate."
+    max_retries: 1
+
+  - id: "foundation-nav"
+    title: "Refactor FloatingBottomNav — App Store Tab Bar"
+    prompt: |
+      You are the iOS navigation specialist for DailyStack.
+
+      DESIGN DECISIONS (locked):
+      - 5 tabs: Home, Recurring, Net Worth, Transaction, Profile
+      - App Store Tab Bar style (pill capsule + floating circle)
+      - Use translations.ts for EN/TH labels (no hardcoded labelEn/labelTh)
+      - Lime accent color (#CDFF24) for active state
+      - Light theme (white background)
+      - Route paths: /dashboard, /subscriptions, /networth, /activity, /settings
+
+      MISSION: Rewrite `app/src/components/FloatingBottomNav.tsx`
+
+      YOUR SPEC:
+      1. Read `app/src/components/FloatingBottomNav.tsx` (current)
+      2. Read `app/src/data/translations.ts` — extract the nav label keys (dashboardTab, radarTabMenu, etc.)
+      3. Rewrite FloatingBottomNav.tsx with:
+         - NO hardcoded labelEn/labelTh — use translations[lang].dashboardTab etc.
+         - Active state: Lime (#CDFF24) text/icon color
+         - Inactive state: #86868B (Apple gray)
+         - White/blur capsule background (rgba(255,255,255,0.95) + backdrop blur)
+         - 56px capsule height, 56px circle button
+         - Framer-motion layout animation for active tab (layoutId="activeTab")
+         - Haptic feedback on tap (haptics.fire('SELECT'))
+         - 5 tabs ONLY in MAIN_CAPSULE_TABS array
+         - Fix the 'Recurring' Thai label: should be เงาการสมัคร or similar from translations
+
+      WRITE: `app/src/components/FloatingBottomNav.tsx`
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: list of changes and TypeScript result.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["foundation-tokens"]
+    verify_skip_reason: "Navigation changes verified by TypeScript + downstream page tasks."
+    max_retries: 1
+
+  - id: "foundation-cleanup"
+    title: "Delete Dead Pages and Unused Components"
+    prompt: |
+      You are the cleanup specialist for DailyStack.
+
+      MISSION: Delete files that are dead code — not imported by any route or component.
+
+      FIND and DELETE these confirmed dead pages (no routes reference them):
+      1. `app/src/components/PiloPillCardShowcase.tsx`
+      2. `app/src/components/SidebarTools.tsx`
+      3. `app/src/components/ZeroButtonDashboard.tsx`
+      4. `app/src/components/LiquidParticleEngine.tsx`
+      5. `app/src/components/DatabasePage.tsx` (redirected to /dashboard, never shown)
+      6. `app/src/components/MorePage.tsx` (redirected, never shown)
+
+      ALSO check if `app/src/components/BottomNavBar.tsx` is used — if NOT imported anywhere, delete it too.
+
+      VERIFY before deleting: grep the codebase for each filename. Only delete if zero imports found.
+
+      ALSO update `app/src/App.tsx` to remove any references to deleted pages (if any remain).
+
+      USE mavis-trash for safe deletion (recoverable via OS Trash).
+
+      WRITE: None (deletions only)
+      Report: list of deleted files and any App.tsx updates.
+    assigned_to: "general"
+    role: "produce"
+    verify_skip_reason: "Dead code deletion is low-risk; TypeScript compilation catches broken imports."
+    max_retries: 1
+
+  - id: "core-dashboard"
+    title: "Refactor DashboardPage — Real Data + Design Tokens"
+    prompt: |
+      You are a senior iOS developer refactoring DailyStack's DashboardPage.
+
+      DESIGN SYSTEM (use tokens, NOT hardcoded Tailwind values):
+      - Background: #FFFFFF (white)
+      - Surface/Card: #F0F0F0
+      - Accent: #CDFF24 (lime)
+      - Text primary: #1D1D1F, Text secondary: #86868B
+      - Success: #34C759, Warning: #FF9F0A
+      - Border: #D2D2D7
+      - Font: Inter (EN), Kanit (TH) via CSS variables
+      - Touch target: min 44x44pt
+      - Spacing: 8pt grid (8, 16, 24, 32px)
+      - Border radius: 12px (cards), 8px (buttons), 20px (hero cards)
+
+      MISSION: Refactor `app/src/components/DashboardPage.tsx`
+
+      YOUR SPEC:
+      1. Read `app/src/components/DashboardPage.tsx` FULLY
+      2. Read `app/src/data/translations.ts`
+      3. Read `app/src/services/transactionService.ts`
+      4. Read `app/src/services/subscriptionService.ts`
+      5. Refactor DashboardPage:
+         a. REMOVE all hardcoded Tailwind color values (#EF4444, #6366F1, #F7F8FA, etc.)
+         b. USE CSS variables or design token references instead
+         c. Replace mock data with real service calls (transactionService, subscriptionService)
+         d. Clean up to under 500 lines by extracting sections into sub-components within the same file
+         e. Use translations[lang] for ALL user-facing strings
+         f. Fix BOM character at line 1 (remove U+FEFF)
+         g. Extract sub-components: HeroBalanceCard, SubscriptionWidget, RecentTransactionsList, QuickActionsBar
+
+      WRITE: `app/src/components/DashboardPage.tsx` (refactored)
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: changed files, line count before/after, TypeScript result.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["foundation-tokens", "foundation-nav"]
+    verify_skip_reason: "Page refactoring verified by TypeScript + final E2E phase."
+    max_retries: 2
+
+  - id: "core-subscriptions"
+    title: "Refactor SubscriptionTrackerPage — Real Data"
+    prompt: |
+      You are a senior iOS developer refactoring DailyStack's SubscriptionTrackerPage.
+
+      DESIGN SYSTEM:
+      - Background: #FFFFFF, Surface: #F0F0F0
+      - Accent: #CDFF24 (lime)
+      - Text primary: #1D1D1F, Text secondary: #86868B
+      - Success: #34C759, Warning: #FF9F0A
+      - Font: Inter (EN), Kanit (TH)
+      - Spacing: 8pt grid, Border radius: 12px (cards)
+      - Touch target: min 44x44pt
+
+      MISSION: Refactor `app/src/components/SubscriptionTrackerPage.tsx`
+
+      YOUR SPEC:
+      1. Read `app/src/components/SubscriptionTrackerPage.tsx` FULLY
+      2. Read `app/src/data/translations.ts`
+      3. Read `app/src/services/subscriptionService.ts`
+      4. Refactor:
+         a. Remove hardcoded colors — use CSS variables / design tokens
+         b. Replace mock/placeholder data with real subscriptionService calls
+         c. Use useEffect + useState to load from subscriptionService
+         d. Show loading skeletons while data loads
+         e. Use translations[lang] for all strings
+         f. Fix BOM character at line 1 if present
+         g. Keep the 'dark' theme prop support (theme="dark" uses dark palette)
+
+      WRITE: `app/src/components/SubscriptionTrackerPage.tsx`
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: changed files and TypeScript result.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["foundation-tokens"]
+    verify_skip_reason: "Verified by TypeScript compilation."
+    max_retries: 2
+
+  - id: "core-secondary"
+    title: "Refactor NetWorthPage and ActivityPage — Real Data"
+    prompt: |
+      You are a senior iOS developer refactoring DailyStack's secondary pages.
+
+      DESIGN SYSTEM:
+      - Background: #FFFFFF, Surface: #F0F0F0
+      - Accent: #CDFF24 (lime)
+      - Text primary: #1D1D1F, Text secondary: #86868B
+      - Success: #34C759, Warning: #FF9F0A
+      - Font: Inter (EN), Kanit (TH)
+      - Spacing: 8pt grid, Border radius: 12px
+      - Touch target: min 44x44pt
+
+      MISSION: Refactor BOTH pages.
+
+      PAGE A: `app/src/components/NetWorthPage.tsx`
+      1. Read the file fully
+      2. Read `app/src/services/netWorthService.ts`
+      3. Read `app/src/data/translations.ts`
+      4. Refactor: remove hardcoded colors, use real netWorthService, use translations
+
+      PAGE B: `app/src/components/ActivityPage.tsx`
+      1. Read the file fully
+      2. Read `app/src/services/transactionService.ts`
+      3. Read `app/src/data/translations.ts`
+      4. Refactor: remove hardcoded colors, use real transactionService, use translations
+
+      Fix BOM chars at line 1 in both files if present.
+
+      WRITE:
+      - `app/src/components/NetWorthPage.tsx`
+      - `app/src/components/ActivityPage.tsx`
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: changed files and TypeScript result.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["foundation-tokens"]
+    verify_skip_reason: "Verified by TypeScript compilation."
+    max_retries: 2
+
+  - id: "secondary-onboarding"
+    title: "Fix OnboardingPage — Use translations.ts, Remove BOM"
+    prompt: |
+      You are a QA+iOS developer fixing DailyStack's OnboardingPage.
+
+      MISSION: Fix 3 critical issues in `app/src/components/OnboardingPage.tsx`
+
+      ISSUE 1 — BOM at line 1:
+      - File starts with U+FEFF character. Remove it. Re-save as UTF-8 without BOM.
+
+      ISSUE 2 — Hardcoded local translation object:
+      - The component has a local `t = { en: {...}, th: {...} }` object with full EN/TH copy.
+      - This bypasses translations.ts entirely. DELETE the local t object.
+      - Instead, import and use `translations[lang]` from `../data/translations`
+      - Map the onboarding step keys: titleKey/subtitleKey/descriptionKey should reference actual keys in translations.ts
+      - If the keys don't exist in translations.ts, ADD them there first, then use them
+
+      ISSUE 3 — Garbled Thai baht symbols:
+      - Preview data has garbled text. Fix all double-encoded Thai characters.
+
+      STEPS:
+      1. Read `app/src/components/OnboardingPage.tsx` fully
+      2. Read `app/src/data/translations.ts` — check existing onboarding keys
+      3. If onboarding keys are missing in translations.ts, ADD them to translations.ts first
+      4. Then refactor OnboardingPage to use translations[lang]
+      5. Fix BOM and garbled text
+
+      WRITE:
+      - `app/src/components/OnboardingPage.tsx`
+      - `app/src/data/translations.ts` (only if keys are missing)
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: changes and TypeScript result.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["foundation-tokens"]
+    verify_skip_reason: "Verified by TypeScript compilation."
+    max_retries: 2
+
+  - id: "secondary-insights"
+    title: "Refactor InsightsPage and BudgetManagementPage — Fix BOM + Real Data"
+    prompt: |
+      You are a senior iOS developer fixing DailyStack's insights pages.
+
+      DESIGN SYSTEM:
+      - Background: #FFFFFF, Surface: #F0F0F0
+      - Accent: #CDFF24 (lime)
+      - Text primary: #1D1D1F, Text secondary: #86868B
+      - Success: #34C759, Warning: #FF9F0A
+      - Font: Inter (EN), Kanit (TH)
+      - Spacing: 8pt grid, Border radius: 12px
+
+      MISSION: Fix BOTH pages.
+
+      PAGE A: `app/src/components/InsightsPage.tsx`
+      1. Read fully
+      2. Fix BOM character at line 1 (U+FEFF — remove it)
+      3. Fix garbled Thai category names in categoryMap (double-encoded)
+      4. Use translations[lang] for all strings
+      5. Connect to real data (transactionService for spending analysis)
+
+      PAGE B: `app/src/components/BudgetManagementPage.tsx`
+      1. Read fully
+      2. Fix BOM at line 1
+      3. Fix garbled Thai text in categories/savingsGoals/monthlyData initial state
+      4. Use translations[lang] for hardcoded category names and goal names
+      5. Connect to real transaction data for budget calculations
+
+      WRITE:
+      - `app/src/components/InsightsPage.tsx`
+      - `app/src/components/BudgetManagementPage.tsx`
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: changes and TypeScript result.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["foundation-tokens"]
+    verify_skip_reason: "Verified by TypeScript compilation."
+    max_retries: 2
+
+  - id: "ux-trust-security"
+    title: "Add Trust & Security UI Components"
+    prompt: |
+      You are the FinTech UX specialist for DailyStack.
+
+      MISSION: Implement Trust & Security UI to boost user confidence in this financial app.
+
+      READ FIRST:
+      1. Read `app/src/design-system/index.ts` — understand what components exist
+      2. Read `app/src/components/FloatingBottomNav.tsx` — understand the nav pattern
+      3. Read `app/src/data/translations.ts` — existing translation keys
+
+      IMPLEMENT the following components:
+
+      1. `app/src/components/SecurityBadge.tsx` — Reusable security indicator badge
+         - Props: variant ('encrypted' | 'verified' | 'secure')
+         - Display: Lock icon + text (256-bit Encrypted / Verified Account / Secure Connection)
+         - Use Apple system green #34C759 for success states
+         - Appears in Settings/Profile, Auth screens, Dashboard header
+
+      2. `app/src/components/BiometricButton.tsx` — Face ID / Fingerprint auth button
+         - Props: onAuthenticate, isLoading
+         - Shows Face ID icon or Fingerprint icon based on platform
+         - Used in AuthPage and Settings for quick re-auth
+
+      3. `app/src/components/ConfirmationModal.tsx` — Financial transaction confirmation
+         - Props: title, amount, merchant, date, onConfirm, onCancel, warningText
+         - Clearly shows what user is about to do
+         - Warning text: "This action cannot be undone"
+         - Large Confirm/Cancel buttons (min 44px touch target)
+         - Haptic feedback on confirm
+
+      4. `app/src/components/ErrorState.tsx` — Clear error states with recovery actions
+         - Props: error, onRetry, onDismiss
+         - Shows specific error message (NOT generic "Something went wrong")
+         - Provides actionable next steps (retry button, contact support link)
+         - Uses #FF3B30 sparingly — only for critical errors
+
+      5. `app/src/components/EmptyState.tsx` — Consistent empty state with CTAs
+         - Props: icon, title, description, action (optional)
+         - Follows Apple's empty state guidelines
+         - Call-to-action button to resolve the empty state
+
+      WRITE:
+      - `app/src/components/SecurityBadge.tsx`
+      - `app/src/components/BiometricButton.tsx`
+      - `app/src/components/ConfirmationModal.tsx`
+      - `app/src/components/ErrorState.tsx`
+      - `app/src/components/EmptyState.tsx`
+      - Update `app/src/components/index.ts` to export new components
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: files created, TypeScript result.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["foundation-tokens"]
+    verify_skip_reason: "New components verified by TypeScript."
+    max_retries: 1
+
+  - id: "ux-color-scheme"
+    title: "Fix Box Cards (Black) & Pill Cards (Light Gray)"
+    prompt: |
+      You are the design system specialist for DailyStack.
+
+      DESIGN DECISIONS (locked by user):
+      - Box Cards → BLACK (dark theme, bg-black or bg-[#0B0F0A])
+      - Pill Cards → Light gray (#F5F5F5) — same tone as ProfilePage pill cards
+      - Background → White (#FFFFFF) for Pilo Light mode
+
+      MISSION: Ensure all pages use the correct card color scheme.
+
+      CHECK and FIX the following pages/components:
+
+      1. Read `app/src/components/DashboardPage.tsx`
+         - Box Cards (hero cards, stat cards) → must be BLACK bg
+         - Pill Cards (insight pills, filter pills) → must be #F5F5F5 light gray
+
+      2. Read `app/src/components/SubscriptionTrackerPage.tsx`
+         - Box Cards → BLACK
+         - Pill Cards → #F5F5F5
+
+      3. Read `app/src/components/NetWorthPage.tsx`
+         - Box Cards → BLACK (already has `bg-black rounded-[24px]`)
+         - Pill Cards → #F5F5F5
+
+      4. Read `app/src/components/ActivityPage.tsx`
+         - Box Cards → BLACK
+         - Pill Cards → #F5F5F5
+
+      5. Read `app/src/components/InsightsPage.tsx`
+         - Box Cards → BLACK
+         - Pill Cards → #F5F5F5
+
+      6. Reference `app/src/components/ProfilePage.tsx` (lines 692, 730, 758)
+         - Pill Cards use: `bg-[#F5F5F5] border border-zinc-200 rounded-full px-6 py-4`
+         - This is the STANDARD — apply to all other pages
+
+      REFERENCE COLORS:
+      ```
+      BLACK (Box Cards):
+        - bg-black
+        - bg-[#0B0F0A]
+        - bg-[#171C15]
+
+      LIGHT GRAY (Pill Cards):
+        - bg-[#F5F5F5]
+        - border-zinc-200
+        - rounded-full
+        - px-6 py-4
+      ```
+
+      WRITE:
+      - Update all pages to use correct card colors
+      - Ensure consistency across all pages
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: pages updated, color consistency verified.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["foundation-tokens"]
+    verify_skip_reason: "Color scheme changes are visual; TypeScript check ensures no breaking changes."
+    max_retries: 1
+
+  - id: "ux-accessibility"
+    title: "WCAG 2.1 Accessibility Improvements"
+    prompt: |
+      You are the accessibility specialist for DailyStack.
+
+      MISSION: Fix WCAG 2.1 compliance issues across all components.
+
+      READ FIRST:
+      1. Read `app/src/design-system/color-tokens.ts` (updated version)
+      2. Read `app/src/components/DashboardPage.tsx`
+      3. Read `app/src/components/FloatingBottomNav.tsx`
+
+      FIX the following accessibility issues:
+
+      1. COLOR CONTRAST — Ensure all text meets 4.5:1 ratio (WCAG 1.4.3)
+         - Check that white text on dark backgrounds passes contrast ratio
+         - If text is too light, add text-shadow or darken the color
+         - Check in DashboardPage and other dark-theme components
+
+      2. REDUCED MOTION SUPPORT — Respect prefers-reduced-motion (WCAG 2.3.1)
+         - Read current motion/animation implementation
+         - Add reduced motion check: `window.matchMedia('(prefers-reduced-motion: reduce)')`
+         - Provide non-animated fallbacks for sensitive users
+
+      3. SCREEN READER LABELS — ARIA improvements (WCAG 1.3.1)
+         - Add aria-label to all icon-only buttons
+         - Add aria-describedby for complex interactive elements
+         - Add aria-live="polite" for dynamic content updates
+         - Add role="status" for balance/summary sections
+
+      4. FOCUS VISIBILITY — Visible focus indicators (WCAG 2.4.7)
+         - Ensure keyboard navigation has visible focus rings
+         - Style: 2px solid lime accent, 2px offset
+
+      5. TOUCH TARGET VERIFICATION
+         - Verify all interactive elements are min 44x44px
+         - Check DashboardPage, BottomNav, all form inputs
+         - Fix any targets smaller than 44px
+
+      WRITE:
+      - Update components with accessibility fixes
+      - Document any CSS changes in a comment block
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: files modified, accessibility issues fixed.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["foundation-tokens", "foundation-nav"]
+    verify_skip_reason: "Accessibility fixes are qualitative; TypeScript ensures no breaking changes."
+    max_retries: 1
+
+  - id: "final-verification"
+    title: "Final TypeScript + Verification Gate"
+    prompt: |
+      You are the final QA gate for DailyStack iOS HIG Redesign.
+
+      MISSION: Verify the entire refactor is production-ready.
+
+      CHECK 1 — TypeScript Compilation:
+      Run: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Expected: 0 errors. Fix any errors found.
+
+      CHECK 2 — No Hardcoded Colors Remaining in components:
+      Run grep to find hex colors in JSX style attributes — colors should use CSS variables or design tokens.
+      Run: `grep -rn "#[0-9A-Fa-f]\{3,6\}" --include="*.tsx" D:\Coding Folder\dailystack-fintech\app\src\components\`
+      Report which (if any) are design-system tokens vs hardcoded values.
+
+      CHECK 3 — BOM Characters Removed:
+      Run: `grep -rn $'\xEF\xBB\xBF' --include="*.tsx" D:\Coding Folder\dailystack-fintech\app\src\components\`
+      Expected: no results (except .gitkeep files)
+
+      CHECK 4 — No Hardcoded EN/TH Labels in BottomNav:
+      Check `app/src/components/FloatingBottomNav.tsx` — labelEn/labelTh should NOT exist.
+      Should use: `translations[lang].dashboardTab` etc.
+
+      CHECK 5 — Dead Pages Deleted:
+      These files should NOT exist:
+      - PiloPillCardShowcase.tsx
+      - SidebarTools.tsx
+      - ZeroButtonDashboard.tsx
+      - LiquidParticleEngine.tsx
+      - DatabasePage.tsx
+      - MorePage.tsx
+
+      CHECK 6 — Box Cards (Black) & Pill Cards (Light Gray):
+      - Box Cards must use BLACK (bg-black, bg-[#0B0F0A], bg-[#171C15])
+      - Pill Cards must use LIGHT GRAY (#F5F5F5, border-zinc-200, rounded-full)
+      - Reference: ProfilePage.tsx lines 692, 730, 758 for pill card standard
+
+      CHECK 7 — App.tsx Routes Match BottomNav 5 tabs:
+      BottomNav 5 tabs: /dashboard, /subscriptions, /networth, /activity, /settings
+      Verify App.tsx has routes for all 5 paths.
+
+      WRITE REPORT to `D:\Coding Folder\dailystack-fintech\reports\hig-redesign-verification.json`:
+      ```json
+      {
+        "tsc_result": "PASS/FAIL + error count",
+        "hardcoded_colors_found": [],
+        "bom_files_found": [],
+        "nav_labels_hardcoded": true/false,
+        "dead_pages_remaining": [],
+        "routes_match_nav": true/false,
+        "overall_status": "PASS/FAIL"
+      }
+      ```
+    assigned_to: "general"
+    role: "verify-as-task"
+    depends_on: ["foundation-tokens", "foundation-nav", "foundation-cleanup", "core-dashboard", "core-subscriptions", "core-secondary", "secondary-onboarding", "secondary-insights", "ux-trust-security", "ux-color-scheme", "ux-accessibility"]
+    max_retries: 1

@@ -9,19 +9,55 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { translations, Language } from '../data/translations';
 import { UserProfile } from '../types';
 
+import { Goal } from '../services/goalService';
+
+// Goal item for UI display
+interface GoalItem {
+  id: string;
+  name: string;
+  target: number;
+  current: number;
+  icon: React.ReactNode;
+  color: string;
+  target_date: string | null;
+  status: 'in_progress' | 'achieved' | 'paused';
+}
+
 interface GoalSimulationPageProps {
   profile: UserProfile;
   lang: Language;
+  goals: Goal[];
   onNavigateToUpgrade?: () => void;
+  onGoalSelect?: (goal: GoalItem) => void;
+  onGoalUpdate?: (goalId: string, updates: Partial<Goal>) => void;
+  onGoalCreate?: (goal: Omit<Goal, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => void;
+  onGoalDelete?: (goalId: string) => void;
   theme?: 'dark' | 'light';
 }
 
-// Mock goal data
-const MOCK_GOALS = [
-  { id: 1, name: 'Emergency Fund', target: 50000, current: 32500, icon: <Shield className="w-5 h-5" />, color: '#00E676' },
-  { id: 2, name: 'Thailand Trip', target: 80000, current: 45000, icon: <Plane className="w-5 h-5" />, color: '#FFB800' },
-  { id: 3, name: 'New MacBook Pro', target: 75000, current: 12000, icon: <Laptop className="w-5 h-5" />, color: '#CCFF00' },
-];
+// Map database Goal to UI GoalItem
+function mapGoalToItem(goal: Goal): GoalItem {
+  const iconMap: Record<string, React.ReactNode> = {
+    Shield: <Shield className="w-5 h-5" />,
+    Plane: <Plane className="w-5 h-5" />,
+    Laptop: <Laptop className="w-5 h-5" />,
+    Target: <Target className="w-5 h-5" />,
+    Savings: <TrendingUp className="w-5 h-5" />,
+    Home: <Target className="w-5 h-5" />,
+    Car: <Target className="w-5 h-5" />,
+  };
+
+  return {
+    id: goal.id,
+    name: goal.goal_name,
+    target: goal.target_amount,
+    current: goal.current_amount,
+    icon: iconMap[goal.icon_name] || <Target className="w-5 h-5" />,
+    color: goal.color_code,
+    target_date: goal.target_date,
+    status: goal.status,
+  };
+}
 
 // Scenario simulation presets
 const SCENARIO_PRESETS = [
@@ -47,10 +83,15 @@ const generateTimeline = (months: number, monthlySavings: number, rate: number, 
   return data;
 };
 
-export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme = 'dark' }: GoalSimulationPageProps) {
+export function GoalSimulationPage({ profile, lang, goals, onNavigateToUpgrade, onGoalSelect, onGoalUpdate, onGoalCreate, onGoalDelete, theme = 'dark' }: GoalSimulationPageProps) {
   const t = translations[lang];
   const [activeTab, setActiveTab] = useState<'goals' | 'simulation'>('goals');
-  const [selectedGoal, setSelectedGoal] = useState(MOCK_GOALS[0]);
+  
+  // Map real goals to UI items
+  const goalItems: GoalItem[] = goals.map(mapGoalToItem);
+  
+  // Default to first goal or create empty state
+  const [selectedGoal, setSelectedGoal] = useState<GoalItem | null>(goalItems[0] || null);
   const [selectedScenario, setSelectedScenario] = useState(SCENARIO_PRESETS[0]);
   const [monthlyContribution, setMonthlyContribution] = useState(5000);
   const [simulationRunning, setSimulationRunning] = useState(false);
@@ -75,9 +116,10 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
     setTimeout(() => setSimulationRunning(false), 2000);
   };
 
-  const goalProgress = (selectedGoal.current / selectedGoal.target) * 100;
-  const remainingAmount = selectedGoal.target - selectedGoal.current;
-  const monthsToGoal = Math.ceil(remainingAmount / monthlyContribution);
+  // Handle null selectedGoal for empty state
+  const goalProgress = selectedGoal ? (selectedGoal.current / selectedGoal.target) * 100 : 0;
+  const remainingAmount = selectedGoal ? selectedGoal.target - selectedGoal.current : 0;
+  const monthsToGoal = remainingAmount > 0 ? Math.ceil(remainingAmount / monthlyContribution) : 0;
 
   // Chart dimensions
   const chartWidth = 100;
@@ -92,10 +134,10 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
         <div>
           <h2 className="font-display text-2xl font-extrabold text-white flex items-center gap-2">
             <Target className="w-6 h-6 text-brand" />
-            {lang === 'en' ? 'Goal Simulation' : 'จำลองเป้าหมาย'}
+            {lang === 'en' ? 'Goal Launcher' : 'ตัวปล่อยเป้าหมาย'}
           </h2>
           <p className="text-sm text-zinc-400">
-            {lang === 'en' ? 'Plan your financial future with AI-powered scenarios' : 'วางแผนอนาคตทางการเงินด้วยการจำลอง AI'}
+            {lang === 'en' ? 'Launch your financial goals with AI-powered simulations' : 'ปล่อยเป้าหมายทางการเงินด้วยการจำลอง AI'}
           </p>
         </div>
         
@@ -148,107 +190,133 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
           >
             {/* Goal Selection Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {MOCK_GOALS.map((goal) => (
-                <button
-                  key={goal.id}
-                  onClick={() => setSelectedGoal(goal)}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer text-left ${
-                    selectedGoal.id === goal.id
-                      ? 'bg-dark-card border-brand shadow-[0_0_20px_rgba(204,255,0,0.15)]'
-                      : 'bg-dark-card border-zinc-900 hover:border-zinc-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-2xl">{goal.icon}</span>
-                    <span className="text-xs font-mono text-zinc-500 uppercase">
-                      {Math.round((goal.current / goal.target) * 100)}%
-                    </span>
-                  </div>
-                  <h3 className="font-display font-bold text-sm text-white mb-1">{goal.name}</h3>
-                  <p className="text-xs text-zinc-400">
-                    {lang === 'en' ? '฿' : '฿'}{goal.current.toLocaleString()} / {lang === 'en' ? '฿' : '฿'}{goal.target.toLocaleString()}
+              {goalItems.length === 0 ? (
+                <div className="col-span-3 text-center py-8">
+                  <Target className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
+                  <p className="text-zinc-400 text-sm">
+                    {lang === 'th' ? 'ยังไม่มีเป้าหมาย' : 'No goals yet'}
                   </p>
-                  {/* Mini Progress Bar */}
-                  <div className="mt-3 h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${(goal.current / goal.target) * 100}%`, backgroundColor: goal.color }}
-                    />
-                  </div>
-                </button>
-              ))}
+                  <p className="text-zinc-500 text-xs mt-1">
+                    {lang === 'th' ? 'สร้างเป้าหมายแรกของคุณ' : 'Create your first goal'}
+                  </p>
+                </div>
+              ) : (
+                goalItems.map((goal) => (
+                  <button
+                    key={goal.id}
+                    onClick={() => {
+                      setSelectedGoal(goal);
+                      onGoalSelect?.(goal);
+                    }}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer text-left ${
+                      selectedGoal?.id === goal.id
+                        ? 'bg-dark-card border-brand shadow-[0_0_20px_rgba(204,255,0,0.15)]'
+                        : 'bg-dark-card border-zinc-900 hover:border-zinc-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-2xl" style={{ color: goal.color }}>{goal.icon}</span>
+                      <span className="text-xs font-mono text-zinc-500 uppercase">
+                        {Math.round((goal.current / goal.target) * 100)}%
+                      </span>
+                    </div>
+                    <h3 className="font-display font-bold text-sm text-white mb-1">{goal.name}</h3>
+                    <p className="text-xs text-zinc-400">
+                      {lang === 'en' ? '฿' : '฿'}{goal.current.toLocaleString()} / {lang === 'en' ? '฿' : '฿'}{goal.target.toLocaleString()}
+                    </p>
+                    {/* Mini Progress Bar */}
+                    <div className="mt-3 h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${(goal.current / goal.target) * 100}%`, backgroundColor: goal.color }}
+                      />
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
 
             {/* Selected Goal Detail Card */}
             <div className="bg-gradient-to-br from-dark-card to-zinc-900/50 p-6 rounded-3xl border border-zinc-900">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <span className="text-4xl mb-2 block">{selectedGoal.icon}</span>
-                  <h3 className="font-display text-xl font-extrabold text-white">{selectedGoal.name}</h3>
-                  <p className="text-sm text-zinc-400 mt-1">
-                    {lang === 'en' ? 'Target Date' : 'วันเป้าหมาย'}: <span className="text-brand font-mono">Dec 2027</span>
+              {selectedGoal ? (
+                <>
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <span className="text-4xl mb-2 block" style={{ color: selectedGoal.color }}>{selectedGoal.icon}</span>
+                      <h3 className="font-display text-xl font-extrabold text-white">{selectedGoal.name}</h3>
+                      <p className="text-sm text-zinc-400 mt-1">
+                        {lang === 'en' ? 'Target Date' : 'วันเป้าหมาย'}: <span className="text-brand font-mono">{selectedGoal.target_date ? new Date(selectedGoal.target_date).toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-US', { month: 'short', year: 'numeric' }) : 'Not set'}</span>
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-zinc-500 font-mono uppercase">{lang === 'en' ? 'Remaining' : 'คงเหลือ'}</div>
+                      <div className="text-2xl font-display font-extrabold text-white">฿{remainingAmount.toLocaleString()}</div>
+                    </div>
+                  </div>
+
+                  {/* Big Progress Ring */}
+                  <div className="flex justify-center mb-6">
+                    <div className="relative w-40 h-40">
+                      <svg width="160" height="160" viewBox="0 0 160 160" className="-rotate-90">
+                        <circle cx="80" cy="80" r="70" stroke="var(--color-dark-border)" strokeWidth="12" fill="none" />
+                        <motion.circle 
+                          cx="80" cy="80" r="70" 
+                          stroke={selectedGoal.color}
+                          strokeWidth="12" 
+                          fill="none"
+                          strokeLinecap="round"
+                          initial={{ strokeDasharray: "0 440" }}
+                          animate={{ strokeDasharray: `${(goalProgress / 100) * 440} 440` }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <div className="text-4xl font-display font-black text-white">{Math.round(goalProgress)}%</div>
+                        <div className="text-xs text-zinc-400 font-mono uppercase">{lang === 'en' ? 'Complete' : 'สำเร็จ'}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Goal Stats */}
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="p-3 bg-zinc-900/50 rounded-xl">
+                      <DollarSign className="w-4 h-4 text-brand mx-auto mb-1" />
+                      <div className="text-sm font-display font-bold text-white">฿{selectedGoal.current.toLocaleString()}</div>
+                      <div className="text-[10px] text-zinc-500 uppercase">{lang === 'en' ? 'Saved' : 'ออมแล้ว'}</div>
+                    </div>
+                    <div className="p-3 bg-zinc-900/50 rounded-xl">
+                      <Target className="w-4 h-4 text-amber-400 mx-auto mb-1" />
+                      <div className="text-sm font-display font-bold text-white">฿{selectedGoal.target.toLocaleString()}</div>
+                      <div className="text-[10px] text-zinc-500 uppercase">{lang === 'en' ? 'Target' : 'เป้า'}</div>
+                    </div>
+                    <div className="p-3 bg-zinc-900/50 rounded-xl">
+                      <Calendar className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
+                      <div className="text-sm font-display font-bold text-white">{monthsToGoal}</div>
+                      <div className="text-[10px] text-zinc-500 uppercase">{lang === 'en' ? 'Months' : 'เดือน'}</div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <Target className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+                  <p className="text-zinc-400">
+                    {lang === 'th' ? 'เลือกเป้าหมายเพื่อดูรายละเอียด' : 'Select a goal to view details'}
                   </p>
                 </div>
-                <div className="text-right">
-                  <div className="text-xs text-zinc-500 font-mono uppercase">{lang === 'en' ? 'Remaining' : 'คงเหลือ'}</div>
-                  <div className="text-2xl font-display font-extrabold text-white">฿{remainingAmount.toLocaleString()}</div>
-                </div>
-              </div>
+              )}
+            </div>
 
-              {/* Big Progress Ring */}
-              <div className="flex justify-center mb-6">
-                <div className="relative w-40 h-40">
-                  <svg width="160" height="160" viewBox="0 0 160 160" className="-rotate-90">
-                    <circle cx="80" cy="80" r="70" stroke="var(--color-dark-border)" strokeWidth="12" fill="none" />
-                    <motion.circle 
-                      cx="80" cy="80" r="70" 
-                      stroke={selectedGoal.color}
-                      strokeWidth="12" 
-                      fill="none"
-                      strokeLinecap="round"
-                      initial={{ strokeDasharray: "0 440" }}
-                      animate={{ strokeDasharray: `${(goalProgress / 100) * 440} 440` }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-4xl font-display font-black text-white">{Math.round(goalProgress)}%</div>
-                    <div className="text-xs text-zinc-400 font-mono uppercase">{lang === 'en' ? 'Complete' : 'สำเร็จ'}</div>
-                  </div>
-                </div>
+            {/* Recommended Monthly Contribution */}
+            <div className="mt-6 p-4 bg-brand/10 rounded-xl border border-brand/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="w-4 h-4 text-brand" />
+                <span className="text-xs font-mono text-brand uppercase">{lang === 'en' ? 'AI Recommendation' : 'คำแนะนำ AI'}</span>
               </div>
-
-              {/* Goal Stats */}
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="p-3 bg-zinc-900/50 rounded-xl">
-                  <DollarSign className="w-4 h-4 text-brand mx-auto mb-1" />
-                  <div className="text-sm font-display font-bold text-white">฿{selectedGoal.current.toLocaleString()}</div>
-                  <div className="text-[10px] text-zinc-500 uppercase">{lang === 'en' ? 'Saved' : 'ออมแล้ว'}</div>
-                </div>
-                <div className="p-3 bg-zinc-900/50 rounded-xl">
-                  <Target className="w-4 h-4 text-amber-400 mx-auto mb-1" />
-                  <div className="text-sm font-display font-bold text-white">฿{selectedGoal.target.toLocaleString()}</div>
-                  <div className="text-[10px] text-zinc-500 uppercase">{lang === 'en' ? 'Target' : 'เป้า'}</div>
-                </div>
-                <div className="p-3 bg-zinc-900/50 rounded-xl">
-                  <Calendar className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
-                  <div className="text-sm font-display font-bold text-white">{monthsToGoal}</div>
-                  <div className="text-[10px] text-zinc-500 uppercase">{lang === 'en' ? 'Months' : 'เดือน'}</div>
-                </div>
-              </div>
-
-              {/* Recommended Monthly Contribution */}
-              <div className="mt-6 p-4 bg-brand/10 rounded-xl border border-brand/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="w-4 h-4 text-brand" />
-                  <span className="text-xs font-mono text-brand uppercase">{lang === 'en' ? 'AI Recommendation' : 'คำแนะนำ AI'}</span>
-                </div>
-                <p className="text-sm text-zinc-300">
-                  {lang === 'en' 
-                    ? `Save ฿${Math.ceil(remainingAmount / 18).toLocaleString()}/month to reach your goal by Dec 2027`
-                    : `ออม ฿${Math.ceil(remainingAmount / 18).toLocaleString()}/เดือน เพื่อถึงเป้า ธ.ค. 2570`}
-                </p>
-              </div>
+              <p className="text-sm text-zinc-300">
+                {lang === 'en' 
+                  ? `Save ฿${Math.ceil(remainingAmount / 18).toLocaleString()}/month to reach your goal by Dec 2027`
+                  : `ออม ฿${Math.ceil(remainingAmount / 18).toLocaleString()}/เดือน เพื่อถึงเป้า ธ.ค. 2570`}
+              </p>
             </div>
           </motion.div>
         ) : (
@@ -367,8 +435,8 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
                   {/* Gradient Fill */}
                   <defs>
                     <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#CCFF00" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#CCFF00" stopOpacity="0" />
+                      <stop offset="0%" stopColor="#56be89" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#56be89" stopOpacity="0" />
                     </linearGradient>
                   </defs>
                   
@@ -381,7 +449,7 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
                   {/* Line */}
                   <motion.path
                     d={`M${timelineData.map((d, i) => `${(i / (timelineData.length - 1)) * chartWidth},${chartHeight - (d.balance / maxValue) * chartHeight}`).join(' L')}`}
-                    stroke="#CCFF00"
+                    stroke="#56be89"
                     strokeWidth="0.5"
                     fill="none"
                     strokeLinecap="round"
@@ -397,7 +465,7 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
                       cx={(i * 6 / (timelineData.length - 1)) * chartWidth}
                       cy={chartHeight - (d.balance / maxValue) * chartHeight}
                       r="1"
-                      fill="#CCFF00"
+                      fill="#56be89"
                     />
                   ))}
                 </svg>
@@ -442,7 +510,7 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
                   <span className="text-[10px] font-mono text-zinc-500 uppercase">{lang === 'en' ? 'Time to Goal' : 'เวลาถึงเป้า'}</span>
                 </div>
                 <div className="text-2xl font-display font-extrabold text-white">
-                  {Math.ceil(selectedGoal.target / monthlyContribution)}
+                  {selectedGoal ? Math.ceil(selectedGoal.target / monthlyContribution) : 0}
                 </div>
                 <div className="text-xs text-zinc-400 font-mono mt-1">
                   {lang === 'en' ? 'months at current rate' : 'เดือน อัตราปัจจุบัน'}
@@ -457,14 +525,19 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
                 <span className="text-xs font-mono text-brand uppercase">{lang === 'en' ? 'AI Insight' : 'ข้อมูลเชิงลึก AI'}</span>
               </div>
               <p className="text-sm text-zinc-300 leading-relaxed">
-                {lang === 'en'
-                  ? `Based on your ${selectedScenario.labelEn.toLowerCase()} scenario, you could reach your ${selectedGoal.name.toLowerCase()} goal ${
-                      Math.ceil(selectedGoal.target / monthlyContribution) < 24 ? `${Math.ceil(selectedGoal.target / monthlyContribution)} months` : 'in over 24 months'
-                    }. Consider increasing your monthly contribution by ${Math.max(0, Math.ceil(selectedGoal.target / 18) - monthlyContribution).toLocaleString()}฿ to accelerate your timeline.`
-                  : `จากสถานการณ์${selectedScenario.labelTh}ของคุณ คุณสามารถถึงเป้าหมาย${selectedGoal.name}ได้ในอีก ${
-                      Math.ceil(selectedGoal.target / monthlyContribution) < 24 ? `${Math.ceil(selectedGoal.target / monthlyContribution)} เดือน` : 'มากกว่า 24 เดือน'
-                    }. ลองเพิ่มเงินออมรายเดือนอีก ${Math.max(0, Math.ceil(selectedGoal.target / 18) - monthlyContribution).toLocaleString()}฿ เพื่อเร่งการบรรลุเป้า`
-                }
+                {selectedGoal ? (
+                  lang === 'en'
+                    ? `Based on your ${selectedScenario.labelEn.toLowerCase()} scenario, you could reach your ${selectedGoal.name.toLowerCase()} goal ${
+                        Math.ceil(selectedGoal.target / monthlyContribution) < 24 ? `${Math.ceil(selectedGoal.target / monthlyContribution)} months` : 'in over 24 months'
+                      }. Consider increasing your monthly contribution by ${Math.max(0, Math.ceil(selectedGoal.target / 18) - monthlyContribution).toLocaleString()}฿ to accelerate your timeline.`
+                    : `จากสถานการณ์${selectedScenario.labelTh}ของคุณ คุณสามารถถึงเป้าหมาย${selectedGoal.name}ได้ในอีก ${
+                        Math.ceil(selectedGoal.target / monthlyContribution) < 24 ? `${Math.ceil(selectedGoal.target / monthlyContribution)} เดือน` : 'มากกว่า 24 เดือน'
+                      }. ลองเพิ่มเงินออมรายเดือนอีก ${Math.max(0, Math.ceil(selectedGoal.target / 18) - monthlyContribution).toLocaleString()}฿ เพื่อเร่งการบรรลุเป้า`
+                ) : (
+                  lang === 'th' 
+                    ? 'สร้างเป้าหมายเพื่อรับข้อมูลเชิงลึกจาก AI'
+                    : 'Create a goal to get AI insights'
+                )}
               </p>
             </div>
 
@@ -476,9 +549,9 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
                   {lang === 'en' ? 'Unlock Advanced Simulations' : 'ปลดล็อกการจำลองขั้นสูง'}
                 </h3>
                 <p className="text-sm text-zinc-400 mb-4">
-                  {lang === 'en' 
-                    ? 'Get access to Money Twin projections, multiple goal tracking, and AI-powered scenario comparisons.'
-                    : 'เข้าถึงการคาดการณ์ Money Twin, การติดตามหลายเป้าหมาย และการเปรียบเทียบสถานการณ์ AI'}
+                  {lang === 'en'
+                    ? 'Get access to advanced projections, multiple goal tracking, and AI-powered scenario comparisons.'
+                    : 'เข้าถึงการจำลองการเงินขั้นสูง การติดตามหลายเป้าหมาย และการเปรียบเทียบสถานการณ์ด้วย AI'}
                 </p>
                 <button
                   onClick={onNavigateToUpgrade}
@@ -500,7 +573,7 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #CCFF00;
+          background: #56be89;
           cursor: pointer;
           box-shadow: 0 0 10px rgba(204, 255, 0, 0.5);
         }
@@ -508,7 +581,7 @@ export function GoalSimulationPage({ profile, lang, onNavigateToUpgrade, theme =
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #CCFF00;
+          background: #56be89;
           cursor: pointer;
           border: none;
           box-shadow: 0 0 10px rgba(204, 255, 0, 0.5);

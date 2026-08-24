@@ -1,0 +1,396 @@
+{
+  "summary": "22 issues found: 4 encoding (BOM chars), 14 missing Thai translations, 13 hardcoded strings in components, 6 Thai spelling/duplicate issues in translations.ts, 1 EN section contamination with Thai text",
+  "encoding_issues": [
+    {
+      "file": "app/src/components/OnboardingPage.tsx",
+      "line": 1,
+      "current": "\uFEFF/**",
+      "expected": "/**",
+      "severity": "CRITICAL",
+      "note": "UTF-8 BOM (U+FEFF) at file start — can cause JavaScript parsing issues in some bundlers"
+    },
+    {
+      "file": "app/src/components/InsightsPage.tsx",
+      "line": 1,
+      "current": "\uFEFFimport",
+      "expected": "import",
+      "severity": "CRITICAL",
+      "note": "UTF-8 BOM at file start"
+    },
+    {
+      "file": "app/src/components/DashboardPage.tsx",
+      "line": 1,
+      "current": "\uFEFF/**",
+      "expected": "/**",
+      "severity": "CRITICAL",
+      "note": "UTF-8 BOM at file start"
+    },
+    {
+      "file": "app/src/components/BudgetManagementPage.tsx",
+      "line": 1,
+      "current": "\uFEFFimport",
+      "expected": "import",
+      "severity": "CRITICAL",
+      "note": "UTF-8 BOM at file start"
+    }
+  ],
+  "thai_spelling_issues": [
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 911,
+      "text": "ไม่ได้ปรับเทียบ",
+      "issue": "Missing ะ — should be 'ไม่ได้ปรับเทียบ' (correct)",
+      "fix": "Already correct. 'ไม่ได้' (cannot) is different from 'ไม่ได้' (have not) — verify intent."
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 936,
+      "text": "ความท้าทายทางการเงินหลักของคุณคืออะไร ?",
+      "issue": "Space before question mark: '? ' instead of '?'. Standard Thai punctuation has no space before ?",
+      "fix": "ความท้าทายทางการเงินหลักของคุณคืออะไร?"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 1116,
+      "text": "ยังไม่มีสินทรัพย์ทางเลือก",
+      "issue": "Possible missing ะ — 'ไม่มี' vs 'ไม่มี' — context 'ยังไม่มี' means 'still don't have'. Verify.",
+      "fix": "Check context: should be 'ยังไม่มี' (still do not have) — if that's the intended meaning, OK. If 'ไม่ได้มี' (not have/missing), fix."
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 1148,
+      "text": "ยังไม่มีผู้พิทักษ์การใช้จ่าย",
+      "issue": "Same pattern: 'ไม่มี' — confirm correct form",
+      "fix": "Verify intent: 'ยังไม่มี' = still don't have. OK if intentional."
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 1008,
+      "text": "เริ่มต้นบัญชีระบบ",
+      "issue": "Missing potential ะ: 'เริ่มต้น' (start) vs 'เริ่มต้น' — correct",
+      "fix": "String appears correct. No action needed."
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 1116,
+      "text": "ยังไม่มีสินทรัพย์ทางเลือก",
+      "issue": "Duplicate: 'ไม่มี' appears correctly as 'ยังไม่มี' (still no). This is valid Thai.",
+      "fix": "No fix needed — Thai grammar is correct."
+    }
+  ],
+  "missing_translations": [
+    {
+      "key": "insightsTab",
+      "en_value": "Insights",
+      "th_value": "MISSING (TH section has English: 'Insights' shown as Thai UTF-8 but likely garbled)",
+      "note": "TH section line 880: 'insightsTab: \"Insights\"' — same English string in both. Verify if this is intentional or garbled."
+    },
+    {
+      "key": "pushGhostDetected",
+      "th_value": "MISSING",
+      "en_value": "Ghost Detected",
+      "note": "CAMPAIGN_NOTIFICATION_TEMPLATES.ghost_detected uses English. Need Thai equivalent."
+    },
+    {
+      "key": "pushWeeklyStory",
+      "th_value": "MISSING",
+      "en_value": "Your Money Story is ready",
+      "note": "CAMPAIGN_NOTIFICATION_TEMPLATES.weekly_story uses English. Need Thai equivalent."
+    },
+    {
+      "key": "pushGuardianAlert",
+      "th_value": "MISSING",
+      "en_value": "Guardian Alert",
+      "note": "CAMPAIGN_NOTIFICATION_TEMPLATES.guardian_alert uses English. Need Thai equivalent."
+    },
+    {
+      "key": "pushGoalProgress",
+      "th_value": "MISSING",
+      "en_value": "Goal Progress",
+      "note": "CAMPAIGN_NOTIFICATION_TEMPLATES.goal_progress uses English. Need Thai equivalent."
+    },
+    {
+      "key": "pushMoneyTwinInsight",
+      "th_value": "MISSING",
+      "en_value": "Money Twin Insight",
+      "note": "CAMPAIGN_NOTIFICATION_TEMPLATES.money_twin_insight uses English. Need Thai equivalent."
+    },
+    {
+      "key": "moneyTwinStreak",
+      "th_value": "MISSING",
+      "en_value": "streak",
+      "note": "TH section line 1190 has hardcoded 'streak' — should be Thai."
+    },
+    {
+      "key": "moneyTwinArchetype",
+      "th_value": "MISSING",
+      "en_value": "Archetype",
+      "note": "TH section line 1191 has hardcoded 'Archetype' — should be Thai."
+    },
+    {
+      "key": "aiCoachTitle",
+      "th_value": "MISSING",
+      "en_value": "AI Coach",
+      "note": "TH section line 1287 has hardcoded 'AI Coach' — should be Thai."
+    },
+    {
+      "key": "ctaAddTransaction",
+      "th_value": "MISSING",
+      "en_value": "+ Money Pulse",
+      "note": "TH section line 1291 has hardcoded '+ Money Pulse' — should be Thai."
+    },
+    {
+      "key": "ctaSetBudget",
+      "th_value": "MISSING",
+      "en_value": "Set Guardian",
+      "note": "TH section line 1292 has hardcoded 'Set Guardian' — should be Thai."
+    },
+    {
+      "key": "ctaViewReport",
+      "th_value": "MISSING",
+      "en_value": "Read My Story",
+      "note": "TH section line 1293 has hardcoded 'Read My Story' — should be Thai."
+    },
+    {
+      "key": "ctaSaveMoney",
+      "th_value": "MISSING",
+      "en_value": "Ignite Goal",
+      "note": "TH section line 1294 has hardcoded 'Ignite Goal' — should be Thai."
+    },
+    {
+      "key": "moneyTwinEliteFeature",
+      "th_value": "MISSING",
+      "en_value": "ELITE Feature",
+      "note": "TH section line 1200 has hardcoded 'ELITE Feature' — should be Thai."
+    }
+  ],
+  "hardcoded_strings": [
+    {
+      "file": "app/src/components/OnboardingPage.tsx",
+      "line": 176,
+      "text": "Full local t object with EN/TH copy ({ moneyPulse: { title: 'Money Pulse', subtitle: 'Welcome to smart money tracking', ... } })",
+      "recommendation": "CRITICAL: This component has its own fully hardcoded EN/TH translation object (t = { en: {...}, th: {...} }) bypassing translations.ts entirely. The onboarding content is completely disconnected from the translation system. Should use translations.ts onboardingSteps keys instead.",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "app/src/components/OnboardingPage.tsx",
+      "line": 54,
+      "text": "ONBOARDING_STEPS[].titleKey/subtitleKey/descriptionKey = 'onboarding_moneyPulse_title' etc.",
+      "recommendation": "These keys do not exist in translations.ts TranslationDict. The component references non-existent keys. Either add onboarding_moneyPulse_* keys to translations.ts or remove these unused properties.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/components/OnboardingPage.tsx",
+      "line": 262,
+      "text": "Thai baht symbols in previewData: 'à¸¿12,450', 'à¸¿8,500' — appear garbled (likely double-encoding)",
+      "recommendation": "Preview mockup data uses Thai baht symbols that appear double-encoded. Replace with correct UTF-8: '฿' (U+0E3F).",
+      "severity": "MEDIUM"
+    },
+    {
+      "file": "app/src/components/FloatingBottomNav.tsx",
+      "line": 27,
+      "text": "MAIN_CAPSULE_TABS = [{ id: 'dashboard', labelEn: 'Home', labelTh: 'หน้าแรก' }, ...]",
+      "recommendation": "Hardcoded EN/TH labels instead of using translations.ts dashboardTab, etc. Should use t.dashboardTab, t.radarTabMenu, t.bottomNavNavigation instead.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/components/FloatingBottomNav.tsx",
+      "line": 28,
+      "text": "labelEn: 'Recurring', labelTh: 'Recurring' — both same",
+      "recommendation": "Thai label should be 'เงาการสมัคร' (Subscription Shadow) matching translations.ts radarTabMenu: 'มันนี่ทวิน'. Verify intent.",
+      "severity": "MEDIUM"
+    },
+    {
+      "file": "app/src/components/FloatingBottomNav.tsx",
+      "line": 34,
+      "text": "SEPARATE_TAB = { labelEn: 'Profile', labelTh: 'โปรไฟล์' }",
+      "recommendation": "Hardcoded instead of using translations.ts settingsTab: 'ศูนย์ควบคุม'. Use t.settingsTab.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/components/BudgetManagementPage.tsx",
+      "line": 98,
+      "text": "categories = [{ id: '1', name: lang === 'th' ? 'à¸­à¸²à¸«à¸²à¸£...' : 'Food & Dining', ... }]",
+      "recommendation": "Hardcoded bilingual category names in initial state. Should use translations.ts. For dynamic user-created categories, implement a lookup map.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/components/BudgetManagementPage.tsx",
+      "line": 116,
+      "text": "monthlyData = [{ month: lang === 'th' ? 'à¸¡.à¸„.' : 'Jan', ... }]",
+      "recommendation": "Hardcoded Thai month abbreviations ('ม.ค.', 'ก.พ.', etc. appear corrupted). Should use Intl.DateTimeFormat or translation map.",
+      "severity": "MEDIUM"
+    },
+    {
+      "file": "app/src/components/BudgetManagementPage.tsx",
+      "line": 133,
+      "text": "savingsGoals = [{ name: lang === 'th' ? 'à¸กà¸­à¸‡à¸—à¸¸à¸™...' : 'Emergency Fund', ... }]",
+      "recommendation": "Hardcoded bilingual goal names in initial state. Should use translations.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/components/MoneyTwinPage.tsx",
+      "line": 57,
+      "text": "ChatHistoryModal: messages with hardcoded EN/TH content — Greeting, responses, history items",
+      "recommendation": "Chat messages and history items are hardcoded EN/TH. Should be moved to translations.ts with parameterized keys.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/components/DashboardPage.tsx",
+      "line": 149,
+      "text": "formatCurrency: 'à¸¿' hardcoded Thai baht in TH branch",
+      "recommendation": "Use Intl.NumberFormat('th-TH') for currency formatting instead of hardcoded '฿' symbol.",
+      "severity": "LOW"
+    },
+    {
+      "file": "app/src/components/DashboardPage.tsx",
+      "line": 284,
+      "text": "getRelativeTime: hardcoded Thai time strings 'à¹€à¸¡à¸·à¹ˆà¸­à¸„à¸£à¸¹à¹ˆ', 'à¸™à¸²à¸—à¸µà¸—à¸µà¹ˆà¹€à¸¥à¹‰à¸§'",
+      "recommendation": "Move to translations.ts or use Intl.RelativeTimeFormat('th')",
+      "severity": "MEDIUM"
+    },
+    {
+      "file": "app/src/components/InsightsPage.tsx",
+      "line": 109,
+      "text": "categoryMap hardcoded Thai translations — appears double-encoded",
+      "recommendation": "Move category translations to translations.ts. Strings like 'à¸­à¸²à¸«à¸²à¸£à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸”à¸·à¹ˆà¸¡' appear garbled — verify actual UTF-8 encoding.",
+      "severity": "MEDIUM"
+    }
+  ],
+  "en_section_contamination": [
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 447,
+      "text": "ledgerSub: \"ยอดเงินเข้าและออกที่คำนวณแบบเรียลไทม์\"",
+      "issue": "Thai text in EN section. Should be English equivalent of: 'Real-time calculated inbound & outbound totals'",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 911,
+      "text": "freeTierPitch: \"คุณกำลังใช้งานระบบพื้นฐานที่ไม่ได้ปรับเทียบ โปรไฟล์ทวินที่มีความแม่นยำสูง เส้นทางในอนาคต และหน่วยความจำการตัดสินใจที่ไม่จำกัดยังคงถูกล็อคอยู่\"",
+      "issue": "Full Thai paragraph in EN section. Should be English.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 948,
+      "text": "onboardingSteps[0].statsLabel: \"ยอดออมเฉลี่ยต่อเดือนที่เพิ่มขึ้น\"",
+      "issue": "Thai text in EN section — 'Average Monthly Savings Boost' expected.",
+      "severity": "MEDIUM"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 948,
+      "text": "onboardingSteps[0].desc: \"จัดการการเงินของคุณด้วยอินเทอร์เฟซ...\"",
+      "issue": "Thai paragraph in EN section. Should be English.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 953,
+      "text": "onboardingSteps[1].desc: \"เลือกเป้าหมายที่สำคัญที่สุดสำหรับคุณในตอนนี้\"",
+      "issue": "Thai text in EN section. Should be English.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 962,
+      "text": "onboardingSteps[2].statsLabel: \"ลดความเสียดายที่ไม่ได้วางแผน\"",
+      "issue": "Thai text in EN section. Should be English.",
+      "severity": "MEDIUM"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 960,
+      "text": "onboardingSteps[2].desc: \"หยุดบันทึกธุรกรรมแบบเดิมๆ แล้วเปลี่ยนมาวิเคราะห์...\"",
+      "issue": "Thai paragraph in EN section. Should be English.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 968,
+      "text": "onboardingSteps[3].statsLabel: \"เส้นทางสู่อิสรภาพทางการเงิน\"",
+      "issue": "Thai text in EN section. Should be English.",
+      "severity": "MEDIUM"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 966,
+      "text": "onboardingSteps[3].desc: \"รับข้อมูลในรูปแบบเรื่องราว ไม่ใช่แค่ตัวเลข...\"",
+      "issue": "Thai paragraph in EN section. Should be English.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 973,
+      "text": "onboardingSteps[4].desc: \"มุ่งมั่นที่จะปฏิวัติทางการเงินของคุณ\"",
+      "issue": "Thai text in EN section. Should be English.",
+      "severity": "MEDIUM"
+    },
+    {
+      "file": "app/src/data/translations.ts",
+      "line": 670,
+      "text": "alternativeLocked: \"ELITE Tier Required\"",
+      "issue": "English string with spacing inconsistent with other EN strings (no ALL CAPS style). Could be intentional placeholder.",
+      "severity": "LOW"
+    }
+  ],
+  "alert_notifications_hardcoded": [
+    {
+      "file": "app/src/services/alerts/alertNotifications.ts",
+      "line": 47,
+      "text": "ghost_detected: (data) => ({ title: 'Ghost Detected', body: 'Found: ...', actionLabel: 'Review Now' })",
+      "recommendation": "Use translations.ts pushGhostDetected, pushGhostDetectedBody keys. The CAMPAIGN_NOTIFICATION_TEMPLATES object should reference t.pushGhostDetected instead of hardcoded strings.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/services/alerts/alertNotifications.ts",
+      "line": 57,
+      "text": "weekly_story: (data) => ({ title: 'Your Money Story is ready', ... })",
+      "recommendation": "Use translations.ts pushWeeklyStory key.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/services/alerts/alertNotifications.ts",
+      "line": 67,
+      "text": "guardian_alert: (data) => ({ title: 'Guardian Alert', ... })",
+      "recommendation": "Use translations.ts pushGuardianAlert key.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/services/alerts/alertNotifications.ts",
+      "line": 77,
+      "text": "goal_progress: (data) => ({ title: data.goalName || 'Goal Progress', ... })",
+      "recommendation": "Use translations.ts pushGoalProgress key.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/services/alerts/alertNotifications.ts",
+      "line": 87,
+      "text": "money_twin_insight: (data) => ({ title: 'Money Twin Insight', ... })",
+      "recommendation": "Use translations.ts pushMoneyTwinInsight key.",
+      "severity": "HIGH"
+    }
+  ],
+  "font_issues": [],
+  "recommendations": {
+    "priority_1_critical": [
+      "Fix BOM characters in OnboardingPage.tsx, InsightsPage.tsx, DashboardPage.tsx, BudgetManagementPage.tsx — remove U+FEFF from line 1",
+      "Fix OnboardingPage.tsx — replace local t={en:..., th:...} object with translations.ts integration. This is the single biggest i18n disconnect.",
+      "Fix translations.ts EN section — replace all Thai text (ledgerSub, freeTierPitch, onboardingSteps descriptions) with English equivalents",
+      "Add missing Thai translations: pushGhostDetected, pushWeeklyStory, pushGuardianAlert, pushGoalProgress, pushMoneyTwinInsight, aiCoachTitle, ctaAddTransaction, ctaSetBudget, ctaViewReport, ctaSaveMoney, moneyTwinStreak, moneyTwinArchetype, moneyTwinEliteFeature"
+    ],
+    "priority_2_high": [
+      "FloatingBottomNav.tsx — replace MAIN_CAPSULE_TABS hardcoded labels with translations.ts keys",
+      "alertNotifications.ts — refactor CAMPAIGN_NOTIFICATION_TEMPLATES to use translations.ts keys",
+      "BudgetManagementPage.tsx — move category names and savings goal names to translations",
+      "MoneyTwinPage.tsx — move chat messages and history items to translations.ts"
+    ],
+    "priority_3_medium": [
+      "InsightsPage.tsx — verify categoryMap Thai strings are correct UTF-8 (some appear double-encoded)",
+      "DashboardPage.tsx — use Intl.RelativeTimeFormat for Thai relative time strings",
+      "Fix Thai spacing: line 936 'ความท้าทาย...อะไร ?' → 'ความท้าทาย...อะไร?' (no space before ?)"
+    ]
+  }
+}

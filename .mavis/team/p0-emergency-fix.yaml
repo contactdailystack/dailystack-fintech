@@ -1,0 +1,391 @@
+# DailyStack P0 Emergency Fix — Team Plan
+# Launch: 2026-06-13 | Deadline: EOD | Goal: Production-ready
+
+version: 1
+plan:
+  name: DailyStack P0 Emergency Fix
+  max_concurrency: 4
+  max_consecutive_failures: 2
+  max_cycles: 6
+  auto_reject_retries: 1
+  verifier_config:
+    default_verifiers: [verifier]
+    audit_sample_rate: 0.0
+
+tasks:
+  # ─────────────────────────────────────────────────────────────
+  # TASK 1: Frontend P0 Bugs (Critical — Must Fix First)
+  # ─────────────────────────────────────────────────────────────
+  - id: p0-bugs
+    title: "[P0] Fix Critical Bugs in App.tsx"
+    prompt: |
+      ## Mission
+      Fix 4 critical bugs in `app/src/App.tsx` — all must be resolved TODAY.
+
+      ## Context
+      This is a Thai fintech app (DailyStack/PicksWise). The codebase is at:
+      `D:\Coding Folder\dailystack-fintech`
+
+      ## Bugs to Fix
+
+      ### Bug #1: Activity Tab Duplicate Render (P0)
+      - Location: `app/src/App.tsx` lines 651-655
+      - Problem: `currentTab === 'activity'` renders BOTH ActivityPage AND MyCardsPage
+      - Fix: REMOVE lines 651-655 (the duplicate MyCardsPage block)
+
+      ```typescript
+      // REMOVE THIS BLOCK (lines 651-655):
+      {currentTab === 'activity' && (
+        <MyCardsPage
+          lang={lang}
+        />
+      )}
+      ```
+
+      ### Bug #2: AlertsProvider Not Wrapped (P0)
+      - Location: `app/src/App.tsx` around line 95-100
+      - Problem: AlertsProvider is not wrapping the app, so all alerts are non-functional
+      - Fix: Wrap `<Routes>` with `<AlertsProvider>`
+
+      ```typescript
+      // BEFORE:
+      <AuthProvider>
+        <Routes>...</Routes>
+      </AuthProvider>
+
+      // AFTER:
+      <AuthProvider>
+        <AlertsProvider>
+          <Routes>...</Routes>
+        </AlertsProvider>
+      </AuthProvider>
+      ```
+      Note: Import AlertsProvider from `./services/alerts/AlertsContext`
+
+      ### Bug #3: Emoji in Scan Tab (P0)
+      - Location: `app/src/App.tsx` line 641
+      - Problem: Uses emoji 📷 which violates Zero Emoji Policy
+      - Fix: Replace with Lucide icon
+
+      ```typescript
+      // BEFORE:
+      <span className="text-4xl">📷</span>
+
+      // AFTER:
+      // Add import at top: import { ScanLine } from 'lucide-react';
+      <ScanLine className="w-10 h-10 text-[#C7FF2E]" />
+      ```
+
+      ### Bug #4: Transaction Not Persisting (P0)
+      - Location: `app/src/App.tsx` handleAddTransaction function (around line 450)
+      - Problem: Adding transaction only updates local state, not Supabase
+      - Fix: Call saveTransaction after updating local state
+
+      ```typescript
+      // Find handleAddTransaction and add:
+      const handleAddTransaction = async (tx: Transaction) => {
+        setTransactions(prev => [tx, ...prev]);
+        // ADD THIS: Save to Supabase
+        try {
+          const { saveTransaction } = await import('./services/transactionService');
+          await saveTransaction(tx);
+        } catch (err) {
+          console.error('Failed to save transaction:', err);
+        }
+      };
+      ```
+
+      ## Verification
+      After fixing, run:
+      ```powershell
+      cd D:\Coding Folder\dailystack-fintech\app
+      npx tsc --noEmit
+      ```
+
+      ## Deliverables
+      1. Fixed App.tsx with all 4 bugs resolved
+      2. TypeScript compilation passes (0 errors)
+      3. Report which lines were changed
+    assigned_to: frontend-dev
+    verified_by: verifier
+    verify_prompt: |
+      ## Verify P0 Bugs Fixed
+
+      Run these checks in `D:\Coding Folder\dailystack-fintech`:
+
+      1. **Activity Tab Fix**: `grep -n "currentTab === 'activity'" app/src/App.tsx`
+         - Should appear ONCE only (line ~629)
+         - If appears twice, bug NOT fixed
+
+      2. **AlertsProvider Fix**: `grep -n "AlertsProvider" app/src/App.tsx`
+         - Should show AlertsProvider wrapping Routes
+
+      3. **Emoji Fix**: `grep -n "📷" app/src/App.tsx`
+         - Should return NO MATCHES
+
+      4. **Transaction Fix**: `grep -n "saveTransaction" app/src/App.tsx`
+         - Should show saveTransaction call in handleAddTransaction
+
+      5. **TypeScript**: `cd app && npx tsc --noEmit`
+         - Must pass with 0 errors
+
+      Report PASS/FAIL for each check.
+    max_retries: 2
+
+  # ─────────────────────────────────────────────────────────────
+  # TASK 2: Backend Wiring — apiService Integration
+  # ─────────────────────────────────────────────────────────────
+  - id: backend-wire
+    title: "[P1] Wire apiService to Edge Functions"
+    prompt: |
+      ## Mission
+      Wire the unused apiService to all features. Functions exist but UI doesn't call them.
+
+      ## Context
+      - Project: `D:\Coding Folder\dailystack-fintech`
+      - apiService: `app/src/services/apiService.ts` — typed wrappers ready
+      - Edge Functions: `supabase/functions/` — 11 functions deployed
+      - Problem: grep shows ZERO calls to apiService functions
+
+      ## Files to Wire
+
+      ### 1. SubscriptionTrackerPage.tsx
+      - Wire: getSubscriptions, addSubscription
+      - Show real subscriptions from Supabase instead of hardcoded
+
+      ### 2. BudgetManagementPage.tsx
+      - Wire: getBudgets, updateBudget
+      - Persist budget data to Supabase
+
+      ### 3. MoneyTwinPage.tsx
+      - Wire: analyzeSpendingPatterns()
+      - Replace MOCK_INTERPRETATION with real API call
+
+      ### 4. WeeklyStoryPage.tsx
+      - Wire: generateWeeklyStory()
+      - Replace static WEEKLY_STORIES with real API
+
+      ### 5. InsightsPage.tsx
+      - Wire: getUserInsights()
+      - Replace hardcoded chart data
+
+      ## Implementation Pattern
+
+      ```typescript
+      // Example: Wire MoneyTwinPage
+      import { analyzeSpendingPatterns } from '../../services/apiService';
+
+      useEffect(() => {
+        const fetchInsights = async () => {
+          try {
+            const result = await analyzeSpendingPatterns({
+              userId: user.id,
+              periodDays: 30
+            });
+            setInsights(result);
+          } catch (err) {
+            console.error('Failed to fetch insights:', err);
+            // Fallback to mock if API fails
+          }
+        };
+        fetchInsights();
+      }, [user.id]);
+      ```
+
+      ## Verification
+      After wiring, run:
+      ```powershell
+      cd D:\Coding Folder\dailystack-fintech\app
+      npx tsc --noEmit
+      ```
+
+      ## Deliverables
+      1. All 5 pages wired to apiService
+      2. TypeScript compilation passes
+      3. Report which functions were connected
+    assigned_to: backend-dev
+    verified_by: verifier
+    verify_prompt: |
+      ## Verify apiService Wired
+
+      In `D:\Coding Folder\dailystack-fintech\app\src`:
+
+      1. **MoneyTwinPage**: `grep -n "analyzeSpendingPatterns" components/MoneyTwinPage.tsx`
+         - Should show function call in useEffect
+
+      2. **WeeklyStoryPage**: `grep -n "generateWeeklyStory" components/WeeklyStoryPage.tsx`
+         - Should show function call
+
+      3. **InsightsPage**: `grep -n "getUserInsights" components/InsightsPage.tsx`
+         - Should show function call
+
+      4. **TypeScript**: `cd app && npx tsc --noEmit`
+         - Must pass with 0 errors
+
+      Report PASS/FAIL for each check.
+    max_retries: 2
+
+  # ─────────────────────────────────────────────────────────────
+  # TASK 3: Brand Compliance Fixes
+  # ─────────────────────────────────────────────────────────────
+  - id: brand-fix
+    title: "[P1] Fix Brand Compliance Issues"
+    prompt: |
+      ## Mission
+      Fix brand compliance issues: font mismatch and light theme in ProfileSettings
+
+      ## Context
+      - Project: `D:\Coding Folder\dailystack-fintech`
+      - Spec: Space Grotesk (EN) + Kanit (TH)
+      - Current: Outfit used everywhere (55 occurrences)
+      - Issue: ProfileSettings uses light theme #F2F2F7
+
+      ## Fixes Required
+
+      ### Fix #1: ProfileSettings Dark Theme (CRITICAL)
+      - File: `app/src/components/ProfileSettingsPage.tsx`
+      - Line: ~93
+      - Change: `bg-[#F2F2F7]` → `bg-[#0B0F0A]`
+      - Also check for any hardcoded light colors and fix them
+
+      ```typescript
+      // BEFORE:
+      <div className="space-y-0 min-h-screen bg-[#F2F2F7] text-left">
+
+      // AFTER:
+      <div className="space-y-0 min-h-screen bg-[#0B0F0A] text-left">
+      ```
+
+      ### Fix #2: Font Update (Lower Priority — Can be done in Sprint 3)
+      - Option A: Quick fix — update CSS variables to use Space Grotesk
+      - Option B: Full migration — replace Outfit with Space Grotesk + Kanit
+
+      For today: Do Option A (CSS variable override)
+
+      Add to `app/src/index.css`:
+      ```css
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap');
+
+      :root {
+        --font-display: 'Space Grotesk', sans-serif;
+        --font-thai: 'Kanit', sans-serif;
+      }
+
+      body {
+        font-family: var(--font-display);
+      }
+      ```
+
+      ## Verification
+      ```powershell
+      cd D:\Coding Folder\dailystack-fintech\app
+      npx tsc --noEmit
+      ```
+
+      ## Deliverables
+      1. ProfileSettingsPage uses dark theme #0B0F0A
+      2. Font variables added to CSS
+      3. Report changes made
+    assigned_to: frontend-dev
+    verified_by: verifier
+    verify_prompt: |
+      ## Verify Brand Compliance
+
+      In `D:\Coding Folder\dailystack-fintech`:
+
+      1. **ProfileSettings Dark**: `grep -n "F2F2F7" app/src/components/ProfileSettingsPage.tsx`
+         - Should return NO MATCHES (or only in conditional for light theme)
+
+      2. **Font CSS**: Check `app/src/index.css` for Space Grotesk / Kanit imports
+
+      3. **TypeScript**: `cd app && npx tsc --noEmit`
+         - Must pass with 0 errors
+
+      Report PASS/FAIL for each check.
+    max_retries: 1
+
+  # ─────────────────────────────────────────────────────────────
+  # TASK 4: Final QA — TypeScript + Brand Audit
+  # ─────────────────────────────────────────────────────────────
+  - id: final-qa
+    title: "[QA] Final Verification — TypeScript + Brand Audit"
+    prompt: |
+      ## Mission
+      Run comprehensive QA check on all fixes. This is the FINAL gate before launch.
+
+      ## Context
+      - Project: `D:\Coding Folder\dailystack-fintech\app`
+      - Previous status: 73% production-ready
+
+      ## QA Checklist
+
+      ### 1. TypeScript Compilation
+      ```powershell
+      cd D:\Coding Folder\dailystack-fintech\app
+      npx tsc --noEmit
+      ```
+      Expected: 0 errors
+
+      ### 2. Brand Compliance Audit
+      ```powershell
+      # Zero Emoji Check
+      grep -r "📷\|📱\|💰\|🔔" app/src/ --include="*.tsx"
+      # Expected: NO MATCHES (except in intentional places)
+
+      # Zero Red Check
+      grep -r "text-red-\|bg-red-\|border-red-" app/src/ --include="*.tsx"
+      # Expected: Only in policy comments, not in actual code
+      ```
+
+      ### 3. Routing Verification
+      ```powershell
+      # Activity tab appears only once
+      grep -n "currentTab === 'activity'" app/src/App.tsx
+      # Expected: 1 match only
+
+      # AlertsProvider present
+      grep -n "AlertsProvider" app/src/App.tsx
+      # Expected: At least 1 match
+      ```
+
+      ### 4. Build Test
+      ```powershell
+      cd D:\Coding Folder\dailystack-fintech\app
+      npm run build
+      ```
+      Expected: Build completes successfully
+
+      ## Deliverables
+      Report:
+      1. TypeScript: PASS/FAIL + error count
+      2. Brand Audit: PASS/FAIL + violations found
+      3. Routing: PASS/FAIL + issues found
+      4. Build: PASS/FAIL + build time
+      5. Overall verdict: READY TO SHIP / NEEDS MORE WORK
+    assigned_to: qa-agent
+    verified_by: verifier
+    verify_prompt: |
+      ## Final QA Gate
+
+      Run the full QA checklist from the task prompt and report results.
+
+      This is a VERIFICATION task — run all checks independently, don't trust
+      previous reports. Report actual command output.
+
+      Final verdict: READY TO SHIP or NEEDS MORE WORK
+    max_retries: 1
+
+# Dependencies:
+# - p0-bugs, backend-wire, brand-fix run IN PARALLEL
+# - final-qa runs AFTER all others complete
+depends_on: []
+
+# Final QA depends on all other tasks
+final-qa:
+  depends_on: [p0-bugs, backend-wire, brand-fix]
+
+gates:
+  - command: cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit
+    label: TypeScript Compilation
+  - command: cd D:\Coding Folder\dailystack-fintech\app && npm run build
+    label: Production Build

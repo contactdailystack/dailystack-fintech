@@ -1,0 +1,34 @@
+# ============================================================
+# DailyStack FinTech — Supabase Local Development Config
+# ============================================================
+# NOTE: This config.toml is for LOCAL Supabase development only.
+# For the hosted DailyStack-FinTech project (ref: pexcvfhuvqrwrabpgkzi),
+# email confirmation is controlled via Supabase Dashboard:
+#   Authentication > Providers > Email > Confirm email (toggle OFF)
+# ============================================================
+
+[project]
+project_id = "pexcvfhuvqrwrabpgkzi"
+
+[api]
+enabled = true
+port = 54321
+max_rows = 1000
+
+[db]
+port = 54322
+
+[auth]
+enabled = true
+# AUTO-CONFIRM SIGNUP (Option B from P1-01 decision)
+# Setting to false allows users to access the app immediately after signup
+# without clicking the email confirmation link
+email_confirm_enabled = false
+
+[auth.email]
+# Double-confirm enabled = false for clarity
+confirm_email = false
+
+[auth.smtp]
+admin_email = "admin@dailystack.app"
+sender_name = "DailyStack"

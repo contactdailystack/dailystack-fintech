@@ -1,0 +1,12 @@
+{
+  "image_info": [
+    {
+      "file": "C:/Users/Pick/Downloads/recurring-upcoming-512x1024.webp",
+      "prompt": "Analyze this mobile app screenshot in extreme detail for UI/UX implementation. Describe: 1) Exact layout structure and component hierarchy 2) All colors used with hex codes 3) Typography styles and sizes 4) Component states and interactions 5) Spacing and padding values 6) Card/container styles 7) Icon styles 8) Animation/interaction patterns visible 9) Any list or grid patterns 10) Navigation elements"
+    },
+    {
+      "file": "C:/Users/Pick/Downloads/LTyIHmAdWuf6FpEXjcjNhnPE.avif",
+      "prompt": "Analyze this mobile app screenshot in extreme detail for UI/UX implementation. Describe: 1) Exact layout structure and component hierarchy 2) All colors used with hex codes 3) Typography styles and sizes 4) Component states and interactions 5) Spacing and padding values 6) Card/container styles 7) Icon styles 8) Animation/interaction patterns visible 9) Any charts or data visualizations 10) Navigation elements"
+    }
+  ]
+}

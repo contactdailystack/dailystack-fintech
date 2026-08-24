@@ -1,0 +1,10 @@
+{
+  "last_cycle": [
+    { "task_id": "p3-page-audit", "verdict": "manual_retry", "reason": "Worker session errored. Will retry with same instructions." },
+    { "task_id": "p3-responsive", "verdict": "manual_retry", "reason": "Worker session errored. Will retry with same instructions." },
+    { "task_id": "p3-conversion-trust", "verdict": "manual_retry", "reason": "Worker session errored. Will retry with same instructions." }
+  ],
+  "next_cycle": [],
+  "plan_complete": false,
+  "message_to_user": "Cycle 2: All 3 Phase 3 tasks errored (session issues). Approving retry — they will restart in next cycle."
+}

@@ -1,0 +1,159 @@
+version: 1
+plan:
+  name: DailyStack E2E Production Audit
+  max_concurrency: 6
+  max_consecutive_failures: 2
+  max_cycles: 5
+  auto_reject_retries: 1
+tasks:
+  - id: audit-dashboard
+    title: Audit Dashboard Page
+    prompt: |
+      You are auditing the DailyStack fintech app DashboardPage.tsx.
+      Location: D:\Coding Folder\dailystack-fintech\app\src\components\DashboardPage.tsx
+
+      AUDIT CHECKLIST:
+      1. Every button onClick — verify calls real handler or navigation
+      2. Every navigation — verify onNavigate() wired to actual page
+      3. Data source — check real state/props vs hardcoded mock
+      4. Error handling — check loading/empty states
+      5. API calls — verify Supabase connection or mock
+      6. Edge cases — null checks, empty arrays
+
+      AUDIT EACH SECTION:
+      - Hero Card: graph data, trend calculation
+      - Recent Activity: transaction data source
+      - Accounts: balance data source
+      - Upcoming Bills: subscription data source
+
+      OUTPUT FORMAT:
+      For each issue found:
+      - Line number, Code snippet, Problem, Severity, Fix
+
+      End with: Production Ready Score: X/10
+    assigned_to: explore
+    verify_skip_reason: Owner will compile all results into final report; exploration provides bounded deliverable
+    max_retries: 1
+
+  - id: audit-insights
+    title: Audit Insights Page
+    prompt: |
+      You are auditing the DailyStack fintech app InsightsPage.tsx.
+      Location: D:\Coding Folder\dailystack-fintech\app\src\components\InsightsPage.tsx
+
+      AUDIT CHECKLIST:
+      1. Every button onClick — verify real handler
+      2. Navigation — verify onNavigate() wired
+      3. Data source — real vs hardcoded mock
+      4. Error/loading states
+      5. API calls — Supabase or mock
+
+      AUDIT EACH SECTION:
+      - Coming Up card: subscription data
+      - Payday View toggle
+      - Charts: real data or random
+      - Empty states
+
+      OUTPUT FORMAT:
+      For each issue: Line, Code, Problem, Severity, Fix
+      End with: Production Ready Score: X/10
+    assigned_to: explore
+    verify_skip_reason: Owner will compile all results into final report
+    max_retries: 1
+
+  - id: audit-profile
+    title: Audit Profile Page
+    prompt: |
+      You are auditing the DailyStack fintech app ProfilePage.tsx.
+      Location: D:\Coding Folder\dailystack-fintech\app\src\components\ProfilePage.tsx
+
+      AUDIT CHECKLIST:
+      1. Button onClick — real handlers
+      2. Edit modals — save/cancel work
+      3. Avatar upload — localStorage
+      4. Settings navigation
+      5. Stats: real or mock
+
+      AUDIT EACH SECTION:
+      - Edit name/email modals
+      - Avatar handlers
+      - Stats calculations
+      - Settings list
+
+      OUTPUT FORMAT:
+      For each issue: Line, Code, Problem, Severity, Fix
+      End with: Production Ready Score: X/10
+    assigned_to: explore
+    verify_skip_reason: Owner will compile all results into final report
+    max_retries: 1
+
+  - id: audit-navigation
+    title: Audit Navigation System
+    prompt: |
+      You are auditing the DailyStack navigation system.
+      Files:
+      - D:\Coding Folder\dailystack-fintech\app\src\components\FloatingBottomNav.tsx
+      - D:\Coding Folder\dailystack-fintech\app\src\components\BottomNavBar.tsx
+      - D:\Coding Folder\dailystack-fintech\app\src\App.tsx
+
+      AUDIT CHECKLIST:
+      1. Nav items link to existing pages
+      2. Active state correct
+      3. onNavigate prop passed correctly
+      4. Routes all defined
+      5. 404 handling
+
+      OUTPUT FORMAT:
+      For each issue: File/line, Code, Problem, Severity, Fix
+      List all navigation paths.
+      End with: Production Ready Score: X/10
+    assigned_to: explore
+    verify_skip_reason: Owner will compile all results into final report
+    max_retries: 1
+
+  - id: audit-forms
+    title: Audit Forms and Data Flow
+    prompt: |
+      You are auditing DailyStack forms and data management.
+      Search for:
+      - D:\Coding Folder\dailystack-fintech\app\src\components\*Form*.tsx
+      - D:\Coding Folder\dailystack-fintech\app\src\hooks\*.ts
+      - D:\Coding Folder\dailystack-fintech\app\src\context\*.tsx
+
+      AUDIT CHECKLIST:
+      1. Form validation
+      2. Submit handlers real API
+      3. Error display
+      4. State persistence
+      5. localStorage operations
+
+      OUTPUT FORMAT:
+      For each issue: File/line, Code, Problem, Severity, Fix
+      End with: Production Ready Score: X/10
+    assigned_to: explore
+    verify_skip_reason: Owner will compile all results into final report
+    max_retries: 1
+
+  - id: audit-api
+    title: Audit API Integration
+    prompt: |
+      You are auditing DailyStack API and backend integration.
+      Files:
+      - D:\Coding Folder\dailystack-fintech\app\src\services\*.ts
+      - D:\Coding Folder\dailystack-fintech\app\src\lib\*.ts
+      - D:\Coding Folder\dailystack-fintech\app\src\supabase\*.ts
+
+      AUDIT CHECKLIST:
+      1. API calls real fetch/supabase
+      2. Error handling
+      3. Loading states
+      4. Auth flow
+      5. CRUD operations
+
+      OUTPUT FORMAT:
+      For each issue: File/line, Code, Problem, Severity, Fix
+      List: Real APIs, Mock services
+      End with: Production Ready Score: X/10
+    assigned_to: explore
+    verify_skip_reason: Owner will compile all results into final report
+    max_retries: 1

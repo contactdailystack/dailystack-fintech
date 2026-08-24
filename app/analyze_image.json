@@ -1,0 +1,8 @@
+{
+  "image_info": [
+    {
+      "file": "D:/Coding Folder/dailystack-fintech/app/recurring-upcoming-512x1024.webp",
+      "prompt": "Please analyze this mobile app screenshot in extreme detail. Describe: 1) Overall layout and visual hierarchy 2) Color scheme and design tokens 3) Typography choices 4) UI components and their states 5) Any potential UX issues or inconsistencies 6) Compliance with the dark theme design system described (background: #0B0F0A, surface: #171C15, accent: #C7FF2E) 7) Any accessibility concerns 8) Comparison with typical fintech app design patterns"
+    }
+  ]
+}

@@ -1,18 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import {
-  Sparkles, Send, Loader, Bot, User, Zap, Flame, TrendingUp
+  Sparkles, Send, Loader, Bot, User
 } from 'lucide-react';
 import { UserProfile, AIInterpretation } from '../types';
 import { translations, Language } from '../data/translations';
-import {
-  FBIS_BASE,
-  calculateStreakMultiplier,
-  getLevelFromScore,
-  getScoreToNextLevel,
-  getAICOachRecommendation,
-} from '../core/fbis';
-import { useAuthContext } from '../services/AuthContext';
-import { supabase } from '../services/supabaseClient';
+import { supabase } from '../supabaseClient';
+
+const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string).replace(/\/$/, '');
 
 interface AICoachPageProps {
   profile: UserProfile;
@@ -30,29 +24,7 @@ interface Message {
 
 export default function AICoachPage({ profile, interpretation, onNavigateToUpgrade, lang, theme }: AICoachPageProps) {
   const t = translations[lang];
-  const { fbis } = useAuthContext();
 
-  // Derive FBIS values from Supabase — fallback to base state if not yet loaded
-  const fbisScore = fbis?.current_score ?? FBIS_BASE;
-  const fbisStreak = fbis?.streak_days ?? 0;
-  const fbisMultiplier = fbis?.xp_multiplier ?? calculateStreakMultiplier(fbisStreak);
-  const fbisLevel = getLevelFromScore(fbisScore);
-  const fbisToNext = getScoreToNextLevel(fbisScore);
-
-  // Derive coach persona from tier
-  const persona: 'strict' | 'supportive' | 'analytical' =
-    profile.plan === 'basic' ? 'strict'
-    : profile.plan === 'pro' ? 'supportive'
-    : 'analytical';
-
-  // Build coach recommendation using real FBIS state
-  const fbisStateForCoach = {
-    currentScore: fbisScore,
-    streakDays: fbisStreak,
-    lastRecordedAt: fbis?.last_recorded_at ? new Date(fbis.last_recorded_at) : null,
-    xpMultiplier: fbisMultiplier,
-  };
-  const coachRecommendation = getAICOachRecommendation(persona, fbisStateForCoach);
   // Helper translating current archetype to Thai
   const displayArchetype = lang === 'en'
     ? interpretation.archetype
@@ -107,7 +79,7 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
       const sessionId = 'default';
 
       const response = await fetch(
-        'https://pexcvfhuvqrwrabpgkzi.supabase.co/functions/v1/ai-chat',
+        `${SUPABASE_URL}/functions/v1/ai-chat`,
         {
           method: 'POST',
           headers: {
@@ -154,7 +126,7 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
     
     if (lang === 'en') {
       if (q.includes('save') || q.includes('budget')) {
-        return `As a ${archetype}, your core future confidence relies on structured systems. I recommend establishing an autonomous "10% core multiplier" where that portion of every incoming settlement bypasses your retail accounts and settles instantly into MSFT or treasury classes. This mitigates mid-week dopamine leakagees.`;
+        return `As a ${archetype}, your core future confidence relies on structured systems. I recommend establishing an autonomous "10% core multiplier" where that portion of every incoming settlement bypasses your retail accounts and settles instantly into MSFT or treasury classes. This mitigates mid-week dopamine leakages.`;
       }
       if (q.includes('invest') || q.includes('stock') || q.includes('crypto')) {
         return `We see extreme demographic stability in Apple (AAPL) and NVIDIA (NVDA) positions inside your current profile. To maximize compound momentum, focus 80% on these system anchors, and contain speculative micro-plays under a strict 4% emotional playground limit.`;
@@ -185,9 +157,9 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch" id="coach-radar-grid">
         
         {/* Left Card: Archetype and Personality breakdown */}
-        <div className={`col-span-1 lg:col-span-4 border rounded-[32px] p-6 shadow-sm flex flex-col justify-between transition-all duration-300 ${theme === 'dark' ? 'bg-dark-card border-dark-border shadow-black/80' : 'bg-white border-[#E5E5EA]/80 shadow-[0_8px_32px_rgba(0,0,0,0.03)]'}`} id="archetype-info-card">
+        <div className={`col-span-1 lg:col-span-4 border rounded-[28px] p-6 shadow-sm flex flex-col justify-between transition-all duration-300 ${theme === 'dark' ? 'bg-dark-card border-dark-border shadow-black/80' : 'bg-white border-[#E5E5EA]/80 shadow-[0_8px_32px_rgba(0,0,0,0.03)]'}`} id="archetype-info-card">
           <div className="space-y-4 text-left">
-            <span className={`font-mono text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-full border font-bold ${theme === 'dark' ? 'bg-brand/10 text-brand border-brand/20' : 'bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/20'}`}>
+            <span className={`font-mono text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full border font-bold ${theme === 'dark' ? 'bg-brand/10 text-brand border-brand/20' : 'bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/20'}`}>
               {t.identityRadar}
             </span>
             <p className="text-xs text-zinc-500 font-mono mt-2">{t.coreSignature}</p>
@@ -215,7 +187,7 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
         </div>
 
         {/* Right Card: Interactive Radar sliders representation (Identity Engine metrics) */}
-        <div className={`col-span-1 lg:col-span-8 border rounded-[32px] p-6 shadow-sm flex flex-col justify-between transition-all duration-300 ${theme === 'dark' ? 'bg-dark-card border-dark-border shadow-black/80' : 'bg-white border-[#E5E5EA]/80 shadow-[0_8px_32px_rgba(0,0,0,0.03)]'}`} id="radar-metrics-interactive">
+        <div className={`col-span-1 lg:col-span-8 border rounded-[28px] p-6 shadow-sm flex flex-col justify-between transition-all duration-300 ${theme === 'dark' ? 'bg-dark-card border-dark-border shadow-black/80' : 'bg-white border-[#E5E5EA]/80 shadow-[0_8px_32px_rgba(0,0,0,0.03)]'}`} id="radar-metrics-interactive">
           <div className="text-left flex justify-between items-start gap-4">
             <div>
               <h3 className={`font-display font-medium text-xs uppercase tracking-widest ${theme === 'dark' ? 'text-[#ECEEF2]' : 'text-zinc-650'}`}>
@@ -230,7 +202,7 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
               <div className="space-y-1.5" id="slider-impulse">
                 <div className="flex justify-between text-xs font-mono">
                   <span className={theme === 'dark' ? 'text-zinc-400' : 'text-zinc-600'}>{t.impulseRating}</span>
-                  <span className={`font-bold ${theme === 'dark' ? 'text-[#C7FF2E]' : 'text-amber-600'}`}>{interpretation.radarAnalysis.impulseRating}/100</span>
+                  <span className={`font-bold ${theme === 'dark' ? 'text-[#56be89]' : 'text-amber-600'}`}>{interpretation.radarAnalysis.impulseRating}/100</span>
                 </div>
                 <div className={`w-full h-2 rounded-full overflow-hidden border ${theme === 'dark' ? 'bg-zinc-950 border-zinc-900' : 'bg-[#F2F2F7] border-transparent'}`}>
                   <div className="h-full bg-amber-400 rounded-full" style={{ width: `${interpretation.radarAnalysis.impulseRating}%` }} />
@@ -273,77 +245,8 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
         </div>
       </div>
 
-      {/* FBIS Score Card */}
-      <div className={`border rounded-[32px] p-5 flex flex-col gap-4 transition-all duration-300 ${theme === 'dark' ? 'bg-dark-card border-dark-border' : 'bg-white border-[#E5E5EA]/85 shadow-[0_8px_32px_rgba(0,0,0,0.03)]'}`} id="fbis-score-card">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${theme === 'dark' ? 'bg-[#C7FF2E]/10 text-[#C7FF2E]' : 'bg-[#007AFF]/10 text-[#007AFF]'}`}>
-              <Zap className="w-4 h-4" />
-            </div>
-            <span className={`font-mono text-[9px] uppercase tracking-widest font-bold ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
-              {lang === 'en' ? 'Financial Behavior Score' : 'คะแนนพฤติกรรมการเงิน'}
-            </span>
-          </div>
-          <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full border font-bold ${theme === 'dark' ? 'text-[#C7FF2E] border-[#C7FF2E]/20 bg-[#C7FF2E]/10' : 'text-[#007AFF] border-[#007AFF]/20 bg-[#007AFF]/10'}`}>
-            {lang === 'en' ? `Level ${fbisLevel}` : `เลเวล ${fbisLevel}`}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3">
-          {/* Score */}
-          <div className="flex flex-col gap-1">
-            <span className={`font-mono text-[8px] uppercase tracking-widest ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`}>
-              {lang === 'en' ? 'Score' : 'คะแนน'}
-            </span>
-            <span className={`font-display font-black text-2xl tracking-tight ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-              {fbisScore}
-            </span>
-          </div>
-          {/* Next Level */}
-          <div className="flex flex-col gap-1">
-            <span className={`font-mono text-[8px] uppercase tracking-widest ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`}>
-              {lang === 'en' ? 'To Next Level' : 'สู่เลเวลถัดไป'}
-            </span>
-            <span className={`font-display font-black text-2xl tracking-tight ${theme === 'dark' ? 'text-[#C7FF2E]' : 'text-[#007AFF]'}`}>
-              {fbisToNext}
-            </span>
-          </div>
-          {/* Streak */}
-          <div className="flex flex-col gap-1">
-            <span className={`font-mono text-[8px] uppercase tracking-widest ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`}>
-              {lang === 'en' ? 'Streak' : 'วันต่อเนื่อง'}
-            </span>
-            <div className="flex items-center gap-1">
-              <Flame className={`w-4 h-4 ${fbisStreak > 0 ? 'text-amber-400' : theme === 'dark' ? 'text-zinc-600' : 'text-zinc-300'}`} />
-              <span className={`font-display font-black text-2xl tracking-tight ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-                {fbisStreak}
-              </span>
-              {fbisMultiplier > 1.0 && (
-                <span className="font-mono text-[8px] text-amber-400 font-bold">{fbisMultiplier}x</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Progress bar to next level */}
-        <div className="space-y-1">
-          <div className={`w-full h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-zinc-800' : 'bg-slate-200/60'}`}>
-            <div
-              className={`h-full rounded-full ${theme === 'dark' ? 'bg-[#C7FF2E]' : 'bg-[#007AFF]'}`}
-              style={{ width: `${Math.min(100, ((fbisScore % 1000) / 1000) * 100)}%` }}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <TrendingUp className={`w-3 h-3 ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`} />
-            <p className={`font-mono text-[9px] italic ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
-              {coachRecommendation}
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Lower Main block: Chat console interface (Apple style minimalist luxury) */}
-      <div className={`border rounded-[32px] p-6 shadow-sm flex flex-col justify-between min-h-[440px] transition-all duration-300 ${theme === 'dark' ? 'bg-dark-card border-dark-border' : 'bg-white border-[#E5E5EA]/85 shadow-[0_8px_32px_rgba(0,0,0,0.03)]'}`} id="coach-chat-console">
+      <div className={`border rounded-[28px] p-6 shadow-sm flex flex-col justify-between min-h-[440px] transition-all duration-300 ${theme === 'dark' ? 'bg-dark-card border-dark-border' : 'bg-white border-[#E5E5EA]/85 shadow-[0_8px_32px_rgba(0,0,0,0.03)]'}`} id="coach-chat-console">
         
         <div className={`flex items-center justify-between pb-4 border-b ${theme === 'dark' ? 'border-zinc-800/60' : 'border-slate-100'}`} id="chat-header">
           <div className="flex items-center gap-3">
@@ -360,7 +263,7 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
             <button
               id="btn-chat-upgrade"
               onClick={onNavigateToUpgrade}
-              className={`border px-3.5 py-1.5 rounded-xl font-mono text-[9px] uppercase tracking-widest font-bold transition-all cursor-pointer ${theme === 'dark' ? 'bg-brand/10 text-brand border-brand/30 hover:bg-brand/25' : 'bg-[#EFEEF4] border-transparent text-[#007AFF] hover:bg-[#E5E5EA]'}`}
+              className={`border px-3.5 py-1.5 rounded-xl font-mono text-[10px] uppercase tracking-widest font-bold transition-all cursor-pointer ${theme === 'dark' ? 'bg-brand/10 text-brand border-brand/30 hover:bg-brand/25' : 'bg-[#EFEEF4] border-transparent text-[#007AFF] hover:bg-[#E5E5EA]'}`}
             >
               {t.infiniteMemory}
             </button>
@@ -377,15 +280,15 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
                 key={i}
                 className={`flex gap-3 max-w-[85%] ${isCoach ? 'mr-auto items-start' : 'ml-auto flex-row-reverse items-end'}`}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isCoach ? (theme === 'dark' ? 'bg-[#C7FF2E]/10 text-[#C7FF2E]' : 'bg-[#007AFF]/10 text-[#007AFF]') : (theme === 'dark' ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-205 text-slate-705')}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isCoach ? (theme === 'dark' ? 'bg-[#56be89]/10 text-[#56be89]' : 'bg-[#007AFF]/10 text-[#007AFF]') : (theme === 'dark' ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-205 text-slate-705')}`}>
                   {isCoach
                     ? <Bot className="w-4 h-4" />
                     : <User className="w-4 h-4" />
                   }
                 </div>
-                <div className={`p-4 rounded-3xl text-sm leading-relaxed text-left ${isCoach ? (theme === 'dark' ? 'bg-[#1A1B1E] border border-zinc-900 rounded-tl-none text-zinc-300' : 'bg-white border border-slate-205 rounded-tl-none text-zinc-805 shadow-sm') : (theme === 'dark' ? 'bg-[#C7FF2E] text-black font-semibold rounded-br-none' : 'bg-[#007AFF] text-white font-medium rounded-br-none shadow-sm')}`}>
+                <div className={`p-4 rounded-3xl text-sm leading-relaxed text-left ${isCoach ? (theme === 'dark' ? 'bg-[#1A1B1E] border border-zinc-900 rounded-tl-none text-zinc-300' : 'bg-white border border-slate-205 rounded-tl-none text-zinc-805 shadow-sm') : (theme === 'dark' ? 'bg-[#56be89] text-black font-semibold rounded-br-none' : 'bg-[#007AFF] text-white font-medium rounded-br-none shadow-sm')}`}>
                   {msg.text}
-                  <span className={`block text-[9px] font-mono mt-1 text-right ${isCoach ? 'text-zinc-500' : 'text-zinc-200/80'}`}>{msg.time}</span>
+                  <span className={`block text-[10px] font-mono mt-1 text-right ${isCoach ? 'text-zinc-500' : 'text-zinc-200/80'}`}>{msg.time}</span>
                 </div>
               </div>
             );
@@ -393,8 +296,8 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
 
           {loading && (
             <div className="flex gap-3 justify-start mr-auto items-start animate-pulse" id="chat-loading-ind">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-[#C7FF2E]/10' : 'bg-slate-100'}`}>
-                <Loader className={`w-4 h-4 animate-spin ${theme === 'dark' ? 'text-[#C7FF2E]' : 'text-[#007AFF]'}`} />
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-[#56be89]/10' : 'bg-slate-100'}`}>
+                <Loader className={`w-4 h-4 animate-spin ${theme === 'dark' ? 'text-[#56be89]' : 'text-[#007AFF]'}`} />
               </div>
               <div className={`p-4 rounded-3xl rounded-tl-none text-xs font-mono text-left ${theme === 'dark' ? 'bg-[#1A1B1E] border border-zinc-900 text-zinc-500' : 'bg-slate-100 border border-slate-200 text-zinc-650'}`}>
                 {t.chatProcessing}
@@ -413,13 +316,13 @@ export default function AICoachPage({ profile, interpretation, onNavigateToUpgra
             onChange={(e) => setInputMessage(e.target.value)}
             disabled={loading}
             placeholder={t.chatPlaceholder}
-            className={`flex-1 border rounded-2xl px-5 py-3 text-xs transition-all font-sans focus:outline-none focus:ring-1 ${theme === 'dark' ? 'bg-zinc-950 border-zinc-900 focus:border-[#C7FF2E]/30 text-white focus:ring-[#C7FF2E]/10 placeholder-zinc-500' : 'bg-[#F2F2F7] border-transparent text-[#1D1D1F] placeholder-[#8E8E93] focus:bg-white focus:border-[#007AFF] focus:ring-[#007AFF]/35'}`}
+            className={`flex-1 border rounded-2xl px-5 py-3 text-xs transition-all font-sans focus:outline-none focus:ring-1 ${theme === 'dark' ? 'bg-zinc-950 border-zinc-900 focus:border-[#56be89]/30 text-white focus:ring-[#56be89]/10 placeholder-zinc-500' : 'bg-[#F2F2F7] border-transparent text-[#1D1D1F] placeholder-[#8E8E93] focus:bg-white focus:border-[#007AFF] focus:ring-[#007AFF]/35'}`}
           />
           <button
             id="btn-chat-submit"
             type="submit"
             disabled={loading || !inputMessage.trim()}
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center cursor-pointer transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95 ${theme === 'dark' ? 'bg-[#C7FF2E] hover:bg-white text-black shadow-md' : 'bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-sm'}`}
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center cursor-pointer transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95 ${theme === 'dark' ? 'bg-[#56be89] hover:bg-white text-black shadow-md' : 'bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-sm'}`}
           >
             <Send className="w-4 h-4 font-bold" />
           </button>

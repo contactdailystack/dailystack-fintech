@@ -1,0 +1,222 @@
+/**
+ * ============================================================
+ * DailyStack Design System — Production Token Foundation v1.0
+ * ============================================================
+ *
+ * ARCHITECTURE: Single Source of Truth for Runtime CSS
+ *
+ * Layer 1 — BRAND TOKENS (Immutable, theme-agnostic)
+ *   PicksWise identity. Never changes between themes.
+ *   Used ONLY for: Primary CTA, Active State, Key Insight highlight.
+ *
+ * Layer 2 — SEMANTIC TOKENS (Meaning-based, adapts to theme)
+ *   System meaning. Color adapts; meaning is constant.
+ *   Used for: Success, Warning, Error, Information feedback only.
+ *
+ * Layer 3 — APPEARANCE TOKENS (Theme-specific, light mode default)
+ *   Visual surface. Current production = Light Mode.
+ *   Dark mode structural support exists but is NOT activated.
+ *
+ * USAGE:
+ *   Component reads CSS variable:  background: var(--bg-page);
+ *   Component reads semantic:       color: var(--success);
+ *   Component reads brand:         background: var(--brand-primary);
+ *
+ * RULES:
+ *   1. NEVER hardcode hex values in components
+ *   2. NEVER use brand color for decoration
+ *   3. NEVER use semantic color without icon/text pairing
+ *   4. Brand #56BE89 ≈ 5% of viewport max
+ *
+ * ============================================================
+ */
+
+/* ─────────────────────────────────────────────────────────────
+   LAYER 1 — BRAND TOKENS
+   Immutable. Same value in light and dark.
+   Applied ONLY to: CTA, active nav, key insight.
+   v2.0 — Rocket Money visual clone palette:
+     Primary = Prussian Navy #001C5A (RM CTA / active states)
+     Secondary = Di Serria Orange #D6964A (urgent accents)
+     Tertiary = Jordy Blue #6BBAEF (growth / info accents)
+───────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Brand Primary: RM Prussian Navy ── */
+  --brand-primary: #001C5A;
+  --brand-primary-hover: #1A3270;
+  --brand-primary-muted: rgba(0, 28, 90, 0.08);
+  --brand-primary-ghost: rgba(0, 28, 90, 0.18);
+  /* Text rendered ON brand-primary background */
+  --brand-on-primary: #FFFFFF;
+
+  /* ── Secondary Brand: RM Di Serria Orange ── */
+  /* Used sparingly — notifications, urgent accents ONLY */
+  --accent-orange: #D6964A;
+  --accent-orange-light: #E5B27A;
+  --accent-orange-muted: rgba(214, 150, 74, 0.12);
+
+  /* ── Tertiary Accent: RM Jordy Blue ── */
+  /* Growth indicators, investment data ONLY */
+  --accent-cyan: #6BBAEF;
+  --accent-cyan-light: #8FCDF5;
+  --accent-cyan-muted: rgba(107, 186, 239, 0.14);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LAYER 2 — SEMANTIC TOKENS
+   Meaning is constant; exact shade adapts per theme.
+   Always pair with text label or icon — never color alone.
+───────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Success: Positive financial outcome ── */
+  --success: #22C55E;
+  --success-light: #4ADE80;
+  --success-muted: rgba(34, 197, 94, 0.12);
+  --success-text: #166534;
+
+  /* ── Warning: Budget drift, approaching limit ── */
+  --warning: #D97706;
+  --warning-light: #F59E0B;
+  --warning-muted: rgba(217, 119, 6, 0.12);
+  --warning-text: #92400E;
+
+  /* ── Error: Failed action, critical issue ── */
+  --error: #EF4444;
+  --error-light: #F87171;
+  --error-muted: rgba(239, 68, 68, 0.12);
+  --error-text: #991B1B;
+
+  /* ── Information: Neutral, contextual ── */
+  --info: #3B82F6;
+  --info-light: #60A5FA;
+  --info-muted: rgba(59, 130, 246, 0.12);
+  --info-text: #1E40AF;
+
+  /* ── Insights: AI recommendation (use sparingly) ── */
+  /* Do NOT use purple purely for "AI" decoration */
+  --insights: #7C3AED;
+  --insights-light: #A78BFA;
+  --insights-muted: rgba(124, 58, 237, 0.12);
+  --insights-text: #4C1D95;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LAYER 3 — APPEARANCE TOKENS (Light Mode Production Default)
+   Production direction: White 80%, Soft Gray 15%, Brand 5%
+───────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Background ── */
+  --bg-page: #FFFFFF;
+  --bg-surface: #F3F3F3;
+  --bg-elevated: #FFFFFF;
+  --bg-overlay: rgba(0, 0, 0, 0.4);
+  --bg-input: #F0F0F0;
+
+  /* ── Text ── */
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+  --text-placeholder: #D1D5DB;
+  --text-inverse: #FFFFFF;
+
+  /* ── Border ── */
+  --border-default: #E5E7EB;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-focus: rgba(0, 28, 90, 0.5);
+
+  /* ── Shadow ── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-brand: 0 2px 12px rgba(0, 28, 90, 0.2);
+
+  /* ── Glass Surface (Apple HIG) ── */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-blur: blur(20px);
+
+  /* ── Skeleton Loading ── */
+  --skeleton-base: #E5E7EB;
+  --skeleton-shimmer: #F3F4F6;
+
+  /* ── Tab Bar / Bottom Nav ── */
+  --tab-bar-bg: rgba(255, 255, 255, 0.92);
+  --tab-bar-active: #111827;
+  --tab-bar-inactive: #8E8E93;
+  --tab-bar-border: rgba(0, 0, 0, 0.06);
+
+  /* ── Focus Ring (WCAG 2.4.7) ── */
+  --focus-ring: 2px solid #001C5A;
+  --focus-ring-offset: 2px;
+
+  /* ── Card ── */
+  --card-radius: 20px;
+  --card-padding: 20px;
+  --card-bg: #FFFFFF;
+  --card-border: #E5E7EB;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  /* ── Typography ── */
+  --font-sans: "Inter", "Kanit", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-size-xs: 0.6875rem;   /* 11px — caption */
+  --font-size-sm: 0.75rem;     /* 12px — label */
+  --font-size-base: 0.9375rem; /* 15px — body */
+  --font-size-lg: 1.125rem;    /* 18px — heading small */
+  --font-size-xl: 1.375rem;   /* 22px — heading */
+  --font-size-2xl: 1.75rem;   /* 28px — display */
+}
+
+/* ─────────────────────────────────────────────────────────────
+   DARK MODE TOKENS (Structure only — NOT activated)
+   Defined here for completeness; use via [data-theme="dark"]
+   on <html> element. Currently NOT used in production.
+───────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] {
+  /* Background */
+  --bg-page: #0B0F0A;
+  --bg-surface: #171C15;
+  --bg-elevated: #1E241C;
+  --bg-overlay: rgba(0, 0, 0, 0.75);
+  --bg-input: #252D23;
+
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.35);
+  --text-placeholder: rgba(255, 255, 255, 0.25);
+  --text-inverse: #0B0F0A;
+
+  /* Border */
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-focus: rgba(107, 186, 239, 0.5);
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-brand: 0 2px 12px rgba(107, 186, 239, 0.25);
+
+  /* Glass */
+  --glass-bg: rgba(23, 28, 21, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.06);
+
+  /* Skeleton */
+  --skeleton-base: #1E241C;
+  --skeleton-shimmer: #252D23;
+
+  /* Tab Bar */
+  --tab-bar-bg: rgba(23, 28, 21, 0.92);
+  --tab-bar-active: #FFFFFF;
+  --tab-bar-inactive: #8E8E93;
+
+  /* Card */
+  --card-bg: #171C15;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}

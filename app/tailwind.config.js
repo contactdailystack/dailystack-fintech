@@ -1,12 +1,12 @@
-﻿/** @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
         pilo: {
-          DEFAULT: '#CCFF00',
-          light: '#C7FF2E',
+          DEFAULT: '#56be89',
+          light: '#6fcca3',
         },
         emerald: {
           brand: '#10B981',
@@ -27,7 +27,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Space Grotesk', 'Kanit', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'Manjari', 'Kanit', 'system-ui', 'sans-serif'],
+        display: ['Inter', 'Manjari', 'Kanit', 'system-ui', 'sans-serif'],
       },
       animation: {
         // v4.1 Breathing Aura - 60 BPM
@@ -51,9 +52,9 @@ export default {
           '50%': { opacity: '0.5' },
         },
         slideSuccessGlow: {
-          '0%': { boxShadow: '0 0 0 rgba(199, 255, 46, 0)' },
-          '50%': { boxShadow: '0 0 60px rgba(199, 255, 46, 0.6), 0 0 120px rgba(199, 255, 46, 0.3)' },
-          '100%': { boxShadow: '0 0 30px rgba(199, 255, 46, 0.3)' },
+          '0%': { boxShadow: '0 0 0 rgba(86, 190, 137, 0)' },
+          '50%': { boxShadow: '0 0 60px rgba(86, 190, 137, 0.6), 0 0 120px rgba(86, 190, 137, 0.3)' },
+          '100%': { boxShadow: '0 0 30px rgba(86, 190, 137, 0.3)' },
         },
         particleDissolve: {
           '0%': { opacity: '1', transform: 'scale(1)', filter: 'blur(0px)' },

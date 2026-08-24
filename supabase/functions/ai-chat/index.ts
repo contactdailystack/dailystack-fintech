@@ -55,17 +55,6 @@ serve(async (req) => {
       return json({ error: 'Empty prompt' }, 400)
     }
 
-    // --- Fetch FBIS score ---
-    let fbisScore = 50
-    try {
-      const { data: fp } = await supabaseClient
-        .from('user_financial_profiles')
-        .select('current_fbis_score')
-        .eq('user_id', user.id)
-        .single()
-      if (fp?.current_fbis_score) fbisScore = fp.current_fbis_score
-    } catch { /* non-critical */ }
-
     // --- Build conversation history ---
     let history: Array<{ role: 'user' | 'model'; text: string }> = []
     try {
@@ -101,7 +90,6 @@ Rules:
 
 User context:
 - Spending archetype: ${archetype || 'balanced'}
-- FBIS score: ${fbisScore}/100
 - Plan: ${tier.toUpperCase()}`
 
     // --- Build messages for MiniMax ---
@@ -151,8 +139,8 @@ User context:
     const sid = sessionId || 'default'
     try {
       await supabaseClient.from('ai_coach_conversations').insert([
-        { user_id: user.id, session_id: sid, message_role: 'user', message_content: prompt.trim(), archetype, fbis_score: fbisScore },
-        { user_id: user.id, session_id: sid, message_role: 'coach', message_content: reply, archetype, fbis_score: fbisScore },
+        { user_id: user.id, session_id: sid, message_role: 'user', message_content: prompt.trim(), archetype },
+        { user_id: user.id, session_id: sid, message_role: 'coach', message_content: reply, archetype },
       ])
     } catch (e) {
       console.error('Persist error:', e)

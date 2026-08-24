@@ -1,0 +1,162 @@
+{
+  "summary": "2 HIGH issues, 1 WARNING — all connections are real. The create-payment-intent edge function has a silent price default vulnerability, and a leftover Next.js env file creates a naming-confusion risk.",
+  "api_connections": {
+    "status": "REAL",
+    "issues": [
+      {
+        "file": "app/src/services/apiService.ts",
+        "line": 89,
+        "issue": "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are read but not validated at startup — a missing env var only surfaces when an edge function call is attempted.",
+        "severity": "LOW",
+        "fix": "Consider adding an early validation check in apiService.ts or a startup guard in App.tsx that throws if these are missing."
+      }
+    ],
+    "details": [
+      "apiService.ts uses VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY from env (lines 89-90)",
+      "stripeService.ts uses VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY from env (lines 15-16)",
+      "supabaseClient.ts validates presence of VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY at import time and throws if missing (lines 6-10)",
+      "All API calls go to Supabase Edge Functions: detect-ghost-subscriptions, check-budget-alerts, user-insights, generate-weekly-story, analyze-spending, create-payment-intent",
+      "No localhost URLs found in any .ts/.tsx files under app/src"
+    ]
+  },
+  "auth_flow": {
+    "status": "REAL",
+    "issues": [
+      {
+        "file": "app/src/services/authService.ts",
+        "line": "26-43",
+        "issue": "P1-01 MVP Decision: email confirmation is disabled (auto-confirm pattern). Users enter app immediately after signup without verifying email. Supabase still sends verification email in background. This is an intentional tradeoff for faster onboarding.",
+        "severity": "WARNING",
+        "fix": "Re-enable email confirmation in production. Code comment at lines 32-35 documents the decision."
+      }
+    ],
+    "details": [
+      "AuthPage.tsx calls signUp() and signIn() from authService.ts (lines 429, 438) — real Supabase calls",
+      "AuthPage.tsx calls supabase.auth.signInWithOAuth for Google OAuth (line 480) — real Supabase call",
+      "AuthPage.tsx calls supabase.auth.resetPasswordForEmail for forgot password (line 512) — real Supabase call",
+      "AuthCallbackPage.tsx uses supabase.auth.onAuthStateChange to verify session (line 34) — real Supabase call",
+      "authService.ts: signUp → supabase.auth.signUp() (line 26)",
+      "authService.ts: signIn → supabase.auth.signInWithPassword() (line 53)",
+      "authService.ts: signOut → supabase.auth.signOut() (line 68)",
+      "authService.ts: getCurrentUser → supabase.auth.getUser() (line 79)",
+      "authService.ts: onAuthStateChange → supabase.auth.onAuthStateChange() (line 88)",
+      "No fake auth bypass — all auth methods verify against real Supabase",
+      "Token refresh is implemented in apiService.ts (lines 110-126)"
+    ]
+  },
+  "database": {
+    "status": "REAL",
+    "issues": [],
+    "details": [
+      "subscriptionService.ts uses real supabase client for all CRUD: loadSubscriptions, addSubscription, updateSubscription, deleteSubscription, toggleSubscriptionActive",
+      "All queries use .eq('user_id', user.id) to enforce ownership (subscriptionService.ts lines 97, 122, 150, 177, 202)",
+      "subscription_summary view is queried with user_id filter (line 231) — fallback to raw computation exists",
+      "supabaseClient.ts throws on missing env vars (lines 6-10)",
+      "supabase/migrations/999_consolidated_final.sql: RLS enabled on ALL 24 user-facing tables (lines 876-905)",
+      "supabase/migrations/999_consolidated_final.sql: RLS policies follow auth.uid() = id/user_id pattern for all user tables (lines 911-969+)",
+      "otp_requests and pending_signups use service_role policy (correct — system tables need full access)",
+      "No TODO: connect to real DB comments found in any source files",
+      "No mock data hardcoded in service files — graceful fallbacks exist for API failures, not for DB"
+    ]
+  },
+  "stripe": {
+    "status": "REAL",
+    "issues": [
+      {
+        "file": "supabase/functions/create-payment-intent/index.ts",
+        "line": "66-67",
+        "issue": "STRIPE_PRICE_PRO and STRIPE_PRICE_ELITE env vars default to '99' and '199' respectively if missing. This means a misconfigured deployment could silently undercharge users (treating Elite as 199 THB instead of failing).",
+        "severity": "HIGH",
+        "fix": "Use ?? instead of || so missing env vars produce NaN and fail the amount check. Or throw early like stripe-webhook/index.ts does."
+      }
+    ],
+    "details": [
+      "stripeService.ts: no STRIPE_SECRET_KEY on client — all Stripe operations go through Supabase Edge Function create-payment-intent (lines 45-52)",
+      "create-payment-intent/index.ts: uses STRIPE_SECRET_KEY from env (line 10) — server-side only",
+      "create-payment-intent/index.ts: server-side price enforcement — amount computed from env, client only sends tier (lines 65-74)",
+      "create-payment-intent/index.ts: no hardcoded price IDs — pulled from env (lines 66-67)",
+      "stripe-webhook/index.ts: uses STRIPE_SECRET_KEY from env (line 10)",
+      "stripe-webhook/index.ts: uses STRIPE_WEBHOOK_SECRET for signature verification (line 15) — not hardcoded",
+      "stripe-webhook/index.ts: fail-fast if STRIPE_PRICE_PRO or STRIPE_PRICE_ELITE missing (lines 18-24) — correct pattern",
+      "stripe-webhook/index.ts: validates charged amount matches expected tier price before upgrading (lines 84-88) — prevents price hacking",
+      "STRIPE_PRICE_PRO and STRIPE_PRICE_ELITE must be set in Supabase Edge Function env vars"
+    ]
+  },
+  "buttons_actions": {
+    "status": "REAL",
+    "issues": [
+      {
+        "file": "app/src/components/AuthPage.tsx",
+        "line": "195-223",
+        "issue": "PrimaryButton's onClick prop is optional (onClick?: () => void). Buttons rendered with type='submit' without explicit onClick delegate to form onSubmit — this is correct HTML behavior, not an empty handler.",
+        "severity": "INFO",
+        "fix": "No fix needed — submit buttons without onClick are intentional and correctly fall through to form onSubmit."
+      }
+    ],
+    "details": [
+      "AuthPage.tsx handleSubmit: calls signUp/signIn from authService, navigates on success (lines 407-456)",
+      "AuthPage.tsx handleSocialLogin: calls supabase.auth.signInWithOAuth (lines 476-493)",
+      "AuthPage.tsx handleForgotPassword: calls supabase.auth.resetPasswordForEmail (lines 502-524)",
+      "AuthPage.tsx navigateToDashboard: calls onLoginSuccess(email) (line 499) — not empty",
+      "AuthPage.tsx handleRetry (AuthCallbackPage): resets state and restarts verification (line 11-14)",
+      "No console.log('TODO') or empty onClick handlers found in source",
+      "All form submissions call real authService methods",
+      "No placeholder/mocked button handlers found"
+    ]
+  },
+  "critical_issues": [
+    {
+      "file": "supabase/functions/create-payment-intent/index.ts",
+      "line": "66-67",
+      "issue": "STRIPE_PRICE_PRO/ELITE default to string '99'/'199' via || operator instead of failing on missing env. If env vars are not set, prices silently default to these values instead of throwing an error.",
+      "fix": "Replace `parseInt(Deno.env.get('STRIPE_PRICE_PRO') ?? '99')` with a strict guard that throws if the env var is missing. Example: `const price = Deno.env.get('STRIPE_PRICE_PRO'); if (!price) throw new Error('STRIPE_PRICE_PRO is not set'); parseInt(price)`. This matches the pattern already used correctly in stripe-webhook/index.ts lines 18-24.",
+      "severity": "HIGH"
+    },
+    {
+      "file": ".env.local",
+      "line": "7-8",
+      "issue": "Root .env.local uses NEXT_PUBLIC_SUPABASE_URL/NEXT_PUBLIC_SUPABASE_ANON_KEY (Next.js convention) pointing to a different Supabase project (xyzcompany.supabase.co). The app/.env.local uses VITE_ prefix pointing to the correct project (pexcvfhuvqrwrabpgkzi.supabase.co). Vite does NOT read root .env.local, so this is not a runtime issue, but it indicates confusion from a potential Next.js → Vite migration. Leftover root .env.local should be removed or renamed to .env.local.bak to avoid future confusion.",
+      "fix": "Delete or rename root .env.local. Vite only reads app/.env.local which is correctly configured.",
+      "severity": "HIGH"
+    },
+    {
+      "file": "app/src/services/apiService.ts",
+      "line": "89-90",
+      "issue": "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are used without startup validation — missing env vars only surface when the first edge function is called, producing a confusing runtime error.",
+      "fix": "Add an early validation at module load time, similar to supabaseClient.ts: `if (!SUPABASE_URL || !ANON_KEY) throw new Error('[apiService] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY');`",
+      "severity": "LOW"
+    }
+  ],
+  "warnings": [
+    {
+      "file": "app/src/services/authService.ts",
+      "line": "26-43",
+      "issue": "P1-01 MVP Decision: Email confirmation bypassed for faster onboarding. Users can sign up and access the app without verifying their email address. Supabase still sends the confirmation email in the background.",
+      "recommendation": "Re-enable email confirmation before production launch. The auto-confirm pattern is a security tradeoff appropriate only for MVP.",
+      "severity": "WARNING"
+    },
+    {
+      "file": ".env.example, app/.env.example",
+      "line": "VITE_APP_URL=http://localhost:5173",
+      "issue": "VITE_APP_URL defaults to localhost in both .env.example files. This variable is used for auth redirect URLs (AuthPage.tsx line 483: `${window.location.origin}/auth/callback`). On Vercel, window.location.origin is set automatically, so this default is harmless — but if it's used as a fallback and Vercel doesn't set it, redirects go to localhost.",
+      "severity": "LOW",
+      "fix": "Verify Vercel sets VITE_APP_URL or VERCEL_URL in production environment, or remove the fallback and rely solely on window.location.origin."
+    }
+  ],
+  "verified_correct": [
+    "No localhost/127.0.0.1 URLs in app/src/*.ts/*.tsx files",
+    "No hardcoded Stripe secret keys — all use Deno.env.get() or import.meta.env",
+    "No mock/fake auth patterns (e.g., returning a user without verifying)",
+    "Stripe webhook signature verification is implemented (stripe-webhook/index.ts line 53)",
+    "Stripe webhook validates amount before upgrading tier (stripe-webhook/index.ts lines 84-88)",
+    "supabaseClient.ts throws error on missing env vars at import time",
+    "All edge function calls include Bearer token auth (Authorization header)",
+    "Token refresh implemented with retry on 401 (apiService.ts lines 177-190)",
+    "RLS enabled on all 24 user-facing tables in 999_consolidated_final.sql",
+    "RLS policies use auth.uid() = id/user_id for all user tables",
+    "API error fallbacks are graceful (return empty arrays/mock results, don't crash UI)",
+    "No console.log('TODO') or TODO-style placeholder comments in service files",
+    "send-alert-email validates ownership before sending (alert.user_id check)",
+    "VITE_STRIPE_PUBLIC_KEY referenced in .env.example but NOT used in stripeService.ts (stripeService uses edge function only) — correct security pattern"
+  ]
+}

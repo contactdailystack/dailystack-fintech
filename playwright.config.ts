@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: 'tests',
   // Maximum time for the entire test run (global)
-  globalTimeout: 30_000,
+  globalTimeout: 120_000,
   // Maximum time per test
   timeout: 60_000,
   expect: { timeout: 5_000 },
@@ -34,7 +34,11 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] }
+      use: {
+        ...devices['Desktop Chrome'],
+        // Force clean browser state per test — no session leakage
+        storageState: { cookies: [], origins: [] },
+      }
     }
   ]
 });

@@ -1,9 +1,17 @@
-import { useState } from 'react';
 import {
-  User, LogOut, ChevronRight, Crown, Shield
+  ChevronLeft,
+  Info,
+  Pencil,
+  Wallet,
+  CreditCard,
+  Target,
+  Grid3X3,
+  Settings,
+  HelpCircle,
+  Power,
+  ChevronRight,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { getTierDisplayName } from '../services/userTierService';
 import { translations, Language } from '../data/translations';
 
 interface ProfileSettingsPageProps {
@@ -11,186 +19,212 @@ interface ProfileSettingsPageProps {
   onUpdateProfile: (p: Partial<UserProfile>) => void;
   onLogout: () => void;
   onNavigateToUpgrade: () => void;
+  onNavigateToBalance?: () => void;
+  onNavigateToCardDetails?: () => void;
+  onNavigateToMyPlan?: () => void;
+  onNavigateToMyCards?: () => void;
+  onNavigateToSettings?: () => void;
+  onNavigateToHelp?: () => void;
   lang: Language;
   setLang: (lang: Language) => void;
 }
 
-export default function ProfileSettingsPage({ 
-  profile, 
-  onUpdateProfile, 
-  onLogout, 
+const MENU_ITEMS_EN = [
+  { label: 'My Balance', icon: Wallet, action: 'balance' },
+  { label: 'Card Details', icon: CreditCard, action: 'cardDetails' },
+  { label: 'My Plan', icon: Target, action: 'myPlan' },
+  { label: 'My Cards', icon: Grid3X3, action: 'myCards' },
+  { label: 'Control Center', icon: Settings, action: 'settings' },
+  { label: 'Help & Support', icon: HelpCircle, action: 'help' },
+];
+
+const MENU_ITEMS_TH = [
+  { label: 'ยอดเงินของฉัน', icon: Wallet, action: 'balance' },
+  { label: 'รายละเอียดบัตร', icon: CreditCard, action: 'cardDetails' },
+  { label: 'แพลนของฉัน', icon: Target, action: 'myPlan' },
+  { label: 'บัตรของฉัน', icon: Grid3X3, action: 'myCards' },
+  { label: 'ศูนย์ควบคุม', icon: Settings, action: 'settings' },
+  { label: 'ช่วยเหลือ', icon: HelpCircle, action: 'help' },
+];
+
+export default function ProfileSettingsPage({
+  profile,
+  onUpdateProfile,
+  onLogout,
   onNavigateToUpgrade,
+  onNavigateToBalance,
+  onNavigateToCardDetails,
+  onNavigateToMyPlan,
+  onNavigateToMyCards,
+  onNavigateToSettings,
+  onNavigateToHelp,
   lang,
-  setLang
+  setLang,
 }: ProfileSettingsPageProps) {
-  const [name, setName] = useState(profile.name);
-  const [email, setEmail] = useState(profile.email);
-
   const t = translations[lang];
+  const menuItems = lang === 'en' ? MENU_ITEMS_EN : MENU_ITEMS_TH;
 
-  const cleanDisplayName = (name: string): string => {
-    return name
-      .replace(/<[^>]*>/g, '')
-      .replace(/[<>'"&]/g, '')
-      .trim()
-      .slice(0, 100);
-  };
-
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    const safeName = cleanDisplayName(name);
-    onUpdateProfile({ name: safeName, email });
+  const handleMenuClick = (action: string) => {
+    switch (action) {
+      case 'balance':
+        onNavigateToBalance?.();
+        break;
+      case 'cardDetails':
+        onNavigateToCardDetails?.();
+        break;
+      case 'myPlan':
+        onNavigateToMyPlan?.();
+        break;
+      case 'myCards':
+        onNavigateToMyCards?.();
+        break;
+      case 'settings':
+        onNavigateToSettings?.();
+        break;
+      case 'help':
+        onNavigateToHelp?.();
+        break;
+    }
   };
 
   return (
-    <div id="settings-viewport" className="space-y-6 md:space-y-8 animate-slide-up text-left">
+    <div id="settings-viewport" className="space-y-0 min-h-screen bg-white text-left pb-[max(112px,calc(env(safe-area-inset-bottom,0px)+96px))]">
       
-      {/* Settings Header */}
-      <div id="settings-head" className="text-left">
-        <h2 className="font-display font-extrabold text-2xl text-white">{lang === 'en' ? 'Identity & Settings' : 'ข้อมูลพอร์ตและสิทธิส่วนบุคคล'}</h2>
-        <p className="text-xs text-zinc-500 font-mono text-left">CREDENTIAL MATRICES & SUBSCRIPTION CHANNELS</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start" id="settings-layout-grid">
-        
-        {/* Left Column: Identity Management Form */}
-        <div className="col-span-1 lg:col-span-7 border rounded-[32px] p-6 md:p-8 shadow-sm relative overflow-hidden transition-all duration-300 bg-[#131416]/90 border-[#222428]" id="identity-management-card">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#C7FF2E]/5 rounded-bl-[120px] pointer-events-none" />
-          
-          <h3 className="font-display font-extrabold text-lg mb-6 uppercase tracking-tight flex items-center gap-2 text-white">
-            <User className="w-5 h-5 text-[#C7FF2E]" /> {lang === 'en' ? 'Master Credentials' : 'สิทธิ์ผู้ควบคุมพอร์ตเอกสิทธิ์'}
-          </h3>
-
-          <form onSubmit={handleSaveProfile} className="space-y-5" id="profile-edit-form">
-            <div className="space-y-1.5" id="field-set-name">
-              <label className="block font-mono text-[9px] text-zinc-500 uppercase tracking-widest">{t.legalName}</label>
-              <input
-                id="input-set-name"
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="pickky"
-                className="w-full border rounded-xl px-4 py-3.5 text-xs focus:outline-none transition-colors bg-[#1A1B1E] border-zinc-900 text-white focus:border-[#C7FF2E]"
-              />
-            </div>
-
-            <div className="space-y-1.5" id="field-set-email">
-              <label className="block font-mono text-[9px] text-zinc-500 uppercase tracking-widest">{t.commsRoute}</label>
-              <input
-                id="input-set-email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="pickky.kotchakorn@gmail.com"
-                className="w-full border rounded-xl px-4 py-3.5 text-xs focus:outline-none transition-colors bg-[#1A1B1E] border-zinc-900 text-white focus:border-[#C7FF2E]"
-              />
-            </div>
-
-            <div className="pt-6 border-t flex justify-between items-center border-zinc-800" id="settings-action-bar">
-              <button
-                id="btn-logout-settings"
-                type="button"
-                onClick={onLogout}
-                className="font-mono text-[10px] text-red-500 uppercase tracking-widest hover:underline flex items-center gap-1.5 cursor-pointer font-bold"
-              >
-                <LogOut className="w-3.5 h-3.5" /> {t.terminateSession}
-              </button>
-
-              <button
-                id="btn-save-settings"
-                type="submit"
-                className="font-display font-extrabold text-[10px] px-6 py-3.5 rounded-xl uppercase tracking-wider hover:scale-[1.01] transition-transform cursor-pointer bg-[#C7FF2E] text-black hover:bg-white"
-              >
-                {t.commitSpecs}
-              </button>
-            </div>
-          </form>
+      {/* Light Header */}
+      <div id="profile-header" className="bg-white px-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-6 border-b border-zinc-200">
+        {/* Header Row: Back + Title + Info */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => window.history.back()}
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-zinc-100 text-zinc-900 active:scale-95 transition-colors"
+            aria-label={t.commonGoBack}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <h2 className="font-display font-extrabold text-lg text-zinc-900 tracking-tight">
+            {t.profileTitle}
+          </h2>
+          <button
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-zinc-100 text-zinc-900 active:scale-95 transition-colors"
+            aria-label={t.commonInfo}
+          >
+            <Info className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Right Column: Dynamic preferences and Premium status card */}
-        <div className="col-span-1 lg:col-span-5 space-y-6" id="settings-pricing-sidebar">
-          
-          {/* Preferences controls card */}
-          <div className="border rounded-[32px] p-6 shadow-sm relative overflow-hidden transition-all duration-300 bg-[#131416] border-[#222428] shadow-black/80" id="preferences-card">
-            <h3 className="font-display font-bold text-xs uppercase tracking-widest mb-5 text-white">
-              {lang === 'en' ? 'APP PREF CONVENTIONS' : 'การตีกรอบความพึงพอใจการแสดงผล'}
-            </h3>
-            
-            <div className="space-y-5" id="pref-controllers">
-              {/* Language toggle section */}
-              <div className="flex justify-between items-center py-1.5" id="pref-language">
-                <div>
-                  <h4 className="text-xs font-bold leading-normal text-zinc-300">{lang === 'en' ? 'System Language' : 'สลับภาษาทั้งหมด'}</h4>
-                  <p className="text-[10px] text-zinc-500 font-mono uppercase">BILINGUAL MULTIPLIER</p>
-                </div>
-                <div className="flex border rounded-xl overflow-hidden border-zinc-800 bg-[#1A1B1E]" id="lang-switch-box">
-                  <button
-                    type="button"
-                    onClick={() => setLang('en')}
-                    className={`px-3 py-1.5 text-[10px] font-bold font-mono transition-colors cursor-pointer ${lang === 'en' ? 'bg-[#C7FF2E] text-black font-extrabold' : 'bg-transparent text-zinc-500 hover:text-zinc-400'}`}
-                  >
-                    EN
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLang('th')}
-                    className={`px-3 py-1.5 text-[10px] font-bold font-mono transition-colors cursor-pointer ${lang === 'th' ? 'bg-[#C7FF2E] text-black font-extrabold' : 'bg-transparent text-zinc-500 hover:text-zinc-400'}`}
-                  >
-                    TH
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Subscription Tier display */}
-          <div className="border rounded-[32px] p-6 shadow-sm relative overflow-hidden transition-all duration-300 bg-[#131416] border-[#222428] shadow-black/80" id="tier-indicator-card">
-            <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-[100px] pointer-events-none bg-emerald-500/5" />
-            
-            <div className="space-y-4">
-              <span className="font-mono text-[9px] uppercase tracking-widest font-bold text-[#C7FF2E]">{t.currentOperationalTier}</span>
-              <p className="text-xs text-zinc-500">{t.currentOperationalTierDesc}</p>
-              
-              <div className="flex items-center gap-2 text-xl font-bold font-display uppercase tracking-tight text-white">
-                {profile.plan !== 'basic' && <Crown className="w-5 h-5 text-amber-400" />}
-                <span>{getTierDisplayName(profile.plan)}</span>
-              </div>
-
-              {profile.plan === 'basic' ? (
-                <div className="space-y-3.5 pt-2" id="tier-pitch-box">
-                  <p className="text-xs leading-relaxed font-sans text-zinc-400">
-                    {t.freeTierPitch}
-                  </p>
-                  <button
-                    id="btn-settings-upgrade-trigger"
-                    onClick={onNavigateToUpgrade}
-                    className="w-full font-display font-extrabold text-[10px] py-3.5 rounded-xl uppercase tracking-wider hover:scale-[1.01] active:scale-[0.99] transition-transform cursor-pointer flex items-center justify-center gap-1.5 shadow-sm bg-[#C7FF2E] text-black hover:bg-white"
-                  >
-                    <span>{t.activateLuxury}</span> <ChevronRight className="w-3.5 h-3.5 font-bold" />
-                  </button>
-                </div>
+        {/* Profile Card */}
+        <div id="profile-card" className="flex items-center gap-4">
+          {/* Avatar */}
+          <div className="relative flex-shrink-0">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#56be89] to-[#9BE800] flex items-center justify-center overflow-hidden">
+              {profile.name && profile.name.length > 0 ? (
+                <span className="text-xl font-extrabold text-black font-display">
+                  {profile.name.charAt(0).toUpperCase()}
+                </span>
               ) : (
-                <div className="p-3.5 border text-xs font-mono rounded-xl text-center bg-emerald-500/10 border-emerald-500/20 text-emerald-400" id="active-premium-check">
-                  All systems operating normally under sovereign encryption guidelines.
-                </div>
+                <span className="text-xl font-extrabold text-black font-display">P</span>
               )}
             </div>
+            {/* Online indicator */}
+            <div className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-[#56be89] rounded-full border-2 border-white" />
           </div>
 
-          {/* Secure compliance information */}
-          <div className="p-4 rounded-2xl border border-dashed text-xs font-mono space-y-2 text-left bg-zinc-950/40 border-zinc-900 text-zinc-500" id="settings-security-compliance">
-            <span className="uppercase text-[9px] tracking-widest font-bold block text-[#C7FF2E]">{t.secureEncryptionTitle}</span>
-            <p className="text-[11px] leading-relaxed">
-              {t.secureEncryptionPitch}
-            </p>
+          {/* Name & Email */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-zinc-900 font-display font-extrabold text-base truncate">
+                {profile.name || t.profileDefaultsName}
+              </h3>
+              {/* P2-8: Set up complete badge — always visible by default */}
+              {profile.email && (
+                <span
+                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200"
+                  aria-label={t.profileSetupComplete}
+                >
+                  <svg className="w-2.5 h-2.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span>{lang === 'en' ? 'Verified' : 'ยืนยันแล้ว'}</span>
+                </span>
+              )}
+            </div>
+            <p className="text-zinc-500 text-xs truncate mt-0.5">{profile.email || 'your@email.com'}</p>
           </div>
 
+          {/* Edit Button */}
+          <button
+            id="btn-edit-profile"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-zinc-100 text-zinc-900 flex-shrink-0 hover:bg-zinc-200 active:scale-95 transition-colors"
+            aria-label={t.profileEditProfileAria}
+            onClick={() => {
+              const name = prompt(t.profileEditNamePrompt, profile.name);
+              const email = prompt(t.profileEditEmailPrompt, profile.email);
+              if (name !== null && email !== null) {
+                onUpdateProfile({ name: name.trim(), email: email.trim() });
+              }
+            }}
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
         </div>
-
       </div>
 
+      {/* Settings List */}
+      <div id="settings-list-container" className="px-4 pt-4 pb-8">
+        <div id="settings-list" className="bg-white rounded-[28px] overflow-hidden shadow-sm border border-zinc-200">
+          {menuItems.map((item, index) => {
+            const IconComponent = item.icon;
+            return (
+              <button
+                key={item.action}
+                onClick={() => handleMenuClick(item.action)}
+                className={`w-full flex items-center gap-3 px-5 py-4 hover:bg-zinc-50 active:bg-zinc-100 transition-colors text-left min-h-[44px] ${
+                  index < menuItems.length - 1 ? 'border-b border-zinc-100' : ''
+                }`}
+              >
+                {/* Icon Circle */}
+                <div className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-zinc-100 flex items-center justify-center flex-shrink-0">
+                  <IconComponent className="w-4 h-4 text-zinc-700" />
+                </div>
+                {/* Label */}
+                <span className="flex-1 text-sm font-semibold text-zinc-900 font-display">
+                  {item.label}
+                </span>
+                {/* Chevron */}
+                <ChevronRight className="w-4 h-4 text-zinc-300 flex-shrink-0" />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Log Out Button */}
+        <div className="mt-3">
+          <button
+            id="btn-logout-settings"
+            data-testid="logout-button"
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-5 py-4 bg-white rounded-[28px] shadow-sm border border-zinc-200 hover:bg-amber-50 active:bg-amber-100 transition-colors text-left min-h-[44px]"
+          >
+            {/* Icon Circle */}
+            <div className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
+              <Power className="w-4 h-4 text-white" />
+            </div>
+            {/* Label */}
+            <span className="flex-1 text-sm font-semibold text-[#D97706] font-display">
+              {t.profileLogOut}
+            </span>
+            {/* Chevron */}
+            <ChevronRight className="w-4 h-4 text-zinc-300 flex-shrink-0" />
+          </button>
+        </div>
+
+
+
+        {/* App Version */}
+        <p className="text-center text-zinc-400 text-[10px] font-mono mt-6">
+          PicksWise v1.0.0 &nbsp;·&nbsp; © 2026
+        </p>
+      </div>
     </div>
   );
 }

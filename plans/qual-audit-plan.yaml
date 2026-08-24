@@ -1,0 +1,386 @@
+version: 1
+plan:
+  name: "DailyStack Full Quality Audit — Phase 2 + 3"
+  max_concurrency: 3
+  max_consecutive_failures: 2
+  max_cycles: 8
+  auto_reject_retries: 1
+  verifier_config:
+    default_verifiers: [verifier]
+    audit_sample_rate: 0.0
+
+tasks:
+  - id: "p2-design-system"
+    title: "Phase 2 — Loading/Empty/Error Patterns Unification"
+    prompt: |
+      You are the design system specialist for DailyStack.
+
+      MISSION: Audit and unify ALL Loading + Empty + Error state patterns
+      across the design-system so every page uses the same components.
+
+      READ FIRST:
+      1. Read `app/src/design-system/index.ts` — see what exists
+      2. Read `app/src/design-system/components/LoadingSkeleton.tsx`
+      3. Read `app/src/design-system/components/EmptyState.tsx`
+      4. Read `app/src/design-system/components/ErrorState.tsx`
+      5. Read `app/src/components/SkeletonLoader.tsx`
+
+      YOUR AUDIT CHECKLIST:
+      1. Which pages still use ad-hoc inline skeletons (div with bg-gray-200 etc.)?
+         → grep for "animate-pulse" and "bg-zinc-200" in app/src/components/
+      2. Which pages still use ad-hoc empty states (hardcoded div with icon)?
+         → grep for "text-zinc-400" + "ไม่มี|ไม่พบ|No .* yet" in app/src/components/
+      3. Which pages still use ad-hoc error states?
+         → grep for "error|Error|ข้อผิดพลาด" + "bg-red-|border-red" in app/src/components/
+
+      YOUR FIXES:
+      1. If design-system/components/ has LoadingSkeleton/EmptyState/ErrorState:
+         → Update ALL pages to IMPORT and USE these components (no inline ad-hoc states)
+      2. If components are missing from design-system:
+         → Create them in app/src/design-system/components/
+         → Then update all pages to use them
+
+      Design System Standard (from color-tokens.ts):
+      - Loading skeleton: skeleton.base (#E5E5EA) + skeleton.shimmer (#F5F5F7)
+      - Empty state: bg-[#F5F5F5] rounded-[28px], icon in dsColors.textMuted
+      - Error state: bg-[#F5F5F5], border-red-200 (#FECACA), icon in error.DEFAULT (#FF3B30)
+
+      WRITE:
+      - Any updated design-system components
+      - Any updated page files
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: files changed, remaining ad-hoc patterns found (if any).
+    assigned_to: "general"
+    role: "produce"
+    verify_skip_reason: "Loading/Empty/Error patterns are qualitative visual consistency; TypeScript ensures no breaking changes."
+    max_retries: 1
+
+  - id: "p2-billing-ui"
+    title: "Phase 2 — Billing/Pricing UI Audit"
+    prompt: |
+      You are the billing UX specialist for DailyStack.
+
+      MISSION: Audit the entire billing/paywall/pricing UI to ensure
+      UI matches the real billing source-of-truth.
+
+      READ FIRST:
+      1. Read `app/src/services/billingService.ts` — understand real pricing data model
+      2. Read `app/src/components/PaywallPage.tsx` — full file
+      3. Read `app/src/components/SlideToUpgrade.tsx` — subscription upgrade flow
+      4. Read `app/src/components/TransactionHistoryPage.tsx` — billing transactions
+      5. Read `app/src/data/translations.ts` — check billing/pricing keys exist
+
+      YOUR AUDIT:
+      1. HARDCODED PRICES: Are plan prices (#199/฿199, #399/฿399, etc.) hardcoded in UI?
+         → grep for "199|299|399|499|599" in app/src/components/Paywall*.tsx and app/src/components/SlideToUpgrade.tsx
+         → Prices should come from billingService or a config, NOT hardcoded
+      2. TRIAL PERIOD: Does the UI correctly show trial days remaining?
+         → Check if trial countdown matches billingService data
+      3. AUTO-RENEW: Is auto-renew status shown clearly in the UI?
+         → grep for "auto-renew|auto_renew|renewal" in components
+      4. PRICING TRANSPARENCY: Are there any misleading price displays?
+         → Check for currency consistency (฿ vs $ vs ฿THB)
+      5. TRANSLATION KEYS: Do billing strings exist in translations.ts?
+         → grep for "billing|subscription|plan|trial|renew|pricing" in translations.ts
+
+      FIXES:
+      1. Replace any hardcoded prices with billingService values
+      2. Add missing translation keys for billing
+      3. Fix any inconsistent currency displays
+      4. If auto-renew UI is missing, add it to ProfileSettingsPage or PaywallPage
+
+      WRITE:
+      - Updated billingService usage in pages
+      - Added translation keys in translations.ts
+      - Any UI fixes
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: pricing issues found, fixes applied.
+    assigned_to: "general"
+    role: "produce"
+    verify_skip_reason: "Billing UI fixes verified by TypeScript compilation."
+    max_retries: 1
+
+  - id: "p2-motion-safety"
+    title: "Phase 2 — Reduced Motion Safety (paywall/auth)"
+    prompt: |
+      You are the accessibility specialist for DailyStack.
+
+      MISSION: Ensure all motion/animation in PaywallPage and Auth pages
+      respects prefers-reduced-motion (WCAG 2.3.1).
+
+      READ FIRST:
+      1. Read `app/src/components/PaywallPage.tsx` — full file
+      2. Read `app/src/components/AuthPage.tsx` — full file
+      3. Read `app/src/components/AuthCallbackPage.tsx` — full file
+      4. Read `app/src/components/SlideToUpgrade.tsx` — slide gesture animation
+      5. Read `app/src/design-system/motion-tokens.ts` — existing motion tokens
+      6. Check how `useReducedMotion` from framer-motion is used:
+         → grep for "useReducedMotion" in app/src/components/
+
+      YOUR AUDIT:
+      1. Does PaywallPage use useReducedMotion?
+         → If no, add it and disable motion effects when true
+      2. Does AuthPage use useReducedMotion?
+         → Check for page transition animations, button press effects
+      3. Does SlideToUpgrade use useReducedMotion?
+         → The slide-to-confirm gesture should be replaced by button tap when reduced motion
+      4. Does AuthCallbackPage use useReducedMotion?
+      5. Are there any CSS animations (animate-*) in these files that don't check prefers-reduced-motion?
+         → grep for "animate-" in PaywallPage.tsx, AuthPage.tsx, AuthCallbackPage.tsx
+
+      FIXES:
+      1. Add `const reduceMotion = useReducedMotion()` to every page that has motion
+      2. Replace framer-motion animations with `opacity-only` variants when reduceMotion is true
+      3. Replace CSS animate-* with CSS that respects prefers-reduced-motion media query
+      4. For SlideToUpgrade: when reduceMotion=true, show a "Tap to confirm" button instead of sliding gesture
+
+      CSS pattern to add:
+      ```css
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      ```
+
+      WRITE:
+      - Updated PaywallPage.tsx
+      - Updated AuthPage.tsx
+      - Updated AuthCallbackPage.tsx
+      - Updated SlideToUpgrade.tsx
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: files updated, motion safety status.
+    assigned_to: "general"
+    role: "produce"
+    verify_skip_reason: "Motion safety is WCAG compliance; TypeScript ensures no breaking changes."
+    max_retries: 1
+
+  - id: "p3-page-audit"
+    title: "Phase 3 — Full Page Audit (Dashboard/Transactions/Transfer/Settings)"
+    prompt: |
+      You are the UX quality auditor for DailyStack.
+
+      MISSION: Audit 4 core pages against Apple HIG + Pilo Light standards.
+      Score each page and fix critical issues.
+
+      AUDIT PAGES:
+      1. `app/src/components/DashboardPage.tsx`
+      2. `app/src/components/ActivityPage.tsx` (Transactions)
+      3. `app/src/components/TransferAmountScreen.tsx` (Transfer)
+      4. `app/src/components/ProfileSettingsPage.tsx` (Settings)
+
+      FOR EACH PAGE, CHECK AND FIX:
+
+      A. COLOR TOKENS (must use CSS variables, not hardcoded hex):
+         → grep for "#EF4444|#F97316|#3B82F6|#8B5CF6|#EC4899" in the page
+         → Replace with dsColors semantic equivalents
+
+      B. TYPOGRAPHY (Inter EN + Kanit TH):
+         → grep for 'fontFamily' inline styles
+         → Verify lang prop switches between Inter and Kanit
+         → Check font sizes match pageTokens.typography scale
+
+      C. SPACING (8pt grid):
+         → grep for p-3|p-4|p-5|p-6|px-|py- patterns
+         → Verify spacing is multiples of 4 or 8
+
+      D. ICONS (lucide-react, no emoji):
+         → grep for emoji (unicode ranges: \u2600-\u32FF) — should find 0
+         → Verify all icons come from lucide-react
+
+      E. TRANSLATIONS (all user-facing strings):
+         → Check page has `const t = translations[lang]` at top
+         → Verify ALL visible text uses t.* keys
+         → grep for raw Thai text or raw English text in JSX (not in translations.ts)
+
+      F. TOUCH TARGETS:
+         → Verify all buttons/inputs have min 44x44px (min-h-[44px] min-w-[44px])
+
+      G. WCAG:
+         → Verify aria-labels on icon-only buttons
+         → Verify role attributes on interactive regions
+         → Verify color contrast is sufficient
+
+      SCORING (per page):
+      - A: Color tokens (1-5)
+      - B: Typography (1-5)
+      - C: Spacing (1-5)
+      - D: Icons/Emoji (1-5)
+      - E: Translations (1-5)
+      - F: Touch targets (1-5)
+      - G: WCAG (1-5)
+
+      FIX: All items scoring 3 or below must be fixed.
+
+      WRITE:
+      - Updated page files with fixes
+      - Audit report in comment block at top of each updated file
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: per-page scores, issues fixed.
+    assigned_to: "general"
+    role: "produce"
+    verify_skip_reason: "Page audit is qualitative; TypeScript ensures no breaking changes."
+    max_retries: 1
+
+  - id: "p3-responsive"
+    title: "Phase 3 — Responsive Layout + Spacing + Typography Scale"
+    prompt: |
+      You are the responsive design specialist for DailyStack.
+
+      MISSION: Verify all pages are properly responsive and
+      spacing/typography are consistent.
+
+      READ FIRST:
+      1. Read `app/src/design-system/spacing-tokens.ts`
+      2. Read `app/src/design-system/typography-tokens.ts`
+      3. Read `app/src/design-system/page-tokens.ts`
+
+      YOUR CHECKLIST:
+
+      1. RESPONSIVE BREAKPOINTS:
+         → Which pages use mobile-first patterns?
+         → Check for md: lg: breakpoints — are they applied correctly?
+         → Verify horizontal padding: `px-6` (24px) is standard on mobile
+
+      2. SPACING CONSISTENCY:
+         → List all unique spacing values used in components (grep for "p-[0-9]|px-[0-9]|py-[0-9]")
+         → Flag any non-8pt values (e.g., p-3=12px, p-5=20px are fine; p-2.5=10px is odd)
+
+      3. TYPOGRAPHY SCALE:
+         → Check text-[13px] vs text-[14px] vs text-[15px] usage
+         → Verify font weights: text-sm=14px 400, text-[15px] font-semibold=600
+         → Flag any inconsistent font size/weight combinations
+
+      4. SAFE AREAS:
+         → Verify bottom nav (FloatingBottomNav) accounts for safe-area-inset-bottom
+         → Check iOS notch handling (pt-safe-top or pt-12)
+
+      FIXES:
+      1. Fix any broken responsive classes
+      2. Add missing safe-area handling
+      3. Standardize spacing to 4/8pt grid
+      4. Standardize typography scale
+
+      WRITE:
+      - Updated files with responsive fixes
+      - List of files that needed changes
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: responsive issues found and fixed.
+    assigned_to: "general"
+    role: "produce"
+    depends_on: ["p2-design-system"]
+    verify_skip_reason: "Responsive fixes are visual; TypeScript ensures no breaking changes."
+    max_retries: 1
+
+  - id: "p3-conversion-trust"
+    title: "Phase 3 — Conversion & Trust Signals"
+    prompt: |
+      You are the conversion specialist for DailyStack.
+
+      MISSION: Add trust signals and optimize CTA placement/conversion
+      across the app.
+
+      READ FIRST:
+      1. Read `app/src/components/PaywallPage.tsx` — current paywall
+      2. Read `app/src/components/SlideToUpgrade.tsx` — upgrade flow
+      3. Read `app/src/components/SecurityBadge.tsx` — trust component
+      4. Read `app/src/components/ProfileSettingsPage.tsx` — settings trust
+      5. Read `app/src/design-system/components/SecurityBadge.tsx` — design-system version
+
+      YOUR CHECKLIST:
+
+      1. PAYWALL CONVERSION:
+         → Does PaywallPage show pricing clearly without hidden fees?
+         → Is the CTA ("Upgrade") prominent and always visible?
+         → Does it show social proof (e.g., "Join 10,000+ users")?
+         → Is there a clear free trial offer?
+
+      2. TRUST SIGNALS ACROSS APP:
+         → Where are SecurityBadge components used? (grep for "SecurityBadge")
+         → Are they placed in: Auth pages, Settings, Paywall, Dashboard header?
+         → If missing in any of these, add them
+
+      3. PRIVACY SIGNALS:
+         → Does PrivacyPage.tsx exist? (grep for it)
+         → Is there a privacy/security CTA in Settings?
+
+      4. CTA PLACEMENT:
+         → Check all pages for primary CTA button consistency
+         → Primary CTAs should: use dsColors.accent (#CDFF24), min 44px height, bold text
+         → Verify no pages have conflicting CTA styles
+
+      5. PRICING TRANSPARENCY:
+         → In paywall, is total cost shown clearly (not just per-month)?
+         → Are there any "gotcha" prices that hide the real cost?
+
+      FIXES:
+      1. Add SecurityBadge to any missing auth/settings pages
+      2. Standardize CTA button style across app (use dsColors.accent as primary)
+      3. Add pricing transparency fix to PaywallPage
+      4. If PrivacyPage is missing or sparse, add privacy trust content
+
+      WRITE:
+      - Updated pages with trust/conversion improvements
+      - New SecurityBadge placements if needed
+
+      Verify: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Report: trust signals added, CTA improvements made.
+    assigned_to: "general"
+    role: "produce"
+    verify_skip_reason: "Trust/conversion fixes are UX improvements; TypeScript ensures no breaking changes."
+    max_retries: 1
+
+  - id: "final-qa-gate"
+    title: "Final QA Gate — TypeScript + Build + Emoji Check"
+    role: "verify-as-task"
+    prompt: |
+      You are the final QA gate for DailyStack Full Quality Audit.
+
+      MISSION: Run comprehensive verification before production deployment.
+
+      CHECK 1 — TypeScript Compilation:
+      Run: `cd D:\Coding Folder\dailystack-fintech\app && npx tsc --noEmit`
+      Expected: 0 errors.
+
+      CHECK 2 — Production Build:
+      Run: `cd D:\Coding Folder\dailystack-fintech\app && npm run build`
+      Expected: build succeeds.
+
+      CHECK 3 — Emoji Audit (ZERO emoji policy):
+      Run grep for emoji unicode ranges in TSX files:
+      `grep -rn "[^\x00-\x7F]" --include="*.tsx" app/src/components/ | Select-String -Pattern "emoji|unicode"`
+      Actually use: `Select-String -Path "app/src/components/*.tsx" -Pattern "[^a-zA-Z0-9\s\-_#%(),.:;/\\[\]{}]" | Select-String -NotMatch -Pattern "Thai|中文|日本語|한국어|ก|ข|ค|ง|จ|ฉ|ช|ซ|ฌ|ญ|ฎ|ฏ|ฐ|ฑ|ฒ|ณ|ด|ต|ท|ธ|น|บ|ป|ผ|ฝ|พ|ฟ|ภ|ม|ย|ร|ล|ว|ศ|ษ|ส|ห|ฬ|อ|ฮ"`
+      Simplified: `Select-String -Path "app/src/components/*.tsx" -Pattern "[^\x00-\x7F]" | Select-String -NotMatch`
+      Report any emoji found (U+2600-U+32FF range).
+
+      CHECK 4 — Dark Hex Audit (design system compliance):
+      All dark surfaces must use #0B0F0A (--color-dark-card / --color-dark-bg).
+      Run: grep for rogue dark values
+      `Select-String -Path "app/src/components/*.tsx" -Pattern "#131416|#1A1B1E|#222428|#0C0D0E" | Select-Object -First 20`
+      Expected: 0 results.
+
+      CHECK 5 — BOM Check:
+      Run BOM check on all modified TSX files.
+      Expected: 0 BOM files.
+
+      WRITE REPORT to `D:\Coding Folder\dailystack-fintech\reports\qual-audit-verification.json`:
+      ```json
+      {
+        "tsc_result": "PASS/FAIL",
+        "build_result": "PASS/FAIL",
+        "emoji_found": [],
+        "rogue_dark_hex": [],
+        "bom_files": [],
+        "overall_status": "PASS/FAIL"
+      }
+      ```
+    assigned_to: "general"
+    depends_on: ["p2-design-system", "p2-billing-ui", "p2-motion-safety", "p3-page-audit", "p3-responsive", "p3-conversion-trust"]
+    max_retries: 1

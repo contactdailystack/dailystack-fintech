@@ -1,210 +1,234 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
+import { useHaptics } from '../services/hapticService';
+import { motionTokens } from '../design-system/motion-tokens';
 import { translations, Language } from '../data/translations';
 
 interface SlideToUpgradeProps {
   onSlideComplete: () => void;
-  lang: Language;
-  tierColor: string; // e.g. '#C7FF2E' or '#FFD700'
+  lang?: Language;
+  tierColor: string; // e.g. '#56be89' or '#FFD700'
   isLoading?: boolean;
   disabled?: boolean;
 }
 
 export default function SlideToUpgrade(props: SlideToUpgradeProps) {
-  const {
-    onSlideComplete,
-    lang,
-    tierColor,
-    isLoading = false,
-    disabled = false,
-  } = props;
+  const { onSlideComplete, lang = 'en', tierColor, isLoading = false, disabled = false } = props;
   const t = translations[lang];
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [sliderPos, setSliderPos] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
+  const reduceMotion = useReducedMotion() ?? false;
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const thumbRef = useRef<HTMLDivElement | null>(null);
   const [trackWidth, setTrackWidth] = useState(0);
-  const startXRef = useRef(0);
-  const isDisabled = isLoading || disabled;
+  const [pos, setPos] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const startX = useRef(0);
+  const isDisabled = isLoading || disabled || completed;
 
   useEffect(() => {
-    if (trackRef.current) {
-      setTrackWidth(trackRef.current.offsetWidth - 56); // 56 = thumb width
-    }
+    const resize = () => {
+      if (!trackRef.current) return;
+      const w = trackRef.current.offsetWidth - 56; // thumb width approx
+      setTrackWidth(w > 0 ? w : 0);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
   }, []);
 
+  const clamp = (v: number) => Math.max(0, Math.min(v, trackWidth));
+  const { fire } = useHaptics();
+
+  const handleStart = (clientX: number) => {
+    if (isDisabled) return;
+    setDragging(true);
+    startX.current = clientX - pos;
+    try { fire('SELECT'); } catch {};
+  };
+
   const handleMove = (clientX: number) => {
-    if (isComplete || isDisabled) return;
-    const dx = clientX - startXRef.current;
-    const clamped = Math.max(0, Math.min(dx, trackWidth));
-    setSliderPos(clamped);
-    if (clamped >= trackWidth - 8) {
-      setIsComplete(true);
+    if (!dragging || isDisabled) return;
+    const dx = clientX - startX.current;
+    const v = clamp(dx);
+    setPos(v);
+    if (v >= trackWidth - 8) {
+      // complete
+      setCompleted(true);
+      setPos(trackWidth);
+      setDragging(false);
       onSlideComplete();
+      try { fire('DEEP_RESONANCE'); } catch {}
     }
   };
 
-  // Mouse events
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (isComplete || isDisabled) return;
-    e.preventDefault();
-    setIsDragging(true);
-    startXRef.current = e.clientX - sliderPos;
-  };
-
-  // Touch events
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (isComplete || isDisabled) return;
-    setIsDragging(true);
-    startXRef.current = e.touches[0].clientX - sliderPos;
+  const handleEnd = () => {
+    if (isDisabled) return;
+    setDragging(false);
+    if (!completed) setPos(0);
   };
 
   useEffect(() => {
-    if (!isDragging) return;
-
-    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX);
-    const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientX);
-    const handleEnd = () => {
-      setIsDragging(false);
-      // Snap back if not completed
-      if (!isComplete) {
-        setSliderPos(0);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleEnd);
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('touchend', handleEnd);
-
+    const mm = (e: MouseEvent) => handleMove(e.clientX);
+    const mu = () => handleEnd();
+    const tm = (e: TouchEvent) => handleMove(e.touches[0].clientX);
+    const tu = () => handleEnd();
+    if (dragging) {
+      window.addEventListener('mousemove', mm);
+      window.addEventListener('mouseup', mu);
+      window.addEventListener('touchmove', tm, { passive: false } as any);
+      window.addEventListener('touchend', tu);
+    }
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleEnd);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('mousemove', mm);
+      window.removeEventListener('mouseup', mu);
+      window.removeEventListener('touchmove', tm as any);
+      window.removeEventListener('touchend', tu);
     };
-  }, [isDragging, isComplete, isDisabled]);
+  }, [dragging, trackWidth, completed]);
 
-  const progress = trackWidth > 0 ? (sliderPos / trackWidth) * 100 : 0;
+  const progress = trackWidth > 0 ? (pos / trackWidth) * 100 : 0;
 
   return (
     <div className="w-full">
-      {/* Hint text */}
       <p className="text-center text-[10px] text-white/40 font-mono mb-3 uppercase tracking-widest">
-        {isComplete
-          ? lang === 'en'
-            ? 'Access Granted'
-            : 'เข้าถึงแล้ว'
-          : lang === 'en'
-          ? 'Slide to Transform'
-          : 'เลื่อนเพื่อเปลี่ยนผ่าน'}
+        {completed ? 'Access Granted' : reduceMotion ? t.slideConfirm : t.slideUpgrade}
       </p>
 
-      {/* Track */}
-      <div
-        ref={trackRef}
-        className={`
-          relative h-14 rounded-2xl overflow-hidden cursor-pointer select-none
-          transition-all duration-300
-          ${isComplete
-            ? 'bg-[#C7FF2E]/20 border border-[#C7FF2E]/40'
-            : 'bg-[#1A1B1E] border border-[#2B2D31]'}
-        `}
-        onClick={() => {
-          if (!isComplete && !isDisabled && sliderPos === 0) {
-            setSliderPos(trackWidth * 0.9);
-            setIsComplete(true);
+      {/* Reduced motion: tap-to-confirm button instead of slide gesture */}
+      {reduceMotion ? (
+        <button
+          type="button"
+          onClick={() => {
+            if (isDisabled || completed) return;
+            setCompleted(true);
             onSlideComplete();
-          }
-        }}
-      >
-        {/* Progress fill */}
-        <div
-          className="absolute inset-0 transition-all duration-75"
-          style={{
-            width: `${Math.max(progress, isComplete ? 100 : 0)}%`,
-            background: isComplete
-              ? `linear-gradient(90deg, ${tierColor}22 0%, ${tierColor}33 100%)`
-              : `linear-gradient(90deg, ${tierColor}15 0%, ${tierColor}22 100%)`,
-            borderRadius: 'inherit',
           }}
-        />
-
-        {/* Text hint (slides away) */}
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-200"
-          style={{ opacity: isComplete ? 0 : 1 - progress / 100 }}
+          disabled={isDisabled || completed}
+          aria-label={t.slideConfirm}
+          className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-mono text-sm uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#56be89] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
+            completed ? 'text-white/40' : 'text-white/30'
+          } ${isDisabled || completed ? 'cursor-not-allowed opacity-50' : ''}`}
+          style={{
+            background: completed
+              ? `linear-gradient(90deg, ${tierColor}22 0%, ${tierColor}33 100%)`
+              : '#1A1B1E',
+            border: completed ? `1px solid ${tierColor}44` : '1px solid #2B2D31',
+          }}
         >
-          <span className="text-xs font-mono text-white/30 uppercase tracking-widest">
-            {lang === 'en' ? '→ Slide to Upgrade' : '→ เลื่อนเพื่ออัพเกรด'}
+          <Sparkles className="w-4 h-4" style={{ color: completed ? tierColor : '#555' }} />
+          <span style={{ color: completed ? tierColor : undefined }}>
+            {completed
+              ? (lang === 'en' ? 'Access Granted' : '?????????????')
+              : t.slideConfirm}
           </span>
-        </div>
+        </button>
+      ) : (
+        /* Normal: slide gesture */
+        <div
+          ref={trackRef}
+          className={`relative h-14 rounded-2xl overflow-hidden select-none ${completed ? 'bg-[#56be89]/20 border border-[#56be89]/40' : 'bg-[#1A1B1E] border border-[#2B2D31]'}`}
+          tabIndex={0}
+          role="group"
+          aria-label={t.slideConfirm}
+          aria-disabled={isDisabled ? 'true' : 'false'}
+          onKeyDown={(e) => {
+            if (isDisabled) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (!completed && pos === 0) {
+                setPos(trackWidth);
+                setCompleted(true);
+                onSlideComplete();
+              }
+            }
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              if (!completed) setPos(0);
+            }
+          }}
+          onClick={() => {
+            if (!completed && !isDisabled && pos === 0) {
+              setPos(trackWidth);
+              setCompleted(true);
+              onSlideComplete();
+            }
+          }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              width: `${Math.max(progress, completed ? 100 : 0)}%`,
+              transitionProperty: 'width',
+              transitionDuration: motionTokens.duration.fast,
+              background: completed ? `linear-gradient(90deg, ${tierColor}22 0%, ${tierColor}33 100%)` : `linear-gradient(90deg, ${tierColor}15 0%, ${tierColor}22 100%)`,
+              borderRadius: 'inherit',
+            }}
+          />
 
-        {/* Success state */}
-        <AnimatePresence>
-          {isComplete && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ opacity: completed ? 0 : 1 - progress / 100, transitionDuration: motionTokens.duration.fast }}>
+            <span className="text-xs font-mono text-white/30 uppercase tracking-widest">? {t.slideUpgrade}</span>
+          </div>
+
+          {completed && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={reduceMotion ? undefined : { opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
+              transition={reduceMotion ? { duration: 0 } : undefined}
               className="absolute inset-0 flex items-center justify-center"
             >
-              <div className="flex items-center gap-2 animate-slide-success rounded-2xl px-6 py-3">
-                <Sparkles
-                  className="w-4 h-4 animate-pulse"
-                  style={{ color: tierColor }}
-                />
-                <span
-                  className="font-display font-extrabold text-sm uppercase tracking-wider"
-                  style={{ color: tierColor }}
-                >
-                  {lang === 'en' ? 'Access Granted' : 'เข้าถึงแล้ว'}
-                </span>
+              <div className="flex items-center gap-2 rounded-2xl px-6 py-3">
+                <Sparkles className={`w-4 h-4 ${reduceMotion ? '' : 'animate-pulse'}`} style={{ color: tierColor }} />
+                <span className="font-display font-extrabold text-sm uppercase tracking-wider" style={{ color: tierColor }}>{lang === 'en' ? 'Access Granted' : '?????????????'}</span>
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
 
-        {/* Thumb */}
-        {!isComplete && (
+          {/* Thumb */}
           <div
-            className={`
-              absolute top-1 left-1 w-12 h-12 rounded-xl flex items-center justify-center
-              transition-shadow duration-200 cursor-grab active:cursor-grabbing
-              ${isDisabled
-                ? 'bg-[#2B2D31] cursor-not-allowed'
-                : isDragging
-                ? 'bg-[#C7FF2E] shadow-[0_0_20px_rgba(199,255,46,0.4)] cursor-grabbing'
-                : 'bg-[#1E1F22] border border-[#3A3C40] hover:border-[#C7FF2E]/50'}
-            `}
+            ref={thumbRef}
+            role="button"
+            tabIndex={0}
+            aria-label={t.slideConfirm}
+            aria-disabled={isDisabled ? 'true' : 'false'}
+            className={`absolute top-1 left-1 w-12 h-12 rounded-xl flex items-center justify-center ${dragging ? 'cursor-grabbing' : 'cursor-pointer'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#56be89] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent`}
             style={{
-              transform: `translateX(${sliderPos}px)`,
-              boxShadow: isDragging
-                ? `0 0 20px ${tierColor}66, 0 4px 12px rgba(0,0,0,0.4)`
-                : '0 2px 8px rgba(0,0,0,0.3)',
+              transform: `translateX(${pos}px)`,
+              transitionProperty: 'transform',
+              transitionDuration: motionTokens.duration.fast,
+              background: dragging ? tierColor : '#1E1F22',
+              boxShadow: dragging ? `0 0 20px ${tierColor}66, 0 4px 12px rgba(0,0,0,0.4)` : '0 2px 8px rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.04)'
             }}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
+            onKeyDown={(e) => {
+              if (isDisabled) return;
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (!completed && pos === 0) {
+                  setPos(trackWidth);
+                  setCompleted(true);
+                  onSlideComplete();
+                }
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                if (!completed) setPos(0);
+              }
+            }}
+            onMouseDown={(e) => handleStart(e.clientX)}
+            onTouchStart={(e) => handleStart(e.touches[0].clientX)}
           >
             {isLoading ? (
-              <div
-                className="w-4 h-4 border-2 rounded-full animate-spin"
-                style={{ borderColor: `${tierColor}44`, borderTopColor: tierColor }}
-              />
+              <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: `${tierColor}44`, borderTopColor: tierColor }} />
             ) : (
-              <ArrowRight
-                className="w-4 h-4"
-                style={{ color: isDragging ? '#0C0D0E' : '#888' }}
-              />
+              <ArrowRight className="w-4 h-4" style={{ color: dragging ? '#0B0F0A' : '#888' }} />
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Sub-hint */}
-      <p className="text-center text-[9px] text-white/25 font-mono mt-2">
-        {lang === 'en' ? 'Swipe or tap to confirm' : 'เลื่อนหรือกดเพื่อยืนยัน'}
+      <p className="text-center text-[10px] text-white/25 font-mono mt-2">
+        {reduceMotion ? '' : t.swipeConfirm}
       </p>
     </div>
   );

@@ -1,56 +1,449 @@
-﻿import { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ShieldCheck, Fingerprint, ArrowRight, AlertCircle, RefreshCw } from 'lucide-react';
-import { motion } from 'motion/react';
+/**
+ * ============================================================
+ * DailyStack � Auth Page v5.1
+ * ============================================================
+ * New Design (2026-06-15)
+ * Based on dailystack_auth_screens.html
+ *
+ * Design Specs:
+ * - Lime accent: #C9F135
+ * - Dark: #111
+ * - Font: Onest
+ * - Bilingual-first UI (EN/TH via translations)
+ */
+
+import { useState, useEffect } from 'react';
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  AlertCircle,
+  RefreshCw,
+  User,
+  Check,
+  ArrowLeft,
+} from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { signIn, signUp } from '../services/authService';
+import { supabase } from '../supabaseClient';
 import { translations, Language } from '../data/translations';
-import { signIn, signUp, resendConfirmationEmail } from '../services/authService';
+import { haptics } from '../services/hapticService';
 
 interface AuthPageProps {
   onLoginSuccess: (email: string) => void;
-  lang: Language;
-  setLang: (lang: Language) => void;
+  lang?: Language;
+  /** Override the initial auth view: 'login' | 'register' | 'forgot' */
+  defaultView?: 'login' | 'register' | 'forgot';
 }
 
-type AuthView = 'login' | 'register' | 'email-confirmation';
+// ============================================================
+// DESIGN TOKENS (Auth Page - Lime Theme)
+// ============================================================
+const tokens = {
+  // Lime palette (Auth-specific)
+  lime: '#C9F135',
+  limeDark: '#B8E028',
+  limeMuted: 'rgba(201, 241, 53, 0.3)',
 
-export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProps) {
+  // Core colors
+  dark: '#111111',
+  darkSecondary: '#1A1A1A',
+  white: '#FFFFFF',
+
+  // Grays (aligned with design system)
+  grayBg: '#F4F5F7',
+  grayInput: '#E5E7EB',
+  grayText: '#8E8E93',
+  grayTextDark: '#6B7280',
+
+  // Status colors (aligned with design system)
+  success: '#10B981',
+  error: '#EF4444',
+
+  // Typography
+  fontSize: { xs: '11px', sm: '13px', base: '14px', lg: '16px', xl: '24px' },
+  fontEN: '"Inter", sans-serif',
+  fontTH: '"Kanit", sans-serif',
+};
+
+// ============================================================
+// COMPONENT: Progress Dots
+// ============================================================
+function ProgressDots({ active }: { active: 0 | 1 | 2 }) {
+  return (
+    <div className="flex items-center justify-center gap-1.5 py-3" style={{ backgroundColor: tokens.grayBg }}>
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="transition-all duration-300"
+          style={{
+            width: i === active ? '20px' : '6px',
+            height: '6px',
+            borderRadius: i === active ? '3px' : '50%',
+            backgroundColor: i === active ? tokens.dark : tokens.grayInput,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ============================================================
+// COMPONENT: Input Field (New Design)
+// ============================================================
+interface InputFieldProps {
+  type: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder: string;
+  autoComplete?: string;
+  icon?: React.ReactNode;
+  error?: string | null;
+  disabled?: boolean;
+  id?: string;
+}
+
+function InputField({ type, value, onChange, placeholder, autoComplete, icon, error, disabled, id }: InputFieldProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const isPassword = type === 'password';
+  const isFilled = value.length > 0;
+  const hasIcon = !!icon;
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        {hasIcon && (
+          <div
+            className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: isFocused ? tokens.dark : tokens.grayText }}
+          >
+            {icon}
+          </div>
+        )}
+
+        <input
+          id={id}
+          type={isPassword ? (showPassword ? 'text' : 'password') : type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          disabled={disabled}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className="w-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: tokens.white,
+            border: `1.5px solid ${error ? tokens.error : isFocused ? tokens.dark : isFilled ? tokens.dark : tokens.grayInput}`,
+            borderRadius: '100px',
+            padding: '16px 24px',
+            paddingLeft: hasIcon ? '48px' : '24px',
+            paddingRight: isPassword ? '56px' : '24px',
+            fontSize: tokens.fontSize.base,
+            fontFamily: '"Inter", sans-serif',
+            color: tokens.dark,
+            outline: 'none',
+            boxShadow: isFocused ? `0 0 0 3px ${error ? 'rgba(220, 38, 38, 0.15)' : 'rgba(201, 241, 53, 0.3)'}` : 'none',
+          }}
+          aria-invalid={error ? 'true' : 'false'}
+        />
+      </div>
+
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => { haptics.fire('SELECT'); setShowPassword(!showPassword); }}
+          className="absolute right-5 top-1/2 -translate-y-1/2 p-1"
+          style={{ minWidth: '32px', minHeight: '32px' }}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+        >
+          {showPassword ? (
+            <EyeOff size={16} style={{ color: tokens.grayText }} />
+          ) : (
+            <Eye size={16} style={{ color: tokens.grayText }} />
+          )}
+        </button>
+      )}
+
+      {error && (
+        <p className="mt-2 text-xs" style={{ color: tokens.error, fontFamily: '"Inter", sans-serif' }}>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// COMPONENT: Primary Button (Pill Shape)
+// ============================================================
+interface PrimaryButtonProps {
+  type?: 'button' | 'submit' | 'reset';
+  onClick?: () => void;
+  loading?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+  variant?: 'dark' | 'lime';
+  reduceMotion?: boolean;
+}
+
+function PrimaryButton({ type = 'submit', onClick, loading, disabled, children, variant = 'dark', reduceMotion }: PrimaryButtonProps) {
+  const isLime = variant === 'lime';
+
+  return (
+    <motion.button
+      type={type}
+      onClick={onClick}
+      disabled={loading || disabled}
+      whileTap={reduceMotion || loading || disabled ? undefined : { scale: 0.98 }}
+      className="w-full flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+      style={{
+        backgroundColor: isLime ? tokens.lime : tokens.dark,
+        color: isLime ? tokens.dark : tokens.white,
+        border: 'none',
+        borderRadius: '100px',
+        padding: '16px',
+        fontSize: tokens.fontSize.base,
+        fontWeight: 700,
+        fontFamily: '"Inter", sans-serif',
+      }}
+    >
+      {loading ? (
+        <RefreshCw size={18} className="animate-spin" />
+      ) : (
+        children
+      )}
+    </motion.button>
+  );
+}
+
+// ============================================================
+// COMPONENT: Secondary Button (New Design)
+// ============================================================
+interface SecondaryButtonProps {
+  onClick?: () => void;
+  loading?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+}
+
+function SecondaryButton({ onClick, loading, disabled, children, icon }: SecondaryButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={loading || disabled}
+      className="w-full flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      style={{
+        backgroundColor: 'transparent',
+        color: tokens.dark,
+        border: `1.5px solid ${tokens.grayInput}`,
+        borderRadius: '100px',
+        padding: '15px',
+        fontSize: tokens.fontSize.base,
+        fontWeight: 700,
+        fontFamily: '"Inter", sans-serif',
+      }}
+    >
+      {loading ? (
+        <RefreshCw size={16} className="animate-spin" />
+      ) : (
+        <>
+          {icon && <span style={{ display: 'flex' }}>{icon}</span>}
+          <span>{children}</span>
+        </>
+      )}
+    </button>
+  );
+}
+
+// ============================================================
+// COMPONENT: Nav Back Button
+// ============================================================
+function NavBackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
+      style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}
+      aria-label="Go back"
+    >
+      <ArrowLeft size={16} style={{ color: tokens.dark }} strokeWidth={2.5} />
+    </button>
+  );
+}
+
+// ============================================================
+// COMPONENT: Success Animation
+// ============================================================
+interface SuccessAnimationProps {
+  onComplete: () => void;
+  successTitle: string;
+  successSubtitle: string;
+  reduceMotion?: boolean;
+}
+
+function SuccessAnimation({ onComplete, successTitle, successSubtitle, reduceMotion }: SuccessAnimationProps) {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 2500);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <motion.div
+      initial={reduceMotion ? undefined : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.3 }}
+      exit={reduceMotion ? undefined : { opacity: 0 }}
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center"
+      style={{ backgroundColor: tokens.dark }}
+    >
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{
+              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 375),
+              y: -20,
+              scale: Math.random() * 0.5 + 0.5,
+            }}
+            animate={{
+              y: typeof window !== 'undefined' ? window.innerHeight + 20 : 800,
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: Math.random() * 2 + 2,
+              repeat: Infinity,
+              delay: Math.random() * 0.5,
+            }}
+            className="absolute w-2 h-2 rounded-full"
+            style={{ backgroundColor: tokens.lime }}
+          />
+        ))}
+      </div>
+
+      <motion.div
+        initial={reduceMotion ? undefined : { scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+      >
+        <div
+          className="w-20 h-20 rounded-[16px] flex items-center justify-center"
+          style={{ backgroundColor: tokens.lime }}
+        >
+          <Check size={28} style={{ color: tokens.dark }} strokeWidth={3} />
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={reduceMotion ? undefined : { opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={reduceMotion ? { duration: 0 } : { delay: 0.5 }}
+        className="mt-6 text-center"
+      >
+        <h2
+          className="font-bold text-2xl mb-2"
+          style={{ color: tokens.white, fontFamily: '"Inter", sans-serif' }}
+        >
+          {successTitle}
+        </h2>
+        <p
+          className="text-sm"
+          style={{ color: 'rgba(255,255,255,0.6)', fontFamily: '"Inter", sans-serif' }}
+        >
+          {successSubtitle}
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ============================================================
+// MAIN COMPONENT: AuthPage
+// ============================================================
+export default function AuthPage({ onLoginSuccess, lang = 'en', defaultView = 'login' }: AuthPageProps) {
+  const t = translations[lang];
+  const reduceMotion = useReducedMotion() ?? false;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [authView, setAuthView] = useState<AuthView>('login');
+  const [authView, setAuthView] = useState<'login' | 'register' | 'success' | 'forgot'>(defaultView);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [resending, setResending] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [forgotSent, setForgotSent] = useState(false);
 
-  const t = translations[lang];
+  // Clear error when user starts typing
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, email, password, fullName]);
+
+  // Validation
+  const getFieldError = (field: 'email' | 'password' | 'name', value?: string) => {
+    if (field === 'email') {
+      if (!value) return lang === 'th' ? '??????????????' : 'Please enter your email';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return lang === 'th' ? '?????????????????????' : 'Invalid email format';
+    }
+    if (field === 'password') {
+      if (!value) return lang === 'th' ? '?????????????????' : 'Please enter your password';
+      if (authView === 'register' && value.length < 8) return lang === 'th' ? '??????????????????????? 8 ????????' : 'Password must be at least 8 characters';
+    }
+    if (field === 'name') {
+      if (!value) return lang === 'th' ? '?????????????-???????' : 'Please enter your full name';
+    }
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
-    if (authView === 'register' && password.length < 8) {
-      setError(lang === 'en' ? 'Password must be at least 8 characters.' : 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
+    haptics.fire('SELECT');
+
+    setError(null);
+
+    const emailError = getFieldError('email', email);
+    const passwordError = getFieldError('password', password);
+    const nameError = authView === 'register' ? getFieldError('name', fullName) : null;
+
+    if (emailError || passwordError || nameError) {
+      if (emailError) setError(emailError);
+      else if (passwordError) setError(passwordError);
+      else if (nameError) setError(nameError);
+      haptics.fire('ERROR_REJECT');
       return;
     }
 
-    setError(null);
     setLoading(true);
 
     try {
       if (authView === 'register') {
         const result = await signUp({ email, password, fullName });
-        if (result.success && result.needsEmailConfirmation) {
-          setAuthView('email-confirmation');
-        } else if (result.success) {
-          onLoginSuccess(email);
+        if (result.success) {
+          navigateToDashboard();
         } else {
-          setError(result.error || (lang === 'en' ? 'Registration failed.' : 'การลงทะเบียนล้มเหลว'));
+          setError(result.error || (lang === 'th' ? '?????????????? ????????????' : 'Something went wrong. Please try again.'));
+          haptics.fire('ERROR_REJECT');
         }
       } else {
         const result = await signIn(email, password);
         if (result.success) {
-          onLoginSuccess(email);
+          navigateToDashboard();
         } else {
-          setError(result.error || (lang === 'en' ? 'Invalid credentials.' : 'ข้อมูลเข้าสู่ระบบไม่ถูกต้อง'));
+          if (result.error?.toLowerCase().includes('password')) {
+            setError(lang === 'th' ? '?????????????????? ????????????' : 'Incorrect password. Please try again.');
+          } else if (result.error?.toLowerCase().includes('email')) {
+            setError(lang === 'th' ? '??????????????????? ????????????????' : 'Email not found. Please sign up.');
+          } else {
+            setError(result.error || (lang === 'th' ? '?????????????? ????????????' : 'Something went wrong. Please try again.'));
+          }
+          haptics.fire('ERROR_REJECT');
         }
       }
     } finally {
@@ -58,306 +451,617 @@ export default function AuthPage({ onLoginSuccess, lang, setLang }: AuthPageProp
     }
   };
 
-  const handleResendConfirmation = async () => {
-    setResending(true);
+  const handleSwitchToRegister = () => {
+    haptics.fire('SELECT');
+    setAuthView('register');
     setError(null);
-    const result = await resendConfirmationEmail(email);
-    if (!result.success) {
-      setError(result.error || (lang === 'en' ? 'Failed to resend email.' : 'ไม่สามารถส่งอีเมลอีกครั้ง'));
-    }
-    setResending(false);
+    setEmail('');
+    setPassword('');
   };
 
-  const handleBackToLogin = () => {
+  const handleSwitchToLogin = () => {
+    haptics.fire('SELECT');
     setAuthView('login');
+    setError(null);
     setEmail('');
     setPassword('');
     setFullName('');
-    setError(null);
   };
 
-  const handleGoogleOAuth = async () => {
-    setError(null);
+  const handleSocialLogin = async () => {
+    haptics.fire('SELECT');
+    setSocialLoading('google');
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        setError(error.message);
+        haptics.fire('ERROR_REJECT');
+      }
+    } finally {
+      setSocialLoading(null);
+    }
+  };
+
+  const handleSuccessComplete = () => { onLoginSuccess(email); };
+  const navigateToDashboard = () => { onLoginSuccess(email); };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    haptics.fire('SELECT');
+    if (!email) {
+      setError(lang === 'th' ? '??????????????' : 'Please enter your email address.');
+      return;
+    }
     setLoading(true);
-    const { supabase } = await import('../supabaseClient');
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
-    if (oauthError) {
-      setError(oauthError.message);
+    setError(null);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset`,
+      });
+      if (resetError) {
+        setError(resetError.message);
+        haptics.fire('ERROR_REJECT');
+      } else {
+        setForgotSent(true);
+      }
+    } finally {
       setLoading(false);
     }
   };
 
-  // Email confirmation screen
-  if (authView === 'email-confirmation') {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-[#0C0D0E]">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full bg-[#C7FF2E]/10 blur-[100px] pointer-events-none" />
+  const handleBackToLogin = () => {
+    haptics.fire('SELECT');
+    setAuthView('login');
+    setEmail('');
+    setPassword('');
+    setError(null);
+    setForgotSent(false);
+  };
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md border rounded-[28px] p-8 md:p-10 backdrop-blur-md relative z-10 bg-[#131416]/90 border-[#222428] shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-center"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="w-20 h-20 rounded-full bg-[#C7FF2E]/20 flex items-center justify-center mx-auto mb-6"
-          >
-            <Mail className="w-10 h-10 text-[#C7FF2E]" />
-          </motion.div>
+  // Google icon SVG
+  const GoogleIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+  );
 
-          <h2 className="font-display text-2xl font-extrabold text-white mb-2">
-            {lang === 'en' ? 'Check Your Email' : 'ตรวจสอบอีเมลของคุณ'}
-          </h2>
-
-          <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
-            {lang === 'en'
-              ? "We've sent a confirmation link to"
-              : 'เราได้ส่งลิงก์ยืนยันไปยัง'}
-            <br />
-            <span className="text-[#C7FF2E] font-mono font-bold">{email}</span>
-          </p>
-
-          <p className="text-xs text-zinc-500 mb-6">
-            {lang === 'en'
-              ? 'Click the link in the email to activate your account.'
-              : 'คลิกลิงก์ในอีเมลเพื่อเปิดใช้งานบัญชีของคุณ'}
-          </p>
-
-          {error && (
-            <div className="mb-4 flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              {error}
-            </div>
-          )}
-
-          <button
-            onClick={handleResendConfirmation}
-            disabled={resending}
-            className="w-full py-3 rounded-2xl flex items-center justify-center gap-2 font-medium text-sm transition-all cursor-pointer bg-[#1A1B1E] border border-[#2B2D31] text-white hover:bg-[#25282E] disabled:opacity-50"
-          >
-            {resending ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>{lang === 'en' ? 'Sending...' : 'กำลังส่ง...'}</span>
-              </>
-            ) : (
-              <>
-                <Mail className="w-4 h-4" />
-                <span>{lang === 'en' ? "Didn't receive it? Resend" : 'ไม่ได้รับอีเมล? ส่งอีกครั้ง'}</span>
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={handleBackToLogin}
-            className="mt-4 text-xs text-zinc-500 hover:text-[#C7FF2E] transition-colors cursor-pointer"
-          >
-            {lang === 'en' ? '← Back to login' : '← กลับไปหน้าเข้าสู่ระบบ'}
-          </button>
-        </motion.div>
-
-        <div className="absolute bottom-6 flex items-center gap-2 text-[10px] font-mono text-zinc-650">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-          <span>AES-256 BANK GRADE SECURED</span>
-        </div>
-      </div>
-    );
-  }
+  // ---- Helper for bilingual labels ----
+  // Supports both plain strings and JSX nodes
+  const label = (en: React.ReactNode, th?: React.ReactNode): React.ReactNode =>
+    th ? (lang === 'th' ? th : en) : en;
 
   return (
-    <div id="auth-container" className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-[#0C0D0E]">
-
-      {/* Corner language control */}
-      <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
-        <button
-          onClick={() => setLang(lang === 'en' ? 'th' : 'en')}
-          id="btn-lang-corner"
-          className="px-3 py-1.5 rounded-xl border font-mono font-bold text-[10px] tracking-wider transition-all cursor-pointer bg-[#131416]/90 border-zinc-800 text-[#C7FF2E] hover:bg-zinc-800"
-        >
-          {lang === 'en' ? 'EN' : 'TH'}
-        </button>
-      </div>
-
-      {/* Background glow meshes */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full bg-[#C7FF2E]/10 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[240px] h-[240px] rounded-full bg-emerald-500/5 blur-[80px] pointer-events-none" />
-
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        id="auth-box"
-        className="w-full max-w-md border rounded-[28px] p-8 md:p-10 backdrop-blur-md relative z-10 transition-all duration-300 bg-[#131416]/90 border-[#222428] shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-      >
-        {/* Brand header */}
-        <div className="text-center mb-8" id="auth-header">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border font-mono text-[11px] tracking-widest uppercase mb-4 transition-colors bg-[#C7FF2E]/10 text-[#C7FF2E] border-[#C7FF2E]/20">
-            <Fingerprint className="w-3.5 h-3.5 animate-pulse" /> {t.secureFinOS}
-          </div>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight leading-none text-white">
-            {t.brand}
-          </h1>
-          <p className="text-xs mt-2 font-sans max-w-xs mx-auto text-zinc-400">
-            {t.loginSub}
-          </p>
-        </div>
-
-        {/* Error message */}
-        {error && (
-          <div className="mb-4 flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            {error}
-          </div>
+    <>
+      {/* Success Animation Overlay */}
+      <AnimatePresence>
+        {authView === 'success' && (
+          <SuccessAnimation
+            onComplete={handleSuccessComplete}
+            successTitle={t.authSuccess.title}
+            successSubtitle={t.authSuccess.subtitle}
+            reduceMotion={reduceMotion}
+          />
         )}
+      </AnimatePresence>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5" id="auth-form">
-
-          {authView === 'register' && (
-            <div className="space-y-1.5" id="field-name">
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-zinc-400">
-                {lang === 'en' ? 'Full Name' : 'ชื่อ-นามสกุล'}
-              </label>
-              <div className="relative">
-                <input
-                  id="input-auth-name"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder={lang === 'en' ? 'Your name' : 'ชื่อของคุณ'}
-                  className="w-full border rounded-2xl pl-4 pr-4 py-3.5 text-sm transition-all duration-200 font-sans bg-[#1A1B1E] border-[#2B2D31] text-white placeholder-zinc-500 focus:border-[#C7FF2E] focus:ring-1 focus:ring-[#C7FF2E]/35"
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-1.5" id="field-email">
-            <label className="block font-mono text-[10px] uppercase tracking-wider text-zinc-400">
-              {t.emailId}
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">
-                <Mail className="w-4 h-4" />
-              </span>
-              <input
-                id="input-auth-email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@domain.com"
-                className="w-full border rounded-2xl pl-11 pr-4 py-3.5 text-sm transition-all duration-200 font-sans bg-[#1A1B1E] border-[#2B2D31] text-white placeholder-zinc-500 focus:border-[#C7FF2E] focus:ring-1 focus:ring-[#C7FF2E]/35"
-              />
-            </div>
+      {/* ==================== LOGIN SCREEN ==================== */}
+      {authView === 'login' && (
+        <div
+          className="min-h-screen min-h-[100dvh] flex flex-col"
+          style={{
+            backgroundColor: tokens.lime,
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+          }}
+        >
+          {/* Hero Section */}
+          <div className="px-6 py-7" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 28px)' }}>
+            <h1
+              className="font-black leading-[1.1]"
+              style={{
+                fontSize: '38px',
+                letterSpacing: '-0.02em',
+                color: tokens.dark,
+                fontFamily: '"Inter", sans-serif',
+              }}
+            >
+              {label(
+                <>Decide your wealth with <span style={{ color: 'rgba(11, 11, 11, 0.5)' }}>absolute</span><br />intelligence.</>,
+                <>????????????????????????<br />???????????????<span style={{ color: 'rgba(11, 11, 11, 0.5)' }}> � ?????????????</span></>
+              )}
+            </h1>
           </div>
 
-          <div className="space-y-1.5" id="field-pass">
-            <div className="flex items-center justify-between">
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-zinc-400">
-                {t.password}
-              </label>
-              {authView !== 'register' && (
-                <button
-                  type="button"
-                  className="font-mono text-[9px] uppercase tracking-wider hover:underline text-[#C7FF2E]"
+          {/* Form Section */}
+          <div
+            className="flex-1 rounded-t-[40px] overflow-hidden"
+            style={{ backgroundColor: tokens.white }}
+          >
+            <div className="max-w-[360px] mx-auto">
+              <form
+                onSubmit={handleSubmit}
+                className="p-5 space-y-3"
+                style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}
+              >
+                {/* Email Field */}
+                <div>
+                  <label
+                    className="block mb-1.5"
+                    style={{
+                      fontSize: tokens.fontSize.xs,
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: tokens.dark,
+                      opacity: 0.45,
+                      fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
+                    }}
+                  >
+                    {label('Email')}
+                  </label>
+                  <InputField
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={String(label('you@example.com', 'อีเมล@บริษัท.com'))}
+                    autoComplete="email"
+                    id="login-email"
+                    icon={<Mail size={18} />}
+                  />
+                </div>
+
+                {/* Password Field */}
+                <div>
+                  <label
+                    className="block mb-1.5"
+                    style={{
+                      fontSize: tokens.fontSize.xs,
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: tokens.dark,
+                      opacity: 0.45,
+                      fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
+                    }}
+                  >
+                    {label('Password')}
+                  </label>
+                  <InputField
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={String(label('Password'))}
+                    autoComplete="current-password"
+                    id="login-password"
+                    icon={<Lock size={18} />}
+                  />
+                </div>
+
+                {/* Error Message */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg"
+                      style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)' }}
+                      role="alert"
+                    >
+                      <AlertCircle size={16} style={{ color: tokens.error }} />
+                      <span className="text-xs" style={{ color: tokens.error, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}>{error}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Forgot Password */}
+                <div className="text-right -mt-1">
+                  <button
+                    type="button"
+                    className="text-xs font-bold underline underline-offset-2"
+                    style={{ color: tokens.dark, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
+                    onClick={() => { haptics.fire('SELECT'); setAuthView('forgot'); setError(null); }}
+                  >
+                    {label('Forgot Password?', '????????????')}
+                  </button>
+                </div>
+
+                {/* Submit Button */}
+                <PrimaryButton type="submit" loading={loading} reduceMotion={reduceMotion}>
+                  {label('Sign In ', '??????????? ')}<ArrowRight size={16} style={{ display: 'inline' }} />
+                </PrimaryButton>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-4">
+                  <div className="flex-1 h-px" style={{ backgroundColor: '#E8E8E4' }} />
+                  <span style={{ fontSize: '12px', color: tokens.grayText, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}>{label('Or')}</span>
+                  <div className="flex-1 h-px" style={{ backgroundColor: '#E8E8E4' }} />
+                </div>
+
+                {/* Google Login */}
+                <SecondaryButton onClick={handleSocialLogin} loading={socialLoading === 'google'} icon={<GoogleIcon />}>
+                  {label('Continue with Google', '??????????????? Google')}
+                </SecondaryButton>
+
+                {/* Switch to Register */}
+                <p
+                  className="text-center mt-4"
+                  style={{ fontSize: tokens.fontSize.sm, color: tokens.grayText, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
                 >
-                  {t.forgot}
-                </button>
+                  {label("Don't have an account? ", '?????????????? ')}
+                  <button type="button" onClick={handleSwitchToRegister} className="font-bold underline underline-offset-2" style={{ color: tokens.dark }}>
+                    {label('Sign Up', '???????????')}
+                  </button>
+                </p>
+              </form>
+            </div>
+
+            {/* Progress Dots */}
+            <ProgressDots active={0} />
+          </div>
+        </div>
+      )}
+
+      {/* ==================== FORGOT PASSWORD SCREEN ==================== */}
+      {authView === 'forgot' && (
+        <div
+          className="min-h-screen min-h-[100dvh] flex flex-col"
+          style={{
+            backgroundColor: tokens.dark,
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+          }}
+        >
+          {/* Nav Bar */}
+          <div
+            className="px-5 py-2.5 flex items-center"
+            style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+          >
+            <NavBackButton onClick={handleBackToLogin} />
+          </div>
+
+          {/* Hero Section */}
+          <div className="px-6 py-4" style={{ paddingTop: '16px' }}>
+            <h1
+              className="font-black leading-[1.1]"
+              style={{
+                fontSize: '32px',
+                letterSpacing: '-0.02em',
+                color: tokens.white,
+                fontFamily: '"Inter", sans-serif',
+              }}
+            >
+              {label('Reset your\npassword', '??????\n??????????????')}
+            </h1>
+            <p
+              className="mt-3"
+              style={{
+                fontSize: tokens.fontSize.sm,
+                color: tokens.white,
+                opacity: 0.55,
+                fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
+              }}
+            >
+              {forgotSent
+                ? label('Check your email for a reset link.', '???????????????????????????????')
+                : label("Enter your email and we'll send you a reset link.", '???????????????????????????????????')}
+            </p>
+          </div>
+
+          {/* Form Section */}
+          <div
+            className="flex-1 rounded-t-[40px] overflow-hidden"
+            style={{ backgroundColor: tokens.grayBg }}
+          >
+            <div className="max-w-[360px] mx-auto">
+              {forgotSent ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center">
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+                    style={{ backgroundColor: '#10B981' }}
+                  >
+                    <Check size={24} style={{ color: tokens.white }} />
+                  </div>
+                  <h2
+                    className="font-bold text-lg mb-2"
+                    style={{ color: tokens.dark, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
+                  >
+                    {label('Email Sent!', '????????????!')}
+                  </h2>
+                  <p
+                    className="text-sm mb-6"
+                    style={{ color: tokens.grayText, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
+                  >
+                    {label(
+                      <>If an account exists for <strong>{email}</strong>, you will receive a password reset link shortly.</>,
+                      <>???????? <strong>{email}</strong> ???????????? ??????????????????????????????????? ???</>
+                    )}
+                  </p>
+                  <PrimaryButton onClick={handleBackToLogin} reduceMotion={reduceMotion}>
+                    {label('Back to Login', '??????????????????')}
+                  </PrimaryButton>
+                </div>
+              ) : (
+                <form
+                  onSubmit={handleForgotPassword}
+                  className="p-5 space-y-3"
+                  style={{ paddingTop: '20px' }}
+                >
+                  {/* Email Field */}
+                  <div>
+                    <label
+                      className="block mb-1.5"
+                      style={{
+                        fontSize: tokens.fontSize.xs,
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        color: tokens.dark,
+                        opacity: 0.45,
+                        fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
+                      }}
+                    >
+                      {label('Email')}
+                    </label>
+                    <InputField
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    placeholder={String(label('you@example.com', '???@????????.com'))}
+                      autoComplete="email"
+                      id="forgot-email"
+                      icon={<Mail size={18} />}
+                    />
+                  </div>
+
+                  {/* Error Message */}
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        initial={reduceMotion ? undefined : { opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={reduceMotion ? undefined : { opacity: 0 }}
+                        transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-lg"
+                        style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)' }}
+                        role="alert"
+                      >
+                        <AlertCircle size={16} style={{ color: tokens.error }} />
+                        <span className="text-xs" style={{ color: tokens.error, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}>{error}</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Submit Button */}
+                  <PrimaryButton type="submit" loading={loading} reduceMotion={reduceMotion}>
+                    {label('Send Reset Link', '??????????????')}
+                  </PrimaryButton>
+
+                  <p className="text-center -mt-1">
+                    <button
+                      type="button"
+                      onClick={handleBackToLogin}
+                      className="font-bold underline underline-offset-2"
+                      style={{ color: tokens.dark, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
+                    >
+                      {label('Back to Login', '??????????????????')}
+                    </button>
+                  </p>
+                </form>
               )}
             </div>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">
-                <Lock className="w-4 h-4" />
-              </span>
-              <input
-                id="input-auth-password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={authView === 'register' ? (lang === 'en' ? 'Min. 8 characters' : 'อย่างน้อย 8 ตัวอักษร') : '•••••••••••'}
-                className="w-full border rounded-2xl pl-11 pr-11 py-3.5 text-sm transition-all duration-200 font-mono bg-[#1A1B1E] border-[#2B2D31] text-white placeholder-zinc-500 focus:border-[#C7FF2E] focus:ring-1 focus:ring-[#C7FF2E]/35"
-              />
-              <button
-                id="btn-toggle-password"
-                type="button"
-                className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors text-zinc-500 hover:text-zinc-300"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== REGISTER SCREEN ==================== */}
+      {authView === 'register' && (
+        <div
+          className="min-h-screen min-h-[100dvh] flex flex-col"
+          style={{
+            backgroundColor: tokens.dark,
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+          }}
+        >
+          {/* Nav Bar */}
+          <div
+            className="px-5 py-2.5 flex items-center"
+            style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+          >
+            <NavBackButton onClick={handleSwitchToLogin} />
           </div>
 
-          <button
-            id="btn-auth-submit"
-            type="submit"
-            disabled={loading}
-            className="w-full font-medium py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none transition-all duration-250 mt-6 cursor-pointer bg-[#C7FF2E] text-[#0C0D0E] hover:bg-white"
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-2 rounded-full animate-spin border-[#0C0D0E] border-t-transparent" />
-            ) : (
-              <>
-                <span className="font-display font-semibold text-sm">
-                  {authView === 'register' ? t.initAccount : t.enterOS}
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
+          {/* Hero Section */}
+          <div className="px-6 py-4" style={{ paddingTop: '16px' }}>
+            <h1
+              className="font-black leading-[1.1]"
+              style={{
+                fontSize: '32px',
+                letterSpacing: '-0.02em',
+                color: tokens.white,
+                fontFamily: '"Inter", sans-serif',
+              }}
+            >
+              {label(
+                <>Decide your wealth with <span style={{ color: 'rgba(255,255,255,0.5)' }}>absolute</span><br />intelligence.</>,
+                <>????????????????????????<br />???????????????<span style={{ color: 'rgba(255,255,255,0.5)' }}> � ?????????????</span></>
+              )}
+            </h1>
 
-        {/* OAuth divider */}
-        <div className="mt-6 flex items-center justify-between gap-3 text-zinc-650" id="divider">
-          <div className="flex-1 h-[1px] bg-[#222428]" />
-          <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">{t.orMaster}</span>
-          <div className="flex-1 h-[1px] bg-[#222428]" />
+            <p
+              className="mt-3"
+              style={{
+                fontSize: tokens.fontSize.sm,
+                color: tokens.white,
+                opacity: 0.55,
+                fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
+              }}
+            >
+              {label('One purchase. Lifetime access.', '?????????????? ???????????????')}
+            </p>
+          </div>
+
+          {/* Form Section */}
+          <div
+            className="flex-1 rounded-t-[40px] overflow-hidden"
+            style={{ backgroundColor: tokens.grayBg }}
+          >
+            <div className="max-w-[360px] mx-auto">
+              <form
+                onSubmit={handleSubmit}
+                className="p-5 space-y-3"
+                style={{ paddingTop: '20px' }}
+              >
+                {/* Name Field */}
+                <div>
+                  <label
+                    className="block mb-1.5"
+                    style={{
+                      fontSize: tokens.fontSize.xs,
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: tokens.dark,
+                      opacity: 0.45,
+                      fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
+                    }}
+                  >
+                    {label('Full Name', '????-???????')}
+                  </label>
+                  <InputField
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder={String(label('John Doe', 'ชื่อ-นามสกุล'))}
+                    autoComplete="name"
+                    id="register-name"
+                    icon={<User size={18} />}
+                  />
+                </div>
+
+                {/* Email Field */}
+                <div>
+                  <label
+                    className="block mb-1.5"
+                    style={{
+                      fontSize: tokens.fontSize.xs,
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: tokens.dark,
+                      opacity: 0.45,
+                      fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
+                    }}
+                  >
+                    {label('Email')}
+                  </label>
+                  <InputField
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={String(label('you@example.com', 'อีเมล@บริษัท.com'))}
+                    autoComplete="email"
+                    id="register-email"
+                    icon={<Mail size={18} />}
+                  />
+                </div>
+
+                {/* Password Field */}
+                <div>
+                  <label
+                    className="block mb-1.5"
+                    style={{
+                      fontSize: tokens.fontSize.xs,
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: tokens.dark,
+                      opacity: 0.45,
+                      fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN,
+                    }}
+                  >
+                    {label('Password', '????????')}
+                  </label>
+                  <InputField
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={String(label('Minimum 8 characters', 'รหัสผ่านอย่างน้อย 8 ตัวอักษร'))}
+                    autoComplete="new-password"
+                    id="register-password"
+                    icon={<Lock size={18} />}
+                  />
+                </div>
+
+                {/* Error Message */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={reduceMotion ? undefined : { opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={reduceMotion ? undefined : { opacity: 0 }}
+                      transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg"
+                      style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)' }}
+                      role="alert"
+                    >
+                      <AlertCircle size={16} style={{ color: tokens.error }} />
+                      <span className="text-xs" style={{ color: tokens.error, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}>{error}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Submit Button */}
+                <PrimaryButton type="submit" loading={loading} variant="lime" reduceMotion={reduceMotion}>
+                  {label('Create Account ', '?????????? ')}<ArrowRight size={16} style={{ display: 'inline' }} />
+                </PrimaryButton>
+
+                {/* Terms */}
+                <p
+                  className="text-center text-[11px] leading-relaxed"
+                  style={{ color: tokens.grayText, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
+                >
+                  {label(
+                    <>By signing up, you agree to our<br /><span className="font-bold" style={{ color: tokens.dark }}>Privacy Policy</span> and <span className="font-bold" style={{ color: tokens.dark }}>Terms of Service</span></>,
+                    <>???????????????? ??????????<br /><span className="font-bold" style={{ color: tokens.dark }}>?????????????????????</span> ??? <span className="font-bold" style={{ color: tokens.dark }}>?????????????????</span></>
+                  )}
+                </p>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-4">
+                  <div className="flex-1 h-px" style={{ backgroundColor: '#E8E8E4' }} />
+                  <span style={{ fontSize: '12px', color: tokens.grayText, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}>{label('Already have an account?', '????????????????')}</span>
+                  <div className="flex-1 h-px" style={{ backgroundColor: '#E8E8E4' }} />
+                </div>
+
+                {/* Switch to Login */}
+                <p className="text-center -mt-2">
+                  <button
+                    type="button"
+                    onClick={handleSwitchToLogin}
+                    className="font-bold underline underline-offset-2"
+                    style={{ color: tokens.dark, fontFamily: lang === 'th' ? tokens.fontTH : tokens.fontEN }}
+                  >
+                    {label('Sign In', '???????????')}
+                  </button>
+                </p>
+              </form>
+            </div>
+
+            {/* Progress Dots */}
+            <ProgressDots active={1} />
+          </div>
         </div>
-
-        <div className="mt-4">
-          <button
-            id="btn-oauth-google"
-            onClick={handleGoogleOAuth}
-            disabled={loading}
-            className="w-full rounded-xl py-3 text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer border border-[#2B2D31] text-white hover:bg-[#25282E] disabled:opacity-50 disabled:pointer-events-none"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path fill="#C7FF2E" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#C7FF2E" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#C7FF2E" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#C7FF2E" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            <span className="font-sans">{t.googleCloud}</span>
-          </button>
-        </div>
-
-        {/* Toggle register / login */}
-        <p className="text-center font-mono text-[10px] uppercase tracking-wider mt-8 text-zinc-500" id="auth-toggle">
-          {authView === 'register' ? t.alreadyEngineered : t.newToDailyStack}
-          <button
-            id="btn-auth-mode-toggle"
-            type="button"
-            className="hover:underline ml-1 uppercase font-bold text-[#C7FF2E]"
-            onClick={() => { setAuthView(authView === 'register' ? 'login' : 'register'); setError(null); }}
-          >
-            {authView === 'register' ? t.loginCore : t.registerSecurely}
-          </button>
-        </p>
-      </motion.div>
-
-      {/* Compliance footer */}
-      <div className="absolute bottom-6 flex items-center gap-2 text-[10px] font-mono text-zinc-650" id="auth-compliance">
-        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-        <span>{t.bankSecured}</span>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

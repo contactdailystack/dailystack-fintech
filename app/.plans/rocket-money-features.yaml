@@ -1,0 +1,230 @@
+version: 1
+plan:
+  name: 'Rocket Money Features'
+  max_concurrency: 5
+  max_consecutive_failures: 2
+  max_cycles: 3
+  auto_reject_retries: 1
+  verifier_config:
+    default_verifiers: [verifier]
+    audit_sample_rate: 0.0
+
+tasks:
+  # Task 1: Enhance Subscription Cancellation
+  - id: 'enhance-cancel'
+    title: 'Enhance Subscription Cancellation'
+    prompt: |
+      ## Task: Enhance Subscription Cancellation Flow
+
+      **ไฟล์:** `D:\Coding Folder\dailystack-fintech\app\src\components\SubscriptionTrackerPage.tsx`
+
+      **สิ่งที่ต้องทำ:**
+      1. เพิ่ม Cancel button สำหรับแต่ละ subscription
+      2. เพิ่ม Confirmation modal ก่อน cancel (แสดง warning + confirm/cancel)
+      3. เพิ่ม "Cancel in app" indicator (เหมือน Rocket Money)
+      4. เพิ่ม state 'Cancelling...' ระหว่าง process
+      5. เพิ่ม success feedback หลัง cancel สำเร็จ
+
+      **Design System:**
+      - Background: #FFFFFF
+      - Card: rounded-3xl, shadow-sm, bg-white
+      - Cancel button: text-red-500 หรือ red-500 พร้อม icon
+      - Modal: centered, backdrop blur
+
+      **Thai text (from translations.ts):**
+      - cancelSubscription: 'ยกเลิกการสมัคร'
+      - confirmCancel: 'ยืนยันการยกเลิก'
+      - cancelWarning: 'คุณแน่ใจหรือไม่ที่จะยกเลิก...'
+      - keepSubscription: 'เก็บไว้'
+      - successfullyCancelled: 'ยกเลิกสำเร็จ'
+
+      **Build requirement:** `cd "D:\Coding Folder\dailystack-fintech\app"; npm run build` ต้อง 0 errors
+
+  # Task 2: Bill Timeline Component
+  - id: 'bill-timeline'
+    title: 'Create Bill Timeline Component'
+    prompt: |
+      ## Task: Create Bill Timeline Component
+
+      **ไฟล์ใหม่:** `D:\Coding Folder\dailystack-fintech\app\src\design-system\components\BillTimeline.tsx`
+
+      **UI Requirements:**
+      1. Timeline view แสดง upcoming bills
+      2. แต่ละ item แสดง: icon, name, amount, due date, days until due
+      3. Color coding: green (safe), yellow (soon), red (overdue)
+      4. "See all" link ไป subscription page
+      5. Empty state ถ้าไม่มี bills
+
+      **Props interface:**
+      ```typescript
+      interface BillTimelineProps {
+        bills: Array<{
+          id: string;
+          name: string;
+          amount: number;
+          dueDate: string;
+          icon?: string;
+          color?: string;
+        }>;
+        onBillPress?: (id: string) => void;
+        onSeeAllPress?: () => void;
+      }
+      ```
+
+      **Design System:**
+      - Background: #FFFFFF
+      - Items: rounded-2xl, bg-white, shadow-sm
+      - Accent: #C7FF2E
+      - Timeline line: #E5E7EB
+
+      **Export:** ต้อง export component และ interface
+
+      **Build requirement:** `cd "D:\Coding Folder\dailystack-fintech\app"; npm run build` ต้อง 0 errors
+
+  # Task 3: Sync Now Button
+  - id: 'sync-now'
+    title: 'Add Sync Now Button to Dashboard'
+    prompt: |
+      ## Task: Add Sync Now Button to Dashboard
+
+      **ไฟล์:** `D:\Coding Folder\dailystack-fintech\app\src\components\DashboardPage.tsx`
+
+      **สิ่งที่ต้องทำ:**
+      1. เพิ่ม "Sync now" text button หลัง section header "ACCOUNTS"
+      2. เพิ่ม refresh icon ข้างๆ
+      3. เพิ่ม loading state: icon spin, disabled
+      4. เพิ่ม success toast/snackbar หลัง sync
+      5. Animation: rotation spin ระหว่าง sync
+
+      **Position:** ตรง ACCOUNTS header section (หา locate ดูใน code)
+
+      **Thai text:**
+      - syncNow: 'Sync ตอนนี้'
+      - syncing: 'กำลัง Sync...'
+      - syncComplete: 'Sync เสร็จแล้ว'
+
+      **Design:**
+      - Text: text-sm, text-gray-500 หรือ #6B7280
+      - Icon: RefreshCw จาก lucide-react, w-4 h-4
+      - Animation: animate-spin ระหว่าง loading
+
+      **Build requirement:** `cd "D:\Coding Folder\dailystack-fintech\app"; npm run build` ต้อง 0 errors
+
+  # Task 4: Bill Negotiation Card
+  - id: 'bill-negotiation'
+    title: 'Create Bill Negotiation Card'
+    prompt: |
+      ## Task: Create Bill Negotiation Card Component
+
+      **ไฟล์ใหม่:** `D:\Coding Folder\dailystack-fintech\app\src\design-system\components\BillNegotiationCard.tsx`
+
+      **UI Requirements:**
+      1. Card แสดง "Need help negotiating bills?"
+      2. Subtitle: "Let our concierge help you lower your bills"
+      3. CTA button: "Get Started" หรือ "ลองเลย"
+      4. Icon: ShieldCheck หรือ Handshake
+      5. Premium badge: "Premium" pill
+
+      **Props interface:**
+      ```typescript
+      interface BillNegotiationCardProps {
+        onGetStarted?: () => void;
+        isPremium?: boolean;
+      }
+      ```
+
+      **Design System:**
+      - Card: rounded-3xl, bg-gradient (accent to darker)
+      - Text: white on dark bg หรือ dark on light
+      - Button: pill style, bg-accent
+
+      **Thai text:**
+      - billNegotiationTitle: 'ต้องการความช่วยเหลือในการต่อรองค่าใช้จ่าย?'
+      - billNegotiationSub: 'ให้ทีมงานของเราช่วยคุณลดค่าใช้จ่าย'
+      - getStarted: 'ลองเลย'
+      - premium: 'Premium'
+
+      **Export:** ต้อง export component และ interface
+
+      **Build requirement:** `cd "D:\Coding Folder\dailystack-fintech\app"; npm run build` ต้อง 0 errors
+
+  # Task 5: Split Bills Feature
+  - id: 'split-bills'
+    title: 'Create Split Bills Modal'
+    prompt: |
+      ## Task: Create Split Bills Modal Component
+
+      **ไฟล์ใหม่:** `D:\Coding Folder\dailystack-fintech\app\src\design-system\components\SplitBillsModal.tsx`
+
+      **UI Requirements:**
+      1. Modal overlay with backdrop blur
+      2. Header: "Split Bill" + close button
+      3. Bill info display (name, total amount)
+      4. Input: enter friend email or select from contacts
+      5. Split options: Equal / Custom amount
+      6. Preview: show each person's split
+      7. Send button
+
+      **Props interface:**
+      ```typescript
+      interface SplitBillsModalProps {
+        isOpen: boolean;
+        onClose: () => void;
+        bill: {
+          id: string;
+          name: string;
+          amount: number;
+        };
+        onSendSplit?: (splitData: SplitData) => void;
+      }
+
+      interface SplitData {
+        friends: string[];
+        amounts: number[];
+        type: 'equal' | 'custom';
+      }
+      ```
+
+      **Design System:**
+      - Modal: centered, bg-white, rounded-3xl
+      - Backdrop: bg-black/50, backdrop-blur
+      - Input: rounded-xl, border, bg-gray-50
+      - Buttons: pill style
+
+      **Thai text:**
+      - splitBill: 'แบ่งค่าใช้จ่าย'
+      - selectFriend: 'เลือกเพื่อน'
+      - splitEqually: 'แบ่งเท่ากัน'
+      - customAmount: 'จำนวนเอง'
+      - yourShare: 'ส่วนของคุณ'
+      - friendShare: 'ส่วนของเพื่อน'
+      - sendInvite: 'ส่งคำเชิญ'
+
+      **Export:** ต้อง export component และ interfaces
+
+      **Build requirement:** `cd "D:\Coding Folder\dailystack-fintech\app"; npm run build` ต้อง 0 errors
+
+  # Final Gate: Build Verification
+  - id: 'final-gate'
+    title: 'Verify Build Success'
+    role: verify-as-task
+    prompt: |
+      ## Final Verification Gate
+
+      **Task:** Run build and verify all features compile
+
+      **Command:**
+      ```bash
+      cd "D:\Coding Folder\dailystack-fintech\app"; npm run build
+      ```
+
+      **PASS criteria:**
+      - Build completes with 0 errors
+      - No TypeScript errors
+      - All exports are valid
+
+      **Report:** แสดง build output, ระบุว่า pass หรือ fail
+
+    assigned_to: general
+    depends_on: ['enhance-cancel', 'bill-timeline', 'sync-now', 'bill-negotiation', 'split-bills']
+    max_retries: 1

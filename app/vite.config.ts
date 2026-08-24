@@ -13,4 +13,22 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Animation libraries
+          'vendor-motion': ['motion/react'],
+          // Icons
+          'vendor-icons': ['lucide-react'],
+          // Supabase
+          'vendor-supabase': ['@supabase/supabase-js'],
+        },
+      },
+    },
+    // Increase warning limit since we're being more aggressive
+    chunkSizeWarningLimit: 400,
+  },
 })

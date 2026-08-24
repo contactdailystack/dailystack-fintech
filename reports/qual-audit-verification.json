@@ -1,0 +1,101 @@
+{
+  "tsc_result": "FAIL",
+  "tsc_errors": [
+    {
+      "file": "AuthPage.tsx",
+      "line": 205,
+      "error": "Type 'false | { scale: number; }' is not assignable to type 'VariantLabels | TargetAndTransition | undefined' — whileTap prop"
+    },
+    {
+      "file": "AuthPage.tsx",
+      "line": 306,
+      "error": "Type 'false | { opacity: number; }' is not assignable to type 'VariantLabels | TargetAndTransition | undefined' — exit prop"
+    },
+    {
+      "file": "AuthPage.tsx",
+      "line": 591,
+      "error": "Type 'boolean | null' is not assignable to type 'boolean | undefined' — reduceMotion prop passed to SuccessAnimation"
+    },
+    {
+      "file": "AuthPage.tsx",
+      "line": 695,
+      "error": "Type 'false | { opacity: number; }' is not assignable to type 'VariantLabels | TargetAndTransition | undefined' — exit prop"
+    },
+    {
+      "file": "AuthPage.tsx",
+      "line": 720,
+      "error": "Type 'boolean | null' is not assignable to type 'boolean | undefined' — reduceMotion prop passed to PrimaryButton"
+    },
+    {
+      "file": "AuthPage.tsx",
+      "line": 842,
+      "error": "Type 'boolean | null' is not assignable to type 'boolean | undefined' — reduceMotion prop passed to PrimaryButton"
+    },
+    {
+      "file": "AuthPage.tsx",
+      "line": 885,
+      "error": "Type 'false | { opacity: number; }' is not assignable to type 'VariantLabels | TargetAndTransition | undefined' — exit prop"
+    },
+    {
+      "file": "AuthPage.tsx",
+      "line": 898,
+      "error": "Type 'boolean | null' is not assignable to type 'boolean | undefined' — reduceMotion prop passed to PrimaryButton"
+    },
+    {
+      "file": "AuthPage.tsx",
+      "line": 1070,
+      "error": "Type 'false | { opacity: number; }' is not assignable to type 'VariantLabels | TargetAndTransition | undefined' — initial prop"
+    },
+    {
+      "file": "AuthPage.tsx",
+      "line": 1083,
+      "error": "Type 'boolean | null' is not assignable to type 'boolean | undefined' — reduceMotion prop passed to PrimaryButton"
+    },
+    {
+      "file": "PaywallPage.tsx",
+      "line": 470,
+      "error": "Type 'false | { scale: number; }' is not assignable to type 'VariantLabels | TargetAndTransition | undefined' — whileTap prop"
+    }
+  ],
+  "build_result": "FAIL",
+  "emoji_found": [],
+  "emoji_notes": "Grep for U+2600-U+32FF range matched only Unicode box-drawing characters (■ □) in FloatingBottomNav.tsx comments (WCAG notation) and a garbled balance character in OnboardingPage.tsx:225 — no actual emoji present.",
+  "rogue_dark_hex": [
+    {
+      "file": "OTPInput.tsx",
+      "line": 165,
+      "value": "#0C0D0E",
+      "should_be": "#0B0F0A"
+    },
+    {
+      "file": "OTPInput.tsx",
+      "line": 277,
+      "value": "#0C0D0E",
+      "should_be": "#0B0F0A"
+    },
+    {
+      "file": "OTPInput.tsx",
+      "line": 280,
+      "value": "#0C0D0E",
+      "should_be": "#0B0F0A"
+    },
+    {
+      "file": "SlideToUpgrade.tsx",
+      "line": 237,
+      "value": "#0C0D0E",
+      "should_be": "#0B0F0A"
+    }
+  ],
+  "bom_files": [],
+  "overall_status": "FAIL",
+  "blocking_issues": [
+    "11 TypeScript compilation errors in AuthPage.tsx (10 errors) and PaywallPage.tsx (1 error)",
+    "4 instances of rogue dark hex #0C0D0E in OTPInput.tsx (3x) and SlideToUpgrade.tsx (1x)"
+  ],
+  "remediation": {
+    "framer_motion_false_fix": "Replace `false` with `undefined` in motion props: `whileTap={reduceMotion ? undefined : { scale: 0.98 }}`, `exit={reduceMotion ? undefined : { opacity: 0 }}`, `initial={reducedMotion ? undefined : { opacity: 0, y: -5 }}` — framer-motion treats undefined as skip-animation",
+    "boolean_null_fix": "Change `reduceMotion={reducedMotion}` to `reduceMotion={reducedMotion ?? undefined}` or ensure `useReducedMotion()` return type is used directly without intermediate `boolean | null` variable",
+    "dark_hex_fix": "Replace #0C0D0E with #0B0F0A in OTPInput.tsx and SlideToUpgrade.tsx"
+  },
+  "verified_at": "2026-06-29T21:45:00+07:00"
+}
